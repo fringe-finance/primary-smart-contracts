@@ -1,0 +1,2188 @@
+{
+  "contractName": "ICErc20Token",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "mintAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "redeemTokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeem",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "redeemAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeemUnderlying",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "borrowAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "borrow",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "repayAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "repayBorrow",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "borrower",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "repayAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "repayBorrowBehalf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "borrower",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "repayAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "cTokenCollateral",
+          "type": "address"
+        }
+      ],
+      "name": "liquidateBorrow",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "accountTokens",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"accountTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"borrowAmount\",\"type\":\"uint256\"}],\"name\":\"borrow\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"borrower\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"repayAmount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"cTokenCollateral\",\"type\":\"address\"}],\"name\":\"liquidateBorrow\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"mintAmount\",\"type\":\"uint256\"}],\"name\":\"mint\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"redeemTokens\",\"type\":\"uint256\"}],\"name\":\"redeem\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"redeemAmount\",\"type\":\"uint256\"}],\"name\":\"redeemUnderlying\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"repayAmount\",\"type\":\"uint256\"}],\"name\":\"repayBorrow\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"borrower\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"repayAmount\",\"type\":\"uint256\"}],\"name\":\"repayBorrowBehalf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"accountTokens(address)\":{\"details\":\"This also accrues interest in a transaction\",\"params\":{\"owner\":\"The address of the account to query\"},\"returns\":{\"_0\":\"The amount of underlying owned by `owner`\"}},\"balanceOf(address)\":{\"params\":{\"owner\":\"The address of the account to query\"},\"returns\":{\"_0\":\"The number of tokens owned by `owner`\"}},\"borrow(uint256)\":{\"params\":{\"borrowAmount\":\"The amount of the underlying asset to borrow\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"liquidateBorrow(address,uint256,address)\":{\"params\":{\"borrower\":\"The borrower of this cToken to be liquidated\",\"cTokenCollateral\":\"The market in which to seize collateral from the borrower\",\"repayAmount\":\"The amount of the underlying borrowed asset to repay\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"mint(uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"mintAmount\":\"The amount of the underlying asset to supply\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"redeem(uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"redeemTokens\":\"The number of cTokens to redeem into underlying\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"redeemUnderlying(uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"redeemAmount\":\"The amount of underlying to redeem\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"repayBorrow(uint256)\":{\"params\":{\"repayAmount\":\"The amount to repay\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"repayBorrowBehalf(address,uint256)\":{\"params\":{\"borrower\":\"the account with the debt being payed off\",\"repayAmount\":\"The amount to repay\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"accountTokens(address)\":{\"notice\":\"Get the underlying balance of the `owner`\"},\"balanceOf(address)\":{\"notice\":\"Get the token balance of the `owner`\"},\"borrow(uint256)\":{\"notice\":\"Sender borrows assets from the protocol to their own address\"},\"liquidateBorrow(address,uint256,address)\":{\"notice\":\"The sender liquidates the borrowers collateral.  The collateral seized is transferred to the liquidator.\"},\"mint(uint256)\":{\"notice\":\"Sender supplies assets into the market and receives cTokens in exchange\"},\"redeem(uint256)\":{\"notice\":\"Sender redeems cTokens in exchange for the underlying asset\"},\"redeemUnderlying(uint256)\":{\"notice\":\"Sender redeems cTokens in exchange for a specified amount of underlying asset\"},\"repayBorrow(uint256)\":{\"notice\":\"Sender repays their own borrow\"},\"repayBorrowBehalf(address,uint256)\":{\"notice\":\"Sender repays a borrow belonging to borrower\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICErc20Token.sol\":\"ICErc20Token\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":250},\"remappings\":[]},\"sources\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICErc20Token.sol\":{\"keccak256\":\"0xf2f93c46fddeb81d64bfc0e89f1b5842c28aefb6876a87b57db8a8d5f0f12b88\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8d1c025862052a621d0b117c26f548c78ef6bc519481b1c22a82c75d357bd0bc\",\"dweb:/ipfs/QmPPLtwX8Tsuozc6ySi3JwzxTSVmJqfFYL2tf9wonoPHuC\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0;\n\n\ninterface ICErc20Token{\n    \n\n    /**\n     * @notice Sender supplies assets into the market and receives cTokens in exchange\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param mintAmount The amount of the underlying asset to supply\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function mint(uint mintAmount) external returns (uint);\n\n    /**\n     * @notice Sender redeems cTokens in exchange for the underlying asset\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param redeemTokens The number of cTokens to redeem into underlying\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function redeem(uint redeemTokens) external returns (uint);\n\n    /**\n     * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param redeemAmount The amount of underlying to redeem\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function redeemUnderlying(uint redeemAmount) external returns (uint);\n\n    /**\n      * @notice Sender borrows assets from the protocol to their own address\n      * @param borrowAmount The amount of the underlying asset to borrow\n      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n      */\n    function borrow(uint borrowAmount) external returns (uint);\n\n    /**\n     * @notice Sender repays their own borrow\n     * @param repayAmount The amount to repay\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function repayBorrow(uint repayAmount) external returns (uint);\n\n    /**\n     * @notice Sender repays a borrow belonging to borrower\n     * @param borrower the account with the debt being payed off\n     * @param repayAmount The amount to repay\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function repayBorrowBehalf(address borrower, uint repayAmount) external returns (uint);\n\n    /**\n     * @notice The sender liquidates the borrowers collateral.\n     *  The collateral seized is transferred to the liquidator.\n     * @param borrower The borrower of this cToken to be liquidated\n     * @param repayAmount The amount of the underlying borrowed asset to repay\n     * @param cTokenCollateral The market in which to seize collateral from the borrower\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function liquidateBorrow(address borrower, uint repayAmount, address cTokenCollateral) external returns (uint);\n\n     /**\n     * @notice Get the token balance of the `owner`\n     * @param owner The address of the account to query\n     * @return The number of tokens owned by `owner`\n     */\n    function balanceOf(address owner) external view returns (uint256);\n\n    /**\n     * @notice Get the underlying balance of the `owner`\n     * @dev This also accrues interest in a transaction\n     * @param owner The address of the account to query\n     * @return The amount of underlying owned by `owner`\n     */\n    function accountTokens(address owner) external returns (uint);\n    \n    \n}\n",
+  "sourcePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICErc20Token.sol",
+  "ast": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICErc20Token.sol",
+    "exportedSymbols": {
+      "ICErc20Token": [
+        13694
+      ]
+    },
+    "id": 13695,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 13615,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:19"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 13694,
+        "linearizedBaseContracts": [
+          13694
+        ],
+        "name": "ICErc20Token",
+        "nameLocation": "69:12:19",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 13616,
+              "nodeType": "StructuredDocumentation",
+              "src": "93:339:19",
+              "text": " @notice Sender supplies assets into the market and receives cTokens in exchange\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param mintAmount The amount of the underlying asset to supply\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "a0712d68",
+            "id": 13623,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nameLocation": "446:4:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13619,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13618,
+                  "mutability": "mutable",
+                  "name": "mintAmount",
+                  "nameLocation": "456:10:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13623,
+                  "src": "451:15:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13617,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "451:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "450:17:19"
+            },
+            "returnParameters": {
+              "id": 13622,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13621,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13623,
+                  "src": "486:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13620,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "486:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "485:6:19"
+            },
+            "scope": 13694,
+            "src": "437:55:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13624,
+              "nodeType": "StructuredDocumentation",
+              "src": "498:332:19",
+              "text": " @notice Sender redeems cTokens in exchange for the underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemTokens The number of cTokens to redeem into underlying\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "db006a75",
+            "id": 13631,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "844:6:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13627,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13626,
+                  "mutability": "mutable",
+                  "name": "redeemTokens",
+                  "nameLocation": "856:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13631,
+                  "src": "851:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13625,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "851:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "850:19:19"
+            },
+            "returnParameters": {
+              "id": 13630,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13629,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13631,
+                  "src": "888:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13628,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "888:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "887:6:19"
+            },
+            "scope": 13694,
+            "src": "835:59:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13632,
+              "nodeType": "StructuredDocumentation",
+              "src": "900:337:19",
+              "text": " @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemAmount The amount of underlying to redeem\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "852a12e3",
+            "id": 13639,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemUnderlying",
+            "nameLocation": "1251:16:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13635,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13634,
+                  "mutability": "mutable",
+                  "name": "redeemAmount",
+                  "nameLocation": "1273:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13639,
+                  "src": "1268:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13633,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1268:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1267:19:19"
+            },
+            "returnParameters": {
+              "id": 13638,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13637,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13639,
+                  "src": "1305:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13636,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1305:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1304:6:19"
+            },
+            "scope": 13694,
+            "src": "1242:69:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13640,
+              "nodeType": "StructuredDocumentation",
+              "src": "1317:250:19",
+              "text": " @notice Sender borrows assets from the protocol to their own address\n @param borrowAmount The amount of the underlying asset to borrow\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "c5ebeaec",
+            "id": 13647,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "borrow",
+            "nameLocation": "1581:6:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13643,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13642,
+                  "mutability": "mutable",
+                  "name": "borrowAmount",
+                  "nameLocation": "1593:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13647,
+                  "src": "1588:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13641,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1588:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1587:19:19"
+            },
+            "returnParameters": {
+              "id": 13646,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13645,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13647,
+                  "src": "1625:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13644,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1625:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1624:6:19"
+            },
+            "scope": 13694,
+            "src": "1572:59:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13648,
+              "nodeType": "StructuredDocumentation",
+              "src": "1637:190:19",
+              "text": " @notice Sender repays their own borrow\n @param repayAmount The amount to repay\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "0e752702",
+            "id": 13655,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "repayBorrow",
+            "nameLocation": "1841:11:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13651,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13650,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "1858:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13655,
+                  "src": "1853:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13649,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1853:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1852:18:19"
+            },
+            "returnParameters": {
+              "id": 13654,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13653,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13655,
+                  "src": "1889:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13652,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1889:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1888:6:19"
+            },
+            "scope": 13694,
+            "src": "1832:63:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13656,
+              "nodeType": "StructuredDocumentation",
+              "src": "1901:269:19",
+              "text": " @notice Sender repays a borrow belonging to borrower\n @param borrower the account with the debt being payed off\n @param repayAmount The amount to repay\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "2608f818",
+            "id": 13665,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "repayBorrowBehalf",
+            "nameLocation": "2184:17:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13661,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13658,
+                  "mutability": "mutable",
+                  "name": "borrower",
+                  "nameLocation": "2210:8:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2202:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13657,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2202:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13660,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "2225:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2220:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13659,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2220:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2201:36:19"
+            },
+            "returnParameters": {
+              "id": 13664,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13663,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2256:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13662,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2256:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2255:6:19"
+            },
+            "scope": 13694,
+            "src": "2175:87:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13666,
+              "nodeType": "StructuredDocumentation",
+              "src": "2268:461:19",
+              "text": " @notice The sender liquidates the borrowers collateral.\n  The collateral seized is transferred to the liquidator.\n @param borrower The borrower of this cToken to be liquidated\n @param repayAmount The amount of the underlying borrowed asset to repay\n @param cTokenCollateral The market in which to seize collateral from the borrower\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "f5e3c462",
+            "id": 13677,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "liquidateBorrow",
+            "nameLocation": "2743:15:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13673,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13668,
+                  "mutability": "mutable",
+                  "name": "borrower",
+                  "nameLocation": "2767:8:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2759:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13667,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2759:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13670,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "2782:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2777:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13669,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2777:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13672,
+                  "mutability": "mutable",
+                  "name": "cTokenCollateral",
+                  "nameLocation": "2803:16:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2795:24:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13671,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2795:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2758:62:19"
+            },
+            "returnParameters": {
+              "id": 13676,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13675,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2839:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13674,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2839:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2838:6:19"
+            },
+            "scope": 13694,
+            "src": "2734:111:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13678,
+              "nodeType": "StructuredDocumentation",
+              "src": "2852:172:19",
+              "text": " @notice Get the token balance of the `owner`\n @param owner The address of the account to query\n @return The number of tokens owned by `owner`"
+            },
+            "functionSelector": "70a08231",
+            "id": 13685,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "balanceOf",
+            "nameLocation": "3038:9:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13681,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13680,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "3056:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13685,
+                  "src": "3048:13:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13679,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3048:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3047:15:19"
+            },
+            "returnParameters": {
+              "id": 13684,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13683,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13685,
+                  "src": "3086:7:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13682,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3086:7:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3085:9:19"
+            },
+            "scope": 13694,
+            "src": "3029:66:19",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13686,
+              "nodeType": "StructuredDocumentation",
+              "src": "3101:237:19",
+              "text": " @notice Get the underlying balance of the `owner`\n @dev This also accrues interest in a transaction\n @param owner The address of the account to query\n @return The amount of underlying owned by `owner`"
+            },
+            "functionSelector": "a19d1460",
+            "id": 13693,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "accountTokens",
+            "nameLocation": "3352:13:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13689,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13688,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "3374:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13693,
+                  "src": "3366:13:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13687,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3366:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3365:15:19"
+            },
+            "returnParameters": {
+              "id": 13692,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13691,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13693,
+                  "src": "3399:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13690,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3399:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3398:6:19"
+            },
+            "scope": 13694,
+            "src": "3343:62:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 13695,
+        "src": "59:3358:19",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:3386:19"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICErc20Token.sol",
+    "exportedSymbols": {
+      "ICErc20Token": [
+        13694
+      ]
+    },
+    "id": 13695,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 13615,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:19"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 13694,
+        "linearizedBaseContracts": [
+          13694
+        ],
+        "name": "ICErc20Token",
+        "nameLocation": "69:12:19",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 13616,
+              "nodeType": "StructuredDocumentation",
+              "src": "93:339:19",
+              "text": " @notice Sender supplies assets into the market and receives cTokens in exchange\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param mintAmount The amount of the underlying asset to supply\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "a0712d68",
+            "id": 13623,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mint",
+            "nameLocation": "446:4:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13619,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13618,
+                  "mutability": "mutable",
+                  "name": "mintAmount",
+                  "nameLocation": "456:10:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13623,
+                  "src": "451:15:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13617,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "451:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "450:17:19"
+            },
+            "returnParameters": {
+              "id": 13622,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13621,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13623,
+                  "src": "486:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13620,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "486:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "485:6:19"
+            },
+            "scope": 13694,
+            "src": "437:55:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13624,
+              "nodeType": "StructuredDocumentation",
+              "src": "498:332:19",
+              "text": " @notice Sender redeems cTokens in exchange for the underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemTokens The number of cTokens to redeem into underlying\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "db006a75",
+            "id": 13631,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeem",
+            "nameLocation": "844:6:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13627,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13626,
+                  "mutability": "mutable",
+                  "name": "redeemTokens",
+                  "nameLocation": "856:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13631,
+                  "src": "851:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13625,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "851:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "850:19:19"
+            },
+            "returnParameters": {
+              "id": 13630,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13629,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13631,
+                  "src": "888:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13628,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "888:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "887:6:19"
+            },
+            "scope": 13694,
+            "src": "835:59:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13632,
+              "nodeType": "StructuredDocumentation",
+              "src": "900:337:19",
+              "text": " @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemAmount The amount of underlying to redeem\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "852a12e3",
+            "id": 13639,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemUnderlying",
+            "nameLocation": "1251:16:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13635,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13634,
+                  "mutability": "mutable",
+                  "name": "redeemAmount",
+                  "nameLocation": "1273:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13639,
+                  "src": "1268:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13633,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1268:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1267:19:19"
+            },
+            "returnParameters": {
+              "id": 13638,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13637,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13639,
+                  "src": "1305:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13636,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1305:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1304:6:19"
+            },
+            "scope": 13694,
+            "src": "1242:69:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13640,
+              "nodeType": "StructuredDocumentation",
+              "src": "1317:250:19",
+              "text": " @notice Sender borrows assets from the protocol to their own address\n @param borrowAmount The amount of the underlying asset to borrow\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "c5ebeaec",
+            "id": 13647,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "borrow",
+            "nameLocation": "1581:6:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13643,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13642,
+                  "mutability": "mutable",
+                  "name": "borrowAmount",
+                  "nameLocation": "1593:12:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13647,
+                  "src": "1588:17:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13641,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1588:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1587:19:19"
+            },
+            "returnParameters": {
+              "id": 13646,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13645,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13647,
+                  "src": "1625:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13644,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1625:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1624:6:19"
+            },
+            "scope": 13694,
+            "src": "1572:59:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13648,
+              "nodeType": "StructuredDocumentation",
+              "src": "1637:190:19",
+              "text": " @notice Sender repays their own borrow\n @param repayAmount The amount to repay\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "0e752702",
+            "id": 13655,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "repayBorrow",
+            "nameLocation": "1841:11:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13651,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13650,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "1858:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13655,
+                  "src": "1853:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13649,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1853:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1852:18:19"
+            },
+            "returnParameters": {
+              "id": 13654,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13653,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13655,
+                  "src": "1889:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13652,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1889:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1888:6:19"
+            },
+            "scope": 13694,
+            "src": "1832:63:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13656,
+              "nodeType": "StructuredDocumentation",
+              "src": "1901:269:19",
+              "text": " @notice Sender repays a borrow belonging to borrower\n @param borrower the account with the debt being payed off\n @param repayAmount The amount to repay\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "2608f818",
+            "id": 13665,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "repayBorrowBehalf",
+            "nameLocation": "2184:17:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13661,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13658,
+                  "mutability": "mutable",
+                  "name": "borrower",
+                  "nameLocation": "2210:8:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2202:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13657,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2202:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13660,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "2225:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2220:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13659,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2220:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2201:36:19"
+            },
+            "returnParameters": {
+              "id": 13664,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13663,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13665,
+                  "src": "2256:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13662,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2256:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2255:6:19"
+            },
+            "scope": 13694,
+            "src": "2175:87:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13666,
+              "nodeType": "StructuredDocumentation",
+              "src": "2268:461:19",
+              "text": " @notice The sender liquidates the borrowers collateral.\n  The collateral seized is transferred to the liquidator.\n @param borrower The borrower of this cToken to be liquidated\n @param repayAmount The amount of the underlying borrowed asset to repay\n @param cTokenCollateral The market in which to seize collateral from the borrower\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "f5e3c462",
+            "id": 13677,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "liquidateBorrow",
+            "nameLocation": "2743:15:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13673,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13668,
+                  "mutability": "mutable",
+                  "name": "borrower",
+                  "nameLocation": "2767:8:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2759:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13667,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2759:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13670,
+                  "mutability": "mutable",
+                  "name": "repayAmount",
+                  "nameLocation": "2782:11:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2777:16:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13669,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2777:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13672,
+                  "mutability": "mutable",
+                  "name": "cTokenCollateral",
+                  "nameLocation": "2803:16:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2795:24:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13671,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2795:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2758:62:19"
+            },
+            "returnParameters": {
+              "id": 13676,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13675,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13677,
+                  "src": "2839:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13674,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2839:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2838:6:19"
+            },
+            "scope": 13694,
+            "src": "2734:111:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13678,
+              "nodeType": "StructuredDocumentation",
+              "src": "2852:172:19",
+              "text": " @notice Get the token balance of the `owner`\n @param owner The address of the account to query\n @return The number of tokens owned by `owner`"
+            },
+            "functionSelector": "70a08231",
+            "id": 13685,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "balanceOf",
+            "nameLocation": "3038:9:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13681,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13680,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "3056:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13685,
+                  "src": "3048:13:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13679,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3048:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3047:15:19"
+            },
+            "returnParameters": {
+              "id": 13684,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13683,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13685,
+                  "src": "3086:7:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13682,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3086:7:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3085:9:19"
+            },
+            "scope": 13694,
+            "src": "3029:66:19",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13686,
+              "nodeType": "StructuredDocumentation",
+              "src": "3101:237:19",
+              "text": " @notice Get the underlying balance of the `owner`\n @dev This also accrues interest in a transaction\n @param owner The address of the account to query\n @return The amount of underlying owned by `owner`"
+            },
+            "functionSelector": "a19d1460",
+            "id": 13693,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "accountTokens",
+            "nameLocation": "3352:13:19",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13689,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13688,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "3374:5:19",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13693,
+                  "src": "3366:13:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13687,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3366:7:19",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3365:15:19"
+            },
+            "returnParameters": {
+              "id": 13692,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13691,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13693,
+                  "src": "3399:4:19",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13690,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3399:4:19",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3398:6:19"
+            },
+            "scope": 13694,
+            "src": "3343:62:19",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 13695,
+        "src": "59:3358:19",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:3386:19"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.7+commit.e28d00a7.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-09-12T12:56:37.374Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "accountTokens(address)": {
+        "details": "This also accrues interest in a transaction",
+        "params": {
+          "owner": "The address of the account to query"
+        },
+        "returns": {
+          "_0": "The amount of underlying owned by `owner`"
+        }
+      },
+      "balanceOf(address)": {
+        "params": {
+          "owner": "The address of the account to query"
+        },
+        "returns": {
+          "_0": "The number of tokens owned by `owner`"
+        }
+      },
+      "borrow(uint256)": {
+        "params": {
+          "borrowAmount": "The amount of the underlying asset to borrow"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "liquidateBorrow(address,uint256,address)": {
+        "params": {
+          "borrower": "The borrower of this cToken to be liquidated",
+          "cTokenCollateral": "The market in which to seize collateral from the borrower",
+          "repayAmount": "The amount of the underlying borrowed asset to repay"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "mint(uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "mintAmount": "The amount of the underlying asset to supply"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "redeem(uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "redeemTokens": "The number of cTokens to redeem into underlying"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "redeemUnderlying(uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "redeemAmount": "The amount of underlying to redeem"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "repayBorrow(uint256)": {
+        "params": {
+          "repayAmount": "The amount to repay"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "repayBorrowBehalf(address,uint256)": {
+        "params": {
+          "borrower": "the account with the debt being payed off",
+          "repayAmount": "The amount to repay"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "accountTokens(address)": {
+        "notice": "Get the underlying balance of the `owner`"
+      },
+      "balanceOf(address)": {
+        "notice": "Get the token balance of the `owner`"
+      },
+      "borrow(uint256)": {
+        "notice": "Sender borrows assets from the protocol to their own address"
+      },
+      "liquidateBorrow(address,uint256,address)": {
+        "notice": "The sender liquidates the borrowers collateral.  The collateral seized is transferred to the liquidator."
+      },
+      "mint(uint256)": {
+        "notice": "Sender supplies assets into the market and receives cTokens in exchange"
+      },
+      "redeem(uint256)": {
+        "notice": "Sender redeems cTokens in exchange for the underlying asset"
+      },
+      "redeemUnderlying(uint256)": {
+        "notice": "Sender redeems cTokens in exchange for a specified amount of underlying asset"
+      },
+      "repayBorrow(uint256)": {
+        "notice": "Sender repays their own borrow"
+      },
+      "repayBorrowBehalf(address,uint256)": {
+        "notice": "Sender repays a borrow belonging to borrower"
+      }
+    },
+    "version": 1
+  }
+}

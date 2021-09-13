@@ -1,0 +1,5131 @@
+{
+  "contractName": "ComptrollerV2Storage",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "_borrowGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "_mintGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "accountAssets",
+      "outputs": [
+        {
+          "internalType": "contract CToken",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "accountMembership",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "admin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "borrowGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "closeFactorMantissa",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "liquidationIncentiveMantissa",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "markets",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isListed",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "collateralFactorMantissa",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "isComped",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxAssets",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "mintGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "oracle",
+      "outputs": [
+        {
+          "internalType": "contract PriceOracle",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pauseGuardian",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "seizeGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "transferGuardianPaused",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"name\":\"_borrowGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"_mintGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"accountAssets\",\"outputs\":[{\"internalType\":\"contract CToken\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"accountMembership\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"admin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"borrowGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"closeFactorMantissa\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"liquidationIncentiveMantissa\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"markets\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isListed\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"collateralFactorMantissa\",\"type\":\"uint256\"},{\"internalType\":\"bool\",\"name\":\"isComped\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"maxAssets\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"mintGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"oracle\",\"outputs\":[{\"internalType\":\"contract PriceOracle\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"pauseGuardian\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"seizeGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"transferGuardianPaused\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"stateVariables\":{\"markets\":{\"details\":\"Used e.g. to determine if a market is supported\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"accountAssets(address,uint256)\":{\"notice\":\"Per-account mapping of \\\"assets you are in\\\", capped by maxAssets\"},\"accountMembership(address,address)\":{\"notice\":\"Per-market mapping of \\\"accounts in this asset\\\"\"},\"admin()\":{\"notice\":\"Administrator for this contract\"},\"closeFactorMantissa()\":{\"notice\":\"Multiplier used to calculate the maximum repayAmount when liquidating a borrow\"},\"liquidationIncentiveMantissa()\":{\"notice\":\"Multiplier representing the discount on collateral that a liquidator receives\"},\"markets(address)\":{\"notice\":\"Official mapping of cTokens -> Market metadata\"},\"maxAssets()\":{\"notice\":\"Max number of assets a single account can participate in (borrow or use as collateral)\"},\"oracle()\":{\"notice\":\"Oracle which gives the price of any given asset\"},\"pauseGuardian()\":{\"notice\":\"The Pause Guardian can pause certain actions as a safety mechanism.  Actions which allow users to remove their own assets cannot be paused.  Liquidation / seizing / transfer can only be paused globally, not by market.\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerStorage.sol\":\"ComptrollerV2Storage\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":250},\"remappings\":[]},\"sources\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/cToken/CToken.sol\":{\"keccak256\":\"0x20b2d50d22117b8333cca2619f3699934cf93159e26f90b853e0311c745c412e\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://bb9515b605c5773dd76ca8d0001ed152733cc98d2a2ece6e61c0e65a570d014e\",\"dweb:/ipfs/QmdqGdvBHKDa4MbbE2Rxb4bN8qYTAPKzhTsCBAYo9nw96s\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/cToken/CTokenInterfaces.sol\":{\"keccak256\":\"0x0220851952ee40a2ce30e273f4b1d0999c4e1f1884f95976277e9e9bf46d53e8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://a3660464e58cc595786f91c655ed9b5e0085881e5b48b83431d24774a17761d2\",\"dweb:/ipfs/QmdQ5Lu46ZHHos5zybA2YC4rw35FTgzFytR9Zm1fRqbDui\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerInterface.sol\":{\"keccak256\":\"0xb292cb7318b7a216ba111e226052b7af700860e76712dd9d6c2a9d859e31ca7f\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://76fc180362f01a6f090f7caff80a5c58329d6e91c8d2d290b25d7101ad720ebb\",\"dweb:/ipfs/QmdnD6PKLYyiDREeqgA9acZ16kTeikGZLQUrkqSFoT8mSK\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerStorage.sol\":{\"keccak256\":\"0x0751cbd0f78fb19926ab6f3441a7e11b94b70c487a35442221cca16f6fa41fce\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9376df9be41f1c4dc47ee89c9bfd8458a821d60372c3706078a078b5b552c72b\",\"dweb:/ipfs/QmbUZT5vpCZhYCnsP2Vyc5SajmK9zfCYXUrAkrhW6QJfEu\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interestRateModel/InterestRateModel.sol\":{\"keccak256\":\"0xa94445949c71a567f603b1e96d1579aa446f331d622de3cf15f6e042e2faa9b3\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://1fa0c46479e8ea1e359fbb44587b3400cf3dc4aa51bd2be862a1c29950072e5c\",\"dweb:/ipfs/QmTQFvmJjcgwypiv5ti7n8emN356vV88jAJpZsFQyeAkei\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/EIP20Interface.sol\":{\"keccak256\":\"0xdb3437947c527408a23af8933f1ed2dd303f46ad80a21d74a427949f6dee6766\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://089adc999e861c5647b403ddfeb8ab9f154e9b9276f1920f50afdfe1245914ed\",\"dweb:/ipfs/QmT32HHxALUoTB1v3yKoeiVbrt3YktNErkoxJAS8JDExsT\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/EIP20NonStandardInterface.sol\":{\"keccak256\":\"0xe973adec06da587c1c36ed5e9f1106b51ed8fe32cedec30a498f8a881de6b9d8\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://13d72936e65569d32413bf8caa178224554689675416cad1d374c74f81da3be5\",\"dweb:/ipfs/QmaM3wZmNYWxrfeuzDzTtsbEHAFeYvq6xzCpsfzbc8B1Vy\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/priceOracle/PriceOracle.sol\":{\"keccak256\":\"0x03dbaf780a232b82f03e51093cbb759e4462b60d4c1555d253189d57aa8cdc88\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d83f40abf134e23aaa36a942e7eb41ac4274db8a8c5b9617810cb6b7e1906782\",\"dweb:/ipfs/QmWkCFdq6tVpvAfkp5y7bEk6kdwY2PJFRyu2X5SqEWdRVP\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/util/CarefulMath.sol\":{\"keccak256\":\"0x2c0f9b001eced959cad5ce94106e9541ff27cec8f4a10bcaa6e2dafbb052726c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://0831af88645b27583ab032b9c1f6272fca4a0b9b10048407eba972c159f05de7\",\"dweb:/ipfs/QmW7HXDELFWkp3oETLWc6uUjedQ3fAEWNzn22L45w9jcHQ\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/util/ErrorReporter.sol\":{\"keccak256\":\"0xc579b8012535ef14bc163e2fd077228206493bb43c5fa117ef5d3b34cb3accdb\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://564892ceda8e36d101906029a8c78fb6cfba938048f7fc6becd94a7aecc59597\",\"dweb:/ipfs/QmRsxoHBEpByqAoUXHLaPjsCp7AAyLNNGz8c2GRpaFShyN\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/util/Exponential.sol\":{\"keccak256\":\"0xff0fdcffb0e9a36e6b2f6c829be2a7e4db73c6603cd3e9413c887d069b80d025\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://398ea98312ba48a8f42b1291d9e3638c0b4116c9329451885bd7e86bdbc32d4f\",\"dweb:/ipfs/Qmd2XMCTroT8o1ernZw8FYbHKpkr3HrWuVW17eELEMBYCr\"]},\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/util/ExponentialNoError.sol\":{\"keccak256\":\"0x8df07c84c79c83c03ff072a5e573897d1446e145b5f69386997373ee6db661bd\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fd6be4fce0bda669ebde1565f30fb9c78d74e86a9dfd12ffec1efc981d936bb6\",\"dweb:/ipfs/QmT55TJUzG2Y7Ap2nFD8eSaRpyzoVPwteoukzzqtTdYkLj\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b506103bc806100206000396000f3fe608060405234801561001057600080fd5b50600436106100f55760003560e01c80638e8f294b11610097578063dce1544911610066578063dce1544914610270578063e6653f3d14610283578063e875544614610297578063f851a440146102a057600080fd5b80638e8f294b146101d257806394b2294b146102255780639ace3ada1461022e578063ac0b0bb71461025c57600080fd5b80636d154ea5116100d35780636d154ea514610165578063731f0c2b146101885780637dc0d1d0146101ab57806387f76303146101be57600080fd5b806324a3d622146100fa5780633c94786f1461012a5780634ada90af1461014e575b600080fd5b60085461010d906001600160a01b031681565b6040516001600160a01b0390911681526020015b60405180910390f35b60085461013e90600160a01b900460ff1681565b6040519015158152602001610121565b61015760035481565b604051908152602001610121565b61013e610173366004610307565b600a6020526000908152604090205460ff1681565b61013e610196366004610307565b60096020526000908152604090205460ff1681565b60015461010d906001600160a01b031681565b60085461013e90600160b01b900460ff1681565b6102066101e0366004610307565b60076020526000908152604090208054600182015460029092015460ff91821692911683565b6040805193151584526020840192909252151590820152606001610121565b61015760045481565b61013e61023c366004610329565b600660209081526000928352604080842090915290825290205460ff1681565b60085461013e90600160b81b900460ff1681565b61010d61027e36600461035c565b6102b3565b60085461013e90600160a81b900460ff1681565b61015760025481565b60005461010d906001600160a01b031681565b600560205281600052604060002081815481106102cf57600080fd5b6000918252602090912001546001600160a01b03169150829050565b80356001600160a01b038116811461030257600080fd5b919050565b60006020828403121561031957600080fd5b610322826102eb565b9392505050565b6000806040838503121561033c57600080fd5b610345836102eb565b9150610353602084016102eb565b90509250929050565b6000806040838503121561036f57600080fd5b610378836102eb565b94602093909301359350505056fea26469706673582212206dc7c15a06b7d70019415fc2877bbf4ea5de10497fce3d368ef32a092337469764736f6c63430008070033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100f55760003560e01c80638e8f294b11610097578063dce1544911610066578063dce1544914610270578063e6653f3d14610283578063e875544614610297578063f851a440146102a057600080fd5b80638e8f294b146101d257806394b2294b146102255780639ace3ada1461022e578063ac0b0bb71461025c57600080fd5b80636d154ea5116100d35780636d154ea514610165578063731f0c2b146101885780637dc0d1d0146101ab57806387f76303146101be57600080fd5b806324a3d622146100fa5780633c94786f1461012a5780634ada90af1461014e575b600080fd5b60085461010d906001600160a01b031681565b6040516001600160a01b0390911681526020015b60405180910390f35b60085461013e90600160a01b900460ff1681565b6040519015158152602001610121565b61015760035481565b604051908152602001610121565b61013e610173366004610307565b600a6020526000908152604090205460ff1681565b61013e610196366004610307565b60096020526000908152604090205460ff1681565b60015461010d906001600160a01b031681565b60085461013e90600160b01b900460ff1681565b6102066101e0366004610307565b60076020526000908152604090208054600182015460029092015460ff91821692911683565b6040805193151584526020840192909252151590820152606001610121565b61015760045481565b61013e61023c366004610329565b600660209081526000928352604080842090915290825290205460ff1681565b60085461013e90600160b81b900460ff1681565b61010d61027e36600461035c565b6102b3565b60085461013e90600160a81b900460ff1681565b61015760025481565b60005461010d906001600160a01b031681565b600560205281600052604060002081815481106102cf57600080fd5b6000918252602090912001546001600160a01b03169150829050565b80356001600160a01b038116811461030257600080fd5b919050565b60006020828403121561031957600080fd5b610322826102eb565b9392505050565b6000806040838503121561033c57600080fd5b610345836102eb565b9150610353602084016102eb565b90509250929050565b6000806040838503121561036f57600080fd5b610378836102eb565b94602093909301359350505056fea26469706673582212206dc7c15a06b7d70019415fc2877bbf4ea5de10497fce3d368ef32a092337469764736f6c63430008070033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [
+    {
+      "ast": {
+        "nodeType": "YulBlock",
+        "src": "0:2374:17",
+        "statements": [
+          {
+            "nodeType": "YulBlock",
+            "src": "6:3:17",
+            "statements": []
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "63:147:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "73:29:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "offset",
+                        "nodeType": "YulIdentifier",
+                        "src": "95:6:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "calldataload",
+                      "nodeType": "YulIdentifier",
+                      "src": "82:12:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "82:20:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value",
+                      "nodeType": "YulIdentifier",
+                      "src": "73:5:17"
+                    }
+                  ]
+                },
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "188:16:17",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "197:1:17",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "200:1:17",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "revert",
+                            "nodeType": "YulIdentifier",
+                            "src": "190:6:17"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "190:12:17"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "190:12:17"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "value",
+                            "nodeType": "YulIdentifier",
+                            "src": "124:5:17"
+                          },
+                          {
+                            "arguments": [
+                              {
+                                "name": "value",
+                                "nodeType": "YulIdentifier",
+                                "src": "135:5:17"
+                              },
+                              {
+                                "kind": "number",
+                                "nodeType": "YulLiteral",
+                                "src": "142:42:17",
+                                "type": "",
+                                "value": "0xffffffffffffffffffffffffffffffffffffffff"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "and",
+                              "nodeType": "YulIdentifier",
+                              "src": "131:3:17"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "131:54:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "eq",
+                          "nodeType": "YulIdentifier",
+                          "src": "121:2:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "121:65:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "iszero",
+                      "nodeType": "YulIdentifier",
+                      "src": "114:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "114:73:17"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "111:93:17"
+                }
+              ]
+            },
+            "name": "abi_decode_address",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "offset",
+                "nodeType": "YulTypedName",
+                "src": "42:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value",
+                "nodeType": "YulTypedName",
+                "src": "53:5:17",
+                "type": ""
+              }
+            ],
+            "src": "14:196:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "285:116:17",
+              "statements": [
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "331:16:17",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "340:1:17",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "343:1:17",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "revert",
+                            "nodeType": "YulIdentifier",
+                            "src": "333:6:17"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "333:12:17"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "333:12:17"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "dataEnd",
+                            "nodeType": "YulIdentifier",
+                            "src": "306:7:17"
+                          },
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "315:9:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "sub",
+                          "nodeType": "YulIdentifier",
+                          "src": "302:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "302:23:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "327:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "slt",
+                      "nodeType": "YulIdentifier",
+                      "src": "298:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "298:32:17"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "295:52:17"
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "356:39:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "385:9:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "abi_decode_address",
+                      "nodeType": "YulIdentifier",
+                      "src": "366:18:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "366:29:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value0",
+                      "nodeType": "YulIdentifier",
+                      "src": "356:6:17"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "abi_decode_tuple_t_address",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "251:9:17",
+                "type": ""
+              },
+              {
+                "name": "dataEnd",
+                "nodeType": "YulTypedName",
+                "src": "262:7:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "274:6:17",
+                "type": ""
+              }
+            ],
+            "src": "215:186:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "493:173:17",
+              "statements": [
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "539:16:17",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "548:1:17",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "551:1:17",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "revert",
+                            "nodeType": "YulIdentifier",
+                            "src": "541:6:17"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "541:12:17"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "541:12:17"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "dataEnd",
+                            "nodeType": "YulIdentifier",
+                            "src": "514:7:17"
+                          },
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "523:9:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "sub",
+                          "nodeType": "YulIdentifier",
+                          "src": "510:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "510:23:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "535:2:17",
+                        "type": "",
+                        "value": "64"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "slt",
+                      "nodeType": "YulIdentifier",
+                      "src": "506:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "506:32:17"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "503:52:17"
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "564:39:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "593:9:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "abi_decode_address",
+                      "nodeType": "YulIdentifier",
+                      "src": "574:18:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "574:29:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value0",
+                      "nodeType": "YulIdentifier",
+                      "src": "564:6:17"
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "612:48:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "645:9:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "656:2:17",
+                            "type": "",
+                            "value": "32"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "641:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "641:18:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "abi_decode_address",
+                      "nodeType": "YulIdentifier",
+                      "src": "622:18:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "622:38:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value1",
+                      "nodeType": "YulIdentifier",
+                      "src": "612:6:17"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "abi_decode_tuple_t_addresst_address",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "451:9:17",
+                "type": ""
+              },
+              {
+                "name": "dataEnd",
+                "nodeType": "YulTypedName",
+                "src": "462:7:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "474:6:17",
+                "type": ""
+              },
+              {
+                "name": "value1",
+                "nodeType": "YulTypedName",
+                "src": "482:6:17",
+                "type": ""
+              }
+            ],
+            "src": "406:260:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "758:167:17",
+              "statements": [
+                {
+                  "body": {
+                    "nodeType": "YulBlock",
+                    "src": "804:16:17",
+                    "statements": [
+                      {
+                        "expression": {
+                          "arguments": [
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "813:1:17",
+                              "type": "",
+                              "value": "0"
+                            },
+                            {
+                              "kind": "number",
+                              "nodeType": "YulLiteral",
+                              "src": "816:1:17",
+                              "type": "",
+                              "value": "0"
+                            }
+                          ],
+                          "functionName": {
+                            "name": "revert",
+                            "nodeType": "YulIdentifier",
+                            "src": "806:6:17"
+                          },
+                          "nodeType": "YulFunctionCall",
+                          "src": "806:12:17"
+                        },
+                        "nodeType": "YulExpressionStatement",
+                        "src": "806:12:17"
+                      }
+                    ]
+                  },
+                  "condition": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "dataEnd",
+                            "nodeType": "YulIdentifier",
+                            "src": "779:7:17"
+                          },
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "788:9:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "sub",
+                          "nodeType": "YulIdentifier",
+                          "src": "775:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "775:23:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "800:2:17",
+                        "type": "",
+                        "value": "64"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "slt",
+                      "nodeType": "YulIdentifier",
+                      "src": "771:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "771:32:17"
+                  },
+                  "nodeType": "YulIf",
+                  "src": "768:52:17"
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "829:39:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "858:9:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "abi_decode_address",
+                      "nodeType": "YulIdentifier",
+                      "src": "839:18:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "839:29:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value0",
+                      "nodeType": "YulIdentifier",
+                      "src": "829:6:17"
+                    }
+                  ]
+                },
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "877:42:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "904:9:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "915:2:17",
+                            "type": "",
+                            "value": "32"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "900:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "900:18:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "calldataload",
+                      "nodeType": "YulIdentifier",
+                      "src": "887:12:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "887:32:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "value1",
+                      "nodeType": "YulIdentifier",
+                      "src": "877:6:17"
+                    }
+                  ]
+                }
+              ]
+            },
+            "name": "abi_decode_tuple_t_addresst_uint256",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "716:9:17",
+                "type": ""
+              },
+              {
+                "name": "dataEnd",
+                "nodeType": "YulTypedName",
+                "src": "727:7:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "739:6:17",
+                "type": ""
+              },
+              {
+                "name": "value1",
+                "nodeType": "YulTypedName",
+                "src": "747:6:17",
+                "type": ""
+              }
+            ],
+            "src": "671:254:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "1031:125:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "1041:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1053:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1064:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "1049:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1049:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "1041:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1083:9:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "name": "value0",
+                            "nodeType": "YulIdentifier",
+                            "src": "1098:6:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "1106:42:17",
+                            "type": "",
+                            "value": "0xffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "and",
+                          "nodeType": "YulIdentifier",
+                          "src": "1094:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1094:55:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1076:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1076:74:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1076:74:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_address__to_t_address__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "1000:9:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "1011:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "1022:4:17",
+                "type": ""
+              }
+            ],
+            "src": "930:226:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "1256:92:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "1266:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1278:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1289:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "1274:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1274:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "1266:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1308:9:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "name": "value0",
+                                "nodeType": "YulIdentifier",
+                                "src": "1333:6:17"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "iszero",
+                              "nodeType": "YulIdentifier",
+                              "src": "1326:6:17"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "1326:14:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "iszero",
+                          "nodeType": "YulIdentifier",
+                          "src": "1319:6:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1319:22:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1301:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1301:41:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1301:41:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_bool__to_t_bool__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "1225:9:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "1236:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "1247:4:17",
+                "type": ""
+              }
+            ],
+            "src": "1161:187:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "1498:194:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "1508:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1520:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1531:2:17",
+                        "type": "",
+                        "value": "96"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "1516:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1516:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "1508:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1550:9:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "name": "value0",
+                                "nodeType": "YulIdentifier",
+                                "src": "1575:6:17"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "iszero",
+                              "nodeType": "YulIdentifier",
+                              "src": "1568:6:17"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "1568:14:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "iszero",
+                          "nodeType": "YulIdentifier",
+                          "src": "1561:6:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1561:22:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1543:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1543:41:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1543:41:17"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "1604:9:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "1615:2:17",
+                            "type": "",
+                            "value": "32"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "1600:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1600:18:17"
+                      },
+                      {
+                        "name": "value1",
+                        "nodeType": "YulIdentifier",
+                        "src": "1620:6:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1593:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1593:34:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1593:34:17"
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "arguments": [
+                          {
+                            "name": "headStart",
+                            "nodeType": "YulIdentifier",
+                            "src": "1647:9:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "1658:2:17",
+                            "type": "",
+                            "value": "64"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "add",
+                          "nodeType": "YulIdentifier",
+                          "src": "1643:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1643:18:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "arguments": [
+                              {
+                                "name": "value2",
+                                "nodeType": "YulIdentifier",
+                                "src": "1677:6:17"
+                              }
+                            ],
+                            "functionName": {
+                              "name": "iszero",
+                              "nodeType": "YulIdentifier",
+                              "src": "1670:6:17"
+                            },
+                            "nodeType": "YulFunctionCall",
+                            "src": "1670:14:17"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "iszero",
+                          "nodeType": "YulIdentifier",
+                          "src": "1663:6:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1663:22:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1636:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1636:50:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1636:50:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_bool_t_uint256_t_bool__to_t_bool_t_uint256_t_bool__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "1451:9:17",
+                "type": ""
+              },
+              {
+                "name": "value2",
+                "nodeType": "YulTypedName",
+                "src": "1462:6:17",
+                "type": ""
+              },
+              {
+                "name": "value1",
+                "nodeType": "YulTypedName",
+                "src": "1470:6:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "1478:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "1489:4:17",
+                "type": ""
+              }
+            ],
+            "src": "1353:339:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "1813:125:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "1823:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1835:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "1846:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "1831:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1831:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "1823:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "1865:9:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "name": "value0",
+                            "nodeType": "YulIdentifier",
+                            "src": "1880:6:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "1888:42:17",
+                            "type": "",
+                            "value": "0xffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "and",
+                          "nodeType": "YulIdentifier",
+                          "src": "1876:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "1876:55:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "1858:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "1858:74:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "1858:74:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_contract$_CToken_$4127__to_t_address__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "1782:9:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "1793:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "1804:4:17",
+                "type": ""
+              }
+            ],
+            "src": "1697:241:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "2065:125:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "2075:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "2087:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "2098:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "2083:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "2083:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "2075:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "2117:9:17"
+                      },
+                      {
+                        "arguments": [
+                          {
+                            "name": "value0",
+                            "nodeType": "YulIdentifier",
+                            "src": "2132:6:17"
+                          },
+                          {
+                            "kind": "number",
+                            "nodeType": "YulLiteral",
+                            "src": "2140:42:17",
+                            "type": "",
+                            "value": "0xffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        ],
+                        "functionName": {
+                          "name": "and",
+                          "nodeType": "YulIdentifier",
+                          "src": "2128:3:17"
+                        },
+                        "nodeType": "YulFunctionCall",
+                        "src": "2128:55:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "2110:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "2110:74:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "2110:74:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_contract$_PriceOracle_$10293__to_t_address__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "2034:9:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "2045:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "2056:4:17",
+                "type": ""
+              }
+            ],
+            "src": "1943:247:17"
+          },
+          {
+            "body": {
+              "nodeType": "YulBlock",
+              "src": "2296:76:17",
+              "statements": [
+                {
+                  "nodeType": "YulAssignment",
+                  "src": "2306:26:17",
+                  "value": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "2318:9:17"
+                      },
+                      {
+                        "kind": "number",
+                        "nodeType": "YulLiteral",
+                        "src": "2329:2:17",
+                        "type": "",
+                        "value": "32"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "add",
+                      "nodeType": "YulIdentifier",
+                      "src": "2314:3:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "2314:18:17"
+                  },
+                  "variableNames": [
+                    {
+                      "name": "tail",
+                      "nodeType": "YulIdentifier",
+                      "src": "2306:4:17"
+                    }
+                  ]
+                },
+                {
+                  "expression": {
+                    "arguments": [
+                      {
+                        "name": "headStart",
+                        "nodeType": "YulIdentifier",
+                        "src": "2348:9:17"
+                      },
+                      {
+                        "name": "value0",
+                        "nodeType": "YulIdentifier",
+                        "src": "2359:6:17"
+                      }
+                    ],
+                    "functionName": {
+                      "name": "mstore",
+                      "nodeType": "YulIdentifier",
+                      "src": "2341:6:17"
+                    },
+                    "nodeType": "YulFunctionCall",
+                    "src": "2341:25:17"
+                  },
+                  "nodeType": "YulExpressionStatement",
+                  "src": "2341:25:17"
+                }
+              ]
+            },
+            "name": "abi_encode_tuple_t_uint256__to_t_uint256__fromStack_reversed",
+            "nodeType": "YulFunctionDefinition",
+            "parameters": [
+              {
+                "name": "headStart",
+                "nodeType": "YulTypedName",
+                "src": "2265:9:17",
+                "type": ""
+              },
+              {
+                "name": "value0",
+                "nodeType": "YulTypedName",
+                "src": "2276:6:17",
+                "type": ""
+              }
+            ],
+            "returnVariables": [
+              {
+                "name": "tail",
+                "nodeType": "YulTypedName",
+                "src": "2287:4:17",
+                "type": ""
+              }
+            ],
+            "src": "2195:177:17"
+          }
+        ]
+      },
+      "contents": "{\n    { }\n    function abi_decode_address(offset) -> value\n    {\n        value := calldataload(offset)\n        if iszero(eq(value, and(value, 0xffffffffffffffffffffffffffffffffffffffff))) { revert(0, 0) }\n    }\n    function abi_decode_tuple_t_address(headStart, dataEnd) -> value0\n    {\n        if slt(sub(dataEnd, headStart), 32) { revert(0, 0) }\n        value0 := abi_decode_address(headStart)\n    }\n    function abi_decode_tuple_t_addresst_address(headStart, dataEnd) -> value0, value1\n    {\n        if slt(sub(dataEnd, headStart), 64) { revert(0, 0) }\n        value0 := abi_decode_address(headStart)\n        value1 := abi_decode_address(add(headStart, 32))\n    }\n    function abi_decode_tuple_t_addresst_uint256(headStart, dataEnd) -> value0, value1\n    {\n        if slt(sub(dataEnd, headStart), 64) { revert(0, 0) }\n        value0 := abi_decode_address(headStart)\n        value1 := calldataload(add(headStart, 32))\n    }\n    function abi_encode_tuple_t_address__to_t_address__fromStack_reversed(headStart, value0) -> tail\n    {\n        tail := add(headStart, 32)\n        mstore(headStart, and(value0, 0xffffffffffffffffffffffffffffffffffffffff))\n    }\n    function abi_encode_tuple_t_bool__to_t_bool__fromStack_reversed(headStart, value0) -> tail\n    {\n        tail := add(headStart, 32)\n        mstore(headStart, iszero(iszero(value0)))\n    }\n    function abi_encode_tuple_t_bool_t_uint256_t_bool__to_t_bool_t_uint256_t_bool__fromStack_reversed(headStart, value2, value1, value0) -> tail\n    {\n        tail := add(headStart, 96)\n        mstore(headStart, iszero(iszero(value0)))\n        mstore(add(headStart, 32), value1)\n        mstore(add(headStart, 64), iszero(iszero(value2)))\n    }\n    function abi_encode_tuple_t_contract$_CToken_$4127__to_t_address__fromStack_reversed(headStart, value0) -> tail\n    {\n        tail := add(headStart, 32)\n        mstore(headStart, and(value0, 0xffffffffffffffffffffffffffffffffffffffff))\n    }\n    function abi_encode_tuple_t_contract$_PriceOracle_$10293__to_t_address__fromStack_reversed(headStart, value0) -> tail\n    {\n        tail := add(headStart, 32)\n        mstore(headStart, and(value0, 0xffffffffffffffffffffffffffffffffffffffff))\n    }\n    function abi_encode_tuple_t_uint256__to_t_uint256__fromStack_reversed(headStart, value0) -> tail\n    {\n        tail := add(headStart, 32)\n        mstore(headStart, value0)\n    }\n}",
+      "id": 17,
+      "language": "Yul",
+      "name": "#utility.yul"
+    }
+  ],
+  "sourceMap": "967:1506:6:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "967:1506:6:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;2175:28;;;;;-1:-1:-1;;;;;2175:28:6;;;;;;-1:-1:-1;;;;;1094:55:17;;;1076:74;;1064:2;1049:18;2175:28:6;;;;;;;;2209:31;;;;;-1:-1:-1;;;2209:31:6;;;;;;;;;1326:14:17;;1319:22;1301:41;;1289:2;1274:18;2209:31:6;1161:187:17;624:40:6;;;;;;;;;2341:25:17;;;2329:2;2314:18;624:40:6;2195:177:17;2418:52:6;;;;;;:::i;:::-;;;;;;;;;;;;;;;;2362:50;;;;;;:::i;:::-;;;;;;;;;;;;;;;;335:25;;;;;-1:-1:-1;;;;;335:25:6;;;2285:34;;;;;-1:-1:-1;;;2285:34:6;;;;;;1859:41;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;1568:14:17;;1561:22;1543:41;;1615:2;1600:18;;1593:34;;;;1670:14;1663:22;1643:18;;;1636:50;1531:2;1516:18;1859:41:6;1353:339:17;789:21:6;;;;;;1600:70;;;;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;;;;2325:31;;;;;-1:-1:-1;;;2325:31:6;;;;;;912:49;;;;;;:::i;:::-;;:::i;2246:33::-;;;;;-1:-1:-1;;;2246:33:6;;;;;;477:31;;;;;;229:20;;;;;-1:-1:-1;;;;;229:20:6;;;912:49;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;912:49:6;;-1:-1:-1;912:49:6;;-1:-1:-1;912:49:6:o;14:196:17:-;82:20;;-1:-1:-1;;;;;131:54:17;;121:65;;111:93;;200:1;197;190:12;111:93;14:196;;;:::o;215:186::-;274:6;327:2;315:9;306:7;302:23;298:32;295:52;;;343:1;340;333:12;295:52;366:29;385:9;366:29;:::i;:::-;356:39;215:186;-1:-1:-1;;;215:186:17:o;406:260::-;474:6;482;535:2;523:9;514:7;510:23;506:32;503:52;;;551:1;548;541:12;503:52;574:29;593:9;574:29;:::i;:::-;564:39;;622:38;656:2;645:9;641:18;622:38;:::i;:::-;612:48;;406:260;;;;;:::o;671:254::-;739:6;747;800:2;788:9;779:7;775:23;771:32;768:52;;;816:1;813;806:12;768:52;839:29;858:9;839:29;:::i;:::-;829:39;915:2;900:18;;;;887:32;;-1:-1:-1;;;671:254:17:o",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0;\n\nimport \"../cToken/CToken.sol\";\nimport \"../priceOracle/PriceOracle.sol\";\n\n\ncontract ComptrollerV1Storage {\n    /**\n    * @notice Administrator for this contract\n    */\n    address public admin;\n\n    /**\n     * @notice Oracle which gives the price of any given asset\n     */\n    PriceOracle public oracle;\n\n    /**\n     * @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow\n     */\n    uint public closeFactorMantissa;\n\n    /**\n     * @notice Multiplier representing the discount on collateral that a liquidator receives\n     */\n    uint public liquidationIncentiveMantissa;\n\n    /**\n     * @notice Max number of assets a single account can participate in (borrow or use as collateral)\n     */\n    uint public maxAssets;\n\n    /**\n     * @notice Per-account mapping of \"assets you are in\", capped by maxAssets\n     */\n    mapping(address => CToken[]) public accountAssets;\n\n}\n\ncontract ComptrollerV2Storage is ComptrollerV1Storage {\n    struct Market {\n        /// @notice Whether or not this market is listed\n        bool isListed;\n\n        /**\n         * @notice Multiplier representing the most one can borrow against their collateral in this market.\n         *  For instance, 0.9 to allow borrowing 90% of collateral value.\n         *  Must be between 0 and 1, and stored as a mantissa.\n         */\n        uint collateralFactorMantissa;\n\n       \n        /// @notice Whether or not this market receives COMP\n        bool isComped;\n    }\n\n     /// @notice Per-market mapping of \"accounts in this asset\"\n    mapping(address => mapping( address => bool)) public accountMembership;//user address => ctoken address => isListed\n\n    /**\n     * @notice Official mapping of cTokens -> Market metadata\n     * @dev Used e.g. to determine if a market is supported\n     */\n    mapping(address => Market) public markets;\n\n   \n\n    /**\n     * @notice The Pause Guardian can pause certain actions as a safety mechanism.\n     *  Actions which allow users to remove their own assets cannot be paused.\n     *  Liquidation / seizing / transfer can only be paused globally, not by market.\n     */\n    address public pauseGuardian;\n    bool public _mintGuardianPaused;\n    bool public _borrowGuardianPaused;\n    bool public transferGuardianPaused;\n    bool public seizeGuardianPaused;\n    mapping(address => bool) public mintGuardianPaused;\n    mapping(address => bool) public borrowGuardianPaused;\n}\n\ncontract ComptrollerV3Storage is ComptrollerV2Storage {\n    struct CompMarketState {\n        /// @notice The market's last updated compBorrowIndex or compSupplyIndex\n        uint224 index;\n\n        /// @notice The block number the index was last updated at\n        uint32 block;\n    }\n\n    /// @notice A list of all markets\n    CToken[] public allMarkets;\n\n    /// @notice The rate at which the flywheel distributes COMP, per block\n    uint public compRate;\n\n    /// @notice The portion of compRate that each market currently receives\n    mapping(address => uint) public compSpeeds;\n\n    /// @notice The COMP market supply state for each market\n    mapping(address => CompMarketState) public compSupplyState;\n\n    /// @notice The COMP market borrow state for each market\n    mapping(address => CompMarketState) public compBorrowState;\n\n    /// @notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP\n    mapping(address => mapping(address => uint)) public compSupplierIndex;\n\n    /// @notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP\n    mapping(address => mapping(address => uint)) public compBorrowerIndex;\n\n    /// @notice The COMP accrued but not yet transferred to each user\n    mapping(address => uint) public compAccrued;\n}\n\ncontract ComptrollerV4Storage is ComptrollerV3Storage {\n    // @notice The borrowCapGuardian can set borrowCaps to any number for any market. Lowering the borrow cap could disable borrowing on the given market.\n    address public borrowCapGuardian;\n\n    // @notice Borrow caps enforced by borrowAllowed for each cToken address. Defaults to zero which corresponds to unlimited borrowing.\n    mapping(address => uint) public borrowCaps;\n}\n\ncontract ComptrollerV5Storage is ComptrollerV4Storage {\n    /// @notice The portion of COMP that each contributor receives per block\n    mapping(address => uint) public compContributorSpeeds;\n\n    /// @notice Last block at which a contributor's COMP rewards have been allocated\n    mapping(address => uint) public lastContributorBlock;\n\n}\n",
+  "sourcePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerStorage.sol",
+  "ast": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerStorage.sol",
+    "exportedSymbols": {
+      "CDelegateInterface": [
+        4644
+      ],
+      "CDelegationStorage": [
+        4611
+      ],
+      "CDelegatorInterface": [
+        4631
+      ],
+      "CErc20Interface": [
+        4607
+      ],
+      "CErc20Storage": [
+        4535
+      ],
+      "CToken": [
+        4127
+      ],
+      "CTokenInterface": [
+        4531
+      ],
+      "CTokenStorage": [
+        4215
+      ],
+      "CarefulMath": [
+        10490
+      ],
+      "ComptrollerErrorReporter": [
+        10604
+      ],
+      "ComptrollerInterface": [
+        8923
+      ],
+      "ComptrollerV1Storage": [
+        8951
+      ],
+      "ComptrollerV2Storage": [
+        8996
+      ],
+      "ComptrollerV3Storage": [
+        9050
+      ],
+      "ComptrollerV4Storage": [
+        9059
+      ],
+      "ComptrollerV5Storage": [
+        9072
+      ],
+      "EIP20Interface": [
+        10204
+      ],
+      "EIP20NonStandardInterface": [
+        10276
+      ],
+      "Exponential": [
+        11370
+      ],
+      "ExponentialNoError": [
+        12124
+      ],
+      "InterestRateModel": [
+        10113
+      ],
+      "PriceOracle": [
+        10293
+      ],
+      "TokenErrorReporter": [
+        10776
+      ]
+    },
+    "id": 9073,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8925,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:6"
+      },
+      {
+        "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/cToken/CToken.sol",
+        "file": "../cToken/CToken.sol",
+        "id": 8926,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 9073,
+        "sourceUnit": 4128,
+        "src": "58:30:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/priceOracle/PriceOracle.sol",
+        "file": "../priceOracle/PriceOracle.sol",
+        "id": 8927,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 9073,
+        "sourceUnit": 10294,
+        "src": "89:40:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 8951,
+        "linearizedBaseContracts": [
+          8951
+        ],
+        "name": "ComptrollerV1Storage",
+        "nameLocation": "141:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8928,
+              "nodeType": "StructuredDocumentation",
+              "src": "168:56:6",
+              "text": " @notice Administrator for this contract"
+            },
+            "functionSelector": "f851a440",
+            "id": 8930,
+            "mutability": "mutable",
+            "name": "admin",
+            "nameLocation": "244:5:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "229:20:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 8929,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "229:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8931,
+              "nodeType": "StructuredDocumentation",
+              "src": "256:74:6",
+              "text": " @notice Oracle which gives the price of any given asset"
+            },
+            "functionSelector": "7dc0d1d0",
+            "id": 8934,
+            "mutability": "mutable",
+            "name": "oracle",
+            "nameLocation": "354:6:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "335:25:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_PriceOracle_$10293",
+              "typeString": "contract PriceOracle"
+            },
+            "typeName": {
+              "id": 8933,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 8932,
+                "name": "PriceOracle",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 10293,
+                "src": "335:11:6"
+              },
+              "referencedDeclaration": 10293,
+              "src": "335:11:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_PriceOracle_$10293",
+                "typeString": "contract PriceOracle"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8935,
+              "nodeType": "StructuredDocumentation",
+              "src": "367:105:6",
+              "text": " @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow"
+            },
+            "functionSelector": "e8755446",
+            "id": 8937,
+            "mutability": "mutable",
+            "name": "closeFactorMantissa",
+            "nameLocation": "489:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "477:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8936,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "477:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8938,
+              "nodeType": "StructuredDocumentation",
+              "src": "515:104:6",
+              "text": " @notice Multiplier representing the discount on collateral that a liquidator receives"
+            },
+            "functionSelector": "4ada90af",
+            "id": 8940,
+            "mutability": "mutable",
+            "name": "liquidationIncentiveMantissa",
+            "nameLocation": "636:28:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "624:40:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8939,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "624:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8941,
+              "nodeType": "StructuredDocumentation",
+              "src": "671:113:6",
+              "text": " @notice Max number of assets a single account can participate in (borrow or use as collateral)"
+            },
+            "functionSelector": "94b2294b",
+            "id": 8943,
+            "mutability": "mutable",
+            "name": "maxAssets",
+            "nameLocation": "801:9:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "789:21:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8942,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "789:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8944,
+              "nodeType": "StructuredDocumentation",
+              "src": "817:90:6",
+              "text": " @notice Per-account mapping of \"assets you are in\", capped by maxAssets"
+            },
+            "functionSelector": "dce15449",
+            "id": 8950,
+            "mutability": "mutable",
+            "name": "accountAssets",
+            "nameLocation": "948:13:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "912:49:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_contract$_CToken_$4127_$dyn_storage_$",
+              "typeString": "mapping(address => contract CToken[])"
+            },
+            "typeName": {
+              "id": 8949,
+              "keyType": {
+                "id": 8945,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "920:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "912:28:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_contract$_CToken_$4127_$dyn_storage_$",
+                "typeString": "mapping(address => contract CToken[])"
+              },
+              "valueType": {
+                "baseType": {
+                  "id": 8947,
+                  "nodeType": "UserDefinedTypeName",
+                  "pathNode": {
+                    "id": 8946,
+                    "name": "CToken",
+                    "nodeType": "IdentifierPath",
+                    "referencedDeclaration": 4127,
+                    "src": "931:6:6"
+                  },
+                  "referencedDeclaration": 4127,
+                  "src": "931:6:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_CToken_$4127",
+                    "typeString": "contract CToken"
+                  }
+                },
+                "id": 8948,
+                "nodeType": "ArrayTypeName",
+                "src": "931:8:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage_ptr",
+                  "typeString": "contract CToken[]"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "132:833:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 8952,
+              "name": "ComptrollerV1Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 8951,
+              "src": "1000:20:6"
+            },
+            "id": 8953,
+            "nodeType": "InheritanceSpecifier",
+            "src": "1000:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 8996,
+        "linearizedBaseContracts": [
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV2Storage",
+        "nameLocation": "976:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ComptrollerV2Storage.Market",
+            "id": 8963,
+            "members": [
+              {
+                "constant": false,
+                "id": 8956,
+                "mutability": "mutable",
+                "name": "isListed",
+                "nameLocation": "1113:8:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1108:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8955,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1108:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8959,
+                "mutability": "mutable",
+                "name": "collateralFactorMantissa",
+                "nameLocation": "1406:24:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1401:29:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 8958,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1401:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8962,
+                "mutability": "mutable",
+                "name": "isComped",
+                "nameLocation": "1515:8:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1510:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8961,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1510:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Market",
+            "nameLocation": "1034:6:6",
+            "nodeType": "StructDefinition",
+            "scope": 8996,
+            "src": "1027:503:6",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8964,
+              "nodeType": "StructuredDocumentation",
+              "src": "1537:58:6",
+              "text": "@notice Per-market mapping of \"accounts in this asset\""
+            },
+            "functionSelector": "9ace3ada",
+            "id": 8970,
+            "mutability": "mutable",
+            "name": "accountMembership",
+            "nameLocation": "1653:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "1600:70:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_bool_$_$",
+              "typeString": "mapping(address => mapping(address => bool))"
+            },
+            "typeName": {
+              "id": 8969,
+              "keyType": {
+                "id": 8965,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "1608:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "1600:45:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_bool_$_$",
+                "typeString": "mapping(address => mapping(address => bool))"
+              },
+              "valueType": {
+                "id": 8968,
+                "keyType": {
+                  "id": 8966,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1628:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "1619:25:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                  "typeString": "mapping(address => bool)"
+                },
+                "valueType": {
+                  "id": 8967,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1639:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8971,
+              "nodeType": "StructuredDocumentation",
+              "src": "1721:133:6",
+              "text": " @notice Official mapping of cTokens -> Market metadata\n @dev Used e.g. to determine if a market is supported"
+            },
+            "functionSelector": "8e8f294b",
+            "id": 8976,
+            "mutability": "mutable",
+            "name": "markets",
+            "nameLocation": "1893:7:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "1859:41:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Market_$8963_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV2Storage.Market)"
+            },
+            "typeName": {
+              "id": 8975,
+              "keyType": {
+                "id": 8972,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "1867:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "1859:26:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Market_$8963_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV2Storage.Market)"
+              },
+              "valueType": {
+                "id": 8974,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 8973,
+                  "name": "Market",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 8963,
+                  "src": "1878:6:6"
+                },
+                "referencedDeclaration": 8963,
+                "src": "1878:6:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_Market_$8963_storage_ptr",
+                  "typeString": "struct ComptrollerV2Storage.Market"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8977,
+              "nodeType": "StructuredDocumentation",
+              "src": "1912:258:6",
+              "text": " @notice The Pause Guardian can pause certain actions as a safety mechanism.\n  Actions which allow users to remove their own assets cannot be paused.\n  Liquidation / seizing / transfer can only be paused globally, not by market."
+            },
+            "functionSelector": "24a3d622",
+            "id": 8979,
+            "mutability": "mutable",
+            "name": "pauseGuardian",
+            "nameLocation": "2190:13:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2175:28:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 8978,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "2175:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "3c94786f",
+            "id": 8981,
+            "mutability": "mutable",
+            "name": "_mintGuardianPaused",
+            "nameLocation": "2221:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2209:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8980,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2209:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "e6653f3d",
+            "id": 8983,
+            "mutability": "mutable",
+            "name": "_borrowGuardianPaused",
+            "nameLocation": "2258:21:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2246:33:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8982,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2246:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "87f76303",
+            "id": 8985,
+            "mutability": "mutable",
+            "name": "transferGuardianPaused",
+            "nameLocation": "2297:22:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2285:34:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8984,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2285:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "ac0b0bb7",
+            "id": 8987,
+            "mutability": "mutable",
+            "name": "seizeGuardianPaused",
+            "nameLocation": "2337:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2325:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8986,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2325:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "731f0c2b",
+            "id": 8991,
+            "mutability": "mutable",
+            "name": "mintGuardianPaused",
+            "nameLocation": "2394:18:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2362:50:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+              "typeString": "mapping(address => bool)"
+            },
+            "typeName": {
+              "id": 8990,
+              "keyType": {
+                "id": 8988,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "2370:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "2362:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                "typeString": "mapping(address => bool)"
+              },
+              "valueType": {
+                "id": 8989,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "2381:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "6d154ea5",
+            "id": 8995,
+            "mutability": "mutable",
+            "name": "borrowGuardianPaused",
+            "nameLocation": "2450:20:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2418:52:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+              "typeString": "mapping(address => bool)"
+            },
+            "typeName": {
+              "id": 8994,
+              "keyType": {
+                "id": 8992,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "2426:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "2418:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                "typeString": "mapping(address => bool)"
+              },
+              "valueType": {
+                "id": 8993,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "2437:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "967:1506:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 8997,
+              "name": "ComptrollerV2Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 8996,
+              "src": "2508:20:6"
+            },
+            "id": 8998,
+            "nodeType": "InheritanceSpecifier",
+            "src": "2508:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9050,
+        "linearizedBaseContracts": [
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV3Storage",
+        "nameLocation": "2484:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ComptrollerV3Storage.CompMarketState",
+            "id": 9005,
+            "members": [
+              {
+                "constant": false,
+                "id": 9001,
+                "mutability": "mutable",
+                "name": "index",
+                "nameLocation": "2657:5:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 9005,
+                "src": "2649:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint224",
+                  "typeString": "uint224"
+                },
+                "typeName": {
+                  "id": 9000,
+                  "name": "uint224",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2649:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint224",
+                    "typeString": "uint224"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 9004,
+                "mutability": "mutable",
+                "name": "block",
+                "nameLocation": "2747:5:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 9005,
+                "src": "2740:12:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 9003,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2740:6:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "CompMarketState",
+            "nameLocation": "2542:15:6",
+            "nodeType": "StructDefinition",
+            "scope": 9050,
+            "src": "2535:224:6",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9006,
+              "nodeType": "StructuredDocumentation",
+              "src": "2765:33:6",
+              "text": "@notice A list of all markets"
+            },
+            "functionSelector": "52d84d1e",
+            "id": 9010,
+            "mutability": "mutable",
+            "name": "allMarkets",
+            "nameLocation": "2819:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "2803:26:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage",
+              "typeString": "contract CToken[]"
+            },
+            "typeName": {
+              "baseType": {
+                "id": 9008,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9007,
+                  "name": "CToken",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 4127,
+                  "src": "2803:6:6"
+                },
+                "referencedDeclaration": 4127,
+                "src": "2803:6:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_contract$_CToken_$4127",
+                  "typeString": "contract CToken"
+                }
+              },
+              "id": 9009,
+              "nodeType": "ArrayTypeName",
+              "src": "2803:8:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage_ptr",
+                "typeString": "contract CToken[]"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9011,
+              "nodeType": "StructuredDocumentation",
+              "src": "2836:70:6",
+              "text": "@notice The rate at which the flywheel distributes COMP, per block"
+            },
+            "functionSelector": "aa900754",
+            "id": 9013,
+            "mutability": "mutable",
+            "name": "compRate",
+            "nameLocation": "2923:8:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "2911:20:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 9012,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "2911:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9014,
+              "nodeType": "StructuredDocumentation",
+              "src": "2938:71:6",
+              "text": "@notice The portion of compRate that each market currently receives"
+            },
+            "functionSelector": "1d7b33d7",
+            "id": 9018,
+            "mutability": "mutable",
+            "name": "compSpeeds",
+            "nameLocation": "3046:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3014:42:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9017,
+              "keyType": {
+                "id": 9015,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3022:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3014:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9016,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "3033:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9019,
+              "nodeType": "StructuredDocumentation",
+              "src": "3063:56:6",
+              "text": "@notice The COMP market supply state for each market"
+            },
+            "functionSelector": "6b79c38d",
+            "id": 9024,
+            "mutability": "mutable",
+            "name": "compSupplyState",
+            "nameLocation": "3167:15:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3124:58:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+            },
+            "typeName": {
+              "id": 9023,
+              "keyType": {
+                "id": 9020,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3132:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3124:35:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+              },
+              "valueType": {
+                "id": 9022,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9021,
+                  "name": "CompMarketState",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 9005,
+                  "src": "3143:15:6"
+                },
+                "referencedDeclaration": 9005,
+                "src": "3143:15:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_CompMarketState_$9005_storage_ptr",
+                  "typeString": "struct ComptrollerV3Storage.CompMarketState"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9025,
+              "nodeType": "StructuredDocumentation",
+              "src": "3189:56:6",
+              "text": "@notice The COMP market borrow state for each market"
+            },
+            "functionSelector": "8c57804e",
+            "id": 9030,
+            "mutability": "mutable",
+            "name": "compBorrowState",
+            "nameLocation": "3293:15:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3250:58:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+            },
+            "typeName": {
+              "id": 9029,
+              "keyType": {
+                "id": 9026,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3258:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3250:35:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+              },
+              "valueType": {
+                "id": 9028,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9027,
+                  "name": "CompMarketState",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 9005,
+                  "src": "3269:15:6"
+                },
+                "referencedDeclaration": 9005,
+                "src": "3269:15:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_CompMarketState_$9005_storage_ptr",
+                  "typeString": "struct ComptrollerV3Storage.CompMarketState"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9031,
+              "nodeType": "StructuredDocumentation",
+              "src": "3315:105:6",
+              "text": "@notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP"
+            },
+            "functionSelector": "b21be7fd",
+            "id": 9037,
+            "mutability": "mutable",
+            "name": "compSupplierIndex",
+            "nameLocation": "3477:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3425:69:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+              "typeString": "mapping(address => mapping(address => uint256))"
+            },
+            "typeName": {
+              "id": 9036,
+              "keyType": {
+                "id": 9032,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3433:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3425:44:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+                "typeString": "mapping(address => mapping(address => uint256))"
+              },
+              "valueType": {
+                "id": 9035,
+                "keyType": {
+                  "id": 9033,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3452:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "3444:24:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                  "typeString": "mapping(address => uint256)"
+                },
+                "valueType": {
+                  "id": 9034,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3463:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9038,
+              "nodeType": "StructuredDocumentation",
+              "src": "3501:105:6",
+              "text": "@notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP"
+            },
+            "functionSelector": "ca0af043",
+            "id": 9044,
+            "mutability": "mutable",
+            "name": "compBorrowerIndex",
+            "nameLocation": "3663:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3611:69:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+              "typeString": "mapping(address => mapping(address => uint256))"
+            },
+            "typeName": {
+              "id": 9043,
+              "keyType": {
+                "id": 9039,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3619:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3611:44:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+                "typeString": "mapping(address => mapping(address => uint256))"
+              },
+              "valueType": {
+                "id": 9042,
+                "keyType": {
+                  "id": 9040,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3638:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "3630:24:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                  "typeString": "mapping(address => uint256)"
+                },
+                "valueType": {
+                  "id": 9041,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3649:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9045,
+              "nodeType": "StructuredDocumentation",
+              "src": "3687:65:6",
+              "text": "@notice The COMP accrued but not yet transferred to each user"
+            },
+            "functionSelector": "cc7ebdc4",
+            "id": 9049,
+            "mutability": "mutable",
+            "name": "compAccrued",
+            "nameLocation": "3789:11:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3757:43:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9048,
+              "keyType": {
+                "id": 9046,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3765:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3757:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9047,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "3776:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "2475:1328:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 9051,
+              "name": "ComptrollerV3Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 9050,
+              "src": "3838:20:6"
+            },
+            "id": 9052,
+            "nodeType": "InheritanceSpecifier",
+            "src": "3838:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9059,
+        "linearizedBaseContracts": [
+          9059,
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV4Storage",
+        "nameLocation": "3814:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "21af4569",
+            "id": 9054,
+            "mutability": "mutable",
+            "name": "borrowCapGuardian",
+            "nameLocation": "4035:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9059,
+            "src": "4020:32:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9053,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "4020:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "4a584432",
+            "id": 9058,
+            "mutability": "mutable",
+            "name": "borrowCaps",
+            "nameLocation": "4228:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9059,
+            "src": "4196:42:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9057,
+              "keyType": {
+                "id": 9055,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4204:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4196:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9056,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4215:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "3805:436:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 9060,
+              "name": "ComptrollerV4Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 9059,
+              "src": "4276:20:6"
+            },
+            "id": 9061,
+            "nodeType": "InheritanceSpecifier",
+            "src": "4276:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9072,
+        "linearizedBaseContracts": [
+          9072,
+          9059,
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV5Storage",
+        "nameLocation": "4252:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9062,
+              "nodeType": "StructuredDocumentation",
+              "src": "4303:72:6",
+              "text": "@notice The portion of COMP that each contributor receives per block"
+            },
+            "functionSelector": "986ab838",
+            "id": 9066,
+            "mutability": "mutable",
+            "name": "compContributorSpeeds",
+            "nameLocation": "4412:21:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9072,
+            "src": "4380:53:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9065,
+              "keyType": {
+                "id": 9063,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4388:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4380:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9064,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4399:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9067,
+              "nodeType": "StructuredDocumentation",
+              "src": "4440:80:6",
+              "text": "@notice Last block at which a contributor's COMP rewards have been allocated"
+            },
+            "functionSelector": "bea6b8b8",
+            "id": 9071,
+            "mutability": "mutable",
+            "name": "lastContributorBlock",
+            "nameLocation": "4557:20:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9072,
+            "src": "4525:52:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9070,
+              "keyType": {
+                "id": 9068,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4533:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4525:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9069,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4544:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "4243:338:6",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:4550:6"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/comptroller/ComptrollerStorage.sol",
+    "exportedSymbols": {
+      "CDelegateInterface": [
+        4644
+      ],
+      "CDelegationStorage": [
+        4611
+      ],
+      "CDelegatorInterface": [
+        4631
+      ],
+      "CErc20Interface": [
+        4607
+      ],
+      "CErc20Storage": [
+        4535
+      ],
+      "CToken": [
+        4127
+      ],
+      "CTokenInterface": [
+        4531
+      ],
+      "CTokenStorage": [
+        4215
+      ],
+      "CarefulMath": [
+        10490
+      ],
+      "ComptrollerErrorReporter": [
+        10604
+      ],
+      "ComptrollerInterface": [
+        8923
+      ],
+      "ComptrollerV1Storage": [
+        8951
+      ],
+      "ComptrollerV2Storage": [
+        8996
+      ],
+      "ComptrollerV3Storage": [
+        9050
+      ],
+      "ComptrollerV4Storage": [
+        9059
+      ],
+      "ComptrollerV5Storage": [
+        9072
+      ],
+      "EIP20Interface": [
+        10204
+      ],
+      "EIP20NonStandardInterface": [
+        10276
+      ],
+      "Exponential": [
+        11370
+      ],
+      "ExponentialNoError": [
+        12124
+      ],
+      "InterestRateModel": [
+        10113
+      ],
+      "PriceOracle": [
+        10293
+      ],
+      "TokenErrorReporter": [
+        10776
+      ]
+    },
+    "id": 9073,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 8925,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:6"
+      },
+      {
+        "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/cToken/CToken.sol",
+        "file": "../cToken/CToken.sol",
+        "id": 8926,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 9073,
+        "sourceUnit": 4128,
+        "src": "58:30:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/priceOracle/PriceOracle.sol",
+        "file": "../priceOracle/PriceOracle.sol",
+        "id": 8927,
+        "nameLocation": "-1:-1:-1",
+        "nodeType": "ImportDirective",
+        "scope": 9073,
+        "sourceUnit": 10294,
+        "src": "89:40:6",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 8951,
+        "linearizedBaseContracts": [
+          8951
+        ],
+        "name": "ComptrollerV1Storage",
+        "nameLocation": "141:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8928,
+              "nodeType": "StructuredDocumentation",
+              "src": "168:56:6",
+              "text": " @notice Administrator for this contract"
+            },
+            "functionSelector": "f851a440",
+            "id": 8930,
+            "mutability": "mutable",
+            "name": "admin",
+            "nameLocation": "244:5:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "229:20:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 8929,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "229:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8931,
+              "nodeType": "StructuredDocumentation",
+              "src": "256:74:6",
+              "text": " @notice Oracle which gives the price of any given asset"
+            },
+            "functionSelector": "7dc0d1d0",
+            "id": 8934,
+            "mutability": "mutable",
+            "name": "oracle",
+            "nameLocation": "354:6:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "335:25:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_PriceOracle_$10293",
+              "typeString": "contract PriceOracle"
+            },
+            "typeName": {
+              "id": 8933,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 8932,
+                "name": "PriceOracle",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 10293,
+                "src": "335:11:6"
+              },
+              "referencedDeclaration": 10293,
+              "src": "335:11:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_PriceOracle_$10293",
+                "typeString": "contract PriceOracle"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8935,
+              "nodeType": "StructuredDocumentation",
+              "src": "367:105:6",
+              "text": " @notice Multiplier used to calculate the maximum repayAmount when liquidating a borrow"
+            },
+            "functionSelector": "e8755446",
+            "id": 8937,
+            "mutability": "mutable",
+            "name": "closeFactorMantissa",
+            "nameLocation": "489:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "477:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8936,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "477:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8938,
+              "nodeType": "StructuredDocumentation",
+              "src": "515:104:6",
+              "text": " @notice Multiplier representing the discount on collateral that a liquidator receives"
+            },
+            "functionSelector": "4ada90af",
+            "id": 8940,
+            "mutability": "mutable",
+            "name": "liquidationIncentiveMantissa",
+            "nameLocation": "636:28:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "624:40:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8939,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "624:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8941,
+              "nodeType": "StructuredDocumentation",
+              "src": "671:113:6",
+              "text": " @notice Max number of assets a single account can participate in (borrow or use as collateral)"
+            },
+            "functionSelector": "94b2294b",
+            "id": 8943,
+            "mutability": "mutable",
+            "name": "maxAssets",
+            "nameLocation": "801:9:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "789:21:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 8942,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "789:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8944,
+              "nodeType": "StructuredDocumentation",
+              "src": "817:90:6",
+              "text": " @notice Per-account mapping of \"assets you are in\", capped by maxAssets"
+            },
+            "functionSelector": "dce15449",
+            "id": 8950,
+            "mutability": "mutable",
+            "name": "accountAssets",
+            "nameLocation": "948:13:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8951,
+            "src": "912:49:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_contract$_CToken_$4127_$dyn_storage_$",
+              "typeString": "mapping(address => contract CToken[])"
+            },
+            "typeName": {
+              "id": 8949,
+              "keyType": {
+                "id": 8945,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "920:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "912:28:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_contract$_CToken_$4127_$dyn_storage_$",
+                "typeString": "mapping(address => contract CToken[])"
+              },
+              "valueType": {
+                "baseType": {
+                  "id": 8947,
+                  "nodeType": "UserDefinedTypeName",
+                  "pathNode": {
+                    "id": 8946,
+                    "name": "CToken",
+                    "nodeType": "IdentifierPath",
+                    "referencedDeclaration": 4127,
+                    "src": "931:6:6"
+                  },
+                  "referencedDeclaration": 4127,
+                  "src": "931:6:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_contract$_CToken_$4127",
+                    "typeString": "contract CToken"
+                  }
+                },
+                "id": 8948,
+                "nodeType": "ArrayTypeName",
+                "src": "931:8:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage_ptr",
+                  "typeString": "contract CToken[]"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "132:833:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 8952,
+              "name": "ComptrollerV1Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 8951,
+              "src": "1000:20:6"
+            },
+            "id": 8953,
+            "nodeType": "InheritanceSpecifier",
+            "src": "1000:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 8996,
+        "linearizedBaseContracts": [
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV2Storage",
+        "nameLocation": "976:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ComptrollerV2Storage.Market",
+            "id": 8963,
+            "members": [
+              {
+                "constant": false,
+                "id": 8956,
+                "mutability": "mutable",
+                "name": "isListed",
+                "nameLocation": "1113:8:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1108:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8955,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1108:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8959,
+                "mutability": "mutable",
+                "name": "collateralFactorMantissa",
+                "nameLocation": "1406:24:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1401:29:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 8958,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1401:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 8962,
+                "mutability": "mutable",
+                "name": "isComped",
+                "nameLocation": "1515:8:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 8963,
+                "src": "1510:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                },
+                "typeName": {
+                  "id": 8961,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1510:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Market",
+            "nameLocation": "1034:6:6",
+            "nodeType": "StructDefinition",
+            "scope": 8996,
+            "src": "1027:503:6",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8964,
+              "nodeType": "StructuredDocumentation",
+              "src": "1537:58:6",
+              "text": "@notice Per-market mapping of \"accounts in this asset\""
+            },
+            "functionSelector": "9ace3ada",
+            "id": 8970,
+            "mutability": "mutable",
+            "name": "accountMembership",
+            "nameLocation": "1653:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "1600:70:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_bool_$_$",
+              "typeString": "mapping(address => mapping(address => bool))"
+            },
+            "typeName": {
+              "id": 8969,
+              "keyType": {
+                "id": 8965,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "1608:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "1600:45:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_bool_$_$",
+                "typeString": "mapping(address => mapping(address => bool))"
+              },
+              "valueType": {
+                "id": 8968,
+                "keyType": {
+                  "id": 8966,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1628:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "1619:25:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                  "typeString": "mapping(address => bool)"
+                },
+                "valueType": {
+                  "id": 8967,
+                  "name": "bool",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "1639:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8971,
+              "nodeType": "StructuredDocumentation",
+              "src": "1721:133:6",
+              "text": " @notice Official mapping of cTokens -> Market metadata\n @dev Used e.g. to determine if a market is supported"
+            },
+            "functionSelector": "8e8f294b",
+            "id": 8976,
+            "mutability": "mutable",
+            "name": "markets",
+            "nameLocation": "1893:7:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "1859:41:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Market_$8963_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV2Storage.Market)"
+            },
+            "typeName": {
+              "id": 8975,
+              "keyType": {
+                "id": 8972,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "1867:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "1859:26:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_Market_$8963_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV2Storage.Market)"
+              },
+              "valueType": {
+                "id": 8974,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 8973,
+                  "name": "Market",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 8963,
+                  "src": "1878:6:6"
+                },
+                "referencedDeclaration": 8963,
+                "src": "1878:6:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_Market_$8963_storage_ptr",
+                  "typeString": "struct ComptrollerV2Storage.Market"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 8977,
+              "nodeType": "StructuredDocumentation",
+              "src": "1912:258:6",
+              "text": " @notice The Pause Guardian can pause certain actions as a safety mechanism.\n  Actions which allow users to remove their own assets cannot be paused.\n  Liquidation / seizing / transfer can only be paused globally, not by market."
+            },
+            "functionSelector": "24a3d622",
+            "id": 8979,
+            "mutability": "mutable",
+            "name": "pauseGuardian",
+            "nameLocation": "2190:13:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2175:28:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 8978,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "2175:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "3c94786f",
+            "id": 8981,
+            "mutability": "mutable",
+            "name": "_mintGuardianPaused",
+            "nameLocation": "2221:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2209:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8980,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2209:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "e6653f3d",
+            "id": 8983,
+            "mutability": "mutable",
+            "name": "_borrowGuardianPaused",
+            "nameLocation": "2258:21:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2246:33:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8982,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2246:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "87f76303",
+            "id": 8985,
+            "mutability": "mutable",
+            "name": "transferGuardianPaused",
+            "nameLocation": "2297:22:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2285:34:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8984,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2285:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "ac0b0bb7",
+            "id": 8987,
+            "mutability": "mutable",
+            "name": "seizeGuardianPaused",
+            "nameLocation": "2337:19:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2325:31:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_bool",
+              "typeString": "bool"
+            },
+            "typeName": {
+              "id": 8986,
+              "name": "bool",
+              "nodeType": "ElementaryTypeName",
+              "src": "2325:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_bool",
+                "typeString": "bool"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "731f0c2b",
+            "id": 8991,
+            "mutability": "mutable",
+            "name": "mintGuardianPaused",
+            "nameLocation": "2394:18:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2362:50:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+              "typeString": "mapping(address => bool)"
+            },
+            "typeName": {
+              "id": 8990,
+              "keyType": {
+                "id": 8988,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "2370:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "2362:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                "typeString": "mapping(address => bool)"
+              },
+              "valueType": {
+                "id": 8989,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "2381:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "6d154ea5",
+            "id": 8995,
+            "mutability": "mutable",
+            "name": "borrowGuardianPaused",
+            "nameLocation": "2450:20:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 8996,
+            "src": "2418:52:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+              "typeString": "mapping(address => bool)"
+            },
+            "typeName": {
+              "id": 8994,
+              "keyType": {
+                "id": 8992,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "2426:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "2418:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_bool_$",
+                "typeString": "mapping(address => bool)"
+              },
+              "valueType": {
+                "id": 8993,
+                "name": "bool",
+                "nodeType": "ElementaryTypeName",
+                "src": "2437:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_bool",
+                  "typeString": "bool"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "967:1506:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 8997,
+              "name": "ComptrollerV2Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 8996,
+              "src": "2508:20:6"
+            },
+            "id": 8998,
+            "nodeType": "InheritanceSpecifier",
+            "src": "2508:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9050,
+        "linearizedBaseContracts": [
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV3Storage",
+        "nameLocation": "2484:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ComptrollerV3Storage.CompMarketState",
+            "id": 9005,
+            "members": [
+              {
+                "constant": false,
+                "id": 9001,
+                "mutability": "mutable",
+                "name": "index",
+                "nameLocation": "2657:5:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 9005,
+                "src": "2649:13:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint224",
+                  "typeString": "uint224"
+                },
+                "typeName": {
+                  "id": 9000,
+                  "name": "uint224",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2649:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint224",
+                    "typeString": "uint224"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 9004,
+                "mutability": "mutable",
+                "name": "block",
+                "nameLocation": "2747:5:6",
+                "nodeType": "VariableDeclaration",
+                "scope": 9005,
+                "src": "2740:12:6",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint32",
+                  "typeString": "uint32"
+                },
+                "typeName": {
+                  "id": 9003,
+                  "name": "uint32",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "2740:6:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint32",
+                    "typeString": "uint32"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "CompMarketState",
+            "nameLocation": "2542:15:6",
+            "nodeType": "StructDefinition",
+            "scope": 9050,
+            "src": "2535:224:6",
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9006,
+              "nodeType": "StructuredDocumentation",
+              "src": "2765:33:6",
+              "text": "@notice A list of all markets"
+            },
+            "functionSelector": "52d84d1e",
+            "id": 9010,
+            "mutability": "mutable",
+            "name": "allMarkets",
+            "nameLocation": "2819:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "2803:26:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage",
+              "typeString": "contract CToken[]"
+            },
+            "typeName": {
+              "baseType": {
+                "id": 9008,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9007,
+                  "name": "CToken",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 4127,
+                  "src": "2803:6:6"
+                },
+                "referencedDeclaration": 4127,
+                "src": "2803:6:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_contract$_CToken_$4127",
+                  "typeString": "contract CToken"
+                }
+              },
+              "id": 9009,
+              "nodeType": "ArrayTypeName",
+              "src": "2803:8:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_array$_t_contract$_CToken_$4127_$dyn_storage_ptr",
+                "typeString": "contract CToken[]"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9011,
+              "nodeType": "StructuredDocumentation",
+              "src": "2836:70:6",
+              "text": "@notice The rate at which the flywheel distributes COMP, per block"
+            },
+            "functionSelector": "aa900754",
+            "id": 9013,
+            "mutability": "mutable",
+            "name": "compRate",
+            "nameLocation": "2923:8:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "2911:20:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint256",
+              "typeString": "uint256"
+            },
+            "typeName": {
+              "id": 9012,
+              "name": "uint",
+              "nodeType": "ElementaryTypeName",
+              "src": "2911:4:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint256",
+                "typeString": "uint256"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9014,
+              "nodeType": "StructuredDocumentation",
+              "src": "2938:71:6",
+              "text": "@notice The portion of compRate that each market currently receives"
+            },
+            "functionSelector": "1d7b33d7",
+            "id": 9018,
+            "mutability": "mutable",
+            "name": "compSpeeds",
+            "nameLocation": "3046:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3014:42:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9017,
+              "keyType": {
+                "id": 9015,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3022:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3014:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9016,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "3033:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9019,
+              "nodeType": "StructuredDocumentation",
+              "src": "3063:56:6",
+              "text": "@notice The COMP market supply state for each market"
+            },
+            "functionSelector": "6b79c38d",
+            "id": 9024,
+            "mutability": "mutable",
+            "name": "compSupplyState",
+            "nameLocation": "3167:15:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3124:58:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+            },
+            "typeName": {
+              "id": 9023,
+              "keyType": {
+                "id": 9020,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3132:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3124:35:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+              },
+              "valueType": {
+                "id": 9022,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9021,
+                  "name": "CompMarketState",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 9005,
+                  "src": "3143:15:6"
+                },
+                "referencedDeclaration": 9005,
+                "src": "3143:15:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_CompMarketState_$9005_storage_ptr",
+                  "typeString": "struct ComptrollerV3Storage.CompMarketState"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9025,
+              "nodeType": "StructuredDocumentation",
+              "src": "3189:56:6",
+              "text": "@notice The COMP market borrow state for each market"
+            },
+            "functionSelector": "8c57804e",
+            "id": 9030,
+            "mutability": "mutable",
+            "name": "compBorrowState",
+            "nameLocation": "3293:15:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3250:58:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+              "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+            },
+            "typeName": {
+              "id": 9029,
+              "keyType": {
+                "id": 9026,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3258:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3250:35:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_struct$_CompMarketState_$9005_storage_$",
+                "typeString": "mapping(address => struct ComptrollerV3Storage.CompMarketState)"
+              },
+              "valueType": {
+                "id": 9028,
+                "nodeType": "UserDefinedTypeName",
+                "pathNode": {
+                  "id": 9027,
+                  "name": "CompMarketState",
+                  "nodeType": "IdentifierPath",
+                  "referencedDeclaration": 9005,
+                  "src": "3269:15:6"
+                },
+                "referencedDeclaration": 9005,
+                "src": "3269:15:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_struct$_CompMarketState_$9005_storage_ptr",
+                  "typeString": "struct ComptrollerV3Storage.CompMarketState"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9031,
+              "nodeType": "StructuredDocumentation",
+              "src": "3315:105:6",
+              "text": "@notice The COMP borrow index for each market for each supplier as of the last time they accrued COMP"
+            },
+            "functionSelector": "b21be7fd",
+            "id": 9037,
+            "mutability": "mutable",
+            "name": "compSupplierIndex",
+            "nameLocation": "3477:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3425:69:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+              "typeString": "mapping(address => mapping(address => uint256))"
+            },
+            "typeName": {
+              "id": 9036,
+              "keyType": {
+                "id": 9032,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3433:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3425:44:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+                "typeString": "mapping(address => mapping(address => uint256))"
+              },
+              "valueType": {
+                "id": 9035,
+                "keyType": {
+                  "id": 9033,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3452:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "3444:24:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                  "typeString": "mapping(address => uint256)"
+                },
+                "valueType": {
+                  "id": 9034,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3463:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9038,
+              "nodeType": "StructuredDocumentation",
+              "src": "3501:105:6",
+              "text": "@notice The COMP borrow index for each market for each borrower as of the last time they accrued COMP"
+            },
+            "functionSelector": "ca0af043",
+            "id": 9044,
+            "mutability": "mutable",
+            "name": "compBorrowerIndex",
+            "nameLocation": "3663:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3611:69:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+              "typeString": "mapping(address => mapping(address => uint256))"
+            },
+            "typeName": {
+              "id": 9043,
+              "keyType": {
+                "id": 9039,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3619:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3611:44:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_mapping$_t_address_$_t_uint256_$_$",
+                "typeString": "mapping(address => mapping(address => uint256))"
+              },
+              "valueType": {
+                "id": 9042,
+                "keyType": {
+                  "id": 9040,
+                  "name": "address",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3638:7:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  }
+                },
+                "nodeType": "Mapping",
+                "src": "3630:24:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                  "typeString": "mapping(address => uint256)"
+                },
+                "valueType": {
+                  "id": 9041,
+                  "name": "uint",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "3649:4:6",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9045,
+              "nodeType": "StructuredDocumentation",
+              "src": "3687:65:6",
+              "text": "@notice The COMP accrued but not yet transferred to each user"
+            },
+            "functionSelector": "cc7ebdc4",
+            "id": 9049,
+            "mutability": "mutable",
+            "name": "compAccrued",
+            "nameLocation": "3789:11:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9050,
+            "src": "3757:43:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9048,
+              "keyType": {
+                "id": 9046,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "3765:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "3757:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9047,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "3776:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "2475:1328:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 9051,
+              "name": "ComptrollerV3Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 9050,
+              "src": "3838:20:6"
+            },
+            "id": 9052,
+            "nodeType": "InheritanceSpecifier",
+            "src": "3838:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9059,
+        "linearizedBaseContracts": [
+          9059,
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV4Storage",
+        "nameLocation": "3814:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "functionSelector": "21af4569",
+            "id": 9054,
+            "mutability": "mutable",
+            "name": "borrowCapGuardian",
+            "nameLocation": "4035:17:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9059,
+            "src": "4020:32:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_address",
+              "typeString": "address"
+            },
+            "typeName": {
+              "id": 9053,
+              "name": "address",
+              "nodeType": "ElementaryTypeName",
+              "src": "4020:7:6",
+              "stateMutability": "nonpayable",
+              "typeDescriptions": {
+                "typeIdentifier": "t_address",
+                "typeString": "address"
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "functionSelector": "4a584432",
+            "id": 9058,
+            "mutability": "mutable",
+            "name": "borrowCaps",
+            "nameLocation": "4228:10:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9059,
+            "src": "4196:42:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9057,
+              "keyType": {
+                "id": 9055,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4204:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4196:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9056,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4215:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "3805:436:6",
+        "usedErrors": []
+      },
+      {
+        "abstract": false,
+        "baseContracts": [
+          {
+            "baseName": {
+              "id": 9060,
+              "name": "ComptrollerV4Storage",
+              "nodeType": "IdentifierPath",
+              "referencedDeclaration": 9059,
+              "src": "4276:20:6"
+            },
+            "id": 9061,
+            "nodeType": "InheritanceSpecifier",
+            "src": "4276:20:6"
+          }
+        ],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 9072,
+        "linearizedBaseContracts": [
+          9072,
+          9059,
+          9050,
+          8996,
+          8951
+        ],
+        "name": "ComptrollerV5Storage",
+        "nameLocation": "4252:20:6",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9062,
+              "nodeType": "StructuredDocumentation",
+              "src": "4303:72:6",
+              "text": "@notice The portion of COMP that each contributor receives per block"
+            },
+            "functionSelector": "986ab838",
+            "id": 9066,
+            "mutability": "mutable",
+            "name": "compContributorSpeeds",
+            "nameLocation": "4412:21:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9072,
+            "src": "4380:53:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9065,
+              "keyType": {
+                "id": 9063,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4388:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4380:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9064,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4399:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          },
+          {
+            "constant": false,
+            "documentation": {
+              "id": 9067,
+              "nodeType": "StructuredDocumentation",
+              "src": "4440:80:6",
+              "text": "@notice Last block at which a contributor's COMP rewards have been allocated"
+            },
+            "functionSelector": "bea6b8b8",
+            "id": 9071,
+            "mutability": "mutable",
+            "name": "lastContributorBlock",
+            "nameLocation": "4557:20:6",
+            "nodeType": "VariableDeclaration",
+            "scope": 9072,
+            "src": "4525:52:6",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+              "typeString": "mapping(address => uint256)"
+            },
+            "typeName": {
+              "id": 9070,
+              "keyType": {
+                "id": 9068,
+                "name": "address",
+                "nodeType": "ElementaryTypeName",
+                "src": "4533:7:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_address",
+                  "typeString": "address"
+                }
+              },
+              "nodeType": "Mapping",
+              "src": "4525:24:6",
+              "typeDescriptions": {
+                "typeIdentifier": "t_mapping$_t_address_$_t_uint256_$",
+                "typeString": "mapping(address => uint256)"
+              },
+              "valueType": {
+                "id": 9069,
+                "name": "uint",
+                "nodeType": "ElementaryTypeName",
+                "src": "4544:4:6",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                }
+              }
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 9073,
+        "src": "4243:338:6",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:4550:6"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.7+commit.e28d00a7.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-09-13T09:29:53.825Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "stateVariables": {
+      "markets": {
+        "details": "Used e.g. to determine if a market is supported"
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "accountAssets(address,uint256)": {
+        "notice": "Per-account mapping of \"assets you are in\", capped by maxAssets"
+      },
+      "accountMembership(address,address)": {
+        "notice": "Per-market mapping of \"accounts in this asset\""
+      },
+      "admin()": {
+        "notice": "Administrator for this contract"
+      },
+      "closeFactorMantissa()": {
+        "notice": "Multiplier used to calculate the maximum repayAmount when liquidating a borrow"
+      },
+      "liquidationIncentiveMantissa()": {
+        "notice": "Multiplier representing the discount on collateral that a liquidator receives"
+      },
+      "markets(address)": {
+        "notice": "Official mapping of cTokens -> Market metadata"
+      },
+      "maxAssets()": {
+        "notice": "Max number of assets a single account can participate in (borrow or use as collateral)"
+      },
+      "oracle()": {
+        "notice": "Oracle which gives the price of any given asset"
+      },
+      "pauseGuardian()": {
+        "notice": "The Pause Guardian can pause certain actions as a safety mechanism.  Actions which allow users to remove their own assets cannot be paused.  Liquidation / seizing / transfer can only be paused globally, not by market."
+      }
+    },
+    "version": 1
+  }
+}

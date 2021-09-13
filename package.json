@@ -1,0 +1,54 @@
+{
+  "name": "bonded",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test --network test",
+    "full-test": "concurrently --kill-others \"npm run ganache\" \"npm run test\"",
+    "full-test-rinkeby": "concurrently --kill-others \"npm run ganacherinkeby\" \"npm run testrinkeby\"",
+    "full-test-supplyrinkeby": "concurrently --kill-others \"npm run ganacherinkeby\" \"truffle test test/supplyRinkeby.test.js --network testrinkeby\"",
+    "full-migrate-rinkeby": "concurrently --kill-others \"npm run ganacherinkeby\" \"npm run migratetestrinkeby\"",
+    "compile": "truffle compile",
+    "remixd": "remixd -s ./contracts/ --remix-ide https://remix.ethereum.org",
+    "ganache": "ganache-cli --networkId 5777 -l 40000000 -q -f https://mainnet.infura.io/v3/dcf1709920134e81a97bca312360cc10 --defaultBalanceEther 10000000",
+    "ganachemainnet": "ganache-cli --networkId 5778 -l 40000000 -q -f https://mainnet.infura.io/v3/dcf1709920134e81a97bca312360cc10 --defaultBalanceEther 10000000 -m \"$(cat ./network_keys/deployMasterMnemonic)\"",
+    "ganacherinkeby": "ganache-cli --networkId 5779 -l 40000000 -q -f https://rinkeby.infura.io/v3/dcf1709920134e81a97bca312360cc10 --defaultBalanceEther 10000000 -m \"$(cat ./network_keys/deployMasterMnemonic)\"",
+    "ganachebsc": "ganache-cli -i 5777 -l 40000000 -q -f https://bsc-dataseed1.binance.org -e 10000 -a ${ACCOUNT_AMOUNT:-10}",
+    "migrate": "truffle migrate --network test --reset",
+    "migratetestmainnet": "truffle migrate --network testmainnet --reset",
+    "migratetestrinkeby": "truffle migrate --network testrinkeby --reset",
+    "testmainnet": "truffle test test/primaryIndexToken.mainnet.test.js --network testmainnet",
+    "testrinkeby": "truffle test test/primaryIndexToken.rinkeby.test.js --network testrinkeby",
+    "upgratemainnet": "truffle migrate -f 5 --to 5 --network testmainnet",
+    "upgraterinkeby": "truffle migrate -f 5 --to 5 --network testrinkeby"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@chainlink/contracts": "^0.1.7",
+    "@openzeppelin/contracts": "^4.1.0",
+    "@openzeppelin/contracts-upgradeable": "^4.1.0",
+    "@remix-project/remixd": "^0.5.1",
+    "bn-chai": "^1.0.1",
+    "chai": "^4.3.4",
+    "ganache-cli": "^6.12.2",
+    "js-big-decimal": "^1.3.4",
+    "log4js": "^6.3.0",
+    "openzeppelin-test-helpers": "^0.5.1",
+    "truffle": "^5.3.8",
+    "truffle-assertions": "^0.9.2",
+    "truffle-privatekey-provider": "^1.5.0",
+    "tslib": "^2.2.0",
+    "web3": "^1.3.6"
+  },
+  "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.4.0",
+    "chai-bignumber": "^3.0.0",
+    "chai-match": "^1.1.1",
+    "concurrently": "^6.2.0"
+  }
+}

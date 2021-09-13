@@ -1,0 +1,1138 @@
+{
+  "contractName": "ICPrimaryIndexToken",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "minter",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "mintAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mintTo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "err",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "mintedAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "redeemer",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "redeemTokens",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeemTo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "redeemAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "redeemUnderlyingTo",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"minter\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"mintAmount\",\"type\":\"uint256\"}],\"name\":\"mintTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"err\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"mintedAmount\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"redeemer\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"redeemTokens\",\"type\":\"uint256\"}],\"name\":\"redeemTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"redeemAmount\",\"type\":\"uint256\"}],\"name\":\"redeemUnderlyingTo\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"balanceOf(address)\":{\"params\":{\"owner\":\"The address of the account to query\"},\"returns\":{\"_0\":\"The number of tokens owned by `owner`\"}},\"mintTo(address,uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"mintAmount\":\"The amount of the underlying asset to supply to minter return uint 0=success, otherwise a failure (see ErrorReporter.sol for details) return uint minted amount\",\"minter\":\"the address of account which earn liquidity\"}},\"redeemTo(address,uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"redeemTokens\":\"The number of cTokens to redeem into underlying\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}},\"redeemUnderlyingTo(uint256)\":{\"details\":\"Accrues interest whether or not the operation succeeds, unless reverted\",\"params\":{\"redeemAmount\":\"The amount of underlying to redeem\"},\"returns\":{\"_0\":\"uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\"}}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"balanceOf(address)\":{\"notice\":\"Get the token balance of the `owner`\"},\"mintTo(address,uint256)\":{\"notice\":\"Sender supplies assets into the market and receives cTokens in exchange\"},\"redeemTo(address,uint256)\":{\"notice\":\"Sender redeems cTokens in exchange for the underlying asset\"},\"redeemUnderlyingTo(uint256)\":{\"notice\":\"Sender redeems cTokens in exchange for a specified amount of underlying asset\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICPrimaryIndexToken.sol\":\"ICPrimaryIndexToken\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":250},\"remappings\":[]},\"sources\":{\"/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICPrimaryIndexToken.sol\":{\"keccak256\":\"0x4dbcd2789063c9b3c1808f8d7718baa2bf914e68eca21818a1a7843fdb1cfc91\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://8ca447dbe8f0e8a4e904ceaec644ce0d703813136a65189f748d926e352adeb1\",\"dweb:/ipfs/QmRtSPBZKQinXGY3p2Wma4stBAY25Pd3fqmoMsH9quDmuy\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0;\n\n\ninterface ICPrimaryIndexToken{\n    \n\n    /**\n     * @notice Sender supplies assets into the market and receives cTokens in exchange\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param minter the address of account which earn liquidity\n     * @param mintAmount The amount of the underlying asset to supply to minter\n     * return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     * return uint minted amount\n     */\n    function mintTo(address minter, uint mintAmount) external returns (uint err, uint mintedAmount);\n\n    /**\n     * @notice Sender redeems cTokens in exchange for the underlying asset\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param redeemTokens The number of cTokens to redeem into underlying\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function redeemTo(address redeemer, uint redeemTokens) external returns (uint);\n\n    /**\n     * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n     * @dev Accrues interest whether or not the operation succeeds, unless reverted\n     * @param redeemAmount The amount of underlying to redeem\n     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n     */\n    function redeemUnderlyingTo(uint redeemAmount) external returns (uint);\n\n   \n     /**\n     * @notice Get the token balance of the `owner`\n     * @param owner The address of the account to query\n     * @return The number of tokens owned by `owner`\n     */\n    function balanceOf(address owner) external view returns (uint256);\n\n    // /**\n    //  * @notice Get the underlying balance of the `owner`\n    //  * @dev This also accrues interest in a transaction\n    //  * @param owner The address of the account to query\n    //  * @return The amount of underlying owned by `owner`\n    //  */\n    // function accountTokens(address owner) external returns (uint);\n    \n    \n}\n",
+  "sourcePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICPrimaryIndexToken.sol",
+  "ast": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICPrimaryIndexToken.sol",
+    "exportedSymbols": {
+      "ICPrimaryIndexToken": [
+        13796
+      ]
+    },
+    "id": 13797,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 13757,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:21"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 13796,
+        "linearizedBaseContracts": [
+          13796
+        ],
+        "name": "ICPrimaryIndexToken",
+        "nameLocation": "69:19:21",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 13758,
+              "nodeType": "StructuredDocumentation",
+              "src": "100:446:21",
+              "text": " @notice Sender supplies assets into the market and receives cTokens in exchange\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param minter the address of account which earn liquidity\n @param mintAmount The amount of the underlying asset to supply to minter\n return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n return uint minted amount"
+            },
+            "functionSelector": "449a52f8",
+            "id": 13769,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintTo",
+            "nameLocation": "560:6:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13763,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13760,
+                  "mutability": "mutable",
+                  "name": "minter",
+                  "nameLocation": "575:6:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "567:14:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13759,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "567:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13762,
+                  "mutability": "mutable",
+                  "name": "mintAmount",
+                  "nameLocation": "588:10:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "583:15:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13761,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "583:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "566:33:21"
+            },
+            "returnParameters": {
+              "id": 13768,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13765,
+                  "mutability": "mutable",
+                  "name": "err",
+                  "nameLocation": "623:3:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "618:8:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13764,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "618:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13767,
+                  "mutability": "mutable",
+                  "name": "mintedAmount",
+                  "nameLocation": "633:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "628:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13766,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "628:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "617:29:21"
+            },
+            "scope": 13796,
+            "src": "551:96:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13770,
+              "nodeType": "StructuredDocumentation",
+              "src": "653:332:21",
+              "text": " @notice Sender redeems cTokens in exchange for the underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemTokens The number of cTokens to redeem into underlying\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "2f7605fb",
+            "id": 13779,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemTo",
+            "nameLocation": "999:8:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13775,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13772,
+                  "mutability": "mutable",
+                  "name": "redeemer",
+                  "nameLocation": "1016:8:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1008:16:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13771,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1008:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13774,
+                  "mutability": "mutable",
+                  "name": "redeemTokens",
+                  "nameLocation": "1031:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1026:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13773,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1026:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1007:37:21"
+            },
+            "returnParameters": {
+              "id": 13778,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13777,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1063:4:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13776,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1063:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1062:6:21"
+            },
+            "scope": 13796,
+            "src": "990:79:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13780,
+              "nodeType": "StructuredDocumentation",
+              "src": "1075:337:21",
+              "text": " @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemAmount The amount of underlying to redeem\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "0508b57d",
+            "id": 13787,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemUnderlyingTo",
+            "nameLocation": "1426:18:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13783,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13782,
+                  "mutability": "mutable",
+                  "name": "redeemAmount",
+                  "nameLocation": "1450:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13787,
+                  "src": "1445:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13781,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1445:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1444:19:21"
+            },
+            "returnParameters": {
+              "id": 13786,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13785,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13787,
+                  "src": "1482:4:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13784,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1482:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1481:6:21"
+            },
+            "scope": 13796,
+            "src": "1417:71:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13788,
+              "nodeType": "StructuredDocumentation",
+              "src": "1499:172:21",
+              "text": " @notice Get the token balance of the `owner`\n @param owner The address of the account to query\n @return The number of tokens owned by `owner`"
+            },
+            "functionSelector": "70a08231",
+            "id": 13795,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "balanceOf",
+            "nameLocation": "1685:9:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13791,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13790,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "1703:5:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13795,
+                  "src": "1695:13:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13789,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1695:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1694:15:21"
+            },
+            "returnParameters": {
+              "id": 13794,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13793,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13795,
+                  "src": "1733:7:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13792,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1733:7:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1732:9:21"
+            },
+            "scope": 13796,
+            "src": "1676:66:21",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 13797,
+        "src": "59:2026:21",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:2054:21"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ICPrimaryIndexToken.sol",
+    "exportedSymbols": {
+      "ICPrimaryIndexToken": [
+        13796
+      ]
+    },
+    "id": 13797,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 13757,
+        "literals": [
+          "solidity",
+          ">=",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:24:21"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "fullyImplemented": false,
+        "id": 13796,
+        "linearizedBaseContracts": [
+          13796
+        ],
+        "name": "ICPrimaryIndexToken",
+        "nameLocation": "69:19:21",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "documentation": {
+              "id": 13758,
+              "nodeType": "StructuredDocumentation",
+              "src": "100:446:21",
+              "text": " @notice Sender supplies assets into the market and receives cTokens in exchange\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param minter the address of account which earn liquidity\n @param mintAmount The amount of the underlying asset to supply to minter\n return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)\n return uint minted amount"
+            },
+            "functionSelector": "449a52f8",
+            "id": 13769,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "mintTo",
+            "nameLocation": "560:6:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13763,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13760,
+                  "mutability": "mutable",
+                  "name": "minter",
+                  "nameLocation": "575:6:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "567:14:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13759,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "567:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13762,
+                  "mutability": "mutable",
+                  "name": "mintAmount",
+                  "nameLocation": "588:10:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "583:15:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13761,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "583:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "566:33:21"
+            },
+            "returnParameters": {
+              "id": 13768,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13765,
+                  "mutability": "mutable",
+                  "name": "err",
+                  "nameLocation": "623:3:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "618:8:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13764,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "618:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13767,
+                  "mutability": "mutable",
+                  "name": "mintedAmount",
+                  "nameLocation": "633:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13769,
+                  "src": "628:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13766,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "628:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "617:29:21"
+            },
+            "scope": 13796,
+            "src": "551:96:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13770,
+              "nodeType": "StructuredDocumentation",
+              "src": "653:332:21",
+              "text": " @notice Sender redeems cTokens in exchange for the underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemTokens The number of cTokens to redeem into underlying\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "2f7605fb",
+            "id": 13779,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemTo",
+            "nameLocation": "999:8:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13775,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13772,
+                  "mutability": "mutable",
+                  "name": "redeemer",
+                  "nameLocation": "1016:8:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1008:16:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13771,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1008:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 13774,
+                  "mutability": "mutable",
+                  "name": "redeemTokens",
+                  "nameLocation": "1031:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1026:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13773,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1026:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1007:37:21"
+            },
+            "returnParameters": {
+              "id": 13778,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13777,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13779,
+                  "src": "1063:4:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13776,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1063:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1062:6:21"
+            },
+            "scope": 13796,
+            "src": "990:79:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13780,
+              "nodeType": "StructuredDocumentation",
+              "src": "1075:337:21",
+              "text": " @notice Sender redeems cTokens in exchange for a specified amount of underlying asset\n @dev Accrues interest whether or not the operation succeeds, unless reverted\n @param redeemAmount The amount of underlying to redeem\n @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+            },
+            "functionSelector": "0508b57d",
+            "id": 13787,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "redeemUnderlyingTo",
+            "nameLocation": "1426:18:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13783,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13782,
+                  "mutability": "mutable",
+                  "name": "redeemAmount",
+                  "nameLocation": "1450:12:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13787,
+                  "src": "1445:17:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13781,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1445:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1444:19:21"
+            },
+            "returnParameters": {
+              "id": 13786,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13785,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13787,
+                  "src": "1482:4:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13784,
+                    "name": "uint",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1482:4:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1481:6:21"
+            },
+            "scope": 13796,
+            "src": "1417:71:21",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "external"
+          },
+          {
+            "documentation": {
+              "id": 13788,
+              "nodeType": "StructuredDocumentation",
+              "src": "1499:172:21",
+              "text": " @notice Get the token balance of the `owner`\n @param owner The address of the account to query\n @return The number of tokens owned by `owner`"
+            },
+            "functionSelector": "70a08231",
+            "id": 13795,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "balanceOf",
+            "nameLocation": "1685:9:21",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 13791,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13790,
+                  "mutability": "mutable",
+                  "name": "owner",
+                  "nameLocation": "1703:5:21",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13795,
+                  "src": "1695:13:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 13789,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1695:7:21",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1694:15:21"
+            },
+            "returnParameters": {
+              "id": 13794,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 13793,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 13795,
+                  "src": "1733:7:21",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 13792,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1733:7:21",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1732:9:21"
+            },
+            "scope": 13796,
+            "src": "1676:66:21",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "external"
+          }
+        ],
+        "scope": 13797,
+        "src": "59:2026:21",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:2054:21"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.7+commit.e28d00a7.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-09-12T12:56:37.376Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "balanceOf(address)": {
+        "params": {
+          "owner": "The address of the account to query"
+        },
+        "returns": {
+          "_0": "The number of tokens owned by `owner`"
+        }
+      },
+      "mintTo(address,uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "mintAmount": "The amount of the underlying asset to supply to minter return uint 0=success, otherwise a failure (see ErrorReporter.sol for details) return uint minted amount",
+          "minter": "the address of account which earn liquidity"
+        }
+      },
+      "redeemTo(address,uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "redeemTokens": "The number of cTokens to redeem into underlying"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      },
+      "redeemUnderlyingTo(uint256)": {
+        "details": "Accrues interest whether or not the operation succeeds, unless reverted",
+        "params": {
+          "redeemAmount": "The amount of underlying to redeem"
+        },
+        "returns": {
+          "_0": "uint 0=success, otherwise a failure (see ErrorReporter.sol for details)"
+        }
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "balanceOf(address)": {
+        "notice": "Get the token balance of the `owner`"
+      },
+      "mintTo(address,uint256)": {
+        "notice": "Sender supplies assets into the market and receives cTokens in exchange"
+      },
+      "redeemTo(address,uint256)": {
+        "notice": "Sender redeems cTokens in exchange for the underlying asset"
+      },
+      "redeemUnderlyingTo(uint256)": {
+        "notice": "Sender redeems cTokens in exchange for a specified amount of underlying asset"
+      }
+    },
+    "version": 1
+  }
+}
