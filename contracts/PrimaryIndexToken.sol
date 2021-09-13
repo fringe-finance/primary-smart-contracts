@@ -96,6 +96,8 @@ contract PrimaryIndexToken is Initializable,
 
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
 
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
+
     // event Liquidate(address indexed who, address indexed borrower, address indexed prjToken, uint256 amountPrjLiquidated);
 
 
@@ -291,7 +293,6 @@ contract PrimaryIndexToken is Initializable,
         emit Borrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken);
     }
 
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
 
     function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken) public {
         require(lendingTokenId < lendingTokens.length, "Primary Index Token: invalid lendingTokenId!");
