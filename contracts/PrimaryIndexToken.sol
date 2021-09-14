@@ -287,7 +287,7 @@ contract PrimaryIndexToken is Initializable,
         else{
             uint borrowError = ICLendingToken(cLendingToken).borrowTo(_msgSender(), amountLendingToken);
             require(borrowError == 0,"Primary Index Token: borrow error");
-            position.amountBorrowed = ICLendingToken(cLendingToken).borrowBalanceCurrent(_msgSender());//+= amountLendingToken;
+            position.amountBorrowed = ICLendingToken(cLendingToken).borrowBalanceCurrent(_msgSender());
         }
 
         emit Borrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken);
