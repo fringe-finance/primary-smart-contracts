@@ -1,0 +1,288 @@
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0xab8c7a6d682a5e45ef0b2978fa8c37a0e319744d38cf72bd16bad417edee6ff5
+   > Blocks: 1            Seconds: 9
+   > contract address:    0xD012c4726B0591160D81ea96c91c0424c6340544
+   > block number:        9287478
+   > block timestamp:     1631567108
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.172914842984476329
+   > gas used:            155222 (0x25e56)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00310444 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.00310444 ETH
+
+
+2_deploy_compound.js
+====================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+
+   Deploying 'ProxyAdmin'
+   ----------------------
+   > transaction hash:    0x12b9c7cb1df7c5f8b28d586eb26e904924deed362e2432e158684d9d994e54f2
+   > Blocks: 0            Seconds: 9
+   > contract address:    0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba
+   > block number:        9287480
+   > block timestamp:     1631567138
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.162485802984476329
+   > gas used:            475762 (0x74272)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00951524 ETH
+
+ProxyAdmin Address: 0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba
+
+   Deploying 'SimplePriceOracle'
+   -----------------------------
+   > transaction hash:    0xf5c7b698a877759f46380b9a50f1cf299abcbbcd19428250bbfc4fef9149ebb5
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea
+   > block number:        9287481
+   > block timestamp:     1631567153
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.155096702984476329
+   > gas used:            369455 (0x5a32f)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0073891 ETH
+
+SimplePriceOracle address: 0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea
+
+   Deploying 'JumpRateModelV2'
+   ---------------------------
+   > transaction hash:    0x2144e7938bc0a4301435beaf737c79388224ab81e68dc165b893f0cf1de4b009
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x8ADb2bb3292e8880C0E76Caa4DfFAe5e5F23f7BB
+   > block number:        9287482
+   > block timestamp:     1631567168
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.145550262984476329
+   > gas used:            477322 (0x7488a)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.00954644 ETH
+
+JumpRateModelV2 address: 0x8ADb2bb3292e8880C0E76Caa4DfFAe5e5F23f7BB
+
+   Deploying 'Comptroller'
+   -----------------------
+   > transaction hash:    0x4c08c51b1d35f2f2c8a09ca9c49f773406b79e90169bd20a75a7eaeafb9a8e05
+   > Blocks: 0            Seconds: 8
+   > contract address:    0xc0d5bF7623Bd1a9e6e551871Fd81572078E04347
+   > block number:        9287483
+   > block timestamp:     1631567183
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.051067382984476329
+   > gas used:            4724144 (0x4815b0)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.09448288 ETH
+
+Comptroller address: 0xc0d5bF7623Bd1a9e6e551871Fd81572078E04347
+
+   Deploying 'TransparentUpgradeableProxy'
+   ---------------------------------------
+   > transaction hash:    0xe384b1eed9bf907a6a9193c0b470dc5f95cb49b9ef2095a969ce8c1955f57579
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xC0f988FDa256C92cA28e78F4be85F711b5209945
+   > block number:        9287484
+   > block timestamp:     1631567198
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             189.039207222984476329
+   > gas used:            593008 (0x90c70)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01186016 ETH
+
+Comptroller Proxy Instance Address: 0xC0f988FDa256C92cA28e78F4be85F711b5209945
+Comproller called init at 0xC0f988FDa256C92cA28e78F4be85F711b5209945
+Price oracle set: 0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea
+Close factor set: 500000000000000000
+Liquidation incentive set: 1100000000000000000
+
+
+3_deploy_cUSDC.js
+=================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+
+   Deploying 'CUSDC'
+   -----------------
+   > transaction hash:    0xb763723d720a8c5197c6b94bf6b239492ddd24e1785b3a42d88b794d90710b3e
+   > Blocks: 1            Seconds: 12
+   > contract address:    0xc9A95070D08e9109261607c4249aBf59Dc5DdaF2
+   > block number:        9287520
+   > block timestamp:     1631567740
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.935653202984476329
+   > gas used:            4940094 (0x4b613e)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.09880188 ETH
+
+cUsdctest mastercopy address: 0xc9A95070D08e9109261607c4249aBf59Dc5DdaF2
+
+   Deploying 'TransparentUpgradeableProxy'
+   ---------------------------------------
+   > transaction hash:    0xcfefb1377eea5a79194a0f9e3ee33f3b72f6d3ed0f9441b9c36892f0fa428279
+   > Blocks: 1            Seconds: 8
+   > contract address:    0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2
+   > block number:        9287521
+   > block timestamp:     1631567755
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.923793042984476329
+   > gas used:            593008 (0x90c70)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01186016 ETH
+
+CUSDC Proxy Instance Address: 0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2
+CUSDC called init at 0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2
+Comptroller support market 0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2
+Collateral factor set: 500000000000000000
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.11066204 ETH
+
+4_deploy_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Deploying 'UniswapPathFinder'
+   -----------------------------
+   > transaction hash:    0xda7594075bf9fabfab42cb6303a8b956c12c26356fa53990ad26b18bc68b7ba8
+   > Blocks: 1            Seconds: 4
+   > contract address:    0xd075a63127219978D0e0bF408b5545bc94305DCD
+   > block number:        9287546
+   > block timestamp:     1631568131
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.890893862984476329
+   > gas used:            1079084 (0x10772c)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.02158168 ETH
+
+UniswapPathFinder master copy:  0xd075a63127219978D0e0bF408b5545bc94305DCD
+
+   Replacing 'TransparentUpgradeableProxy'
+   ---------------------------------------
+   > transaction hash:    0x4cd6f0c7b4abe2040fa855096f25999c24aeca7698b2c87800d18a95fca92863
+   > Blocks: 1            Seconds: 12
+   > contract address:    0x3B889826A30fc4d2AD2b609B207C53153b12EaE2
+   > block number:        9287547
+   > block timestamp:     1631568146
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.879033702984476329
+   > gas used:            593008 (0x90c70)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01186016 ETH
+
+UniswapPathFinder Proxy Instance Address: 0x3B889826A30fc4d2AD2b609B207C53153b12EaE2
+UniswapPathFinder: call initialize at 0x3B889826A30fc4d2AD2b609B207C53153b12EaE2
+
+   Deploying 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0x776af904c3e46b6f16529cd9e7f46755d2291b8d1d451331327c42c723cd4704
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x83EeDcF4DE563e530C96ca66f6Fb5912058982d9
+   > block number:        9287549
+   > block timestamp:     1631568176
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.800673282984476329
+   > gas used:            3777772 (0x39a4ec)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.07555544 ETH
+
+PrimaryIndexToken master copy: 0x83EeDcF4DE563e530C96ca66f6Fb5912058982d9
+
+   Replacing 'TransparentUpgradeableProxy'
+   ---------------------------------------
+   > transaction hash:    0x7920be405355fce152bffaee653064bc8145f7fbb434958f47f26ebf927551bb
+   > Blocks: 0            Seconds: 8
+   > contract address:    0xA33652B9d55a5c061316c2D1B749a1C98e51C001
+   > block number:        9287550
+   > block timestamp:     1631568191
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.788813122984476329
+   > gas used:            593008 (0x90c70)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01186016 ETH
+
+PrimaryIndexToken Proxy Instance Address: 0xA33652B9d55a5c061316c2D1B749a1C98e51C001
+Added prj token: 0x40EA2e5c5b2104124944282d8db39C5D13ac6770 with values:
+   Numerator:   8
+   Denominator: 10
+Added lending token: 0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A
+Added cLending token: 0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2
+Set comptroller: 0xC0f988FDa256C92cA28e78F4be85F711b5209945
+Set price oracle: 0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea
+
+5_deploy_cPrimaryIndexToken.js
+==============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+
+   Deploying 'CPrimaryIndexToken'
+   ------------------------------
+   > transaction hash:    0x8726e35a5c7c314746a4a5f1d5d80f8f38f8955740560e5b45e305ddd86e2e37
+   > Blocks: 1            Seconds: 8
+   > contract address:    0xbe484CE390E45Dd21a7b998Eb14CA024E3E4bddD
+   > block number:        9287628
+   > block timestamp:     1631569361
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.678019762984476329
+   > gas used:            4848024 (0x49f998)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.09696048 ETH
+
+cPrimaryIndexToken master copy address: 0xbe484CE390E45Dd21a7b998Eb14CA024E3E4bddD
+
+   Replacing 'TransparentUpgradeableProxy'
+   ---------------------------------------
+   > transaction hash:    0xd6793a93b5804fb8f2e3f55621e2de4ee67e3327b8027fd354b3512621a52bdd
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x188CbFa1b5403a6Bb5122A9c059b67eAD9E93369
+   > block number:        9287629
+   > block timestamp:     1631569376
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             188.666159602984476329
+   > gas used:            593008 (0x90c70)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.01186016 ETH
+
+cPrimaryIndexToken Proxy Instance Address: 0x188CbFa1b5403a6Bb5122A9c059b67eAD9E93369
+cPrimaryIndexToken called init at 0x188CbFa1b5403a6Bb5122A9c059b67eAD9E93369
+Comptroller support market 0x188CbFa1b5403a6Bb5122A9c059b67eAD9E93369
+Collateral factor set: 1000000000000000000
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.10882064 ETH
+
+
+Summary
+=======
+> Total deployments:   2
+> Final cost:          0.10882064 ETH
