@@ -20,7 +20,7 @@ module.exports = async function (deployer,network,accounts) {
     console.log("MODERATOR: "+moderator);
     console.log("SUPPLIER: "+supplier);
 
-    let proxyAdminAddress = ProxyAdmin.address;
+    let proxyAdminAddress = ProxyAdmin.address;'0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba';//
    
 
 //============================================================================
@@ -83,14 +83,15 @@ module.exports = async function (deployer,network,accounts) {
     if(network == 'testmainnet' || network == 'mainnet' || network == 'mainnet-fork'){
     }
     if(network == 'testrinkeby' || network == 'rinkeby'|| network == 'rinkeby-fork'){
+        //look at ProxyAdmin address!!!!
         basicTokenAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
         uniswapPathFinderAddress = uniswapPathFinderProxyAddress;
         moderator = deployMaster;
         trustedForwarder = '0x83A54884bE4657706785D7309cf46B58FE5f6e8a';
-        cUsdcAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;
-        comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;
-        cBasicTokenAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;
-        priceOracleAddress = SimplePriceOracle.address
+        cUsdcAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;'0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2';//
+        comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;//'0xC0f988FDa256C92cA28e78F4be85F711b5209945';//
+        cBasicTokenAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;//'0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2';//
+        priceOracleAddress = SimplePriceOracle.address;//'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
 
         let PRJsAddresses = [
             '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
@@ -100,15 +101,21 @@ module.exports = async function (deployer,network,accounts) {
             '0x37a7D483d2dfe97d0C00cEf6F257e25d321e6D4e',//PRJ5
             '0x16E2f279A9BabD4CE133745DdA69C910CBe2e490' //PRJ6
             ];
-        let lvrNumerator = new BN(8);
+        let lvrNumerator = new BN(6);
         let lvrDenominator = new BN(10);
         let ltfNumerator = new BN(12);
         let ltfDenominator = new BN(10);
+        let saleNumerator = new BN(8);
+        let saleDenominator = new BN(10);
 
         await primaryIndexToken.init(basicTokenAddress, uniswapPathFinderAddress, moderator, trustedForwarder, {from:deployMaster});
 
         for(var i = 0; i < 1/*PRJsAddresses.length*/; i++){
-            await primaryIndexToken.addPrjToken(PRJsAddresses[i],lvrNumerator,lvrDenominator,ltfNumerator,ltfDenominator,{from:deployMaster});
+            await primaryIndexToken.addPrjToken(PRJsAddresses[i],
+                                                lvrNumerator,lvrDenominator,
+                                                ltfNumerator,ltfDenominator,
+                                                saleNumerator,saleDenominator,
+                                                {from:deployMaster});
             console.log("Added prj token: "+PRJsAddresses[i]+" with values:");
             console.log("   Numerator:   "+lvrNumerator);
             console.log("   Denominator: "+lvrDenominator);

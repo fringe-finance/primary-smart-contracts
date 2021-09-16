@@ -23,15 +23,16 @@ module.exports = async function (deployer,network,accounts) {
     if(network == 'testrinkeby' || network == 'rinkeby' || network == 'rinkeby-fork'){
 
         let usdctestAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;
-        let jumpRateModelAddress = JumpRateModelV2.address; // 
-        let simplePriceOracleAddress = SimplePriceOracle.address; //
+        let proxyAdminAddress = ProxyAdmin.address;//'0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba';//
+        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;//'0xC0f988FDa256C92cA28e78F4be85F711b5209945';//
+        let jumpRateModelAddress = JumpRateModelV2.address; // '0x8ADb2bb3292e8880C0E76Caa4DfFAe5e5F23f7BB';//
+        let simplePriceOracleAddress = SimplePriceOracle.address; //'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
         let initialExchangeRateMantissa = multiplier18;
         let name = "cUSDC Test Token";
         let symbol = "cUSDCTest";
         let decimals = new BN(8);
         let admin = deployMaster;
-        let proxyAdminAddress = ProxyAdmin.address;
+       
 
         let cUsdcMasterCopyAddress;
         await deployer.deploy(CUSDC,{from:deployMaster}).then(function (instance) {
@@ -47,7 +48,7 @@ module.exports = async function (deployer,network,accounts) {
                                 {from:deployMaster})
             .then(function(instance){
                 cUsdcProxyAddress = instance.address;
-                console.log ("Comptroller Proxy Instance Address: "+ instance.address);
+                console.log ("CUSDC Proxy Instance Address: "+ instance.address);
                 
         });
         
