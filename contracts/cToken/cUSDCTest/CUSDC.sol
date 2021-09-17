@@ -5,11 +5,6 @@ import "../CErc20.sol";
 import "../../interfaces/IComptroller.sol";
 import "../../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-/**
- * @title Compound's CErc20Delegate Contract
- * @notice CTokens which wrap an EIP-20 underlying and are delegated to
- * @author Compound
- */
 contract CUSDC is Initializable, CErc20{
 
     address public primaryIndexToken;
