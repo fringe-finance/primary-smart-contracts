@@ -32,6 +32,28 @@ module.exports = async function (deployer,network,accounts) {
         console.log("SimplePriceOracle address: "+instance.address);
     });
 
+    let simplePriceOracleProxyAddress;   
+    await deployer.deploy(  TransparentUpgradeableProxy,
+                            simplePriceOracleAddress, 
+                            proxyAdminAddress,
+                            web3.utils.hexToBytes('0x'),
+                            {from:deployMaster})
+        .then(function(instance){
+            console.log ("simplePriceOracle Proxy Instance Address: "+ instance.address);
+            simplePriceOracleProxyAddress = instance.address;
+    }); 
+
+    let simplePriceOracle = await SimplePriceOracle.at(simplePriceOracleProxyAddress);
+    await simplePriceOracle.init({from:deployMaster}).then(function(){
+        console.log("simple price oracle called init at "+simplePriceOracleProxyAddress);
+    })
+
+    const simplePriceOracleProxyAddress_data = {
+        "simplePriceOracleProxyAddress":simplePriceOracleProxyAddress
+    }
+    fs.writeFileSync('migrations/simplePriceOracleProxyAddress.json', JSON.stringify(simplePriceOracleProxyAddress_data, null, '\t'));
+    
+
 //=========================================================
 
     //parametrs from cAAVE interest model https://etherscan.io/address/0xd956188795ca6f4a74092ddca33e0ea4ca3a1395#readContract
@@ -95,7 +117,7 @@ module.exports = async function (deployer,network,accounts) {
         console.log("Comproller called init at "+comptrollerProxyAddress);
     });
 
-    await comptroller._setPriceOracle(simplePriceOracleAddress,{from:deployMaster}).then(function(){
+    await comptroller._setPriceOracle(simplePriceOracleProxyAddress,{from:deployMaster}).then(function(){
         console.log("Price oracle set: "+simplePriceOracleAddress);
     });
 

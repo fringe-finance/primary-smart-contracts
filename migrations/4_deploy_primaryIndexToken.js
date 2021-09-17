@@ -91,7 +91,7 @@ module.exports = async function (deployer,network,accounts) {
         cUsdcAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;'0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2';//
         comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;//'0xC0f988FDa256C92cA28e78F4be85F711b5209945';//
         cBasicTokenAddress = JSON.parse(fs.readFileSync('migrations/cUsdcProxyAddress.json', 'utf8')).cUsdcProxyAddress;//'0x644cDD9A9eE9080F693ea6f3BcFEc7D1bD5972D2';//
-        priceOracleAddress = SimplePriceOracle.address;//'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
+        priceOracleAddress = JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress;;//'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
 
         let PRJsAddresses = [
             '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
