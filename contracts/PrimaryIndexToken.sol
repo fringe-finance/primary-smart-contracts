@@ -105,7 +105,7 @@ contract PrimaryIndexToken is Initializable,
 
     event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
 
-    // event Liquidate(address indexed who, address indexed borrower, address indexed prjToken, uint256 amountPrjLiquidated);
+    event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
 
     function init(address _basicToken, address _uniswapPathFinder, address _moderator, address _trustedForwarder) public initializer{
@@ -391,6 +391,8 @@ contract PrimaryIndexToken is Initializable,
             prjPosition.amountPrjDeposited -= prjDeposited;
             borrowPosition.amountBorrowed = 0;
             borrowPosition.amountPit = 0;
+
+            emit Liquidate(_msgSender(),user,lendingTokenId,prjId,prjDeposited);
 
         }
 

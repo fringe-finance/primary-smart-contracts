@@ -56,6 +56,7 @@ abstract contract CToken is CTokenInterface, Exponential, TokenErrorReporter {
         _notEntered = true;
     }
 
+
     /**
      * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
      * @dev Called by both `transfer` and `transferFrom` internally

@@ -43,7 +43,6 @@ contract CUSDC is Initializable, CErc20{
     
 
     function mintTo(address minter, uint mintAmount) external onlyPrimaryIndexToken returns(uint err, uint mintedAmount){
-       //require(msg.sender == underlying,"cPrimaryIndexToken: only Primary Index Token can call mintTo!");
         uint error = accrueInterest();
         
         if (error != uint(Error.NO_ERROR)) {
@@ -58,7 +57,6 @@ contract CUSDC is Initializable, CErc20{
     }
 
      function redeemTo(address redeemer,uint redeemTokens) external onlyPrimaryIndexToken returns(uint redeemErr){
-        //require(msg.sender == getPrimaryIndexTokenAddress(),"cPrimaryIndexToken: only PrimaryIndexToken can call redeemTo!");
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
@@ -70,7 +68,6 @@ contract CUSDC is Initializable, CErc20{
     }
 
     function redeemUnderlyingTo(address redeemer, uint redeemAmount) external onlyPrimaryIndexToken returns(uint redeemUnderlyingError){
-        //require(msg.sender == getPrimaryIndexTokenAddress(),"cPrimaryIndexToken: only PrimaryIndexToken can call redeemUnderlyingTo!");
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
@@ -91,7 +88,6 @@ contract CUSDC is Initializable, CErc20{
     }
 
     function repayBorrowTo(address payer, uint repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
-        //require(msg.sender == getPrimaryIndexTokenAddress(),"cPrimaryIndexToken: only PrimaryIndexToken can call repayBorrowTo!");
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed

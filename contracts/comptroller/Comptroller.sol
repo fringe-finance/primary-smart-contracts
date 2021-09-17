@@ -125,7 +125,7 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
      * @param cTokens The list of addresses of the cToken markets to be enabled
      * @return Success indicator for whether each corresponding market was entered
      */
-    function enterMarkets(address[] memory cTokens) public returns (uint[] memory) {
+    function enterMarkets(address[] memory cTokens) public onlyPrimaryIndexToken returns (uint[] memory) {
         uint len = cTokens.length;
 
         uint[] memory results = new uint[](len);
@@ -143,7 +143,7 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
      * @param cToken The address of the cToken markets to be enabled
      * @param borrower The address of user, which enters to market
      */
-    function enterMarket(address cToken, address borrower) public /**onlyPrimaryIndexToken*/ returns(Error) {
+    function enterMarket(address cToken, address borrower) public onlyPrimaryIndexToken returns(Error) {
         return addToMarketInternal(CToken(cToken), borrower);
     }
 
@@ -186,7 +186,7 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
      * @param cTokenAddress The address of the asset to be removed
      * @return Whether or not the account successfully exited the market
      */
-    function exitMarket(address cTokenAddress) external override returns (uint) {
+    function exitMarket(address cTokenAddress) external onlyPrimaryIndexToken override returns (uint) {
         CToken cToken = CToken(cTokenAddress);
         /* Get sender tokensHeld and amountOwed underlying from the cToken */
         (uint oErr, uint tokensHeld, uint amountOwed, ) = cToken.getAccountSnapshot(msg.sender);
@@ -624,7 +624,7 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
      * @param transferTokens The number of cTokens to transfer
      * @return 0 if the transfer is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function transferAllowed(address cToken, address src, address dst, uint transferTokens) external override returns (uint) {
+    function transferAllowed(address cToken, address src, address dst, uint transferTokens) external onlyPrimaryIndexToken override returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!transferGuardianPaused, "transfer is paused");
 
@@ -650,7 +650,7 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
      * @param dst The account which receives the tokens
      * @param transferTokens The number of cTokens to transfer
      */
-    function transferVerify(address cToken, address src, address dst, uint transferTokens) external override {
+    function transferVerify(address cToken, address src, address dst, uint transferTokens) external onlyPrimaryIndexToken override {
         // Shh - currently unused
         cToken;
         src;

@@ -259,18 +259,18 @@ abstract contract CErc20Interface is CErc20Storage {
 
     /*** User Interface ***/
 
-    function mint(uint mintAmount) external virtual  returns (uint);
-    //function mintTo(address minter,uint mintAmount) external virtual  returns (uint);
-    function redeem(uint redeemTokens) external  virtual returns (uint);
-    //function redeemTo(address redeemer,uint mintAmount) external virtual  returns (uint);
-    function redeemUnderlying(uint redeemAmount) external virtual  returns (uint);
-    //function redeemUnderlyingTo(uint redeemAmount) external virtual  returns (uint);
-    function borrow(uint borrowAmount) external  virtual returns (uint);
-    //function borrowTo(address borrower, uint redeemAmount) external virtual  returns (uint);
-    function repayBorrow(uint repayAmount) external  virtual returns (uint);
-    //function repayBorrow(address borrower, uint repayAmount) external  virtual returns (uint);
-    function repayBorrowBehalf(address borrower, uint repayAmount) external virtual  returns (uint);
-    function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) external  virtual returns (uint);
+    // function mint(uint mintAmount) external virtual  returns (uint);
+    // //function mintTo(address minter,uint mintAmount) external virtual  returns (uint);
+    // function redeem(uint redeemTokens) external  virtual returns (uint);
+    // //function redeemTo(address redeemer,uint mintAmount) external virtual  returns (uint);
+    // function redeemUnderlying(uint redeemAmount) external virtual  returns (uint);
+    // //function redeemUnderlyingTo(uint redeemAmount) external virtual  returns (uint);
+    // function borrow(uint borrowAmount) external  virtual returns (uint);
+    // //function borrowTo(address borrower, uint redeemAmount) external virtual  returns (uint);
+    // function repayBorrow(uint repayAmount) external  virtual returns (uint);
+    // //function repayBorrow(address borrower, uint repayAmount) external  virtual returns (uint);
+    //function repayBorrowBehalf(address borrower, uint repayAmount) external virtual  returns (uint);
+    //function liquidateBorrow(address borrower, uint repayAmount, CTokenInterface cTokenCollateral) external  virtual returns (uint);
     function sweepToken(EIP20NonStandardInterface token) external virtual ;
 
 
