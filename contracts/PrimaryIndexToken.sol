@@ -73,8 +73,6 @@ contract PrimaryIndexToken is Initializable,
 
     struct UserPrjPosition{
         uint256 amountPrjDeposited;
-        //uint256 amountPrjCollateral;
-        //amountPrjDeposited + amountPrjCollateral = const
     }
 
     struct UserBorrowPosition{
@@ -298,7 +296,6 @@ contract PrimaryIndexToken is Initializable,
 
     //event Test2(uint currentBalancePitOfMsgSender,uint liquidity, uint borrowError, uint amountBorrowed);
 
-
     function borrow(uint256 lendingTokenId, uint256 amountLendingToken) public {
         require(lendingTokenId < lendingTokens.length, "Primary Index Token: invalid lendingTokenId!");
         require(amountLendingToken > 0, "Primary Index Token: amountLendingToken should be greated than zero!");
@@ -345,7 +342,6 @@ contract PrimaryIndexToken is Initializable,
         if(amountLendingToken == ((2 ** 256) - 1)){
             position.amountBorrowed = 0;
             position.amountPit = 0;
-
         }
         else{
             position.amountBorrowed = ICLendingToken(cLendingToken).borrowBalanceCurrent(_msgSender());
@@ -354,9 +350,9 @@ contract PrimaryIndexToken is Initializable,
        
     }
 
-    event Test3(uint amoutLendingTokenToReceive, uint amountBorrowed);
+    //event Test3(uint amoutLendingTokenToReceive, uint amountBorrowed);
 
-    function liquidate(address user, uint lendingTokenId, uint prjId/** , uint amountPrj*/) public {
+    function liquidate(address user, uint lendingTokenId, uint prjId) public {
         require(prjId < projectTokens.length, "Primary Index Token: invalid lendingTokenId!");
         //require(amountPrj > 0, "Primary Index Token: amountPrj should be greater than zero!");
         address lendingToken = lendingTokens[lendingTokenId];
@@ -382,7 +378,7 @@ contract PrimaryIndexToken is Initializable,
             uint amoutLendingTokenToReceive = getPrjEvaluationInLendingTokenWithSale(lendingToken, projectToken, prjDeposited);
             IERC20Upgradeable(lendingToken).safeTransferFrom(_msgSender(),address(this),amoutLendingTokenToReceive);
             
-            emit Test3(amoutLendingTokenToReceive, borrowPosition.amountBorrowed);
+            //emit Test3(amoutLendingTokenToReceive, borrowPosition.amountBorrowed);
             
             IERC20Upgradeable(lendingToken).approve(cLendingToken,amoutLendingTokenToReceive);
             (, uint256 mintedAmount) = ICLendingToken(cLendingToken).mintTo(address(this),amoutLendingTokenToReceive);
@@ -499,6 +495,14 @@ contract PrimaryIndexToken is Initializable,
         return pitTotalSupply;
     }
 
+    function projectTokensLength() public view returns(uint256){
+        return projectTokens.length;
+    }
+
+    function lendingTokensLength() public view returns(uint256){
+        return lendingTokens.length;
+    }
+
     //************* HELP FUNCTIONS ********************************
 
     function _msgSender() internal override(ContextUpgradeable, ERC2771ContextUpgradeable) view returns (address) {
@@ -509,30 +513,7 @@ contract PrimaryIndexToken is Initializable,
         return ERC2771ContextUpgradeable._msgData();
     }
 
-    //************* ERC UNUSED FUNCTIONS ********************************
+    //************* ERC20 FUNCTIONS ********************************
 
-    // function approve(address spender, uint256 amount) public virtual override returns (bool) {
-    //     spender; amount;
-    //     return false;
-    // }
-
-    // function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-    //     recipient; amount;
-    //     return false;
-    // }
-
-    // function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
-    //     sender; recipient; amount;
-    //     return false;
-    // }
-
-    // function increaseAllowance(address spender, uint256 addedValue) public virtual override returns (bool) {
-    //     spender; addedValue;
-    //     return false;
-    // }
-
-    // function decreaseAllowance(address spender, uint256 subtractedValue) public virtual override returns (bool) {
-    //     spender; subtractedValue;
-    //     return false;
-    // }
+   
 }

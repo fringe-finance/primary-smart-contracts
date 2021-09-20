@@ -28,6 +28,9 @@ interface IPrimaryIndexToken {
     //mapping(address => LtfInfo) public ltf; //tokenAddress => Ltf (Liquidation Threshold Factor)
     function ltf(address) external view returns(uint8 numerator, uint8 denominator);
     
+    //mapping(address => PrjSaleInfo) public prjSales; //prj token address => PRJ sale info
+    function prjSales(address) external view returns(uint8 numerator, uint8 denominator);
+
     //mapping(address => uint256) public totalStakedPrj; //tokenAddress => PRJ token staked
     function totalStakedPrj(address) external view returns(uint256);
 
@@ -77,6 +80,8 @@ interface IPrimaryIndexToken {
 
     event LiquidationThresholdFactorSet(address indexed who, address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
+    event PrjSaleSet(address indexed who, address indexed tokenPrj, uint8 saleNumerator, uint8 saleDenominator);
+
     event Deposit(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiar);
 
     event Withdraw(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiar);
@@ -91,7 +96,8 @@ interface IPrimaryIndexToken {
 
     event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
 
-    // event Liquidate(address indexed who, address indexed borrower, address indexed prjToken, uint256 amountPrjLiquidated);
+    event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
+
 
     //************* ADMIN FUNCTIONS ********************************
 
@@ -113,45 +119,112 @@ interface IPrimaryIndexToken {
 
     function setLtf(address _tokenPRJ, uint8 _ltfNumerator, uint8 _ltfDenominator) external;
 
+    function setPrjSale(address _tokenPRJ, uint8 _saleNumerator, uint8 _saleDenominator) external;
+
     function pause() external;
 
     function unpause() external;
   
     //************* PUBLIC FUNCTIONS ********************************
-
+    
+    /**
+     * @dev deposit the project token to Bonded primary index token.
+     *      The position will be supplied to msg.sender
+     * @param prjId the project token id in list `projectTokens`
+     * @param amountPrj the amount of project token included decimals
+     */
     function deposit(uint256 prjId, uint256 amountPrj) external;
 
+    /**
+     * @dev deposit the project token to Bonded primary index token.
+     *      The position will be supplied to `beneficiar`
+     * @param prjId the project token id in list `projectTokens`
+     * @param amountPrj the amount of project token included decimals
+     * @param beneficiar the address of receiver of project token position
+     */
     function depositTo(uint256 prjId, uint256 amountPrj, address beneficiar) external;
 
+    /**
+     * @dev withdraw the project token from position.
+     *      The project tokens will be withdrawn to msg.sender
+     * @param prjId the project token id in list `projectTokens`
+     * @param amountPrj the amount of project token included decimals
+     */
     function withdraw(uint256 prjId, uint256 amountPrj) external;
     
+    /**
+     * @dev withdraw the project token from position.
+     *      The project tokens will be withdrawn to `beneficiar`
+     * @param prjId the project token id in list `projectTokens`
+     * @param amountPrj the amount of project token included decimals
+     */
     function withdrawTo(uint256 prjId, uint256 amountPrj, address beneficiar) external;
 
-    event Test1(uint256 mintedAmount);
-
+    /**
+     * @dev supply the lending token to pool.
+     *      The msg.sender will receive cToken of lending token.
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param amountLendingToken the amount of lending token
+     */
     function supply(uint256 lendingTokenId, uint256 amountLendingToken) external;
 
+    /**
+     * @dev redeem the lending token from pool.
+     *      The msg.sender should approve cToken to transferFrom.
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param amountCLendingToken the amount of Clending token to redeem
+     */
     function redeem(uint256 lendingTokenId, uint256 amountCLendingToken) external;
 
+    /**
+     * @dev redeem the lending token from pool.
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param amountLendingToken the amount of lending token to redeem
+     */
     function redeemUnderlying(uint256 lendingTokenId, uint256 amountLendingToken) external;
 
-    //event Test2(uint currentBalancePitOfMsgSender,uint liquidity, uint borrowError, uint enterMarketError);
-
-
+    /**
+     * @dev borrow the lending token from pool
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param amountLendingToken the amount of lending token to borrow.
+     */
     function borrow(uint256 lendingTokenId, uint256 amountLendingToken) external;
 
+    /**
+     * @dev repay the lending token from pool
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param amountLendingToken the amount of lending token to repay.
+     */
     function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken) external;
  
+    /**
+     * @dev liquidate the borrower position.
+            Liquidates all project token position of borrower
+     * @param user the address of borrower
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param prjId the project token id in list `projectTokens` 
+     */
+    function liquidate(address user, uint lendingTokenId, uint prjId) external;
+
+   
     //************* VIEW FUNCTIONS ********************************
+
+    function healthFactor(address account,uint256 lendingTokenId) external view returns(uint256 numerator, uint256 denominator);
 
     function getLiquidity(address account) external view returns(uint);
 
-    function getPrjEvaluationInBasicToken(address tokenPrj, uint256 amount) external view returns(uint256);
+    function getPrjEvaluationInBasicToken(address projectToken, uint256 amount) external view returns(uint256);
 
-    function getCToken(address underlying) external view returns(address) ;
+    function getPrjEvaluationInLendingTokenWithoutSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
+
+    function getPrjEvaluationInLendingTokenWithSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
+
+    function getCToken(address underlying) external view returns(address);
 
     function getDepositedPrjAmount(address account, uint256 prjId) external view returns(uint256);
 
+    function getBorrowPosition(address account, uint256 lendingTokenId) external view returns(uint256,uint256);
+    
     function liquidationThreshold(address account) external view returns(uint256);
 
     function liquidationThresholdForPosition(address account, uint256 prjId) external view returns(uint256);
@@ -168,7 +241,8 @@ interface IPrimaryIndexToken {
 
     function totalSupplyPit() external view returns (uint256);
 
+    function projectTokensLength() external view returns(uint256);
 
-    function healthFactor(address account) external view returns(uint256, uint256);
+    function lendingTokensLength() external view returns(uint256);
 
 }
