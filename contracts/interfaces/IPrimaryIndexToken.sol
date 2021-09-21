@@ -2,53 +2,105 @@
 pragma solidity >=0.8.0;
 
 interface IPrimaryIndexToken {
-   
+
+
+    /**
+     * @dev return keccak("MODERATOR_ROLE")
+     */
     function MODERATOR_ROLE() external view returns(bytes32);
 
+    /**
+     * @dev return the address of uniswapPathFinder contract
+     */
     function uniswapPathFinder() external view returns(address);
 
+    /**
+     * @dev returns the basic token. By default, this is the address of USDC.
+     */
     function basicToken() external view returns(address);
 
+    /**
+     * @dev returns the address of comptroller contract
+     */
     function comptroller() external view returns(address);
 
+    /**
+     * @dev returns the address of cPrimaryIndexToken
+     */
     function cPrimaryIndexToken() external view returns(address);
 
+    /**
+     * @dev return the address of price oracle contract
+     */
     function priceOracle() external view returns(address);
     
     //address[] public projectTokens;
-
-    function projectTokens(uint256) external view returns(address);
+    /**
+     * @dev returns the address of project token
+     * @param projectTokenId - id of project token in list.
+     *                         starts from 0 to projectTokens.length-1;
+     */
+    function projectTokens(uint256 projectTokenId) external view returns(address projectToken);
 
     //address[] public lendingTokens;
-    function lendingTokens(uint256) external view returns(address);
+     /**
+     * @dev returns the address of project token
+     * @param lendingTokenId - id of project token in list `lendingTokens`.
+     *                         starts from 0 to lendingTokens.length-1;
+     */
+    function lendingTokens(uint256 lendingTokenId) external view returns(address);
 
     //mapping(address => LvrInfo) public lvr; //tokenAddress => Lvr (Loan to Value Ratio)
-    function lvr(address) external view returns(uint8 numerator, uint8 denominator);
+    /**
+     * @dev returns the Loan to Value Ratio of project token.
+     * @param prjToken - the address of project token
+     */
+    function lvr(address prjToken) external view returns(uint8 numerator, uint8 denominator);
 
     //mapping(address => LtfInfo) public ltf; //tokenAddress => Ltf (Liquidation Threshold Factor)
-    function ltf(address) external view returns(uint8 numerator, uint8 denominator);
+    /**
+     * @dev returns the Liquidation Threshold Factor of lending token
+     * @param lendingToken the address of lending token
+     */
+    function ltf(address lendingToken) external view returns(uint8 numerator, uint8 denominator);
     
     //mapping(address => PrjSaleInfo) public prjSales; //prj token address => PRJ sale info
-    function prjSales(address) external view returns(uint8 numerator, uint8 denominator);
+    /**
+     * @dev returns the project token sale
+     * @param prjToken - the address of project token
+     */
+    function prjSales(address prjToken) external view returns(uint8 numerator, uint8 denominator);
 
     //mapping(address => uint256) public totalStakedPrj; //tokenAddress => PRJ token staked
-    function totalStakedPrj(address) external view returns(uint256);
+    /**
+     * @dev return the total staked of project token
+     * @param prjToken - the address of project token
+     */
+    function totalStakedPrj(address prjToken) external view returns(uint256);
 
     //mapping(address => mapping(uint256 => UserPrjPosition)) public userPrjPosition; // user address => PRJ token index => UserPrjPosition
+    /**
+     * @dev return the amount of deposited project token by `user`
+     * @param user - the address of depositer
+     * @param prjId - the id of project token in list `projectTokens`
+     */
     function userPrjPosition(address user,uint256 prjId) external view returns(uint256);
     
     //mapping(address => address) public cTokensList; //underlying token address => cToken address
-    function cTokensList(address token) external view returns(address);
+    /**
+     * @dev return the address of cToken of `lendingToken`
+     * @param lendingToken - address of lending token.
+     */
+    function cTokensList(address lendingToken) external view returns(address);
 
-    //mapping(address => uint256) public totalSupplyToken; // Token address => total supply of Token
-    function totalSupplyToken(address token) external view returns(uint256);
-
-    //mapping(address => uint256) public totalSupplyCToken; //cToken address => total supply of cToken
-    function totalSupplyCToken(address token) external view returns(uint256);
-
-   // mapping(address => mapping(uint256 => UserBorrowPosition)) public userBorrowPosition; //user address => lending tokens index => UserBorrowPosition
-    function userBorrowPosition(address token,uint256 lendingTokenId) external view returns(uint256 amountBorrowed, uint256 amountPit);
-
+    // mapping(address => mapping(uint256 => UserBorrowPosition)) public userBorrowPosition; //user address => lending tokens index => UserBorrowPosition
+    /**
+     * @dev 
+     * @param user - the address of user, who borrowed lending token
+     * @param lendingTokenId - id of project token in list `lendingTokens`.
+     *                         starts from 0 to lendingTokens.length-1;
+     */
+    function userBorrowPosition(address user, uint256 lendingTokenId) external view returns(uint256 amountBorrowed, uint256 amountPit);
 
     //Lvr = Loan to Value Ratio  
     struct LvrInfo{
@@ -101,16 +153,47 @@ interface IPrimaryIndexToken {
 
     //************* ADMIN FUNCTIONS ********************************
 
-    function addPrjToken(address _tokenPRJ, uint8 _lvrNumerator, uint8 _lvrDenominator, uint8 _ltfNumerator, uint8 _ltfDenominator) external;
+    /**
+     * @dev adds the project token to Primary Index Token
+     * @param _tokenPRJ - the address of project token
+     * @param _lvrNumerator - the numerator of loan to value ratio
+     * @param _lvrDenominator - the denominator of loan to value ratio
+     * @param _ltfNumerator - the numerator of liquidation treshold factor
+     * @param _ltfDenominator - the denominator of liquidation treshold factor
+     * @param _saleNumerator - the numerator of project token sale
+     * @param _saleDenominator - the denominator of project token sale
+     */
+    function addPrjToken(address _tokenPRJ, uint8 _lvrNumerator, uint8 _lvrDenominator, uint8 _ltfNumerator, uint8 _ltfDenominator,uint8 _saleNumerator, uint8 _saleDenominator) external;
 
+    /**
+     * @dev adds lending token to Primary Index Token
+     * @param _lendingToken - the address of lending token
+     */
     function addLendingToken(address _lendingToken) external;
 
-    function addCLendingToken(address _underlyingToken, address _cToken) external;
+    /**
+     * @dev adds the cToken of lending token to Primary Index Token
+     * @param _lendingToken - the address of lending token
+     * @param _cLendingToken - the address of cLending token 
+     */
+    function addCLendingToken(address _lendingToken, address _cLendingToken) external;
 
+    /**
+     * @dev sets comptroller address to Primary Index Token
+     * @param _comptroller - the address of comptroller contract
+     */
     function setComptroller(address _comptroller) external;
 
-     function setCPrimaryIndexToken(address _cPrimaryIndexToken) external;
+    /**
+     * @dev sets the cPrimary Index Token to Primary Index Token
+     * @param _cPrimaryIndexToken - the address of cPrimary Index Token
+     */
+    function setCPrimaryIndexToken(address _cPrimaryIndexToken) external;
 
+    /**
+     * @dev sets the price oracle to Primary Index Token
+     * @param _priceOracle - the address of price oracle contract
+     */
     function setPriceOracle(address _priceOracle) external;
     
     //************* MODERATOR FUNCTIONS ********************************
@@ -209,40 +292,101 @@ interface IPrimaryIndexToken {
    
     //************* VIEW FUNCTIONS ********************************
 
+    /**
+     * @dev calculates the health factor of `account`
+     * @param account - the address of user
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     */
     function healthFactor(address account,uint256 lendingTokenId) external view returns(uint256 numerator, uint256 denominator);
 
+    /**
+     * @dev gets account liquidity
+     * @param account - the address of user
+     */
     function getLiquidity(address account) external view returns(uint);
 
-    function getPrjEvaluationInBasicToken(address projectToken, uint256 amount) external view returns(uint256);
+    /**
+     * @dev get project token evaluation depending on 
+     * @param projectToken - the address of project token
+     * @param prjAmount - the amount of project token including decimals
+     */
+    function getPrjEvaluationInBasicToken(address projectToken, uint256 prjAmount) external view returns(uint256);
 
+    /**
+     * @dev gets the raw evaluation of project token in dimention of lending token
+     * @param lendingToken - the address of lending token
+     * @param projectToken - the address of project token
+     * @param amountPrj - amount of project token including decimals
+     */
     function getPrjEvaluationInLendingTokenWithoutSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
 
+    /**
+     * @dev gets the evaluation of project token with sale in dimention of lending token
+     * @param lendingToken - the address of lending token
+     * @param projectToken - the address of project token
+     * @param amountPrj - the amount of project token including decimals
+     */
     function getPrjEvaluationInLendingTokenWithSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
 
-    function getCToken(address underlying) external view returns(address);
+    /**
+     * @dev get cToken address of underlying
+     * @param lendingToken - the address of lending token
+     */
+    function getCToken(address lendingToken) external view returns(address);
 
+    /**
+     * @dev returns the deposited prj amount of `account`
+     * @param account - the address of user
+     * @param prjId the project token id in list `projectTokens` 
+     */
     function getDepositedPrjAmount(address account, uint256 prjId) external view returns(uint256);
 
+    /**
+     * @dev get the `account` borrow position
+     * @param account - the address of user
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     */
     function getBorrowPosition(address account, uint256 lendingTokenId) external view returns(uint256,uint256);
     
+    /**
+     * @dev get the liquidation treshold factor of `account`
+     * @param account - the address of user
+     */
     function liquidationThreshold(address account) external view returns(uint256);
 
+    /**
+     * @dev get the liquidation treshold factor of `account` for position
+     * @param account - the address of user
+     * @param prjId the project token id in list `projectTokens` 
+     */
     function liquidationThresholdForPosition(address account, uint256 prjId) external view returns(uint256);
 
     /**
-     * @notice returns the amount of PIT of account
+     * @dev returns the amount of PIT of account
+     * @param account - the address of user
      */
     function balanceOfPit(address account) external view returns (uint256);
 
     /**
-     * @notice returns the amount of PIT of account in position `prjId`
+     * @dev returns the amount of PIT of account in position `prjId`
+     * @param account - the address of user
+     * @param prjId the project token id in list `projectTokens` 
      */
     function balanceOfPitPosition(address account, uint256 prjId) external view returns (uint256);
 
+    /**
+     * @dev returns the total supply of Primary Index Token
+     */
     function totalSupplyPit() external view returns (uint256);
 
+    /**
+     * @return the length of listed project tokens
+     */
     function projectTokensLength() external view returns(uint256);
 
+    /**
+     * @return the length of listed lending tokens
+     */
     function lendingTokensLength() external view returns(uint256);
 
 }

@@ -50,8 +50,8 @@ contract PrimaryIndexToken is Initializable,
     mapping(address => mapping(uint256 => UserPrjPosition)) public userPrjPosition; // user address => PRJ token index => UserPrjPosition
 
     mapping(address => address) public cTokensList; //underlying token address => cToken address
-    mapping(address => uint256) public totalSupplyToken; // underlying token address => total supply of Token
-    mapping(address => uint256) public totalSupplyCToken; //cToken address => total supply of cToken
+    // mapping(address => uint256) public totalSupplyToken; // underlying token address => total supply of Token
+    // mapping(address => uint256) public totalSupplyCToken; //cToken address => total supply of cToken
     mapping(address => mapping(uint256 => UserBorrowPosition)) public userBorrowPosition; //user address => lending tokens index => UserBorrowPosition
 
     struct PrjSaleInfo{
