@@ -389,4 +389,9 @@ interface IPrimaryIndexToken {
      */
     function lendingTokensLength() external view returns(uint256);
 
+    /**
+     * @dev returns the decimals of Primary Index Token
+     */
+    function decimals() external view returns(uint8);
+
 }
