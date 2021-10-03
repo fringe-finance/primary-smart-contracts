@@ -466,6 +466,19 @@ contract PrimaryIndexToken is Initializable,
     }
 
     /**
+     * @notice return the pitBalance depending on input prj indexes
+     */
+    function balanceOfPitDependingOnPrj(address account, uint256[] memory prjIndexes) public view returns(uint256){
+        uint256 prjIndexesLength = prjIndexes.length;
+        require(prjIndexesLength <= projectTokens.length,"Invalid length of prj Indexes");
+        uint256 pitBalance;
+        for(uint256 i = 0; i < prjIndexesLength; i++){
+            pitBalance += balanceOfPitPosition(account,prjIndexes[i]);
+        }
+        return pitBalance;
+    }
+
+    /**
      * @notice returns the amount of PIT of account in position `prjId`
      */
     function balanceOfPitPosition(address account, uint256 prjId) public view returns (uint256){

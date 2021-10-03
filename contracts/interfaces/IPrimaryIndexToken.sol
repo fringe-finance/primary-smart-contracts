@@ -368,6 +368,11 @@ interface IPrimaryIndexToken {
     function balanceOfPit(address account) external view returns (uint256);
 
     /**
+     * @notice return the pitBalance depending on input prj indexes
+     */
+    function balanceOfPitDependingOnPrj(address account, uint256[] memory prjIndexes) external view returns(uint256);
+ 
+    /**
      * @dev returns the amount of PIT of account in position `prjId`
      * @param account - the address of user
      * @param prjId the project token id in list `projectTokens` 
