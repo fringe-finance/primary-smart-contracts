@@ -99,7 +99,7 @@ contract PrimaryIndexToken is Initializable,
     
     event RedeemUnderlying(address indexed who, uint256 redeemTokenId, address indexed redeemToken, address indexed redeemCToken, uint256 redeemAmountUnderlying);
 
-    event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
+    event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
     event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
 
@@ -296,7 +296,7 @@ contract PrimaryIndexToken is Initializable,
 
     //event Test2(uint currentBalancePitOfMsgSender,uint liquidity, uint borrowError, uint amountBorrowed);
 
-    function borrow(uint256 lendingTokenId, uint256 amountLendingToken) public {
+    function borrow(uint256 lendingTokenId, uint256 amountLendingToken,address prj,uint256 prjAmount) public {
         require(lendingTokenId < lendingTokens.length, "Primary Index Token: invalid lendingTokenId!");
         require(amountLendingToken > 0, "Primary Index Token: amountLendingToken should be greated than zero!");
         address lendingToken = lendingTokens[lendingTokenId];
@@ -326,7 +326,7 @@ contract PrimaryIndexToken is Initializable,
             //emit Test2(0, 0, borrowError, position.amountBorrowed);
         }
 
-        emit Borrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken);
+        emit Borrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken,prj,prjAmount);
     }
 
 
