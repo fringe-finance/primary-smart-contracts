@@ -1,0 +1,1176 @@
+[2021-09-20T17:59:31.433] [INFO] primaryIndexToken - ===============================================================================================
+[2021-09-20T17:59:35.806] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:35.806] [INFO] primaryIndexToken - *******Supply Test******* 
+[2021-09-20T17:59:36.574] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:36.574] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000000000
+[2021-09-20T17:59:36.574] [INFO] primaryIndexToken -     USDCTest balance    : 100000000000.000000
+[2021-09-20T17:59:36.575] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:36.575] [INFO] primaryIndexToken -     cUSDCTest balance raw: 0
+[2021-09-20T17:59:36.575] [INFO] primaryIndexToken -     cUSDCTest balance    : 0
+[2021-09-20T17:59:39.022] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.023] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T17:59:39.023] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T17:59:39.023] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.023] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T17:59:39.023] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T17:59:39.028] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:39.028] [INFO] primaryIndexToken - *******Redeem Test******* 
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T17:59:39.269] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T17:59:39.976] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T17:59:39.980] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:39.980] [INFO] primaryIndexToken - *******RedeemUnderlying Test******* 
+[2021-09-20T17:59:40.224] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:40.224] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T17:59:40.224] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T17:59:40.225] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:40.225] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T17:59:40.225] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken -     USDCTest balance raw: 99999500000000000
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken -     USDCTest balance    : 99999500000.000000
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken -     cUSDCTest balance raw: 500000000000
+[2021-09-20T17:59:40.784] [INFO] primaryIndexToken -     cUSDCTest balance    : 5000.00000000
+[2021-09-20T17:59:40.795] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:40.795] [INFO] primaryIndexToken - *******Borrower1 Deposit Test******* 
+[2021-09-20T17:59:41.193] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:41.193] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T17:59:41.193] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T17:59:41.347] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T17:59:42.043] [INFO] primaryIndexToken - Deposited 2000000000000000000000000 PRJ
+[2021-09-20T17:59:42.171] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:42.171] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999998000000000000000000000000
+[2021-09-20T17:59:42.171] [INFO] primaryIndexToken -     PRJ1 balance    : 9999998000000.000000000000000000
+[2021-09-20T17:59:42.196] [INFO] primaryIndexToken - Deposited PRJ amount: 2000000000000000000000000
+[2021-09-20T17:59:42.200] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:42.200] [INFO] primaryIndexToken - *******Borrower1 borrow Test******* 
+[2021-09-20T17:59:42.319] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:42.319] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000
+[2021-09-20T17:59:42.319] [INFO] primaryIndexToken -     USDCTest balance    : 100000.000000
+[2021-09-20T17:59:42.617] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:42.617] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T17:59:42.617] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T17:59:42.980] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:42.980] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T17:59:42.980] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T17:59:43.164] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T17:59:43.164] [INFO] primaryIndexToken - Borrowed 200000000000 tokens
+[2021-09-20T17:59:49.113] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:49.113] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T17:59:49.113] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T17:59:49.149] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:49.149] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T17:59:49.149] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:49.307] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:49.307] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:49.307] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:49.495] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T17:59:49.514] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:49.514] [INFO] primaryIndexToken - *******Borrower1 extra borrow Test******* 
+[2021-09-20T17:59:49.684] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:49.684] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T17:59:49.684] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T17:59:49.717] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:49.717] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T17:59:49.717] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:49.861] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:49.861] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:49.861] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:50.038] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T17:59:50.255] [INFO] primaryIndexToken - Borrowed 50000000000 tokens
+[2021-09-20T17:59:50.371] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:50.371] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T17:59:50.371] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T17:59:50.403] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:50.403] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T17:59:50.403] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:50.555] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:50.555] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:50.555] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:50.737] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T17:59:50.750] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:50.750] [INFO] primaryIndexToken - *******Borrower1 repay half borrow Test******* 
+[2021-09-20T17:59:50.879] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:50.880] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T17:59:50.880] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T17:59:50.917] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:50.917] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T17:59:50.917] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:51.059] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:51.059] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:51.059] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:51.339] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T17:59:51.714] [INFO] primaryIndexToken - Repayed 125000000000 tokens
+[2021-09-20T17:59:51.837] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:51.837] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T17:59:51.837] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T17:59:51.869] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:51.869] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T17:59:51.869] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:52.006] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:52.006] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:52.006] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:52.188] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T17:59:52.196] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:52.196] [INFO] primaryIndexToken - *******Borrower1 repay all borrow Test******* 
+[2021-09-20T17:59:52.311] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:52.311] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T17:59:52.311] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T17:59:52.347] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:52.347] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T17:59:52.347] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T17:59:52.489] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:52.489] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:52.489] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:52.686] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T17:59:52.916] [INFO] primaryIndexToken - Repayed 115792089237316195423570985008687907853269984665640564039457584007913129639935 tokens
+[2021-09-20T17:59:53.046] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:53.046] [INFO] primaryIndexToken -     USDCTest balance raw: 99999948958
+[2021-09-20T17:59:53.046] [INFO] primaryIndexToken -     USDCTest balance    : 99999.948958
+[2021-09-20T17:59:53.080] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:53.080] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T17:59:53.080] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T17:59:53.210] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:53.210] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T17:59:53.210] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T17:59:53.378] [INFO] primaryIndexToken - Account Liquidity: 404930828114
+[2021-09-20T17:59:53.387] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:53.387] [INFO] primaryIndexToken - *******Borrower2 Deposit Test******* 
+[2021-09-20T17:59:53.507] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:53.507] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T17:59:53.507] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T17:59:53.684] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T17:59:53.967] [INFO] primaryIndexToken - Deposited 1000000000000000000000000 PRJ
+[2021-09-20T17:59:54.093] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:54.093] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T17:59:54.093] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T17:59:54.120] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T17:59:54.124] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:54.124] [INFO] primaryIndexToken - *******Borrower2 borrow Test******* 
+[2021-09-20T17:59:54.362] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:54.362] [INFO] primaryIndexToken -     USDCTest balance raw: 0
+[2021-09-20T17:59:54.362] [INFO] primaryIndexToken -     USDCTest balance    : 0
+[2021-09-20T17:59:54.680] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:54.680] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T17:59:54.680] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T17:59:54.997] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:54.997] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T17:59:54.997] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T17:59:55.197] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T17:59:55.325] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T17:59:55.446] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T17:59:55.446] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T17:59:55.446] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T17:59:55.446] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T17:59:55.446] [INFO] primaryIndexToken - Borrowed 304048238349 tokens
+[2021-09-20T17:59:58.058] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:58.058] [INFO] primaryIndexToken -     USDCTest balance raw: 304048238349
+[2021-09-20T17:59:58.058] [INFO] primaryIndexToken -     USDCTest balance    : 304048.238349
+[2021-09-20T17:59:58.092] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T17:59:58.092] [INFO] primaryIndexToken -     amountBorrowed: 304048238349
+[2021-09-20T17:59:58.092] [INFO] primaryIndexToken -     amountPit: 304048238349
+[2021-09-20T17:59:58.223] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:58.223] [INFO] primaryIndexToken -     cPIT balance raw: 304048238349
+[2021-09-20T17:59:58.223] [INFO] primaryIndexToken -     cPIT balance    : 3040.48238349
+[2021-09-20T17:59:58.396] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T17:59:58.529] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T17:59:58.646] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T17:59:58.646] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T17:59:58.646] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T17:59:58.648] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T17:59:58.656] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:58.656] [INFO] primaryIndexToken - *******Borrower2 withdraws some part of PRJ Test******* 
+[2021-09-20T17:59:58.773] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:58.773] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T17:59:58.773] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T17:59:58.801] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T17:59:58.938] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T17:59:58.938] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T17:59:58.938] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T17:59:58.940] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T17:59:58.940] [INFO] primaryIndexToken - Withdrawed 200000000000000000000000 PRJ
+[2021-09-20T17:59:59.270] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T17:59:59.270] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999200000000000000000000000
+[2021-09-20T17:59:59.270] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999200000.000000000000000000
+[2021-09-20T17:59:59.301] [INFO] primaryIndexToken - Deposited PRJ amount: 800000000000000000000000
+[2021-09-20T17:59:59.575] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T17:59:59.575] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T17:59:59.575] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T17:59:59.576] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T17:59:59.583] [INFO] primaryIndexToken - 
+[2021-09-20T17:59:59.584] [INFO] primaryIndexToken - *******Increased price of PRJ Test******* 
+[2021-09-20T17:59:59.717] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T17:59:59.717] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T17:59:59.717] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T17:59:59.718] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T18:00:01.073] [INFO] primaryIndexToken - Increased price of PRJ. USDC amount given: 500000000000
+[2021-09-20T18:00:01.265] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:01.265] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T18:00:01.265] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T18:00:01.268] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T18:00:01.272] [INFO] primaryIndexToken - 
+[2021-09-20T18:00:01.272] [INFO] primaryIndexToken - *******First try to liquidate borrower2 Test******* 
+[2021-09-20T18:00:01.799] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:01.799] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T18:00:01.799] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T18:00:01.948] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:01.948] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T18:00:01.948] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T18:00:02.089] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:02.089] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T18:00:02.089] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T18:00:02.091] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T18:00:02.373] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:02.373] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T18:00:02.373] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T18:00:02.486] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:02.486] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T18:00:02.486] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T18:00:02.624] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:02.624] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T18:00:02.624] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T18:00:02.625] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T18:00:02.632] [INFO] primaryIndexToken - 
+[2021-09-20T18:00:02.632] [INFO] primaryIndexToken - *******Decrease price of PRJ Test******* 
+[2021-09-20T18:00:02.749] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:02.749] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T18:00:02.749] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T18:00:02.751] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T18:00:03.076] [INFO] primaryIndexToken - Decreased price of PRJ. PRJ amount given: 500000000000000000000000
+[2021-09-20T18:00:03.211] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:03.211] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T18:00:03.211] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T18:00:03.212] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T18:00:03.220] [INFO] primaryIndexToken - 
+[2021-09-20T18:00:03.220] [INFO] primaryIndexToken - *******Second try to liquidate borrower2 Test******* 
+[2021-09-20T18:00:03.330] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:03.330] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T18:00:03.330] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T18:00:03.447] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:03.447] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T18:00:03.447] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T18:00:03.686] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:03.686] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T18:00:03.686] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T18:00:03.688] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T18:00:03.832] [INFO] primaryIndexToken - Amount liquidator1 send: 280513310768
+[2021-09-20T18:00:05.233] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:05.233] [INFO] primaryIndexToken -     PRJ1 balance raw: 800000000000000000000000
+[2021-09-20T18:00:05.233] [INFO] primaryIndexToken -     PRJ1 balance    : 800000.000000000000000000
+[2021-09-20T18:00:05.342] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T18:00:05.342] [INFO] primaryIndexToken -     USDCTest balance raw: 719486689232
+[2021-09-20T18:00:05.342] [INFO] primaryIndexToken -     USDCTest balance    : 719486.689232
+[2021-09-20T18:00:05.480] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T18:00:05.480] [INFO] primaryIndexToken -     numerator:   0
+[2021-09-20T18:00:05.480] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T18:00:05.480] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T19:23:06.498] [INFO] primaryIndexToken - ===============================================================================================
+[2021-09-20T19:23:12.061] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:12.061] [INFO] primaryIndexToken - *******Supply Test******* 
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000000000
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken -     USDCTest balance    : 100000000000.000000
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken -     cUSDCTest balance raw: 0
+[2021-09-20T19:23:12.812] [INFO] primaryIndexToken -     cUSDCTest balance    : 0
+[2021-09-20T19:23:15.510] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:15.510] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T19:23:15.511] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T19:23:15.511] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:15.511] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T19:23:15.511] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T19:23:15.516] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:15.516] [INFO] primaryIndexToken - *******Redeem Test******* 
+[2021-09-20T19:23:15.911] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:15.911] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T19:23:15.912] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T19:23:15.912] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:15.912] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T19:23:15.912] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T19:23:16.577] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T19:23:16.584] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:16.584] [INFO] primaryIndexToken - *******RedeemUnderlying Test******* 
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T19:23:16.934] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken -     USDCTest balance raw: 99999500000000000
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken -     USDCTest balance    : 99999500000.000000
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken -     cUSDCTest balance raw: 500000000000
+[2021-09-20T19:23:17.346] [INFO] primaryIndexToken -     cUSDCTest balance    : 5000.00000000
+[2021-09-20T19:23:17.364] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:17.364] [INFO] primaryIndexToken - *******Borrower1 Deposit Test******* 
+[2021-09-20T19:23:17.922] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:17.922] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T19:23:17.922] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T19:23:18.113] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T19:23:18.762] [INFO] primaryIndexToken - Deposited 2000000000000000000000000 PRJ
+[2021-09-20T19:23:18.954] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:18.954] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999998000000000000000000000000
+[2021-09-20T19:23:18.954] [INFO] primaryIndexToken -     PRJ1 balance    : 9999998000000.000000000000000000
+[2021-09-20T19:23:18.981] [INFO] primaryIndexToken - Deposited PRJ amount: 2000000000000000000000000
+[2021-09-20T19:23:18.985] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:18.985] [INFO] primaryIndexToken - *******Borrower1 borrow Test******* 
+[2021-09-20T19:23:19.110] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:19.110] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000
+[2021-09-20T19:23:19.110] [INFO] primaryIndexToken -     USDCTest balance    : 100000.000000
+[2021-09-20T19:23:19.478] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:19.478] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T19:23:19.478] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T19:23:19.823] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:19.823] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T19:23:19.823] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T19:23:20.686] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T19:23:20.686] [INFO] primaryIndexToken - Borrowed 200000000000 tokens
+[2021-09-20T19:23:27.853] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:27.853] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T19:23:27.853] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T19:23:27.889] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:27.889] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T19:23:27.889] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:28.027] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:28.027] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:28.027] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:28.230] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T19:23:28.238] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:28.238] [INFO] primaryIndexToken - *******Borrower1 extra borrow Test******* 
+[2021-09-20T19:23:28.359] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:28.359] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T19:23:28.359] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T19:23:28.394] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:28.394] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T19:23:28.395] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:28.535] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:28.535] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:28.535] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:28.712] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T19:23:28.954] [INFO] primaryIndexToken - Borrowed 50000000000 tokens
+[2021-09-20T19:23:29.086] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:29.086] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T19:23:29.086] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T19:23:29.119] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:29.119] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T19:23:29.119] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:29.256] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:29.256] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:29.256] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:29.440] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T19:23:29.449] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:29.449] [INFO] primaryIndexToken - *******Borrower1 repay half borrow Test******* 
+[2021-09-20T19:23:29.562] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:29.562] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T19:23:29.562] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T19:23:29.594] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:29.594] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T19:23:29.595] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:29.736] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:29.737] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T19:23:29.737] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T19:23:29.887] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:29.887] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:29.887] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:30.156] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T19:23:30.548] [INFO] primaryIndexToken - Repayed 125000000000 tokens
+[2021-09-20T19:23:30.661] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:30.661] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T19:23:30.662] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T19:23:30.694] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:30.695] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T19:23:30.695] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:30.837] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:30.837] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T19:23:30.837] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T19:23:30.978] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:30.978] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:30.978] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:31.167] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T19:23:31.176] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:31.177] [INFO] primaryIndexToken - *******Borrower1 repay all borrow Test******* 
+[2021-09-20T19:23:31.293] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:31.293] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T19:23:31.293] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T19:23:31.327] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:31.327] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T19:23:31.327] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T19:23:31.475] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:31.475] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T19:23:31.475] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T19:23:31.611] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:31.611] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:31.611] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:31.787] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T19:23:32.037] [INFO] primaryIndexToken - Repayed 115792089237316195423570985008687907853269984665640564039457584007913129639935 tokens
+[2021-09-20T19:23:32.147] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:32.147] [INFO] primaryIndexToken -     USDCTest balance raw: 99999948958
+[2021-09-20T19:23:32.147] [INFO] primaryIndexToken -     USDCTest balance    : 99999.948958
+[2021-09-20T19:23:32.176] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:32.176] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T19:23:32.176] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T19:23:32.310] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:32.310] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T19:23:32.310] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T19:23:32.447] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:32.447] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T19:23:32.447] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T19:23:32.626] [INFO] primaryIndexToken - Account Liquidity: 404930828114
+[2021-09-20T19:23:32.635] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:32.635] [INFO] primaryIndexToken - *******Borrower2 Deposit Test******* 
+[2021-09-20T19:23:32.749] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:32.749] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T19:23:32.749] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T19:23:32.931] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T19:23:33.233] [INFO] primaryIndexToken - Deposited 1000000000000000000000000 PRJ
+[2021-09-20T19:23:33.347] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:33.347] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T19:23:33.347] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T19:23:33.378] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T19:23:33.382] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:33.382] [INFO] primaryIndexToken - *******Borrower2 borrow Test******* 
+[2021-09-20T19:23:33.648] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:33.648] [INFO] primaryIndexToken -     USDCTest balance raw: 0
+[2021-09-20T19:23:33.648] [INFO] primaryIndexToken -     USDCTest balance    : 0
+[2021-09-20T19:23:34.333] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:34.333] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T19:23:34.333] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T19:23:34.692] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:34.693] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T19:23:34.693] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T19:23:34.887] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T19:23:35.028] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T19:23:35.159] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:35.159] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T19:23:35.159] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T19:23:35.159] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T19:23:35.159] [INFO] primaryIndexToken - Borrowed 304048238349 tokens
+[2021-09-20T19:23:38.568] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:38.568] [INFO] primaryIndexToken -     USDCTest balance raw: 304048238349
+[2021-09-20T19:23:38.568] [INFO] primaryIndexToken -     USDCTest balance    : 304048.238349
+[2021-09-20T19:23:38.604] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T19:23:38.605] [INFO] primaryIndexToken -     amountBorrowed: 304048238349
+[2021-09-20T19:23:38.605] [INFO] primaryIndexToken -     amountPit: 304048238349
+[2021-09-20T19:23:38.810] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:38.810] [INFO] primaryIndexToken -     cPIT balance raw: 304048238349
+[2021-09-20T19:23:38.810] [INFO] primaryIndexToken -     cPIT balance    : 3040.48238349
+[2021-09-20T19:23:39.063] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T19:23:39.210] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T19:23:39.354] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:39.354] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T19:23:39.354] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T19:23:39.355] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T19:23:39.364] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:39.364] [INFO] primaryIndexToken - *******Borrower2 withdraws some part of PRJ Test******* 
+[2021-09-20T19:23:39.487] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:39.487] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T19:23:39.487] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T19:23:39.520] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T19:23:39.662] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:39.662] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T19:23:39.662] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T19:23:39.665] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T19:23:39.665] [INFO] primaryIndexToken - Withdrawed 200000000000000000000000 PRJ
+[2021-09-20T19:23:39.978] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:39.978] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999200000000000000000000000
+[2021-09-20T19:23:39.978] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999200000.000000000000000000
+[2021-09-20T19:23:40.009] [INFO] primaryIndexToken - Deposited PRJ amount: 800000000000000000000000
+[2021-09-20T19:23:40.151] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:40.151] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T19:23:40.151] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T19:23:40.153] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T19:23:40.159] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:40.159] [INFO] primaryIndexToken - *******Increased price of PRJ Test******* 
+[2021-09-20T19:23:40.283] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:40.283] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T19:23:40.283] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T19:23:40.284] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T19:23:42.234] [INFO] primaryIndexToken - Increased price of PRJ. USDC amount given: 500000000000
+[2021-09-20T19:23:42.429] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:42.429] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T19:23:42.429] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T19:23:42.432] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T19:23:42.445] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:42.445] [INFO] primaryIndexToken - *******First try to liquidate borrower2 Test******* 
+[2021-09-20T19:23:42.910] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:42.910] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T19:23:42.910] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T19:23:43.045] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:43.045] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T19:23:43.045] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T19:23:43.187] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:43.187] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T19:23:43.187] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T19:23:43.188] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T19:23:43.595] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:43.595] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T19:23:43.595] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T19:23:43.711] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:43.711] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T19:23:43.711] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T19:23:43.851] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:43.851] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T19:23:43.851] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T19:23:43.853] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T19:23:43.858] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:43.859] [INFO] primaryIndexToken - *******Decrease price of PRJ Test******* 
+[2021-09-20T19:23:43.985] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:43.985] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T19:23:43.985] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T19:23:43.986] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T19:23:44.303] [INFO] primaryIndexToken - Decreased price of PRJ. PRJ amount given: 500000000000000000000000
+[2021-09-20T19:23:44.444] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:44.444] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T19:23:44.444] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T19:23:44.445] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T19:23:44.455] [INFO] primaryIndexToken - 
+[2021-09-20T19:23:44.455] [INFO] primaryIndexToken - *******Second try to liquidate borrower2 Test******* 
+[2021-09-20T19:23:44.579] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:44.579] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T19:23:44.579] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T19:23:44.703] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:44.703] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T19:23:44.703] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T19:23:44.844] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:44.844] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T19:23:44.844] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T19:23:44.845] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T19:23:44.983] [INFO] primaryIndexToken - Amount liquidator1 send: 280513310768
+[2021-09-20T19:23:46.325] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:46.326] [INFO] primaryIndexToken -     PRJ1 balance raw: 800000000000000000000000
+[2021-09-20T19:23:46.326] [INFO] primaryIndexToken -     PRJ1 balance    : 800000.000000000000000000
+[2021-09-20T19:23:46.453] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T19:23:46.453] [INFO] primaryIndexToken -     USDCTest balance raw: 719486689232
+[2021-09-20T19:23:46.453] [INFO] primaryIndexToken -     USDCTest balance    : 719486.689232
+[2021-09-20T19:23:46.664] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T19:23:46.665] [INFO] primaryIndexToken -     numerator:   0
+[2021-09-20T19:23:46.665] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T19:23:46.665] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T21:10:56.377] [INFO] primaryIndexToken - ===============================================================================================
+[2021-09-20T21:11:01.415] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:01.415] [INFO] primaryIndexToken - *******Supply Test******* 
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000000000
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken -     USDCTest balance    : 100000000000.000000
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken -     cUSDCTest balance raw: 0
+[2021-09-20T21:11:02.253] [INFO] primaryIndexToken -     cUSDCTest balance    : 0
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T21:11:04.766] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T21:11:04.771] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:04.771] [INFO] primaryIndexToken - *******Redeem Test******* 
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T21:11:05.026] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T21:11:05.798] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:05.798] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T21:11:05.798] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T21:11:05.799] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:05.799] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T21:11:05.799] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T21:11:05.803] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:05.803] [INFO] primaryIndexToken - *******RedeemUnderlying Test******* 
+[2021-09-20T21:11:06.079] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:06.080] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T21:11:06.080] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T21:11:06.080] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:06.080] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T21:11:06.080] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken -     USDCTest balance raw: 99999500000000000
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken -     USDCTest balance    : 99999500000.000000
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken -     cUSDCTest balance raw: 500000000000
+[2021-09-20T21:11:06.597] [INFO] primaryIndexToken -     cUSDCTest balance    : 5000.00000000
+[2021-09-20T21:11:06.603] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:06.603] [INFO] primaryIndexToken - *******Borrower1 Deposit Test******* 
+[2021-09-20T21:11:07.094] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:07.094] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:11:07.094] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:11:07.267] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:11:07.860] [INFO] primaryIndexToken - Deposited 2000000000000000000000000 PRJ
+[2021-09-20T21:11:08.034] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:08.035] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999998000000000000000000000000
+[2021-09-20T21:11:08.035] [INFO] primaryIndexToken -     PRJ1 balance    : 9999998000000.000000000000000000
+[2021-09-20T21:11:08.064] [INFO] primaryIndexToken - Deposited PRJ amount: 2000000000000000000000000
+[2021-09-20T21:11:08.066] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:08.067] [INFO] primaryIndexToken - *******Borrower1 borrow Test******* 
+[2021-09-20T21:11:08.192] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:08.192] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000
+[2021-09-20T21:11:08.192] [INFO] primaryIndexToken -     USDCTest balance    : 100000.000000
+[2021-09-20T21:11:08.487] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:08.487] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:11:08.487] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:11:08.906] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:08.906] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T21:11:08.906] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T21:11:09.087] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:11:09.087] [INFO] primaryIndexToken - Borrowed 200000000000 tokens
+[2021-09-20T21:11:14.953] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:14.953] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T21:11:14.953] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T21:11:14.990] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:14.990] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T21:11:14.990] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:15.220] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:15.220] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:15.220] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:15.426] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T21:11:15.440] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:15.440] [INFO] primaryIndexToken - *******Borrower1 extra borrow Test******* 
+[2021-09-20T21:11:15.577] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:15.577] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T21:11:15.577] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T21:11:15.636] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:15.636] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T21:11:15.636] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:15.817] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:15.817] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:15.817] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:15.963] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:15.963] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:15.963] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:16.157] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T21:11:16.394] [INFO] primaryIndexToken - Borrowed 50000000000 tokens
+[2021-09-20T21:11:16.513] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:16.513] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T21:11:16.513] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T21:11:16.551] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:16.551] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T21:11:16.551] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:16.731] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:16.731] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:16.731] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:16.879] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:16.879] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:16.879] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:17.072] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T21:11:17.077] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:17.077] [INFO] primaryIndexToken - *******Borrower1 repay half borrow Test******* 
+[2021-09-20T21:11:17.193] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:17.193] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T21:11:17.193] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T21:11:17.225] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:17.226] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T21:11:17.226] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:17.369] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:17.369] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:17.369] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:17.510] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:17.510] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:17.510] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:17.727] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T21:11:18.107] [INFO] primaryIndexToken - Repayed 125000000000 tokens
+[2021-09-20T21:11:18.231] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:18.231] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T21:11:18.231] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T21:11:18.266] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:18.266] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T21:11:18.266] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:18.408] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:18.408] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:18.408] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:18.558] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:18.558] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:18.558] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:18.754] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T21:11:18.770] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:18.770] [INFO] primaryIndexToken - *******Borrower1 repay all borrow Test******* 
+[2021-09-20T21:11:18.931] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:18.931] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T21:11:18.931] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T21:11:18.996] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:18.996] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T21:11:18.996] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:11:19.182] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:19.182] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:19.182] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:19.357] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:19.358] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:19.358] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:19.547] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T21:11:19.764] [INFO] primaryIndexToken - Repayed 115792089237316195423570985008687907853269984665640564039457584007913129639935 tokens
+[2021-09-20T21:11:19.883] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:19.883] [INFO] primaryIndexToken -     USDCTest balance raw: 99999948958
+[2021-09-20T21:11:19.883] [INFO] primaryIndexToken -     USDCTest balance    : 99999.948958
+[2021-09-20T21:11:19.917] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:19.917] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:11:19.917] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:11:20.063] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:20.063] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:11:20.063] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:11:20.207] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:20.207] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:11:20.207] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:11:20.399] [INFO] primaryIndexToken - Account Liquidity: 404930828114
+[2021-09-20T21:11:20.411] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:20.411] [INFO] primaryIndexToken - *******Borrower2 Deposit Test******* 
+[2021-09-20T21:11:20.545] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:20.545] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:11:20.545] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:11:20.761] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:11:21.114] [INFO] primaryIndexToken - Deposited 1000000000000000000000000 PRJ
+[2021-09-20T21:11:21.233] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:21.233] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T21:11:21.233] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T21:11:21.262] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T21:11:21.266] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:21.267] [INFO] primaryIndexToken - *******Borrower2 borrow Test******* 
+[2021-09-20T21:11:21.544] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:21.544] [INFO] primaryIndexToken -     USDCTest balance raw: 0
+[2021-09-20T21:11:21.544] [INFO] primaryIndexToken -     USDCTest balance    : 0
+[2021-09-20T21:11:21.946] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:21.946] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:11:21.946] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:11:22.398] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:22.398] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T21:11:22.398] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T21:11:22.596] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:11:22.744] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T21:11:22.874] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:22.874] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:11:22.874] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T21:11:22.874] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T21:11:22.874] [INFO] primaryIndexToken - Borrowed 304048238349 tokens
+[2021-09-20T21:11:26.119] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:26.119] [INFO] primaryIndexToken -     USDCTest balance raw: 304048238349
+[2021-09-20T21:11:26.119] [INFO] primaryIndexToken -     USDCTest balance    : 304048.238349
+[2021-09-20T21:11:26.158] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:11:26.158] [INFO] primaryIndexToken -     amountBorrowed: 304048238349
+[2021-09-20T21:11:26.158] [INFO] primaryIndexToken -     amountPit: 304048238349
+[2021-09-20T21:11:26.297] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:26.297] [INFO] primaryIndexToken -     cPIT balance raw: 304048238349
+[2021-09-20T21:11:26.297] [INFO] primaryIndexToken -     cPIT balance    : 3040.48238349
+[2021-09-20T21:11:26.486] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:11:26.646] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T21:11:26.777] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:26.777] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:11:26.777] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T21:11:26.779] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T21:11:26.784] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:26.784] [INFO] primaryIndexToken - *******Borrower2 withdraws some part of PRJ Test******* 
+[2021-09-20T21:11:26.896] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:26.896] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T21:11:26.896] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T21:11:26.930] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T21:11:27.077] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:27.077] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:11:27.077] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T21:11:27.080] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T21:11:27.080] [INFO] primaryIndexToken - Withdrawed 200000000000000000000000 PRJ
+[2021-09-20T21:11:27.588] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:27.588] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999200000000000000000000000
+[2021-09-20T21:11:27.588] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999200000.000000000000000000
+[2021-09-20T21:11:27.623] [INFO] primaryIndexToken - Deposited PRJ amount: 800000000000000000000000
+[2021-09-20T21:11:27.877] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:27.877] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T21:11:27.877] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:11:27.879] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T21:11:27.886] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:27.886] [INFO] primaryIndexToken - *******Increased price of PRJ Test******* 
+[2021-09-20T21:11:28.032] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:28.032] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T21:11:28.032] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:11:28.033] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T21:11:29.444] [INFO] primaryIndexToken - Increased price of PRJ. USDC amount given: 500000000000
+[2021-09-20T21:11:29.635] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:29.635] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:11:29.635] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:11:29.637] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T21:11:29.645] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:29.645] [INFO] primaryIndexToken - *******First try to liquidate borrower2 Test******* 
+[2021-09-20T21:11:29.898] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:29.898] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:11:29.898] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:11:30.028] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:30.028] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:11:30.028] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:11:30.177] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:30.177] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:11:30.177] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:11:30.179] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T21:11:30.463] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:30.463] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:11:30.464] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:11:30.589] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:30.589] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:11:30.589] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:11:30.732] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:30.732] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:11:30.732] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:11:30.733] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T21:11:30.740] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:30.740] [INFO] primaryIndexToken - *******Decrease price of PRJ Test******* 
+[2021-09-20T21:11:30.868] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:30.868] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:11:30.868] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:11:30.869] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T21:11:31.162] [INFO] primaryIndexToken - Decreased price of PRJ. PRJ amount given: 500000000000000000000000
+[2021-09-20T21:11:31.306] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:31.306] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T21:11:31.306] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:11:31.307] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T21:11:31.314] [INFO] primaryIndexToken - 
+[2021-09-20T21:11:31.314] [INFO] primaryIndexToken - *******Second try to liquidate borrower2 Test******* 
+[2021-09-20T21:11:31.430] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:31.430] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:11:31.430] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:11:31.549] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:31.549] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:11:31.550] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:11:31.772] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:31.772] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T21:11:31.772] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:11:31.773] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T21:11:31.933] [INFO] primaryIndexToken - Amount liquidator1 send: 280513310768
+[2021-09-20T21:11:33.316] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:33.316] [INFO] primaryIndexToken -     PRJ1 balance raw: 800000000000000000000000
+[2021-09-20T21:11:33.316] [INFO] primaryIndexToken -     PRJ1 balance    : 800000.000000000000000000
+[2021-09-20T21:11:33.431] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:11:33.431] [INFO] primaryIndexToken -     USDCTest balance raw: 719486689232
+[2021-09-20T21:11:33.431] [INFO] primaryIndexToken -     USDCTest balance    : 719486.689232
+[2021-09-20T21:11:33.577] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:11:33.577] [INFO] primaryIndexToken -     numerator:   0
+[2021-09-20T21:11:33.577] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T21:11:33.577] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T21:27:43.140] [INFO] primaryIndexToken - ===============================================================================================
+[2021-09-20T21:27:48.344] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:48.344] [INFO] primaryIndexToken - *******Moderator deposits PRJ Test******* 
+[2021-09-20T21:27:48.936] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:48.936] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:27:48.936] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:27:49.107] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:27:49.682] [INFO] primaryIndexToken - Deposited 9000000000000000000000000 PRJ
+[2021-09-20T21:27:49.944] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:49.944] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999991000000000000000000000000
+[2021-09-20T21:27:49.944] [INFO] primaryIndexToken -     PRJ1 balance    : 9999991000000.000000000000000000
+[2021-09-20T21:27:49.974] [INFO] primaryIndexToken - Deposited PRJ amount: 9000000000000000000000000
+[2021-09-20T21:27:49.978] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:49.978] [INFO] primaryIndexToken - *******Moderator withdraw PRJ Test******* 
+[2021-09-20T21:27:50.111] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:50.111] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999991000000000000000000000000
+[2021-09-20T21:27:50.111] [INFO] primaryIndexToken -     PRJ1 balance    : 9999991000000.000000000000000000
+[2021-09-20T21:27:50.141] [INFO] primaryIndexToken - Deposited PRJ amount: 9000000000000000000000000
+[2021-09-20T21:27:50.345] [INFO] primaryIndexToken - Withdrawed 9000000000000000000000000 PRJ
+[2021-09-20T21:27:50.479] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:50.479] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:27:50.480] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:27:50.510] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:27:50.515] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:50.515] [INFO] primaryIndexToken - *******Supply Test******* 
+[2021-09-20T21:27:51.394] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:51.394] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000000000
+[2021-09-20T21:27:51.394] [INFO] primaryIndexToken -     USDCTest balance    : 100000000000.000000
+[2021-09-20T21:27:51.395] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:51.395] [INFO] primaryIndexToken -     cUSDCTest balance raw: 0
+[2021-09-20T21:27:51.395] [INFO] primaryIndexToken -     cUSDCTest balance    : 0
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T21:27:53.695] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T21:27:53.702] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:53.703] [INFO] primaryIndexToken - *******Redeem Test******* 
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken -     USDCTest balance raw: 99999000000000000
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken -     USDCTest balance    : 99999000000.000000
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken -     cUSDCTest balance raw: 1000000000000
+[2021-09-20T21:27:54.139] [INFO] primaryIndexToken -     cUSDCTest balance    : 10000.00000000
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T21:27:54.699] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T21:27:54.705] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:54.705] [INFO] primaryIndexToken - *******RedeemUnderlying Test******* 
+[2021-09-20T21:27:55.129] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:55.129] [INFO] primaryIndexToken -     USDCTest balance raw: 99999250000000000
+[2021-09-20T21:27:55.129] [INFO] primaryIndexToken -     USDCTest balance    : 99999250000.000000
+[2021-09-20T21:27:55.130] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:55.130] [INFO] primaryIndexToken -     cUSDCTest balance raw: 750000000000
+[2021-09-20T21:27:55.130] [INFO] primaryIndexToken -     cUSDCTest balance    : 7500.00000000
+[2021-09-20T21:27:55.573] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:55.573] [INFO] primaryIndexToken -     USDCTest balance raw: 99999500000000000
+[2021-09-20T21:27:55.573] [INFO] primaryIndexToken -     USDCTest balance    : 99999500000.000000
+[2021-09-20T21:27:55.574] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:55.574] [INFO] primaryIndexToken -     cUSDCTest balance raw: 500000000000
+[2021-09-20T21:27:55.574] [INFO] primaryIndexToken -     cUSDCTest balance    : 5000.00000000
+[2021-09-20T21:27:55.589] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:55.589] [INFO] primaryIndexToken - *******Borrower1 Deposit Test******* 
+[2021-09-20T21:27:55.717] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:55.717] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:27:55.717] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:27:55.888] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:27:56.230] [INFO] primaryIndexToken - Deposited 2000000000000000000000000 PRJ
+[2021-09-20T21:27:56.368] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:56.368] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999998000000000000000000000000
+[2021-09-20T21:27:56.368] [INFO] primaryIndexToken -     PRJ1 balance    : 9999998000000.000000000000000000
+[2021-09-20T21:27:56.402] [INFO] primaryIndexToken - Deposited PRJ amount: 2000000000000000000000000
+[2021-09-20T21:27:56.404] [INFO] primaryIndexToken - 
+[2021-09-20T21:27:56.404] [INFO] primaryIndexToken - *******Borrower1 borrow Test******* 
+[2021-09-20T21:27:56.528] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:56.528] [INFO] primaryIndexToken -     USDCTest balance raw: 100000000000
+[2021-09-20T21:27:56.528] [INFO] primaryIndexToken -     USDCTest balance    : 100000.000000
+[2021-09-20T21:27:57.048] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:27:57.049] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:27:57.049] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:27:57.456] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:27:57.456] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T21:27:57.456] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T21:27:57.660] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:27:57.660] [INFO] primaryIndexToken - Borrowed 200000000000 tokens
+[2021-09-20T21:28:03.642] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:03.642] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T21:28:03.642] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T21:28:03.678] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:03.678] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T21:28:03.678] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:03.917] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:03.917] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:03.917] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:04.184] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+                                                                        200000000000
+[2021-09-20T21:28:04.194] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:04.194] [INFO] primaryIndexToken - *******Borrower1 extra borrow Test******* 
+[2021-09-20T21:28:04.335] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:04.335] [INFO] primaryIndexToken -     USDCTest balance raw: 300000000000
+[2021-09-20T21:28:04.335] [INFO] primaryIndexToken -     USDCTest balance    : 300000.000000
+[2021-09-20T21:28:04.373] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:04.373] [INFO] primaryIndexToken -     amountBorrowed: 200000000000
+[2021-09-20T21:28:04.373] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:04.526] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:04.526] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:04.526] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:04.670] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:04.670] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:04.670] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:04.876] [INFO] primaryIndexToken - Account Liquidity: 204930828114
+[2021-09-20T21:28:05.147] [INFO] primaryIndexToken - Borrowed 50000000000 tokens
+[2021-09-20T21:28:05.266] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:05.266] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T21:28:05.266] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T21:28:05.299] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:05.299] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T21:28:05.299] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:05.466] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:05.466] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:05.466] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:05.639] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:05.639] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:05.639] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:05.867] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T21:28:05.891] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:05.891] [INFO] primaryIndexToken - *******Borrower1 repay half borrow Test******* 
+[2021-09-20T21:28:06.018] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:06.018] [INFO] primaryIndexToken -     USDCTest balance raw: 350000000000
+[2021-09-20T21:28:06.018] [INFO] primaryIndexToken -     USDCTest balance    : 350000.000000
+[2021-09-20T21:28:06.055] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:06.055] [INFO] primaryIndexToken -     amountBorrowed: 250000010464
+[2021-09-20T21:28:06.055] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:06.216] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:06.216] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:06.217] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:06.377] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:06.377] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:06.377] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:06.635] [INFO] primaryIndexToken - Account Liquidity: 154930817650
+[2021-09-20T21:28:07.037] [INFO] primaryIndexToken - Repayed 125000000000 tokens
+[2021-09-20T21:28:07.151] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:07.151] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T21:28:07.151] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T21:28:07.188] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:07.188] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T21:28:07.188] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:07.351] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:07.351] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:07.351] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:07.512] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:07.512] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:07.512] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:07.759] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T21:28:07.769] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:07.769] [INFO] primaryIndexToken - *******Borrower1 repay all borrow Test******* 
+[2021-09-20T21:28:07.892] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:07.892] [INFO] primaryIndexToken -     USDCTest balance raw: 225000000000
+[2021-09-20T21:28:07.892] [INFO] primaryIndexToken -     USDCTest balance    : 225000.000000
+[2021-09-20T21:28:07.928] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:07.928] [INFO] primaryIndexToken -     amountBorrowed: 125000041975
+[2021-09-20T21:28:07.928] [INFO] primaryIndexToken -     amountPit: 404930828114
+[2021-09-20T21:28:08.075] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:08.075] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:08.075] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:08.224] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:08.224] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:08.224] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:08.407] [INFO] primaryIndexToken - Account Liquidity: 279930786139
+[2021-09-20T21:28:08.639] [INFO] primaryIndexToken - Repayed 115792089237316195423570985008687907853269984665640564039457584007913129639935 tokens
+[2021-09-20T21:28:08.743] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:08.743] [INFO] primaryIndexToken -     USDCTest balance raw: 99999948958
+[2021-09-20T21:28:08.743] [INFO] primaryIndexToken -     USDCTest balance    : 99999.948958
+[2021-09-20T21:28:08.776] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:08.776] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:28:08.776] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:28:08.931] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:08.931] [INFO] primaryIndexToken -     PIT balance raw: 0
+[2021-09-20T21:28:08.931] [INFO] primaryIndexToken -     PIT balance    : 0
+[2021-09-20T21:28:09.066] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:09.066] [INFO] primaryIndexToken -     cPIT balance raw: 404930828114
+[2021-09-20T21:28:09.067] [INFO] primaryIndexToken -     cPIT balance    : 4049.30828114
+[2021-09-20T21:28:09.246] [INFO] primaryIndexToken - Account Liquidity: 404930828114
+[2021-09-20T21:28:09.254] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:09.254] [INFO] primaryIndexToken - *******Borrower2 Deposit Test******* 
+[2021-09-20T21:28:09.384] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:09.384] [INFO] primaryIndexToken -     PRJ1 balance raw: 10000000000000000000000000000000
+[2021-09-20T21:28:09.385] [INFO] primaryIndexToken -     PRJ1 balance    : 10000000000000.000000000000000000
+[2021-09-20T21:28:09.550] [INFO] primaryIndexToken - Deposited PRJ amount: 0
+[2021-09-20T21:28:09.821] [INFO] primaryIndexToken - Deposited 1000000000000000000000000 PRJ
+[2021-09-20T21:28:09.956] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:09.956] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T21:28:09.956] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T21:28:09.985] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T21:28:09.989] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:09.989] [INFO] primaryIndexToken - *******Borrower2 borrow Test******* 
+[2021-09-20T21:28:10.231] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:10.231] [INFO] primaryIndexToken -     USDCTest balance raw: 0
+[2021-09-20T21:28:10.231] [INFO] primaryIndexToken -     USDCTest balance    : 0
+[2021-09-20T21:28:10.540] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:10.540] [INFO] primaryIndexToken -     amountBorrowed: 0
+[2021-09-20T21:28:10.540] [INFO] primaryIndexToken -     amountPit: 0
+[2021-09-20T21:28:10.953] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:10.953] [INFO] primaryIndexToken -     cPIT balance raw: 0
+[2021-09-20T21:28:10.953] [INFO] primaryIndexToken -     cPIT balance    : 0
+[2021-09-20T21:28:11.152] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:28:11.342] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T21:28:11.502] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:11.502] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:28:11.502] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T21:28:11.502] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-09-20T21:28:11.503] [INFO] primaryIndexToken - Borrowed 304048238349 tokens
+[2021-09-20T21:28:14.013] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:14.013] [INFO] primaryIndexToken -     USDCTest balance raw: 304048238349
+[2021-09-20T21:28:14.013] [INFO] primaryIndexToken -     USDCTest balance    : 304048.238349
+[2021-09-20T21:28:14.046] [INFO] primaryIndexToken - Borrow position:
+[2021-09-20T21:28:14.046] [INFO] primaryIndexToken -     amountBorrowed: 304048238349
+[2021-09-20T21:28:14.046] [INFO] primaryIndexToken -     amountPit: 304048238349
+[2021-09-20T21:28:14.181] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:14.181] [INFO] primaryIndexToken -     cPIT balance raw: 304048238349
+[2021-09-20T21:28:14.181] [INFO] primaryIndexToken -     cPIT balance    : 3040.48238349
+[2021-09-20T21:28:14.365] [INFO] primaryIndexToken - Account Liquidity: 0
+[2021-09-20T21:28:14.517] [INFO] primaryIndexToken - Account PIT balance: 304048238349
+[2021-09-20T21:28:14.750] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:14.750] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:28:14.750] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T21:28:14.752] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T21:28:14.760] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:14.760] [INFO] primaryIndexToken - *******Borrower2 withdraws some part of PRJ Test******* 
+[2021-09-20T21:28:14.883] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:14.883] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999000000000000000000000000
+[2021-09-20T21:28:14.883] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999000000.000000000000000000
+[2021-09-20T21:28:14.915] [INFO] primaryIndexToken - Deposited PRJ amount: 1000000000000000000000000
+[2021-09-20T21:28:15.049] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:15.049] [INFO] primaryIndexToken -     numerator:   364857886018
+[2021-09-20T21:28:15.049] [INFO] primaryIndexToken -     denominator: 304048238349
+[2021-09-20T21:28:15.051] [INFO] primaryIndexToken -     health factor: 1.1999999999973688385621174865740251294785
+[2021-09-20T21:28:15.051] [INFO] primaryIndexToken - Withdrawed 200000000000000000000000 PRJ
+[2021-09-20T21:28:15.363] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:15.363] [INFO] primaryIndexToken -     PRJ1 balance raw: 9999999200000000000000000000000
+[2021-09-20T21:28:15.363] [INFO] primaryIndexToken -     PRJ1 balance    : 9999999200000.000000000000000000
+[2021-09-20T21:28:15.393] [INFO] primaryIndexToken - Deposited PRJ amount: 800000000000000000000000
+[2021-09-20T21:28:15.522] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:15.522] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T21:28:15.522] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:28:15.524] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T21:28:15.530] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:15.530] [INFO] primaryIndexToken - *******Increased price of PRJ Test******* 
+[2021-09-20T21:28:15.658] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:15.658] [INFO] primaryIndexToken -     numerator:   324442798468
+[2021-09-20T21:28:15.658] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:28:15.659] [INFO] primaryIndexToken -     health factor: 1.0670766455662177062217958359768080258570
+[2021-09-20T21:28:16.929] [INFO] primaryIndexToken - Increased price of PRJ. USDC amount given: 500000000000
+[2021-09-20T21:28:17.099] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:17.099] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:28:17.099] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:28:17.102] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T21:28:17.109] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:17.109] [INFO] primaryIndexToken - *******First try to liquidate borrower2 Test******* 
+[2021-09-20T21:28:17.355] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:17.355] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:28:17.355] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:28:17.479] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:17.479] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:28:17.479] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:28:17.617] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:17.617] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:28:17.617] [INFO] primaryIndexToken -     denominator: 304048261028
+[2021-09-20T21:28:17.618] [INFO] primaryIndexToken -     health factor: 1.9527292899311257033695992107833539692505
+[2021-09-20T21:28:17.873] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:17.873] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:28:17.873] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:28:17.984] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:17.984] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:28:17.984] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:28:18.122] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:18.122] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:28:18.122] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:28:18.124] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T21:28:18.132] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:18.132] [INFO] primaryIndexToken - *******Decrease price of PRJ Test******* 
+[2021-09-20T21:28:18.256] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:18.256] [INFO] primaryIndexToken -     numerator:   593723944862
+[2021-09-20T21:28:18.256] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:28:18.258] [INFO] primaryIndexToken -     health factor: 1.9527288529617931092281110835867960599227
+[2021-09-20T21:28:18.554] [INFO] primaryIndexToken - Decreased price of PRJ. PRJ amount given: 500000000000000000000000
+[2021-09-20T21:28:18.713] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:18.713] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T21:28:18.713] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:28:18.715] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T21:28:18.720] [INFO] primaryIndexToken - 
+[2021-09-20T21:28:18.720] [INFO] primaryIndexToken - *******Second try to liquidate borrower2 Test******* 
+[2021-09-20T21:28:18.839] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:18.839] [INFO] primaryIndexToken -     PRJ1 balance raw: 0
+[2021-09-20T21:28:18.839] [INFO] primaryIndexToken -     PRJ1 balance    : 0
+[2021-09-20T21:28:18.949] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:18.949] [INFO] primaryIndexToken -     USDCTest balance raw: 1000000000000
+[2021-09-20T21:28:18.949] [INFO] primaryIndexToken -     USDCTest balance    : 1000000.000000
+[2021-09-20T21:28:19.092] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:19.092] [INFO] primaryIndexToken -     numerator:   252461979691
+[2021-09-20T21:28:19.092] [INFO] primaryIndexToken -     denominator: 304048329066
+[2021-09-20T21:28:19.093] [INFO] primaryIndexToken -     health factor: 0.8303350341260973933774770787741659083445
+[2021-09-20T21:28:19.226] [INFO] primaryIndexToken - Amount liquidator1 send: 280513310768
+[2021-09-20T21:28:20.544] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:20.544] [INFO] primaryIndexToken -     PRJ1 balance raw: 800000000000000000000000
+[2021-09-20T21:28:20.544] [INFO] primaryIndexToken -     PRJ1 balance    : 800000.000000000000000000
+[2021-09-20T21:28:20.657] [INFO] primaryIndexToken - Account Balance:
+[2021-09-20T21:28:20.657] [INFO] primaryIndexToken -     USDCTest balance raw: 719486689232
+[2021-09-20T21:28:20.657] [INFO] primaryIndexToken -     USDCTest balance    : 719486.689232
+[2021-09-20T21:28:20.799] [INFO] primaryIndexToken - Account Health:
+[2021-09-20T21:28:20.799] [INFO] primaryIndexToken -     numerator:   0
+[2021-09-20T21:28:20.799] [INFO] primaryIndexToken -     denominator: 0
+[2021-09-20T21:28:20.799] [INFO] primaryIndexToken -     health factor cant be calculated because division by zero is forbidden
+[2021-10-04T15:05:24.768] [INFO] primaryIndexToken - ===============================================================================================
