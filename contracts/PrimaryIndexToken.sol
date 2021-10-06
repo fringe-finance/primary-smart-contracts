@@ -50,9 +50,11 @@ contract PrimaryIndexToken is Initializable,
     mapping(address => mapping(uint256 => UserPrjPosition)) public userPrjPosition; // user address => PRJ token index => UserPrjPosition
 
     mapping(address => address) public cTokensList; //underlying token address => cToken address
-    // mapping(address => uint256) public totalSupplyToken; // underlying token address => total supply of Token
-    // mapping(address => uint256) public totalSupplyCToken; //cToken address => total supply of cToken
+    
     mapping(address => mapping(uint256 => UserBorrowPosition)) public userBorrowPosition; //user address => lending tokens index => UserBorrowPosition
+    mapping(address => mapping(uint256 => uint256)) public suppliedLendingToken; // user address => lendingTokenId => amount supplied
+    mapping(address => uint256) public indexPrjToken;   //prj address => index of prj in list `projectTokens`
+    mapping(address => uint256) public indexLendingToken;//lending token address => index lending token in list `lendingTokens`
 
     struct PrjSaleInfo{
         uint8 numerator;
@@ -101,7 +103,7 @@ contract PrimaryIndexToken is Initializable,
 
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
@@ -133,6 +135,7 @@ contract PrimaryIndexToken is Initializable,
 
     function addPrjToken(address _tokenPRJ, uint8 _lvrNumerator, uint8 _lvrDenominator, uint8 _ltfNumerator, uint8 _ltfDenominator,uint8 _saleNumerator, uint8 _saleDenominator) public onlyAdmin {
         require(_lvrNumerator <= _lvrDenominator, "Primary Index Token: _lvrNumerator should be less than _lvrDenominator!");
+        indexPrjToken[_tokenPRJ] = projectTokens.length;
         projectTokens.push(_tokenPRJ);
         emit AddPrjToken(_msgSender(), _tokenPRJ);
         _setLvr(_tokenPRJ, _lvrNumerator, _lvrDenominator);
@@ -142,6 +145,7 @@ contract PrimaryIndexToken is Initializable,
 
     function addLendingToken(address _lendingToken) public onlyAdmin{
         require(_lendingToken != address(0),"Primary Index Token: invalid _lendingToken address!");
+        indexLendingToken[_lendingToken] = lendingTokens.length;
         lendingTokens.push(_lendingToken);
     }
 
@@ -264,21 +268,24 @@ contract PrimaryIndexToken is Initializable,
         require(amountLendingToken > 0, "Primary Index Token: amountLendingToken should be greated than zero!");
         address lendingToken = lendingTokens[lendingTokenId];
         address cLendingToken = cTokensList[lendingToken];
-           
+        
         (, uint256 mintedAmount) = ICLendingToken(cLendingToken).mintTo(_msgSender(),amountLendingToken);
+        suppliedLendingToken[_msgSender()][lendingTokenId] += amountLendingToken;
 
         emit Supply(_msgSender(), lendingTokenId, lendingToken, amountLendingToken,cLendingToken,mintedAmount);
     }
-
 
     function redeem(uint256 lendingTokenId, uint256 amountCLendingToken) public {
         require(lendingTokenId < lendingTokens.length, "Primary Index Token: invalid lendingTokenId!");
         require(amountCLendingToken > 0, "Primary Index Token: amountLendingToken should be greated than zero!");
         address lendingToken = lendingTokens[lendingTokenId];
         address cLendingToken = cTokensList[lendingToken];
-
+        
+        uint256 balanceOfMsgSenderBefore = IERC20Upgradeable(lendingToken).balanceOf(_msgSender());
         (uint redeemError) = ICLendingToken(cLendingToken).redeemTo(_msgSender(), amountCLendingToken);
         require(redeemError == 0,"Primary Index Token: redeemError is not zero!.It may be caused trying to redeem more than user supply.");
+        uint256 balanceOfMsgSenderAfter = IERC20Upgradeable(lendingToken).balanceOf(_msgSender());
+        suppliedLendingToken[_msgSender()][lendingTokenId] -= (balanceOfMsgSenderBefore - balanceOfMsgSenderAfter);
         emit Redeem(_msgSender(), lendingTokenId, lendingToken, cLendingToken, amountCLendingToken);
     }
 
@@ -290,6 +297,8 @@ contract PrimaryIndexToken is Initializable,
 
         uint redeemUnderlyingError = ICLendingToken(cLendingToken).redeemUnderlyingTo(_msgSender(), amountLendingToken);
         require(redeemUnderlyingError == 0,"Primary Index Token: redeemUnderlyingError not zero! It may be caused by trying to redeem more than user supply");
+        suppliedLendingToken[_msgSender()][lendingTokenId] -= amountLendingToken;
+
 
         emit RedeemUnderlying(_msgSender(), lendingTokenId, lendingToken, cLendingToken, amountLendingToken);
     }
@@ -330,7 +339,7 @@ contract PrimaryIndexToken is Initializable,
     }
 
 
-    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken) public {
+    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj,uint256 prjAmount) public {
         require(lendingTokenId < lendingTokens.length, "Primary Index Token: invalid lendingTokenId!");
         require(amountLendingToken > 0, "Primary Index Token: amountLendingToken should be greated than zero!");
         address lendingToken = lendingTokens[lendingTokenId];
@@ -346,7 +355,7 @@ contract PrimaryIndexToken is Initializable,
         else{
             position.amountBorrowed = ICLendingToken(cLendingToken).borrowBalanceCurrent(_msgSender());
         }
-        emit RepayBorrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken);
+        emit RepayBorrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken,prj,prjAmount);
        
     }
 

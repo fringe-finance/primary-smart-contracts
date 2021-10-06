@@ -102,6 +102,29 @@ interface IPrimaryIndexToken {
      */
     function userBorrowPosition(address user, uint256 lendingTokenId) external view returns(uint256 amountBorrowed, uint256 amountPit);
 
+    //    mapping(address => mapping(uint256 => uint256)) public suppliedLendingToken; // user address => lendingTokenId => amount supplied
+    /**
+     * @dev
+     * @param user - the address of user, who borrowed lending token
+     * @param lendingTokenId - id of project token in list `lendingTokens`.
+     *                         starts from 0 to lendingTokens.length-1;
+     */
+    function suppliedLendingToken(address user, uint256 lendingTokenId) external view returns(uint256);
+
+    //mapping(address => uint256) public indexPrjToken;   //prj address => index of prj in list `projectTokens`
+    /**
+     * @dev returns the index of address of project token in list `projectTokens`
+     * @param prj - address of project token
+     */
+    function indexPrjToken(address prj) external view returns(uint256);
+    
+    //mapping(address => uint256) public indexLendingToken;//lending token address => index lending token in list `lendingTokens`
+    /**
+     * @dev returns the index of address of lending token in list `lendingTokens`
+     * @param lendingToken - address of lending token
+     */
+    function indexLendingToken(address lendingToken) external view returns(uint256);
+
     //Lvr = Loan to Value Ratio  
     struct LvrInfo{
         uint8 numerator;
@@ -146,7 +169,7 @@ interface IPrimaryIndexToken {
 
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount);
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
@@ -278,7 +301,7 @@ interface IPrimaryIndexToken {
      * @param lendingTokenId the lending token id in list `lendingTokens`
      * @param amountLendingToken the amount of lending token to repay.
      */
-    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken) external;
+    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj,uint256 prjAmount) external;
  
     /**
      * @dev liquidate the borrower position.
