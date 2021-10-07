@@ -235,31 +235,39 @@ contract PrimaryIndexToken is Initializable,
         require(prjId < projectTokens.length,"Primary Index Token: invalid prjId. ");
         require(amountPrj > 0 && amountPrj <= userPrjPosition[_msgSender()][prjId].amountPrjDeposited, "Primary Index Token: amountPrj should be greated than zero and less equal than position staked!");
         address tokenPrj = projectTokens[prjId];
+        bool withdrawerIsBorrower = false;
+        uint256 possibleLendingTokenIndexes = 0;
 
-        UserPrjPosition storage msgSenderPosition = userPrjPosition[_msgSender()][prjId];
-        for(uint i=0;i < lendingTokens.length; i++){
+        UserPrjPosition storage msgSenderPrjPosition = userPrjPosition[_msgSender()][prjId];
+        for(uint i=0; i < lendingTokens.length; i++){
             UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[_msgSender()][i];
             if(msgSenderBorrowPosition.amountBorrowed > 0){
+                withdrawerIsBorrower = true;
+                msgSenderBorrowPosition.amountBorrowed = ICLendingToken(cTokensList[lendingTokens[i]]).borrowBalanceCurrent(_msgSender());
                 (uint prevNum, uint prevDenom) = healthFactor(_msgSender(), i);
-                msgSenderPosition.amountPrjDeposited -= amountPrj;
+                msgSenderPrjPosition.amountPrjDeposited -= amountPrj;
                 (uint newNum, uint newDenom) = healthFactor(_msgSender(), i);
                 if(newNum >= newDenom){
-                    totalStakedPrj[tokenPrj] -= amountPrj;
-                    IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-                    emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+                    possibleLendingTokenIndexes++;
                 }
-                else{
-                    msgSenderPosition.amountPrjDeposited += amountPrj;
-                }
-                msgSenderBorrowPosition.amountBorrowed = ICLendingToken(cTokensList[lendingTokens[i]]).borrowBalanceCurrent(_msgSender());
-                emit Test4(prevNum, prevDenom, newNum, newDenom);
-                return;
+                //emit Test4(prevNum, prevDenom, newNum, newDenom);
+                //return;
             }
         }
-        msgSenderPosition.amountPrjDeposited -= amountPrj;
-        totalStakedPrj[tokenPrj] -= amountPrj;
-        IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-        emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+        if(!withdrawerIsBorrower){
+            msgSenderPrjPosition.amountPrjDeposited -= amountPrj;
+            totalStakedPrj[tokenPrj] -= amountPrj;
+            IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
+            emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+            return;
+        }
+        if(possibleLendingTokenIndexes > 0){
+            totalStakedPrj[tokenPrj] -= amountPrj;
+            IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
+            emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+        }else{
+            revert("Primary Index Token: the new account health is less than 1 when withdrawing this amount of PRJ");
+        }
          
     }
 
@@ -285,7 +293,7 @@ contract PrimaryIndexToken is Initializable,
         (uint redeemError) = ICLendingToken(cLendingToken).redeemTo(_msgSender(), amountCLendingToken);
         require(redeemError == 0,"Primary Index Token: redeemError is not zero!.It may be caused trying to redeem more than user supply.");
         uint256 balanceOfMsgSenderAfter = IERC20Upgradeable(lendingToken).balanceOf(_msgSender());
-        suppliedLendingToken[_msgSender()][lendingTokenId] -= (balanceOfMsgSenderBefore - balanceOfMsgSenderAfter);
+        suppliedLendingToken[_msgSender()][lendingTokenId] -= (balanceOfMsgSenderAfter - balanceOfMsgSenderBefore);
         emit Redeem(_msgSender(), lendingTokenId, lendingToken, cLendingToken, amountCLendingToken);
     }
 
