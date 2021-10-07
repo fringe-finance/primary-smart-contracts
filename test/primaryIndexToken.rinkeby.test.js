@@ -205,8 +205,6 @@ contract('PrimaryIndexToken', (accounts) => {
 
     });
 
-
-
     //redeem tests
     {
     it('Supplier1 redeem USDCTest',async()=>{
@@ -218,8 +216,9 @@ contract('PrimaryIndexToken', (accounts) => {
         let supplier1CUSDCbalanceBefore = await getERC20balance(cUSDCAddress,supplier1);
         await printERC20balance(supplier1USDCbalanceBefore);
         await printERC20balance(supplier1CUSDCbalanceBefore);
-        
-       
+        let supplier1USDCsuppliedLendingTokenBefore = await primaryIndexToken.suppliedLendingToken(supplier1,lendingTokenId,{from:supplier1});
+        pitLogger.info("Supplied lending token before: "+supplier1USDCsuppliedLendingTokenBefore);
+
         let amountCUSDCtoRedeem = supplier1CUSDCbalanceBefore.balance.div(new BN(4));
         let redeemResult = await primaryIndexToken.redeem(lendingTokenId,amountCUSDCtoRedeem,{from:supplier1});
         {
@@ -233,6 +232,9 @@ contract('PrimaryIndexToken', (accounts) => {
         let supplier1CUSDCbalanceAfter = await getERC20balance(cUSDCAddress,supplier1);
         await printERC20balance(supplier1UsdctestAmountAfter);
         await printERC20balance(supplier1CUSDCbalanceAfter);
+
+        let supplier1USDCsuppliedLendingTokenAfter = await primaryIndexToken.suppliedLendingToken(supplier1,lendingTokenId,{from:supplier1});
+        pitLogger.info("Supplied lending token after : "+supplier1USDCsuppliedLendingTokenAfter)
     });
 
     it('Supplier1 redeemUnderlying USDCTest',async()=>{
@@ -309,8 +311,7 @@ contract('PrimaryIndexToken', (accounts) => {
         
         let amountLendingTokenToBorrow = USDCmultiplier.mul(new BN(200_000));
         pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
-        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,{from:borrower1});
-
+        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower1});
 
         let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
         await printERC20balance(borrower1USDCbalanceAfter);
@@ -346,7 +347,7 @@ contract('PrimaryIndexToken', (accounts) => {
         await printLiquidity(borrower1LiquidityBefore);
         
         let amountLendingTokenToBorrow = USDCmultiplier.mul(new BN(50_000));
-        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,{from:borrower1});
+        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower1});
         pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
 
         let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
@@ -386,7 +387,7 @@ contract('PrimaryIndexToken', (accounts) => {
         
         let amountLendingTokenToRepay = USDCmultiplier.mul(new BN(125_000));
         await approveTransferFrom(USDCaddress,cUSDCAddress,borrower1,amountLendingTokenToRepay);
-        let borrowRes = await primaryIndexToken.repayBorrow(lendingTokenId, amountLendingTokenToRepay, {from:borrower1});
+        let borrowRes = await primaryIndexToken.repayBorrow(lendingTokenId, amountLendingTokenToRepay,PRJaddress,toBN(10), {from:borrower1});
         pitLogger.info("Repayed "+ amountLendingTokenToRepay+" tokens");
 
         let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
@@ -427,7 +428,7 @@ contract('PrimaryIndexToken', (accounts) => {
         
         let amountLendingTokenToRepay = (new BN(2)).pow(new BN(256)).sub(new BN(1));//USDCmultiplier.mul(new BN(125_000));
         await approveTransferFrom(USDCaddress,cUSDCAddress,borrower1,amountLendingTokenToRepay);
-        let borrowRes = await primaryIndexToken.repayBorrow(lendingTokenId, amountLendingTokenToRepay, {from:borrower1});
+        let borrowRes = await primaryIndexToken.repayBorrow(lendingTokenId, amountLendingTokenToRepay, PRJaddress,toBN(10),{from:borrower1});
         pitLogger.info("Repayed "+ amountLendingTokenToRepay+" tokens");
 
         let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
@@ -496,7 +497,7 @@ contract('PrimaryIndexToken', (accounts) => {
         
         let amountLendingTokenToBorrow = borrower2PitBalanceBefore;//USDCmultiplier.mul(new BN(405_000));
         pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
-        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,{from:borrower2});
+        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower2});
 
         let borrower2USDCbalanceAfter = await getERC20balance(USDCaddress,borrower2);
         await printERC20balance(borrower2USDCbalanceAfter);
@@ -798,5 +799,7 @@ contract('PrimaryIndexToken', (accounts) => {
         );
     }
 
-   
+    function toBN(number) {
+        return web3.utils.toBN(number);
+    }
 });
