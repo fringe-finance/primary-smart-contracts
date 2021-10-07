@@ -23,7 +23,6 @@ module.exports = async function (deployer,network,accounts) {
         console.log("ProxyAdmin Address: "+ProxyAdmin.address)
     });
 
-  
 //=========================================================
 
     let simplePriceOracleAddress;
@@ -95,7 +94,7 @@ module.exports = async function (deployer,network,accounts) {
         console.log("Comptroller address: "+instance.address);
     });
 
-    let comptrollerProxyAddress;   
+    let comptrollerProxyAddress;// = '0x629527bF95584eC4780628D5A0c26F0b1f895eC5';
     await deployer.deploy(  TransparentUpgradeableProxy,
                             comptrollerMasterCopyAddress, 
                             proxyAdminAddress,

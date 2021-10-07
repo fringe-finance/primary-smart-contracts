@@ -23,10 +23,10 @@ module.exports = async function (deployer,network,accounts) {
     if(network == 'testrinkeby' || network == 'rinkeby' || network == 'rinkeby-fork'){
 
         let usdctestAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        let proxyAdminAddress = ProxyAdmin.address;//'0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba';//
-        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;//'0xC0f988FDa256C92cA28e78F4be85F711b5209945';//
-        let simplePriceOracleAddress = JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress; //'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
-        let jumpRateModelAddress = JumpRateModelV2.address; // '0x8ADb2bb3292e8880C0E76Caa4DfFAe5e5F23f7BB';//
+        let proxyAdminAddress = ProxyAdmin.address;
+        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;
+        let simplePriceOracleAddress =JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress;
+        let jumpRateModelAddress = JumpRateModelV2.address;
         
         let initialExchangeRateMantissa = multiplier18;
         let name = "cUSDC Test Token";
@@ -76,11 +76,14 @@ module.exports = async function (deployer,network,accounts) {
         
 
         let comptroller = await Comptroller.at(comptrollerAddress);
-        await comptroller._supportMarket(cUsdcProxyAddress,{from:deployMaster});
-        console.log("Comptroller support market "+cUsdcProxyAddress);
+        await comptroller._supportMarket(cUsdcProxyAddress,{from:deployMaster}).then(function(){
+            console.log("Comptroller support market "+cUsdcProxyAddress);
+        });
         let collateralFactor = multiplier18.div(new BN(2));
-        let collfacres = await comptroller._setCollateralFactor(cUsdcProxyAddress,collateralFactor,{from:deployMaster});
-        console.log("Collateral factor set: "+collateralFactor);
+        let collfacres = await comptroller._setCollateralFactor(cUsdcProxyAddress,collateralFactor,{from:deployMaster}).then(function(){
+            console.log("Collateral factor set: "+collateralFactor);
+        });
+        
         //console.log(collfacres['logs'][0]['args']);
 
     }

@@ -26,11 +26,11 @@ module.exports = async function (deployer,network,accounts) {
 
     if(network == 'testrinkeby' || network == 'rinkeby' || network == 'rinkeby-fork'){
     
-        let proxyAdminAddress = ProxyAdmin.address;//'0xabb233Bc373D8e61179B33152f8b9C3C0F8262Ba';//
-        let primaryIndexTokenAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;//'0xA33652B9d55a5c061316c2D1B749a1C98e51C001';//
-        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;//'0xC0f988FDa256C92cA28e78F4be85F711b5209945';//
-        let jumpRateModelAddress = JumpRateModelV2.address;//'0x8ADb2bb3292e8880C0E76Caa4DfFAe5e5F23f7BB';//
-        let simplePriceOracleAddress = JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress;;//'0xd84111ba8FcFd6ffcbA858702289c3E0E93386ea';//
+        let proxyAdminAddress = ProxyAdmin.address;
+        let primaryIndexTokenAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
+        let comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;
+        let jumpRateModelAddress = JumpRateModelV2.address;
+        let simplePriceOracleAddress = JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress;
         let initialExchangeRateMantissa = multiplier18.mul(new BN(1));//.div(new BN(100));
         let name = "cPrimaryIndexToken";
         let symbol = "cPIT";
@@ -79,21 +79,27 @@ module.exports = async function (deployer,network,accounts) {
         });
        
         let simplePriceOracle = await SimplePriceOracle.at(simplePriceOracleAddress);
-        await simplePriceOracle.setUnderlyingPrice(cPrimaryIndexTokenProxyAddress, multiplier18, {from:deployMaster});
+        await simplePriceOracle.setUnderlyingPrice(cPrimaryIndexTokenProxyAddress, multiplier18, {from:deployMaster}).then(function(){
+            console.log("set underlying price of cPrimaryIndexToken at "+simplePriceOracleAddress);
+        });
         
         
         let comptroller = await Comptroller.at(comptrollerAddress);
-        await comptroller._supportMarket(cPrimaryIndexTokenProxyAddress,{from:deployMaster});
-        console.log("Comptroller support market "+cPrimaryIndexTokenProxyAddress);
+        await comptroller._supportMarket(cPrimaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
+            console.log("Comptroller support market "+cPrimaryIndexTokenProxyAddress);
+        });
+        
         let collateralFactor = multiplier18//.div(new BN(2));
-        let collfacres = await comptroller._setCollateralFactor(cPrimaryIndexTokenProxyAddress, collateralFactor, {from:deployMaster});
+        let collfacres = await comptroller._setCollateralFactor(cPrimaryIndexTokenProxyAddress, collateralFactor, {from:deployMaster}).then(function(){
+            console.log("Collateral factor set: "+collateralFactor);
+        });
         // console.log(collfacres);
         // console.log(collfacres['logs']['0']['args']);
-        console.log("Collateral factor set: "+collateralFactor);
-
-
+        
         let primaryIndexToken = await PrimaryIndexToken.at(primaryIndexTokenAddress);
-        await primaryIndexToken.setCPrimaryIndexToken(cPrimaryIndexTokenProxyAddress,{from:deployMaster});
+        await primaryIndexToken.setCPrimaryIndexToken(cPrimaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
+            console.log("Primary Index Token set CPrimaryIndexToken at "+primaryIndexTokenAddress);
+        });
 
        
     }
