@@ -27,7 +27,7 @@ interface IPrimaryIndexToken {
     /**
      * @dev returns the address of cPrimaryIndexToken
      */
-    function cPrimaryIndexToken() external view returns(address);
+    function bPrimaryIndexToken() external view returns(address);
 
     /**
      * @dev return the address of price oracle contract
@@ -86,21 +86,23 @@ interface IPrimaryIndexToken {
      */
     function userPrjPosition(address user,uint256 prjId) external view returns(uint256);
     
-    //mapping(address => address) public cTokensList; //underlying token address => cToken address
+    //mapping(address => address) public bTokensList; //underlying token address => cToken address
     /**
      * @dev return the address of cToken of `lendingToken`
      * @param lendingToken - address of lending token.
      */
-    function cTokensList(address lendingToken) external view returns(address);
+    function bTokensList(address lendingToken) external view returns(address);
 
     // mapping(address => mapping(uint256 => UserBorrowPosition)) public userBorrowPosition; //user address => lending tokens index => UserBorrowPosition
     /**
      * @dev 
      * @param user - the address of user, who borrowed lending token
-     * @param lendingTokenId - id of project token in list `lendingTokens`.
+     * @param lendingTokenId - id of lending token in list `lendingTokens`.
+     *                         starts from 0 to lendingTokens.length-1;
+     * @param projectTokenId - id of project token in list `projectTokens`.
      *                         starts from 0 to lendingTokens.length-1;
      */
-    function userBorrowPosition(address user, uint256 lendingTokenId) external view returns(uint256 amountBorrowed, uint256 amountPit);
+    function userBorrowPosition(address user, uint256 lendingTokenId,uint256 projectTokenId) external view returns(uint256 amountBorrowed, uint256 amountPit);
 
     //    mapping(address => mapping(uint256 => uint256)) public suppliedLendingToken; // user address => lendingTokenId => amount supplied
     /**
@@ -109,21 +111,26 @@ interface IPrimaryIndexToken {
      * @param lendingTokenId - id of project token in list `lendingTokens`.
      *                         starts from 0 to lendingTokens.length-1;
      */
-    function suppliedLendingToken(address user, uint256 lendingTokenId) external view returns(uint256);
+    function suppliedLendingToken(address user, uint256 lendingTokenId) external view returns(uint256 amountSupplied);
 
     //mapping(address => uint256) public indexPrjToken;   //prj address => index of prj in list `projectTokens`
     /**
      * @dev returns the index of address of project token in list `projectTokens`
      * @param prj - address of project token
      */
-    function indexPrjToken(address prj) external view returns(uint256);
+    function indexPrjToken(address prj) external view returns(uint256 prjId);
     
     //mapping(address => uint256) public indexLendingToken;//lending token address => index lending token in list `lendingTokens`
     /**
      * @dev returns the index of address of lending token in list `lendingTokens`
      * @param lendingToken - address of lending token
      */
-    function indexLendingToken(address lendingToken) external view returns(uint256);
+    function indexLendingToken(address lendingToken) external view returns(uint256 lendingTokenId);
+
+    struct PrjSaleInfo{
+        uint8 numerator;
+        uint8 denominator;
+    }
 
     //Lvr = Loan to Value Ratio  
     struct LvrInfo{
@@ -372,13 +379,17 @@ interface IPrimaryIndexToken {
      * @dev borrow the lending token from pool
      * @param lendingTokenId the lending token id in list `lendingTokens`
      * @param amountLendingToken the amount of lending token to borrow.
+     * @param prj the address of project token
+     * @param prjAmount amount of project token.
      */
-    function borrow(uint256 lendingTokenId, uint256 amountLendingToken) external;
+    function borrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj, uint256 prjAmount) external;
 
     /**
      * @dev repay the lending token from pool
      * @param lendingTokenId the lending token id in list `lendingTokens`
      * @param amountLendingToken the amount of lending token to repay.
+     * @param prj the address of project token
+     * @param prjAmount amount of project token.
      */
     function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj,uint256 prjAmount) external;
  
@@ -400,6 +411,13 @@ interface IPrimaryIndexToken {
      * @param lendingTokenId the lending token id in list `lendingTokens`
      */
     function healthFactor(address account,uint256 lendingTokenId) external view returns(uint256 numerator, uint256 denominator);
+
+    /**
+     * @param account - the address of user
+     * @param lendingTokenId the lending token id in list `lendingTokens`
+     * @param prjId the project token id in list `projectTokens` 
+     */
+    function healthFactorForPosition(address account,uint256 lendingTokenId,uint prjId) external view returns(uint256 numerator, uint256 denominator);
 
     /**
      * @dev gets account liquidity
@@ -448,13 +466,7 @@ interface IPrimaryIndexToken {
      * @param account - the address of user
      * @param lendingTokenId the lending token id in list `lendingTokens`
      */
-    function getBorrowPosition(address account, uint256 lendingTokenId) external view returns(uint256,uint256);
-    
-    /**
-     * @dev get the liquidation treshold factor of `account`
-     * @param account - the address of user
-     */
-    function liquidationThreshold(address account) external view returns(uint256);
+    function getBorrowPosition(address account, uint256 lendingTokenId, uint256 prjId) external view returns(uint256 amountBorrowed,uint256 amountPit);
 
     /**
      * @dev get the liquidation treshold factor of `account` for position
@@ -463,6 +475,20 @@ interface IPrimaryIndexToken {
      */
     function liquidationThresholdForPosition(address account, uint256 prjId) external view returns(uint256);
 
+    /**
+     * @dev get the liquidation treshold factor of `account`
+     * @param account - the address of user
+     */
+    function liquidationThreshold(address account) external view returns(uint256);
+
+      /**
+     * @dev returns the amount of PIT of account in position `prjId`
+     * @param account - the address of user
+     * @param prjId the project token id in list `projectTokens` 
+     */
+    function balanceOfPitPosition(address account, uint256 prjId) external view returns (uint256);
+
+   
     /**
      * @dev returns the amount of PIT of account
      * @param account - the address of user
@@ -475,11 +501,10 @@ interface IPrimaryIndexToken {
     function balanceOfPitDependingOnPrj(address account, uint256[] memory prjIndexes) external view returns(uint256);
  
     /**
-     * @dev returns the amount of PIT of account in position `prjId`
-     * @param account - the address of user
-     * @param prjId the project token id in list `projectTokens` 
+     * @dev returns the uniswap reserves.
+     * @param prj address of project token
      */
-    function balanceOfPitPosition(address account, uint256 prjId) external view returns (uint256);
+    function getUniswapReserves(address prj) external view returns(uint reserve1,uint reserve2);
 
     /**
      * @dev returns the total supply of Primary Index Token
