@@ -544,3 +544,43 @@ Summary
 > Total deployments:   1
 > Final cost:          0.09323194 ETH
 
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 30000000 (0x1c9c380)
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Deploying 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0x27d199813ee3cc6f69c7fd052e64bb2f01c19384e0fd64435a118d9a810e88e0
+   > Blocks: 2            Seconds: 30
+   > contract address:    0x84681B7723C29f70122C53d1a9Bd6962b2680D59
+   > block number:        9430035
+   > block timestamp:     1633708709
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             157.681596839947625713
+   > gas used:            4724891 (0x48189b)
+   > gas price:           20 gwei
+   > value sent:          0 ETH
+   > total cost:          0.09449782 ETH
+
+PrimaryIndexToken master copy: 0x84681B7723C29f70122C53d1a9Bd6962b2680D59
+Proxy admin upgraded primaryIndexToken at 0xBdF47AB5c94341BebC47BEBe3E72560801D26538
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.09449782 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.09449782 ETH

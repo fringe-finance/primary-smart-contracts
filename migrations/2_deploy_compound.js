@@ -23,6 +23,11 @@ module.exports = async function (deployer,network,accounts) {
         console.log("ProxyAdmin Address: "+ProxyAdmin.address)
     });
 
+    const proxyAdmin_data = {
+        "proxyAdminAddress": proxyAdminAddress
+    }
+    fs.writeFileSync('migrations/proxyAdminAddress.json', JSON.stringify(proxyAdmin_data, null, '\t'));
+
 //=========================================================
 
     let simplePriceOracleAddress;
@@ -45,7 +50,7 @@ module.exports = async function (deployer,network,accounts) {
     let simplePriceOracle = await SimplePriceOracle.at(simplePriceOracleProxyAddress);
     await simplePriceOracle.init({from:deployMaster}).then(function(){
         console.log("simple price oracle called init at "+simplePriceOracleProxyAddress);
-    })
+    });
 
     const simplePriceOracleProxyAddress_data = {
         "simplePriceOracleProxyAddress":simplePriceOracleProxyAddress
@@ -72,6 +77,12 @@ module.exports = async function (deployer,network,accounts) {
         console.log("JumpRateModelV2 address: "+JumpRateModelV2.address);
     });
 
+    const jumpRateModelAddress_data = {
+        "jumpRateModelAddress": jumpRateModelAddress
+    }
+    fs.writeFileSync('migrations/jumpRateModelAddress.json', JSON.stringify(jumpRateModelAddress_data, null, '\t'));
+
+
     // let jumpRate = await JumpRateModelV2.at(jumpRateModelAddress);
     // let brpb = await jumpRate.baseRatePerBlock();
     // let bpy = await jumpRate.blocksPerYear();
@@ -94,7 +105,7 @@ module.exports = async function (deployer,network,accounts) {
         console.log("Comptroller address: "+instance.address);
     });
 
-    let comptrollerProxyAddress;// = '0x629527bF95584eC4780628D5A0c26F0b1f895eC5';
+    let comptrollerProxyAddress;
     await deployer.deploy(  TransparentUpgradeableProxy,
                             comptrollerMasterCopyAddress, 
                             proxyAdminAddress,
@@ -105,10 +116,10 @@ module.exports = async function (deployer,network,accounts) {
             comptrollerProxyAddress = instance.address;
     }); 
 
-    const data = {
+    const comptrollerProxyAddress_data = {
         "comptrollerProxyAddress":comptrollerProxyAddress
     }
-    fs.writeFileSync('migrations/comptrollerProxyAddress.json', JSON.stringify(data, null, '\t'));
+    fs.writeFileSync('migrations/comptrollerProxyAddress.json', JSON.stringify(comptrollerProxyAddress_data, null, '\t'));
     
     let comptroller = await Comptroller.at(comptrollerProxyAddress);
 

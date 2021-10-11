@@ -46,7 +46,9 @@ module.exports = {
       network_id: 4,
       provider: () => new HDWalletProvider(mnemonic, Infura.Rinkeby),
       gas: 6_000_000,
-      gasPrice: '20000000000'
+      gasPrice: '90000000000',
+      networkCheckTimeout: 99999999,
+      timeoutBlocks: 2000,
     },
     mainnet: {
       network_id: 1,
@@ -86,7 +88,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.8.7",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.8.9",    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
        optimizer: {

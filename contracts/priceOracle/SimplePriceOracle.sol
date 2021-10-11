@@ -3,7 +3,7 @@ pragma solidity >=0.8.0;
 
 
 import "./PriceOracle.sol";
-import "../cToken/CErc20.sol";
+import "../bToken/BErc20.sol";
 import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 
@@ -16,16 +16,16 @@ contract SimplePriceOracle is Initializable, OwnableUpgradeable, PriceOracle {
         __Ownable_init();
     }
 
-    function getUnderlyingPrice(CToken cToken) public override view returns (uint) {
-        if (compareStrings(cToken.symbol(), "cETH")) {
+    function getUnderlyingPrice(BToken bToken) public override view returns (uint) {
+        if (compareStrings(bToken.symbol(), "bETH")) {
             return 1e18;
         } else {
-            return prices[address(CErc20(address(cToken)).underlying())];
+            return prices[address(BErc20(address(bToken)).underlying())];
         }
     }
 
-    function setUnderlyingPrice(CToken cToken, uint underlyingPriceMantissa) public onlyOwner {
-        address asset = address(CErc20(address(cToken)).underlying());
+    function setUnderlyingPrice(BToken bToken, uint underlyingPriceMantissa) public onlyOwner {
+        address asset = address(BErc20(address(bToken)).underlying());
         emit PricePosted(asset, prices[asset], underlyingPriceMantissa, underlyingPriceMantissa);
         prices[asset] = underlyingPriceMantissa;
     }

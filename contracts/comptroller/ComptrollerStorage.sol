@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "../cToken/CToken.sol";
+import "../bToken/BToken.sol";
 import "../priceOracle/PriceOracle.sol";
 
 
@@ -34,7 +34,7 @@ contract ComptrollerV1Storage {
     /**
      * @notice Per-account mapping of "assets you are in", capped by maxAssets
      */
-    mapping(address => CToken[]) public accountAssets;
+    mapping(address => BToken[]) public accountAssets;
 
 }
 
@@ -56,10 +56,10 @@ contract ComptrollerV2Storage is ComptrollerV1Storage {
     }
 
      /// @notice Per-market mapping of "accounts in this asset"
-    mapping(address => mapping( address => bool)) public accountMembership;//user address => ctoken address => isListed
+    mapping(address => mapping( address => bool)) public accountMembership;//user address => BToken address => isListed
 
     /**
-     * @notice Official mapping of cTokens -> Market metadata
+     * @notice Official mapping of BTokens -> Market metadata
      * @dev Used e.g. to determine if a market is supported
      */
     mapping(address => Market) public markets;
@@ -90,7 +90,7 @@ contract ComptrollerV3Storage is ComptrollerV2Storage {
     }
 
     /// @notice A list of all markets
-    CToken[] public allMarkets;
+    BToken[] public allMarkets;
 
     /// @notice The rate at which the flywheel distributes COMP, per block
     uint public compRate;
@@ -118,7 +118,7 @@ contract ComptrollerV4Storage is ComptrollerV3Storage {
     // @notice The borrowCapGuardian can set borrowCaps to any number for any market. Lowering the borrow cap could disable borrowing on the given market.
     address public borrowCapGuardian;
 
-    // @notice Borrow caps enforced by borrowAllowed for each cToken address. Defaults to zero which corresponds to unlimited borrowing.
+    // @notice Borrow caps enforced by borrowAllowed for each BToken address. Defaults to zero which corresponds to unlimited borrowing.
     mapping(address => uint) public borrowCaps;
 }
 

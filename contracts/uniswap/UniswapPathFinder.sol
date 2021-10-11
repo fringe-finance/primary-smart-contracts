@@ -6,103 +6,105 @@ import "../../openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "./RouterInterface.sol";
 import "./IUniswapV2Pair.sol";
-import "./IAssetValuationManager.sol";
 
-contract UniswapPathFinder is Initializable, IAssetValuationManager{
-  using SafeMathUpgradeable for uint256;
+contract UniswapPathFinder is Initializable{
+    using SafeMathUpgradeable for uint256;
 
-  address[] internal intermediateTokens;
+    address[] internal intermediateTokens;
 
-  function initialize() public initializer {
-    intermediateTokens.push(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); //weth
-    intermediateTokens.push(0xdAC17F958D2ee523a2206206994597C13D831ec7); //usdt
-    intermediateTokens.push(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
-  }
+    address router;
 
-  function findPath(address fromToken, address toToken) public view returns (address[] memory path) {
-    (, path) = evaluatePath(fromToken, toToken, 1000);
-  }
-
-  function evaluate(address fromToken, address toToken, uint256 fromTokenAmt) public view returns (uint256, address[] memory) {
-    return evaluatePath(fromToken, toToken, fromTokenAmt);
-  }
-
-  function getAssetValuation(address basicToken, address assetToken, uint256 assetAmount) public override view returns (uint256 valuation) {
-      (valuation, ) = evaluatePath(assetToken, basicToken, assetAmount);
-  }
-
-  function getAssetUSDValuation(address assetToken, uint256 assetTokenAmt) public override view returns (uint256 assetTokenOut) {
-    address usdPeggedCoinAddress = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; //usdc
-    if(assetToken == usdPeggedCoinAddress){
-      assetTokenOut = assetTokenAmt;
+    function initialize(address _router) public initializer {
+      intermediateTokens.push(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); //weth
+      intermediateTokens.push(0xdAC17F958D2ee523a2206206994597C13D831ec7); //usdt
+      intermediateTokens.push(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48); //usdc
+      router = _router;
     }
-    else {
-     (assetTokenOut,) = evaluatePath(assetToken, usdPeggedCoinAddress, assetTokenAmt);
+
+    function findPath(address fromToken, address toToken) public view returns (address[] memory path) {
+      (, path) = evaluatePath(fromToken, toToken, 1000);
     }
-  }
 
-  function uniswapPositionCap(address basicToken, address toToken, uint256 liquidity) internal view returns (uint256){
-      (uint reserveB, uint reserveA) = getReserves(IUniswapV2Router01(uniswapRouter()).factory(), basicToken, toToken);
-      return getAmountOut(liquidity, reserveA, reserveB);
-  }
+    function evaluate(address fromToken, address toToken, uint256 fromTokenAmt) public view returns (uint256, address[] memory) {
+      return evaluatePath(fromToken, toToken, fromTokenAmt);
+    }
 
-  function uniswapRouter() internal pure returns (address){
-      return 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-  }
+    function getAssetValuation(address basicToken, address assetToken, uint256 assetAmount) public view returns (uint256 valuation) {
+        (valuation, ) = evaluatePath(assetToken, basicToken, assetAmount);
+    }
 
-  function uniswapFactory() internal pure returns (address){
-      return IUniswapV2Router01(uniswapRouter()).factory();
-  } 
+    function getAssetUSDValuation(address assetToken, uint256 assetTokenAmt) public view returns (uint256 assetTokenOut) {
+      address usdPeggedCoinAddress = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48; //usdc
+      if(assetToken == usdPeggedCoinAddress){
+        assetTokenOut = assetTokenAmt;
+      }
+      else {
+      (assetTokenOut,) = evaluatePath(assetToken, usdPeggedCoinAddress, assetTokenAmt);
+      }
+    }
 
-  function evaluatePath(address fromToken, address toToken, uint256 fromTokenAmt) internal view returns (uint256, address[] memory) {
-      if(fromToken == toToken)
-          return (fromTokenAmt, new address[](0));
-        address[] memory path = new address[](2);
-        path[0] = fromToken;
-        path[1] = toToken;
-        uint256 resultingAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,path)[1];
+    function uniswapPositionCap(address basicToken, address toToken, uint256 liquidity) internal view returns (uint256){
+        (uint reserveB, uint reserveA) = getReserves(IUniswapV2Router01(uniswapRouter()).factory(), basicToken, toToken);
+        return getAmountOut(liquidity, reserveA, reserveB);
+    }
 
-        address[] memory internalPath = new address[](3);
-        internalPath[0] = fromToken;
-        internalPath[2] = toToken;
-        for(uint i =0;i < intermediateTokens.length; i++){
-          if(fromToken != intermediateTokens[i] && toToken!= intermediateTokens[i]){
-            internalPath[1] = intermediateTokens[i];
-            uint256 internalResultAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,internalPath)[internalPath.length-1];
-            if(internalResultAmt > resultingAmt){
-              resultingAmt = internalResultAmt;
-              path = new address[](3);
-              path[1] = intermediateTokens[i];
+    function uniswapRouter() public view returns (address){
+        return router;
+    }
+
+    function uniswapFactory() public view returns (address){
+        return IUniswapV2Router01(uniswapRouter()).factory();
+    } 
+
+    function evaluatePath(address fromToken, address toToken, uint256 fromTokenAmt) internal view returns (uint256, address[] memory) {
+        if(fromToken == toToken)
+            return (fromTokenAmt, new address[](0));
+          address[] memory path = new address[](2);
+          path[0] = fromToken;
+          path[1] = toToken;
+          uint256 resultingAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,path)[1];
+
+          address[] memory internalPath = new address[](3);
+          internalPath[0] = fromToken;
+          internalPath[2] = toToken;
+          for(uint i =0;i < intermediateTokens.length; i++){
+            if(fromToken != intermediateTokens[i] && toToken!= intermediateTokens[i]){
+              internalPath[1] = intermediateTokens[i];
+              uint256 internalResultAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,internalPath)[internalPath.length-1];
+              if(internalResultAmt > resultingAmt){
+                resultingAmt = internalResultAmt;
+                path = new address[](3);
+                path[1] = intermediateTokens[i];
+              }
             }
-          }
-    }
+      }
 
-    if(path.length == 3 && resultingAmt>0) { //avoid trying path[4] if intermediate was not successful && direct path gives non zero result
-      internalPath = new address[](4);
-      internalPath[0] = fromToken;
-      internalPath[3] = toToken;
-      for(uint i = 0;i < intermediateTokens.length; i++){
-        for (uint j = 0; j < intermediateTokens.length; j++){
-          if( i != j && fromToken != intermediateTokens[i] && toToken!= intermediateTokens[i] && fromToken != intermediateTokens[j] && toToken != intermediateTokens[j]) {
-            internalPath[1] = intermediateTokens[i];
-            internalPath[2] = intermediateTokens[j];
-            uint256 internalResultAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,internalPath)[internalPath.length-1];
-            if(internalResultAmt > resultingAmt){
-              resultingAmt = internalResultAmt;
-              path = new address[](4);
-              path[1] = intermediateTokens[i];
-              path[2] = intermediateTokens[j];
+      if(path.length == 3 && resultingAmt>0) { //avoid trying path[4] if intermediate was not successful && direct path gives non zero result
+        internalPath = new address[](4);
+        internalPath[0] = fromToken;
+        internalPath[3] = toToken;
+        for(uint i = 0;i < intermediateTokens.length; i++){
+          for (uint j = 0; j < intermediateTokens.length; j++){
+            if( i != j && fromToken != intermediateTokens[i] && toToken!= intermediateTokens[i] && fromToken != intermediateTokens[j] && toToken != intermediateTokens[j]) {
+              internalPath[1] = intermediateTokens[i];
+              internalPath[2] = intermediateTokens[j];
+              uint256 internalResultAmt = getAmountsOut(uniswapFactory(),fromTokenAmt,internalPath)[internalPath.length-1];
+              if(internalResultAmt > resultingAmt){
+                resultingAmt = internalResultAmt;
+                path = new address[](4);
+                path[1] = intermediateTokens[i];
+                path[2] = intermediateTokens[j];
+              }
             }
           }
         }
       }
+
+      path[0] = fromToken;
+      path[path.length-1] = toToken;
+
+      return (resultingAmt,path);
     }
-
-    path[0] = fromToken;
-    path[path.length-1] = toToken;
-
-    return (resultingAmt,path);
-  }
 
   // returns sorted token addresses, used to handle return values from pairs sorted in this order
     function sortTokens(address tokenA, address tokenB) internal pure returns (address token0, address token1) {
@@ -123,7 +125,7 @@ contract UniswapPathFinder is Initializable, IAssetValuationManager{
     }
 
     // fetches and sorts the reserves for a pair
-    function getReserves(address factory, address tokenA, address tokenB) internal view returns (uint reserveA, uint reserveB) {
+    function getReserves(address factory, address tokenA, address tokenB) public view returns (uint reserveA, uint reserveB) {
         (address token0,) = sortTokens(tokenA, tokenB);
         address pairAddress = pairFor(factory, tokenA, tokenB);
         if(!AddressUpgradeable.isContract(pairAddress)){

@@ -148,31 +148,110 @@ interface IPrimaryIndexToken {
         uint256 amountPit;
     }
 
-
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrj - the address of project token
+     */
     event AddPrjToken(address indexed who, address indexed tokenPrj);
 
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrj - the address of project token
+     * @param lvrNumerator - the numerator of loan to value ratio
+     * @param lvrDenominator - the denominator of loan to value ratio
+     */
     event LoanToValueRatioSet(address indexed who, address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
 
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrj - the address of project token
+     * @param ltfNumerator - the numerator of liquidation threshold factor ratio
+     * @param ltfDenominator - the denominator of liquidation threshold factor ratio
+     */
     event LiquidationThresholdFactorSet(address indexed who, address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrj - the address of project token
+     * @param saleNumerator - the numerator of sale
+     * @param saleDenominator - the denominator of sale
+     */
     event PrjSaleSet(address indexed who, address indexed tokenPrj, uint8 saleNumerator, uint8 saleDenominator);
 
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrjId - the id of address of project token in list `projectTokens`
+     * @param tokenPrj - the address of project token
+     * @param prjDepositAmount - the amount of project token deposited
+     * @param beneficiar - the receiver address of prj position
+     */
     event Deposit(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiar);
 
+    /**
+     * @param who - the initiator of event
+     * @param tokenPrjId - the id of address of project token in list `projectTokens`
+     * @param tokenPrj - the address of project token
+     * @param prjWithdrawAmount - the amount of project token withdrawed
+     * @param beneficiar - the receiver address of project tokens
+     */
     event Withdraw(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiar);
 
+    /**
+     * @param who - the initiator of event
+     * @param supplyTokenId - the id of address of lending token in list `lendingTokens`
+     * @param supplyToken - the address of lending token
+     * @param supplyAmount - the amount of lending token including decimals
+     * @param supplyCToken - the address of lending cToken 
+     * @param amountSupplyCTokenReceived - the amount of cToken received by `who`
+     */
     event Supply(address indexed who, uint256 supplyTokenId, address indexed supplyToken, uint256 supplyAmount, address indexed supplyCToken, uint amountSupplyCTokenReceived);
 
+    /**
+     * @param who - the initiator of event
+     * @param redeemTokenId - the id of address of lending token in list `lendingTokens`
+     * @param redeemToken - the address of lending token
+     * @param redeemCToken - the address of lending cToken 
+     * @param redeemAmount - the amount of lending cToken redeemed by `who`
+     */
     event Redeem(address indexed who, uint256 redeemTokenId, address indexed redeemToken, address indexed redeemCToken, uint256 redeemAmount);
     
+    /**
+     * @param who - the initiator of event
+     * @param redeemTokenId - the id of address of lending token in list `lendingTokens`
+     * @param redeemToken - the address of lending token
+     * @param redeemCToken - the address of lending cToken 
+     * @param redeemAmountUnderlying - the amount of lending token redeemed by `who`
+     */
     event RedeemUnderlying(address indexed who, uint256 redeemTokenId, address indexed redeemToken, address indexed redeemCToken, uint256 redeemAmountUnderlying);
 
+    /**
+     * @param who - the initiator of event
+     * @param borrowTokenId - the id of address of lending token in list `lendingTokens`
+     * @param borrowToken - the address of lending token
+     * @param borrowAmount - the amount of lending token borrowed
+     * @param prjAddress - the address of project token that forwarded by frontend or backend
+     * @param prjAmount - the amount of project token that forwarded by frontend or backend
+     */
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
+    /**
+     * @param who - the initiator of event
+     * @param borrowTokenId - the id of address of lending token in list `lendingTokens`
+     * @param borrowToken - the address of lending token
+     * @param borrowAmount - the amount of lending token borrowed
+     * @param prjAddress - the address of project token that forwarded by frontend or backend
+     * @param prjAmount - the amount of project token that forwarded by frontend or backend
+     */
     event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
+    /**
+     * @param liquidator - the initiator of event
+     * @param borrower - the address of lending token
+     * @param lendingTokenId - the id of address of lending token in list `lendingTokens`
+     * @param prjId - the id of address of project token in list `projectTokens`
+     * @param amountPrjLiquidated - the amount of project tokens that is liquidated by liquidator
+     */
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
-
 
     //************* ADMIN FUNCTIONS ********************************
 
