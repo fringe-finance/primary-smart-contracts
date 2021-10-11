@@ -260,6 +260,8 @@ interface IPrimaryIndexToken {
      */
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
     //************* ADMIN FUNCTIONS ********************************
 
     /**
@@ -526,4 +528,5 @@ interface IPrimaryIndexToken {
      */
     function decimals() external view returns(uint8);
 
+    function totalSupply() external view returns (uint256);
 }
