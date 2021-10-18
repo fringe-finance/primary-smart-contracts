@@ -324,3 +324,117 @@ set underlying price of bPrimaryIndexToken at 0x1dd551cD6c5EC18648271953db499143
 Comptroller support market 0x6bfC8c09f5084913CEF8fAcbF3980D692774175f
 Collateral factor set: 1000000000000000000
 Primary Index Token set bPrimaryIndexToken at 0xBDC93176a2Bea09fd4509FEbc2ceDAfb9BD60934
+
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0xf84abc6dca5a1e5715c3b1ca921c4e5c884ed8ff894259e3424aead0c0d54530
+   > Blocks: 1            Seconds: 9
+   > contract address:    0xD061bA097cD448940eaE4409ED9bC91725700b2C
+   > block number:        9458485
+   > block timestamp:     1634136711
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             170.723557437780108255
+   > gas used:            5126356 (0x4e38d4)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.46137204 ETH
+
+PrimaryIndexToken master copy: 0xD061bA097cD448940eaE4409ED9bC91725700b2C
+Proxy admin upgraded primaryIndexToken at 0xBDC93176a2Bea09fd4509FEbc2ceDAfb9BD60934
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.46137204 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.46137204 ETH
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Deploying 'UniswapPathFinder'
+   -----------------------------
+   > transaction hash:    0x154305cb392beb9ed7fa7dd444496c4fd3f8c6004e0cdde94e955e169d388a9d
+   > Blocks: 2            Seconds: 17
+   > contract address:    0xA2658BceE35D5D5284F06581aa194741c809B58e
+   > block number:        9486548
+   > block timestamp:     1634557741
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             170.485237901767672225
+   > gas used:            1289319 (0x13ac67)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.11603871 ETH
+
+UniswapPathFinder master copy:  0xA2658BceE35D5D5284F06581aa194741c809B58e
+Proxy admin upgraded primaryIndexToken at 0x68af8d954A26D738c71894F83D8DE49018F238db
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.11603871 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.11603871 ETH
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 29967644 (0x1c9451c)
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0x973149e9eadcbdeea4e90094f559e7fd0c49735a63483a6c01486fc65aa883ce
+   > Blocks: 2            Seconds: 28
+   > contract address:    0x507AD3AB086eb649738Dfd6Aabd994eD8c3C7840
+   > block number:        9486572
+   > block timestamp:     1634558101
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             170.022833831767672225
+   > gas used:            5073245 (0x4d695d)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.45659205 ETH
+
+PrimaryIndexToken master copy: 0x507AD3AB086eb649738Dfd6Aabd994eD8c3C7840
+Proxy admin upgraded primaryIndexToken at 0xBDC93176a2Bea09fd4509FEbc2ceDAfb9BD60934
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.45659205 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.45659205 ETH
