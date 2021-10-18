@@ -18,7 +18,6 @@ const expect = chai.expect;
 chai.use(require('bn-chai')(BN));
 chai.use(require('chai-match'));
 const truffleAssert = require('truffle-assertions');
-const { time, expectRevert } = require('@openzeppelin/test-helpers');
 const fs = require('fs');
 
 
@@ -28,7 +27,7 @@ log4js.configure({
     appenders: {
         primaryIndexToken: { 
             type: "file",
-            filename: "test/logs/liquidationRinkeby.log"
+            filename: "test/logs/supplyRinkeby.log"
         }
     },
     categories: {
@@ -72,6 +71,7 @@ contract('PrimaryIndexToken', (accounts) => {
     let prj5Id = new BN(4);
     let prj6Id = new BN(5);
 
+
     let lendingTokenId = new BN(0);
 
     let primaryIndexTokenAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
@@ -84,12 +84,11 @@ contract('PrimaryIndexToken', (accounts) => {
     let supplier1 = accounts[2];
     let borrower1 = accounts[3];
     let borrower2 = accounts[4];
-    let liquidator1 = accounts[5];
+    let supplier2 = accounts[5];
     
     console.log("DEPLOY MASTER: "+deployMaster);
     console.log("SUPPLIER1: "+supplier1);
-    console.log("BORROWER1: "+borrower2);
-    console.log("LIQUIDATR: "+liquidator1);
+    console.log("BORROWER1: "+borrower1);
 
     let uniswapRouter;
     let uniswapFactory;
@@ -141,7 +140,7 @@ contract('PrimaryIndexToken', (accounts) => {
         await prj1.mintTo(borrower2, borrower2PRJ1amount,{from:deployMaster});
         let balancePRJ1borrower1 = await getERC20balance(PRJ1address,borrower1);
         let balancePRJ1borrower2 = await getERC20balance(PRJ1address,borrower2);
-        pitLogger.info("PRJ1 balance borrower2:");
+        pitLogger.info("PRJ1 balance borrower1:");
         await printERC20balance(balancePRJ1borrower1);
         pitLogger.info("PRJ1 balance borrower2:");
         await printERC20balance(balancePRJ1borrower2);
@@ -149,24 +148,24 @@ contract('PrimaryIndexToken', (accounts) => {
 
         let borrower1PRJ4amount = PRJ4multiplier.mul(new BN(1000));
         let borrower2PRJ4amount = PRJ4multiplier.mul(new BN(1000));
-        await prj4.mintTo(borrower2, borrower1PRJ4amount,{from:deployMaster});
+        await prj4.mintTo(borrower1, borrower1PRJ4amount,{from:deployMaster});
         await prj4.mintTo(borrower2, borrower2PRJ4amount,{from:deployMaster});
         let balancePRJ4borrower1 = await getERC20balance(PRJ4address,borrower1);
         let balancePRJ4borrower2 = await getERC20balance(PRJ4address,borrower2);
+        pitLogger.info("PRJ4 balance borrower1:");
+        await printERC20balance(balancePRJ1borrower1);
         pitLogger.info("PRJ4 balance borrower2:");
-        await printERC20balance(balancePRJ4borrower1);
-        pitLogger.info("PRJ4 balance borrower2:");
-        await printERC20balance(balancePRJ4borrower2);
+        await printERC20balance(balancePRJ1borrower2);
 
         let usdctest = await IUSDCTest.at(USDCaddress);
         let USDCdecimals = await usdctest.decimals({from:deployMaster});
         USDCmultiplier = ten.pow(USDCdecimals);
-        let amountUSDCsupplier1   = USDCmultiplier.mul(new BN(100_000_000_000));
-        let amountUSDCborrower2   = USDCmultiplier.mul(new BN(100));
-        let amountUSDCliquidator1 = USDCmultiplier.mul(toBN(1_000_000));
+        let amountUSDCsupplier1   = USDCmultiplier.mul(new BN(5_700_000));
+        let amountUSDCsupplier2   = USDCmultiplier.mul(toBN(1_000_000));
+        let amountUSDCborrower1   = USDCmultiplier.mul(new BN(100));
         await usdctest.mintTo(supplier1,amountUSDCsupplier1,{from:deployMaster});
-        await usdctest.mintTo(borrower2,amountUSDCborrower2,{from:deployMaster});
-        await usdctest.mintTo(liquidator1,amountUSDCliquidator1,{from:deployMaster});
+        await usdctest.mintTo(supplier2,amountUSDCsupplier2,{from:deployMaster});
+        await usdctest.mintTo(borrower1,amountUSDCborrower1,{from:deployMaster});
 
         cUsdc = await BUSDC.at(bUSDCAddress);
         comptroller = await Comptroller.at(comptrollerAddress);
@@ -176,7 +175,7 @@ contract('PrimaryIndexToken', (accounts) => {
 
     it('Supplier1 supply USDCTest', async()=>{
         pitLogger.info();
-        pitLogger.info("*******Supply Test******* ");
+        pitLogger.info("*******Supplier1 supply USDCTest Test******* ");
         let lendingTokenId = new BN(0);
 
         let supplier1USDCbalanceBefore = await getERC20balance(USDCaddress,supplier1);
@@ -184,7 +183,7 @@ contract('PrimaryIndexToken', (accounts) => {
         await printERC20balance(supplier1USDCbalanceBefore);
         await printERC20balance(supplier1CUSDCbalanceBefore);
         
-        let amountLendingToken = USDCmultiplier.mul(new BN(19_000_000_000));
+        let amountLendingToken = USDCmultiplier.mul(new BN(5_000_000));
         await approveTransferFrom(USDCaddress,bUSDCAddress,supplier1,amountLendingToken);
         let supplyRes = await primaryIndexToken.supply(lendingTokenId,amountLendingToken,{from:supplier1});
         pitLogger.info("Supplied "+amountLendingToken+" USDCTest");
@@ -196,132 +195,70 @@ contract('PrimaryIndexToken', (accounts) => {
 
     });
 
-    //borrow test;
-    it('Borrower2 deposit PRJ1',async()=>{
+    it('Supplier2 supply USDCTest', async()=>{
         pitLogger.info();
-        pitLogger.info("*******Borrower2 deposit PRJ1 Test******* ");
+        pitLogger.info("*******Supplier2 supply Test******* ");
+        let lendingTokenId = new BN(0);
 
-        let prjId = prj1Id;
+        let supplier2USDCbalanceBefore = await getERC20balance(USDCaddress,supplier2);
+        let supplier2CUSDCbalanceBefore = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2USDCbalanceBefore);
+        await printERC20balance(supplier2CUSDCbalanceBefore);
+        
+        let amountLendingToken = USDCmultiplier.mul(new BN(1_000_000));
+        await approveTransferFrom(USDCaddress,bUSDCAddress,supplier2,amountLendingToken);
+        let supplyRes = await primaryIndexToken.supply(lendingTokenId,amountLendingToken,{from:supplier2});
+        pitLogger.info("Supplied "+amountLendingToken+" USDCTest");
 
-        let borrower2PRJ1balanceBefore = await getERC20balance(PRJ1address,borrower2);
-        await printERC20balance(borrower2PRJ1balanceBefore);
-
-        let borrower2PRJ1depositedBefore = await getDepositedPrjAmount(borrower2,prjId);
-        await printDepositedPrjAmount(borrower2PRJ1depositedBefore);
-
-        let amountPrj1ToDeposit = borrower2PRJ1balanceBefore.balance;
-        await approveTransferFrom(PRJ1address,primaryIndexTokenAddress,borrower2,amountPrj1ToDeposit);
-        await primaryIndexToken.deposit(prjId,amountPrj1ToDeposit,{from:borrower2});
-        pitLogger.info("Deposited "+  amountPrj1ToDeposit +" PRJ1");
-
-        let borrower2PRJ1balanceAfter = await getERC20balance(PRJ1address,borrower2);
-        await printERC20balance(borrower2PRJ1balanceAfter);
-
-        let borrower2PRJ1depositedAfter = await getDepositedPrjAmount(borrower2,prjId);
-        await printDepositedPrjAmount(borrower2PRJ1depositedAfter);
+        let supplier2USDCbalanceAfter = await getERC20balance(USDCaddress,supplier2);
+        let supplier2CUSDCbalanceAfter = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2USDCbalanceAfter);
+        await printERC20balance(supplier2CUSDCbalanceAfter);
 
     });
 
-    it('Borrower2 deposit PRJ4',async()=>{
+   
+    it('Borrower1 deposit PRJ4, borrow USDC, repay all',async()=>{
         pitLogger.info();
-        pitLogger.info("*******Borrower2 deposit PRJ4 Test******* ");
+        pitLogger.info("*******Borrower1 deposit PRJ4, borrow USDC, repay all Test******* ");
 
         let prjId = prj4Id;
         let PRJaddress = PRJ4address;
 
-        let borrower2PRJ4balanceBefore = await getERC20balance(PRJaddress,borrower2);
-        await printERC20balance(borrower2PRJ4balanceBefore);
+        let borrower1PRJ4balanceBefore = await getERC20balance(PRJaddress,borrower1);
+        await printERC20balance(borrower1PRJ4balanceBefore);
 
-        let borrower2PRJ4depositedBefore = await getDepositedPrjAmount(borrower2,prjId);
-        await printDepositedPrjAmount(borrower2PRJ4depositedBefore);
+        let borrower1PRJ4depositedBefore = await getDepositedPrjAmount(borrower1,prjId);
+        await printDepositedPrjAmount(borrower1PRJ4depositedBefore);
 
-        let amountPrj4ToDeposit = borrower2PRJ4balanceBefore.balance.div(toBN(2));
-        await approveTransferFrom(PRJaddress,primaryIndexTokenAddress,borrower2,amountPrj4ToDeposit);
-        await primaryIndexToken.deposit(prjId,amountPrj4ToDeposit,{from:borrower2});
+        let amountPrj4ToDeposit = borrower1PRJ4balanceBefore.balance.div(toBN(2));
+        await approveTransferFrom(PRJaddress,primaryIndexTokenAddress,borrower1,amountPrj4ToDeposit);
+        await primaryIndexToken.deposit(prjId,amountPrj4ToDeposit,{from:borrower1});
         pitLogger.info("Deposited "+  amountPrj4ToDeposit +" PRJ4");
 
-        let borrower2PRJ1balanceAfter = await getERC20balance(PRJaddress,borrower2);
-        await printERC20balance(borrower2PRJ1balanceAfter);
+        let borrower1PRJ1balanceAfter = await getERC20balance(PRJaddress,borrower1);
+        await printERC20balance(borrower1PRJ1balanceAfter);
 
-        let borrower2PRJ1depositedAfter = await getDepositedPrjAmount(borrower2,prjId);
-        await printDepositedPrjAmount(borrower2PRJ1depositedAfter);
+        let borrower1PRJ1depositedAfter = await getDepositedPrjAmount(borrower1,prjId);
+        await printDepositedPrjAmount(borrower1PRJ1depositedAfter);
 
-    });
+        let borrower1USDCbalanceBefore = await getERC20balance(USDCaddress,borrower1);
+        await printERC20balance(borrower1USDCbalanceBefore);
 
-    it('Borrower2 borrow USDC with collateral PRJ1',async()=>{
-        pitLogger.info();
-        pitLogger.info("*******Borrower2 borrow USDC with collateral PRJ1 Test******* ");
+        let borrower1BorrowPositionBefore = await getBorrowPosition(borrower1,lendingTokenId,prjId);
+        await printBorrowPosition(borrower1BorrowPositionBefore);
 
-        let prjId = prj1Id;
-        let PRJaddress = PRJ1address;
+        let borrower1PITbalanceBefore = await getBalanceOfPitPosition(borrower1,prjId);
+        await printBalanceOfPitForPosition(borrower1PITbalanceBefore);
 
-        let borrower2USDCbalanceBefore = await getERC20balance(USDCaddress,borrower2);
-        await printERC20balance(borrower2USDCbalanceBefore);
+        let borrower1BPITbalanceBefore = await getERC20balance(bPrimaryIndexTokenAddress,borrower1);
+        await printERC20balance(borrower1BPITbalanceBefore);
 
-        let borrower2BorrowPositionBefore = await getBorrowPosition(borrower2,lendingTokenId,prjId);
-        await printBorrowPosition(borrower2BorrowPositionBefore);
-
-        let borrower2PITbalanceBefore = await getBalanceOfPitPosition(borrower2,prjId);
-        await printBalanceOfPitForPosition(borrower2PITbalanceBefore);
-
-        let borrower2CPITbalanceBefore = await getERC20balance(bPrimaryIndexTokenAddress,borrower2);
-        await printERC20balance(borrower2CPITbalanceBefore);
-
-        let borrower2LiquidityBefore = await getLiquidity(borrower2);
-        await printLiquidity(borrower2LiquidityBefore);
+        let borrower1LiquidityBefore = await getLiquidity(borrower1);
+        await printLiquidity(borrower1LiquidityBefore);
         
-        let amountLendingTokenToBorrow = borrower2PITbalanceBefore;//USDCmultiplier.mul(new BN(200_000));
-        pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
-        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower2});
-        for(var log of borrowRes['logs']){
-            if(log['event']=="Test2"){
-                console.log("currentBalancePitOfMsgSender:    "+log['args']['currentBalancePitOfMsgSender']);
-                console.log("liquidity:                       "+log['args']['liquidity']);
-                console.log("shortfall:                       "+log['args']['shortfall']);
-                console.log("borrowError:                     "+log['args']['borrowError']);
-            }
-        }
-        let borrower2USDCbalanceAfter = await getERC20balance(USDCaddress,borrower2);
-        await printERC20balance(borrower2USDCbalanceAfter);
-
-        let borrower2BorrowPositionAfter = await getBorrowPosition(borrower2,lendingTokenId,prjId);
-        await printBorrowPosition(borrower2BorrowPositionAfter);
-
-        let borrower2PITbalanceAfter = await getBalanceOfPitPosition(borrower2,prj1Id);
-        await printBalanceOfPitForPosition(borrower2PITbalanceAfter);
-
-        let borrower2CPITbalanceAfter = await getERC20balance(bPrimaryIndexTokenAddress,borrower2);
-        await printERC20balance(borrower2CPITbalanceAfter);
-
-        let borrower2LiquidityAfter = await getLiquidity(borrower2);
-        await printLiquidity(borrower2LiquidityAfter);
-
-    });
-
-    it('Borrower2 borrow USDC with collateral PRJ4',async()=>{
-        pitLogger.info();
-        pitLogger.info("*******Borrower2 borrow USDC with collateral PRJ4 Test******* ");
-
-        let prjId = prj4Id;
-        let PRJaddress = PRJ4address;
-
-        let borrower2USDCbalanceBefore = await getERC20balance(USDCaddress,borrower2);
-        await printERC20balance(borrower2USDCbalanceBefore);
-
-        let borrower2BorrowPositionBefore = await getBorrowPosition(borrower2,lendingTokenId,prjId);
-        await printBorrowPosition(borrower2BorrowPositionBefore);
-
-        let borrower2PITbalanceBefore = await getBalanceOfPitPosition(borrower2,prjId);
-        await printBalanceOfPitForPosition(borrower2PITbalanceBefore);
-
-        let borrower2CPITbalanceBefore = await getERC20balance(bPrimaryIndexTokenAddress,borrower2);
-        await printERC20balance(borrower2CPITbalanceBefore);
-
-        let borrower2LiquidityBefore = await getLiquidity(borrower2);
-        await printLiquidity(borrower2LiquidityBefore);
-        
-        let amountLendingTokenToBorrow = borrower2PITbalanceBefore;
-        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower2});
+        let amountLendingTokenToBorrow = borrower1PITbalanceBefore;
+        let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower1});
         for(var log of borrowRes['logs']){
             if(log['event']=="Test2"){
                 console.log("currentBalancePitOfMsgSender:    "+log['args']['currentBalancePitOfMsgSender']);
@@ -333,128 +270,124 @@ contract('PrimaryIndexToken', (accounts) => {
         //console.log(borrowRes);
         pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
 
-        let borrower2USDCbalanceAfter = await getERC20balance(USDCaddress,borrower2);
-        await printERC20balance(borrower2USDCbalanceAfter);
+        let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
+        await printERC20balance(borrower1USDCbalanceAfter);
 
-        let borrower2BorrowPositionAfter = await getBorrowPosition(borrower2,lendingTokenId,prjId);
-        await printBorrowPosition(borrower2BorrowPositionAfter);
+        let borrower1BorrowPositionAfter = await getBorrowPosition(borrower1,lendingTokenId,prjId);
+        await printBorrowPosition(borrower1BorrowPositionAfter);
 
-        let borrower2PITbalanceAfter = await getBalanceOfPitPosition(borrower2,prj1Id);
-        await printBalanceOfPitForPosition(borrower2PITbalanceAfter);
+        let borrower1PITbalanceAfter = await getBalanceOfPitPosition(borrower1,prj1Id);
+        await printBalanceOfPitForPosition(borrower1PITbalanceAfter);
 
-        let borrower2CPITbalanceAfter = await getERC20balance(bPrimaryIndexTokenAddress,borrower2);
-        await printERC20balance(borrower2CPITbalanceAfter);
+        let borrower1BPITbalanceAfter = await getERC20balance(bPrimaryIndexTokenAddress,borrower1);
+        await printERC20balance(borrower1BPITbalanceAfter);
 
-        let borrower2LiquidityAfter = await getLiquidity(borrower2);
-        await printLiquidity(borrower2LiquidityAfter);
+        let borrower1LiquidityAfter = await getLiquidity(borrower1);
+        await printLiquidity(borrower1LiquidityAfter);
 
-    });
+        borrower1USDCbalanceBefore = await getERC20balance(USDCaddress,borrower1);
+        await printERC20balance(borrower1USDCbalanceBefore);
 
-    it('First try to liquidate borrower2 PRJ1 position',async()=>{
-        pitLogger.info();
-        pitLogger.info("*******First try to liquidate borrower2 PRJ1 position Test******* ");
+        borrower1BorrowPositionBefore = await getBorrowPosition(borrower1,lendingTokenId,prjId);
+        await printBorrowPosition(borrower1BorrowPositionBefore);
+
+        borrower1PITbalanceBefore = await getBalanceOfPitPosition(borrower1,prjId);
+        await printBalanceOfPitForPosition(borrower1PITbalanceBefore);
+
+        borrower1BPITbalanceBefore = await getERC20balance(bPrimaryIndexTokenAddress,borrower1);
+        await printERC20balance(borrower1BPITbalanceBefore);
+
+        borrower1LiquidityBefore = await getLiquidity(borrower1);
+        await printLiquidity(borrower1LiquidityBefore);
         
-        let PRJaddress = PRJ1address;
-        let prjId = prj1Id;
-        let PRJmultiplier = PRJ1multiplier;
+        let amountLendingTokenToRepay = toBN(2).pow(toBN(256)).sub(toBN(1));
+        await approveTransferFrom(USDCaddress,bUSDCAddress,borrower1,amountLendingTokenToRepay);
+        let repayRes = await primaryIndexToken.repayBorrow(lendingTokenId,amountLendingTokenToRepay,PRJaddress,toBN(10),{from:borrower1});
+        for(var log of repayRes['logs']){
+            if(log['event']=="Test4"){
+                console.log("repayBorrowError:    "+log['args']['repayBorrowError']);
+                console.log("amountRepayed:       "+log['args']['amountRepayed']);
+            }
+        }
+        pitLogger.info("Repayed "+ amountLendingTokenToRepay+" tokens");
 
-        let liquidator1PRJbalanceBefore = await getERC20balance(PRJaddress,liquidator1);
-        await printERC20balance(liquidator1PRJbalanceBefore);
+        borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
+        await printERC20balance(borrower1USDCbalanceAfter);
 
-        let liquidator1USDCbalanceBefore = await getERC20balance(USDCaddress,liquidator1);
-        await printERC20balance(liquidator1USDCbalanceBefore);
+        borrower1BorrowPositionAfter = await getBorrowPosition(borrower1,lendingTokenId,prjId);
+        await printBorrowPosition(borrower1BorrowPositionAfter);
 
-        let borrower2AccountHealthBefore = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthBefore);
+        borrower1PITbalanceAfter = await getBalanceOfPitPosition(borrower1,prj1Id);
+        await printBalanceOfPitForPosition(borrower1PITbalanceAfter);
 
-        let amountPRJtoLiquidate = PRJmultiplier.mul(new BN(500_000));
-        await expectRevert(
-            primaryIndexToken.liquidate(borrower2,lendingTokenId,prjId,{from:liquidator1}),
-            'revert'
-        );
+        borrower1BPITbalanceAfter = await getERC20balance(bPrimaryIndexTokenAddress,borrower1);
+        await printERC20balance(borrower1BPITbalanceAfter);
 
-        let liquidator1PRJbalanceAfter = await getERC20balance(PRJaddress,liquidator1);
-        await printERC20balance(liquidator1PRJbalanceAfter);
-
-        let liquidator1USDCbalanceAfter = await getERC20balance(USDCaddress,liquidator1);
-        await printERC20balance(liquidator1USDCbalanceAfter);
-
-        let borrower2AccountHealthAfter = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthAfter);
+        borrower1LiquidityAfter = await getLiquidity(borrower1);
+        await printLiquidity(borrower1LiquidityAfter);
 
     });
 
-    it('Decrease price of PRJ1',async()=>{
+    it('Supplier2 redeem USDCTest',async()=>{
         pitLogger.info();
-        pitLogger.info("*******Decrease price of PRJ1 Test******* ");
+        pitLogger.info("*******Supplier2 redeem USDCTest Test******* ");
+        let lendingTokenId = new BN(0);
 
-        let prjId = prj1Id;
-        let PRJaddress = PRJ1address;
-        PRJmultiplier = PRJ1multiplier;
+        let supplier2USDCbalanceBefore = await getERC20balance(USDCaddress,supplier2);
+        let supplier2BUSDCbalanceBefore = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2USDCbalanceBefore);
+        await printERC20balance(supplier2BUSDCbalanceBefore);
+        let supplier2USDCsuppliedLendingTokenBefore = await primaryIndexToken.suppliedLendingToken(supplier2,lendingTokenId,{from:supplier2});
+        pitLogger.info("Supplied lending token before: "+supplier2USDCsuppliedLendingTokenBefore);
 
-        let borrower2AccountHealthBefore = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthBefore);
+        let amountBUSDCtoRedeem = supplier2BUSDCbalanceBefore.balance.div(new BN(4));
+        let redeemResult = await primaryIndexToken.redeem(lendingTokenId,amountBUSDCtoRedeem,{from:supplier2});
+        {
+            for(var log of redeemResult['logs']){
+                if(log['event']=="Test1"){
+                    console.log("mint:  "+log['args']['mintedAmount']);
+                }
+            }
+        }
+        let supplier2UsdctestAmountAfter = await getERC20balance(USDCaddress,supplier2);
+        let supplier2BUSDCbalanceAfter = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2UsdctestAmountAfter);
+        await printERC20balance(supplier2BUSDCbalanceAfter);
 
-        let amountPRJ = PRJmultiplier.mul(new BN(500_000));
-        await decreasePriceOfPrj(USDCaddress,PRJaddress,amountPRJ,deployMaster);
-
-        let borrower2AccountHealthAfter = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthAfter);
-
+        let supplier2USDCsuppliedLendingTokenAfter = await primaryIndexToken.suppliedLendingToken(supplier2,lendingTokenId,{from:supplier2});
+        pitLogger.info("Supplied lending token after : "+supplier2USDCsuppliedLendingTokenAfter)
     });
 
-    it('Decrease price of PRJ4',async()=>{
+    it('Supplier2 redeem all USDCTest',async()=>{
         pitLogger.info();
-        pitLogger.info("*******Decrease price of PRJ1 Test******* ");
+        pitLogger.info("*******Supplier2 redeem all USDCTest Test******* ");
+        let lendingTokenId = new BN(0);
 
-        let prjId = prj4Id;
-        let PRJaddress = PRJ4address;
-        PRJmultiplier = PRJ4multiplier;
+        let supplier2USDCbalanceBefore = await getERC20balance(USDCaddress,supplier2);
+        let supplier2BUSDCbalanceBefore = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2USDCbalanceBefore);
+        await printERC20balance(supplier2BUSDCbalanceBefore);
+        let supplier2USDCsuppliedLendingTokenBefore = await primaryIndexToken.suppliedLendingToken(supplier2,lendingTokenId,{from:supplier2});
+        pitLogger.info("Supplied lending token before: "+supplier2USDCsuppliedLendingTokenBefore);
 
-        let borrower2AccountHealthBefore = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthBefore);
+        let amountBUSDCtoRedeem = supplier2BUSDCbalanceBefore.balance;
+        let redeemResult = await primaryIndexToken.redeem(lendingTokenId,amountBUSDCtoRedeem,{from:supplier2});
+        {
+            for(var log of redeemResult['logs']){
+                if(log['event']=="Test1"){
+                    console.log("mint:  "+log['args']['mintedAmount']);
+                }
+            }
+        }
+        let supplier2UsdctestAmountAfter = await getERC20balance(USDCaddress,supplier2);
+        let supplier2BUSDCbalanceAfter = await getERC20balance(bUSDCAddress,supplier2);
+        await printERC20balance(supplier2UsdctestAmountAfter);
+        await printERC20balance(supplier2BUSDCbalanceAfter);
 
-        let amountPRJ = PRJmultiplier.mul(new BN(500_000));
-        await decreasePriceOfPrj(USDCaddress,PRJaddress,amountPRJ,deployMaster);
-
-        let borrower2AccountHealthAfter = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthAfter);
-
+        let supplier2USDCsuppliedLendingTokenAfter = await primaryIndexToken.suppliedLendingToken(supplier2,lendingTokenId,{from:supplier2});
+        pitLogger.info("Supplied lending token after : "+supplier2USDCsuppliedLendingTokenAfter)
     });
 
-    it('Second try to liquidate borrower2 PRJ1 position',async()=>{
-        pitLogger.info();
-        pitLogger.info("*******Second try to liquidate borrower2 PRJ1 position Test******* ");
-        
-        let PRJaddress = PRJ1address;
-        let prjId = prj1Id;
-        let PRJmultiplier = PRJ1multiplier;
-
-        let liquidator1PRJ1balanceBefore = await getERC20balance(PRJaddress,liquidator1);
-        await printERC20balance(liquidator1PRJ1balanceBefore);
-
-        let liquidator1USDCbalanceBefore = await getERC20balance(USDCaddress,liquidator1);
-        await printERC20balance(liquidator1USDCbalanceBefore);
-
-        let borrower2AccountHealthBefore = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthBefore);
-
-        let amountPRJtoLiquidate = await primaryIndexToken.getDepositedPrjAmount(borrower2,prjId,{from:liquidator1});
-        pitLogger.info("Deposited amount PRJ: "+amountPRJtoLiquidate);
-        let amountLendingTokenToSend = await primaryIndexToken.getPrjEvaluationInBasicTokenWithSale(PRJaddress,amountPRJtoLiquidate,{from:liquidator1});
-        pitLogger.info("Amount liquidator1 should send: "+amountLendingTokenToSend);
-        await approveTransferFrom(USDCaddress,primaryIndexTokenAddress,liquidator1,amountLendingTokenToSend);
-        let liquidateResult = await primaryIndexToken.liquidate(borrower2,lendingTokenId,prjId,{from:liquidator1});
-
-        let liquidator1PRJbalanceAfter = await getERC20balance(PRJaddress,liquidator1);
-        await printERC20balance(liquidator1PRJbalanceAfter);
-
-        let liquidator1USDCbalanceAfter = await getERC20balance(USDCaddress,liquidator1);
-        await printERC20balance(liquidator1USDCbalanceAfter);
-
-        let borrower2AccountHealthAfter = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
-        await printAccountHealth(borrower2AccountHealthAfter);
-    });
 
 
 
@@ -478,24 +411,7 @@ contract('PrimaryIndexToken', (accounts) => {
             pitLogger.info("    health factor cant be calculated because division by zero is forbidden");
         }
     }
-
-    async function getAccountHealthFactorForPosition(account,lendingTokenId,prjId){
-        let accHealth = await primaryIndexToken.healthFactorForPosition(account,lendingTokenId,prjId,{from:account});
-        return accHealth;
-    }
-
-    async function printAccountHealthFactorForPosition(data){
-        pitLogger.info("Account Health for position:");
-        pitLogger.info("    numerator:   "+data['0']);
-        pitLogger.info("    denominator: "+data['1']);
-        
-        if(data['1'].cmp(new BN(0)) !=0){
-            pitLogger.info("    health factor: "+bigDecimal.divide(data['0'],data['1'],new BN(4)));
-        }else{
-            pitLogger.info("    health factor cant be calculated because division by zero is forbidden");
-        }
-    }
-
+       
     async function getBorrowPosition(account, lendingTokenId,prjId){
         let position = await primaryIndexToken.getBorrowPosition(account,lendingTokenId,prjId,{from:account});
         return position;
