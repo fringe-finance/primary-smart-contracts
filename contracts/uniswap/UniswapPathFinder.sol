@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+
 import "../../openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "./RouterInterface.sol";
 import "./IUniswapV2Pair.sol";
@@ -161,6 +163,19 @@ contract UniswapPathFinder is Initializable{
             amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut);
         }
     }
+
+    function getUniswapPoolReserves(address tokenA,address tokenB) public view returns(uint256 reserveA, uint256 reserveB){
+        (reserveA,reserveB) = getReserves(uniswapFactory(), tokenA, tokenB);
+    }
+
+    function getPrice(address basicToken, address prj) public view returns(uint256 priceOfPrjScaledBy10pow18){
+        (uint reserveBasicToken,uint reservePrj) = getReserves(uniswapFactory(), basicToken, prj);
+        uint8 basicTokenDecimals = ERC20Upgradeable(basicToken).decimals();
+        uint8 prjDecimals = ERC20Upgradeable(prj).decimals();
+        priceOfPrjScaledBy10pow18 = (10 ** 18) * (reserveBasicToken * (10 ** basicTokenDecimals)) / (reservePrj * (10 ** prjDecimals));
+        return priceOfPrjScaledBy10pow18;
+    }
+  
 
     
 
