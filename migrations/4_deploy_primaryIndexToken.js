@@ -139,7 +139,7 @@ module.exports = async function (deployer,network,accounts) {
         });
         
 
-        await primaryIndexToken.addCLendingToken(basicTokenAddress, bBasicTokenAddress, {from:deployMaster}).then(function(){
+        await primaryIndexToken.addBLendingToken(basicTokenAddress, bBasicTokenAddress, {from:deployMaster}).then(function(){
             console.log("Added bLending token: "+bBasicTokenAddress);
         });
         
@@ -161,7 +161,7 @@ module.exports = async function (deployer,network,accounts) {
         
         let bUsdc = await BUSDC.at(bUsdcAddress);
         await bUsdc.setPrimaryIndexToken(primaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
-            console.log("cUsdc set primaryIndexToken at "+bUsdcAddress);
+            console.log("bUsdc set primaryIndexToken at "+bUsdcAddress);
         });
         
     }

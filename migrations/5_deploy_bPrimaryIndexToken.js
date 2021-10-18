@@ -97,7 +97,7 @@ module.exports = async function (deployer,network,accounts) {
         // console.log(collfacres['logs']['0']['args']);
         
         let primaryIndexToken = await PrimaryIndexToken.at(primaryIndexTokenAddress);
-        await primaryIndexToken.setCPrimaryIndexToken(bPrimaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
+        await primaryIndexToken.setBPrimaryIndexToken(bPrimaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
             console.log("Primary Index Token set bPrimaryIndexToken at "+primaryIndexTokenAddress);
         });
 
