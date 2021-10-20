@@ -196,6 +196,13 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         return balance;
     }
 
+    function balanceOfUnderlyingView(address owner) external view returns(uint){
+        Exp memory exchangeRate = Exp({mantissa: exchangeRateStored()});
+        (MathError mErr, uint balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
+        require(mErr == MathError.NO_ERROR, "balance could not be calculated");
+        return balance;
+    }
+
     /**
      * @notice Get a snapshot of the account's balances, and the cached exchange rate
      * @dev This is used by comptroller to more efficiently perform liquidity checks.
