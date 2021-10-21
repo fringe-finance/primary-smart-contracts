@@ -106,7 +106,7 @@ contract PrimaryIndexToken is Initializable,
 
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress );//last parametr: "uint256 prjAmount"
 
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
@@ -397,11 +397,15 @@ contract PrimaryIndexToken is Initializable,
             revert("PIT: no borrow positions");
         }
         uint256 currentBorrowBalance;
-        uint estimateInterest;
+        uint256 estimateInterest;
         if(amountLendingToken == ((2 ** 256) - 1)){
             if(borrowedPositions == 1){
-                repayBorrowAll(lendingTokenId);
+                (repayBorrowError, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowTo(_msgSender(), ((2**256) - 1));
+                require(repayBorrowError == 0 && amountRepayed > 0,"PIT: repayBorrowError!=0");
+                uint256 lendingTokenIdCopy0 = lendingTokenId;
+                emit RepayBorrow(_msgSender(), lendingTokenIdCopy0, lendingToken, amountRepayed, prj);
                 return;
+                
             }else{
                 currentBorrowBalance = IBLendingToken(bLendingToken).borrowBalanceCurrent(_msgSender());
                 if(currentBorrowBalance > cumulativeBorrowBalance){
@@ -448,21 +452,21 @@ contract PrimaryIndexToken is Initializable,
 
             msgSenderBorrowPosition.amountBorrowed -= amountLendingToken;
             msgSenderBorrowPosition.amountPit = balanceOfPitPosition(_msgSender(),indexPrjToken[prj]);
+           
         }
-        uint lendingTokenIdCopy = lendingTokenId;
-        uint amountLendingTokenCopy = amountLendingToken;
-        uint prjAmountCopy = prjAmount;
+        uint lendingTokenIdCopy1 = lendingTokenId;
+        emit RepayBorrow(_msgSender(), lendingTokenIdCopy1, lendingToken, amountRepayed, prj);
         for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
-            UserBorrowPosition storage borrowPosition = userBorrowPosition[_msgSender()][lendingTokenIdCopy][prjId];
+            UserBorrowPosition storage borrowPosition = userBorrowPosition[_msgSender()][lendingTokenIdCopy1][prjId];
             if(borrowPosition.amountBorrowed > 0){
                 borrowPosition.amountBorrowed += estimateInterest;
                 borrowPosition.amountPit = balanceOfPitPosition(_msgSender(),prjId);
             }
         }
-        emit RepayBorrow(_msgSender(), lendingTokenIdCopy, lendingToken, amountLendingTokenCopy, prj, prjAmountCopy);
+        
     }
 
-    function repayBorrowAll(uint256 lendingTokenId) public {
+    function repayBorrowAll(uint256 lendingTokenId) private {
         require(lendingTokenId < lendingTokens.length);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -476,10 +480,10 @@ contract PrimaryIndexToken is Initializable,
 
         for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
             UserBorrowPosition storage borrowPosition = userBorrowPosition[_msgSender()][lendingTokenId][prjId];
-            UserPrjPosition storage prjPosition = userPrjPosition[_msgSender()][prjId];
+            //UserPrjPosition storage prjPosition = userPrjPosition[_msgSender()][prjId];
             borrowPosition.amountBorrowed = 0;
             borrowPosition.amountPit = 0;
-            emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, (2 ** 256) - 1, projectTokens[prjId], prjPosition.amountPrjDeposited);
+            emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, (2 ** 256) - 1, projectTokens[prjId]);
         }
 
         
