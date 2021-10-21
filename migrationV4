@@ -438,3 +438,82 @@ Summary
 =======
 > Total deployments:   1
 > Final cost:          0.45659205 ETH
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'BUSDC'
+   -----------------
+   > transaction hash:    0x417158a7de8d312fa1effa1c60f155d03303391cfe0fb1e419329b6458f95a4b
+   > Blocks: 1            Seconds: 17
+   > contract address:    0xE8208877B41D043a1e9ABd14Ecb9DC35810f44A8
+   > block number:        9497601
+   > block timestamp:     1634723614
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             169.623689771767672225
+   > gas used:            4370356 (0x42afb4)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.39333204 ETH
+
+bUsdctest mastercopy address: 0xE8208877B41D043a1e9ABd14Ecb9DC35810f44A8
+Proxy admin upgraded bUsdcProxyAddress at 0x210717E4F507ddBF23511882671DaF486BcC5f53
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.39333204 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.39333204 ETH
+
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 29941410 (0x1c8dea2)
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0x2942d4190f76308034cd448b7753b0397fcd84ab38b47aaf4eca9c5d197db50e
+   > Blocks: 2            Seconds: 18
+   > contract address:    0x08091FB34e08c91094a8Ec7244a1753F7491d3cB
+   > block number:        9503790
+   > block timestamp:     1634816450
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             169.171685561767672225
+   > gas used:            4957691 (0x4ba5fb)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.44619219 ETH
+
+PrimaryIndexToken master copy: 0x08091FB34e08c91094a8Ec7244a1753F7491d3cB
+Proxy admin upgraded primaryIndexToken at 0xBDC93176a2Bea09fd4509FEbc2ceDAfb9BD60934
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.44619219 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.44619219 ETH
