@@ -247,9 +247,9 @@ interface IPrimaryIndexToken {
      * @param borrowToken - the address of lending token
      * @param borrowAmount - the amount of lending token borrowed
      * @param prjAddress - the address of project token that forwarded by frontend or backend
-     * @param prjAmount - the amount of project token that forwarded by frontend or backend
+     * @noparam prjAmount - the amount of project token that forwarded by frontend or backend
      */
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress);
 
     /**
      * @param liquidator - the initiator of event
@@ -285,9 +285,9 @@ interface IPrimaryIndexToken {
     /**
      * @dev adds the cToken of lending token to Primary Index Token
      * @param _lendingToken - the address of lending token
-     * @param _cLendingToken - the address of cLending token 
+     * @param _bLendingToken - the address of bLending token 
      */
-    function addCLendingToken(address _lendingToken, address _cLendingToken) external;
+    function addBLendingToken(address _lendingToken, address _bLendingToken) external;
 
     /**
      * @dev sets comptroller address to Primary Index Token
@@ -297,9 +297,9 @@ interface IPrimaryIndexToken {
 
     /**
      * @dev sets the cPrimary Index Token to Primary Index Token
-     * @param _cPrimaryIndexToken - the address of cPrimary Index Token
+     * @param _bPrimaryIndexToken - the address of cPrimary Index Token
      */
-    function setCPrimaryIndexToken(address _cPrimaryIndexToken) external;
+    function setBPrimaryIndexToken(address _bPrimaryIndexToken) external;
 
     /**
      * @dev sets the price oracle to Primary Index Token
@@ -366,9 +366,9 @@ interface IPrimaryIndexToken {
      * @dev redeem the lending token from pool.
      *      The msg.sender should approve cToken to transferFrom.
      * @param lendingTokenId the lending token id in list `lendingTokens`
-     * @param amountCLendingToken the amount of Clending token to redeem
+     * @param amountBLendingToken the amount of Blending token to redeem
      */
-    function redeem(uint256 lendingTokenId, uint256 amountCLendingToken) external;
+    function redeem(uint256 lendingTokenId, uint256 amountBLendingToken) external;
 
     /**
      * @dev redeem the lending token from pool.
@@ -422,12 +422,6 @@ interface IPrimaryIndexToken {
     function healthFactorForPosition(address account,uint256 lendingTokenId,uint prjId) external view returns(uint256 numerator, uint256 denominator);
 
     /**
-     * @dev gets account liquidity
-     * @param account - the address of user
-     */
-    function getLiquidity(address account) external view returns(uint);
-
-    /**
      * @dev get project token evaluation depending on 
      * @param projectToken - the address of project token
      * @param prjAmount - the amount of project token including decimals
@@ -436,25 +430,16 @@ interface IPrimaryIndexToken {
 
     /**
      * @dev gets the raw evaluation of project token in dimention of lending token
-     * @param lendingToken - the address of lending token
      * @param projectToken - the address of project token
      * @param amountPrj - amount of project token including decimals
      */
-    function getPrjEvaluationInLendingTokenWithoutSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
-
-    /**
-     * @dev gets the evaluation of project token with sale in dimention of lending token
-     * @param lendingToken - the address of lending token
-     * @param projectToken - the address of project token
-     * @param amountPrj - the amount of project token including decimals
-     */
-    function getPrjEvaluationInLendingTokenWithSale(address lendingToken, address projectToken, uint256 amountPrj) external view returns(uint256);
+    function getPrjEvaluationInBasicTokenWithSale (address projectToken, uint256 amountPrj) external view returns(uint256);
 
     /**
      * @dev get cToken address of underlying
      * @param lendingToken - the address of lending token
      */
-    function getCToken(address lendingToken) external view returns(address);
+    function getBToken(address lendingToken) external view returns(address);
 
     /**
      * @dev returns the deposited prj amount of `account`
