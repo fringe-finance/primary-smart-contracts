@@ -403,6 +403,8 @@ contract PrimaryIndexToken is Initializable,
                 (repayBorrowError, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowTo(_msgSender(), ((2**256) - 1));
                 require(repayBorrowError == 0 && amountRepayed > 0,"PIT: repayBorrowError!=0");
                 uint256 lendingTokenIdCopy0 = lendingTokenId;
+                msgSenderBorrowPosition.amountBorrowed = 0;
+                msgSenderBorrowPosition.amountPit = 0;
                 emit RepayBorrow(_msgSender(), lendingTokenIdCopy0, lendingToken, amountRepayed, prj);
                 return;
                 

@@ -4,7 +4,8 @@ pragma solidity >=0.8.0;
 
 interface IBLendingToken{
 
-    /**
+    
+     /**
      * @notice Sender supplies assets into the market and receives cTokens in exchange
      * @dev Accrues interest whether or not the operation succeeds, unless reverted
      * @param minter the address of account which earn liquidity
@@ -13,6 +14,7 @@ interface IBLendingToken{
      * return uint minted amount
      */
     function mintTo(address minter, uint mintAmount) external returns (uint err, uint mintedAmount);
+
 
     /**
      * @notice Sender redeems cTokens in exchange for the underlying asset
@@ -44,5 +46,10 @@ interface IBLendingToken{
     function borrowBalanceCurrent(address account) external returns (uint);
 
     function borrowBalanceStored(address account) external view returns (uint);
+  
+    function totalSupply() external view returns(uint256);
 
+    function totalBorrows() external view returns(uint256);
+
+    function exchangeRateStored() external view returns (uint256);
 }
