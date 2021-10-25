@@ -1,5 +1,6 @@
 const PrimaryIndexToken = artifacts.require("PrimaryIndexToken");
 const UniswapPathFinder = artifacts.require("UniswapPathFinder");
+const BUSDC = artifacts.require("BUSDC");
 const ProxyAdmin = artifacts.require("ProxyAdmin");
 
 
@@ -42,9 +43,21 @@ module.exports = async function (deployer,network,accounts) {
     // let uniswapPathFinderProxyAddress = '0x68af8d954A26D738c71894F83D8DE49018F238db';
     
     // await proxyAdmin.upgrade(uniswapPathFinderProxyAddress,uniswapPathFinderMasterCopyAddress,{from:deployMaster}).then(function(){
-    //     console.log("Proxy admin upgraded primaryIndexToken at "+uniswapPathFinderProxyAddress);
+    //     console.log("Proxy admin upgraded uniswapPathFinder at "+uniswapPathFinderProxyAddress);
     // });
 
 //============================================================================
-   
+
+    // let bUsdcMasterCopyAddress;
+    // await deployer.deploy(BUSDC,{from:deployMaster}).then(function (instance) {
+    //     bUsdcMasterCopyAddress = instance.address;
+    //     console.log("bUsdctest mastercopy address: "+instance.address);
+    // });
+
+    // let bUsdcProxyAddress = '0x210717E4F507ddBF23511882671DaF486BcC5f53';
+
+    // await proxyAdmin.upgrade(bUsdcProxyAddress,bUsdcMasterCopyAddress,{from:deployMaster}).then(function(){
+    //     console.log("Proxy admin upgraded bUsdcProxyAddress at "+bUsdcProxyAddress);
+    // });
+
 };
