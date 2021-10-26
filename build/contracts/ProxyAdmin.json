@@ -6948,7 +6948,27 @@
   },
   "networks": {
     "4": {
-      "events": {},
+      "events": {
+        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "previousOwner",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "newOwner",
+              "type": "address"
+            }
+          ],
+          "name": "OwnershipTransferred",
+          "type": "event"
+        }
+      },
       "links": {},
       "address": "0x966981cDf9A94487078DD44E30e02a7063299d55",
       "transactionHash": "0x041a0974a58c2f42269e08510f8296c3a2b1b22c56076315275f87de2e325922"
@@ -6980,8 +7000,8 @@
       "transactionHash": "0x087a6cb1b51599e25a5e613216b520630984118ea095ddc2f44575370e19eb41"
     }
   },
-  "schemaVersion": "3.4.3",
-  "updatedAt": "2021-10-11T13:42:37.808Z",
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-10-26T08:00:21.918Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "This is an auxiliary contract meant to be assigned as the admin of a {TransparentUpgradeableProxy}. For an explanation of why you would want to use this see the documentation for {TransparentUpgradeableProxy}.",

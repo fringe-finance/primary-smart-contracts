@@ -107,7 +107,7 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousPriceMantissa\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"requestedPriceMantissa\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPriceMantissa\",\"type\":\"uint256\"}],\"name\":\"PricePosted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"}],\"name\":\"assetPrices\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"cToken\",\"type\":\"address\"}],\"name\":\"getUnderlyingPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"setDirectPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"cToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"underlyingPriceMantissa\",\"type\":\"uint256\"}],\"name\":\"setUnderlyingPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interfaces/ISimplePriceOracle.sol\":\"ISimplePriceOracle\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":250},\"remappings\":[]},\"sources\":{\"project:/contracts/interfaces/ISimplePriceOracle.sol\":{\"keccak256\":\"0xfd7de216d027add95b612cee11a819140202befc06f88f4eacab27ec419e97f5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ece0da97ee13baad6c8474c3ed05133c69bf2fe33b4c39a5297c504472687592\",\"dweb:/ipfs/QmYbZQywLkqw4riCh4VycQjAT11AeE4bzfECmQMZUuBjhL\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.9+commit.e5eed63a\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"previousPriceMantissa\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"requestedPriceMantissa\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"newPriceMantissa\",\"type\":\"uint256\"}],\"name\":\"PricePosted\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"}],\"name\":\"assetPrices\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"cToken\",\"type\":\"address\"}],\"name\":\"getUnderlyingPrice\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"}],\"name\":\"setDirectPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"cToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"underlyingPriceMantissa\",\"type\":\"uint256\"}],\"name\":\"setUnderlyingPrice\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/interfaces/ISimplePriceOracle.sol\":\"ISimplePriceOracle\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":300},\"remappings\":[]},\"sources\":{\"project:/contracts/interfaces/ISimplePriceOracle.sol\":{\"keccak256\":\"0xfd7de216d027add95b612cee11a819140202befc06f88f4eacab27ec419e97f5\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://ece0da97ee13baad6c8474c3ed05133c69bf2fe33b4c39a5297c504472687592\",\"dweb:/ipfs/QmYbZQywLkqw4riCh4VycQjAT11AeE4bzfECmQMZUuBjhL\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "immutableReferences": {},
@@ -116,20 +116,20 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0;\n\ninterface ISimplePriceOracle {\n    \n    event PricePosted(address asset, uint previousPriceMantissa, uint requestedPriceMantissa, uint newPriceMantissa);\n\n    function getUnderlyingPrice(address cToken) external view returns (uint);\n\n    function setUnderlyingPrice(address cToken, uint underlyingPriceMantissa) external;\n\n    function setDirectPrice(address asset, uint price) external;\n\n    // v1 price oracle interface for use as backing of proxy\n    function assetPrices(address asset) external view returns (uint);\n\n   \n}\n",
-  "sourcePath": "/Users/vchikhladze/DApps/DeFi/primaryIndexToken/contracts/interfaces/ISimplePriceOracle.sol",
+  "sourcePath": "/Users/sergeymurzin/PROJECTS/VAREGER/primary-smart-contracts/contracts/interfaces/ISimplePriceOracle.sol",
   "ast": {
     "absolutePath": "project:/contracts/interfaces/ISimplePriceOracle.sol",
     "exportedSymbols": {
       "ISimplePriceOracle": [
-        15171
+        15411
       ]
     },
-    "id": 15172,
+    "id": 15412,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15132,
+        "id": 15372,
         "literals": [
           "solidity",
           ">=",
@@ -137,7 +137,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:24:24"
+        "src": "32:24:23"
       },
       {
         "abstract": false,
@@ -146,34 +146,34 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15171,
+        "id": 15411,
         "linearizedBaseContracts": [
-          15171
+          15411
         ],
         "name": "ISimplePriceOracle",
-        "nameLocation": "68:18:24",
+        "nameLocation": "68:18:23",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "anonymous": false,
-            "id": 15142,
+            "id": 15382,
             "name": "PricePosted",
-            "nameLocation": "104:11:24",
+            "nameLocation": "104:11:23",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 15141,
+              "id": 15381,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15134,
+                  "id": 15374,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "124:5:24",
+                  "nameLocation": "124:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "116:13:24",
+                  "scope": 15382,
+                  "src": "116:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -181,10 +181,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15133,
+                    "id": 15373,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "116:7:24",
+                    "src": "116:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -195,14 +195,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15136,
+                  "id": 15376,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "previousPriceMantissa",
-                  "nameLocation": "136:21:24",
+                  "nameLocation": "136:21:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "131:26:24",
+                  "scope": 15382,
+                  "src": "131:26:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -210,10 +210,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15135,
+                    "id": 15375,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "131:4:24",
+                    "src": "131:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -223,14 +223,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15138,
+                  "id": 15378,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "requestedPriceMantissa",
-                  "nameLocation": "164:22:24",
+                  "nameLocation": "164:22:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "159:27:24",
+                  "scope": 15382,
+                  "src": "159:27:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -238,10 +238,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15137,
+                    "id": 15377,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "159:4:24",
+                    "src": "159:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -251,14 +251,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15140,
+                  "id": 15380,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "newPriceMantissa",
-                  "nameLocation": "193:16:24",
+                  "nameLocation": "193:16:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "188:21:24",
+                  "scope": 15382,
+                  "src": "188:21:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -266,10 +266,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15139,
+                    "id": 15379,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "188:4:24",
+                    "src": "188:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -278,32 +278,32 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "115:95:24"
+              "src": "115:95:23"
             },
-            "src": "98:113:24"
+            "src": "98:113:23"
           },
           {
             "functionSelector": "fc57d4df",
-            "id": 15149,
+            "id": 15389,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getUnderlyingPrice",
-            "nameLocation": "226:18:24",
+            "nameLocation": "226:18:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15145,
+              "id": 15385,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15144,
+                  "id": 15384,
                   "mutability": "mutable",
                   "name": "cToken",
-                  "nameLocation": "253:6:24",
+                  "nameLocation": "253:6:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15149,
-                  "src": "245:14:24",
+                  "scope": 15389,
+                  "src": "245:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -311,10 +311,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15143,
+                    "id": 15383,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "245:7:24",
+                    "src": "245:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -324,21 +324,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "244:16:24"
+              "src": "244:16:23"
             },
             "returnParameters": {
-              "id": 15148,
+              "id": 15388,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15147,
+                  "id": 15387,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15149,
-                  "src": "284:4:24",
+                  "scope": 15389,
+                  "src": "284:4:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -346,10 +346,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15146,
+                    "id": 15386,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "284:4:24",
+                    "src": "284:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -358,36 +358,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "283:6:24"
+              "src": "283:6:23"
             },
-            "scope": 15171,
-            "src": "217:73:24",
+            "scope": 15411,
+            "src": "217:73:23",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "127ffda0",
-            "id": 15156,
+            "id": 15396,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setUnderlyingPrice",
-            "nameLocation": "305:18:24",
+            "nameLocation": "305:18:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15154,
+              "id": 15394,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15151,
+                  "id": 15391,
                   "mutability": "mutable",
                   "name": "cToken",
-                  "nameLocation": "332:6:24",
+                  "nameLocation": "332:6:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15156,
-                  "src": "324:14:24",
+                  "scope": 15396,
+                  "src": "324:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -395,10 +395,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15150,
+                    "id": 15390,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "324:7:24",
+                    "src": "324:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -409,13 +409,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15153,
+                  "id": 15393,
                   "mutability": "mutable",
                   "name": "underlyingPriceMantissa",
-                  "nameLocation": "345:23:24",
+                  "nameLocation": "345:23:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15156,
-                  "src": "340:28:24",
+                  "scope": 15396,
+                  "src": "340:28:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -423,10 +423,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15152,
+                    "id": 15392,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "340:4:24",
+                    "src": "340:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -435,42 +435,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "323:46:24"
+              "src": "323:46:23"
             },
             "returnParameters": {
-              "id": 15155,
+              "id": 15395,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "378:0:24"
+              "src": "378:0:23"
             },
-            "scope": 15171,
-            "src": "296:83:24",
+            "scope": 15411,
+            "src": "296:83:23",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "09a8acb0",
-            "id": 15163,
+            "id": 15403,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setDirectPrice",
-            "nameLocation": "394:14:24",
+            "nameLocation": "394:14:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15161,
+              "id": 15401,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15158,
+                  "id": 15398,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "417:5:24",
+                  "nameLocation": "417:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15163,
-                  "src": "409:13:24",
+                  "scope": 15403,
+                  "src": "409:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -478,10 +478,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15157,
+                    "id": 15397,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "409:7:24",
+                    "src": "409:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -492,13 +492,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15160,
+                  "id": 15400,
                   "mutability": "mutable",
                   "name": "price",
-                  "nameLocation": "429:5:24",
+                  "nameLocation": "429:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15163,
-                  "src": "424:10:24",
+                  "scope": 15403,
+                  "src": "424:10:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -506,10 +506,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15159,
+                    "id": 15399,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "424:4:24",
+                    "src": "424:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -518,42 +518,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "408:27:24"
+              "src": "408:27:23"
             },
             "returnParameters": {
-              "id": 15162,
+              "id": 15402,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "444:0:24"
+              "src": "444:0:23"
             },
-            "scope": 15171,
-            "src": "385:60:24",
+            "scope": 15411,
+            "src": "385:60:23",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "5e9a523c",
-            "id": 15170,
+            "id": 15410,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "assetPrices",
-            "nameLocation": "521:11:24",
+            "nameLocation": "521:11:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15166,
+              "id": 15406,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15165,
+                  "id": 15405,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "541:5:24",
+                  "nameLocation": "541:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15170,
-                  "src": "533:13:24",
+                  "scope": 15410,
+                  "src": "533:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -561,10 +561,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15164,
+                    "id": 15404,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "533:7:24",
+                    "src": "533:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -574,21 +574,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "532:15:24"
+              "src": "532:15:23"
             },
             "returnParameters": {
-              "id": 15169,
+              "id": 15409,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15168,
+                  "id": 15408,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15170,
-                  "src": "571:4:24",
+                  "scope": 15410,
+                  "src": "571:4:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -596,10 +596,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15167,
+                    "id": 15407,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "571:4:24",
+                    "src": "571:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -608,35 +608,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "570:6:24"
+              "src": "570:6:23"
             },
-            "scope": 15171,
-            "src": "512:65:24",
+            "scope": 15411,
+            "src": "512:65:23",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15172,
-        "src": "58:526:24",
+        "scope": 15412,
+        "src": "58:526:23",
         "usedErrors": []
       }
     ],
-    "src": "32:553:24"
+    "src": "32:553:23"
   },
   "legacyAST": {
     "absolutePath": "project:/contracts/interfaces/ISimplePriceOracle.sol",
     "exportedSymbols": {
       "ISimplePriceOracle": [
-        15171
+        15411
       ]
     },
-    "id": 15172,
+    "id": 15412,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 15132,
+        "id": 15372,
         "literals": [
           "solidity",
           ">=",
@@ -644,7 +644,7 @@
           ".0"
         ],
         "nodeType": "PragmaDirective",
-        "src": "32:24:24"
+        "src": "32:24:23"
       },
       {
         "abstract": false,
@@ -653,34 +653,34 @@
         "contractDependencies": [],
         "contractKind": "interface",
         "fullyImplemented": false,
-        "id": 15171,
+        "id": 15411,
         "linearizedBaseContracts": [
-          15171
+          15411
         ],
         "name": "ISimplePriceOracle",
-        "nameLocation": "68:18:24",
+        "nameLocation": "68:18:23",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "anonymous": false,
-            "id": 15142,
+            "id": 15382,
             "name": "PricePosted",
-            "nameLocation": "104:11:24",
+            "nameLocation": "104:11:23",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 15141,
+              "id": 15381,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15134,
+                  "id": 15374,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "124:5:24",
+                  "nameLocation": "124:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "116:13:24",
+                  "scope": 15382,
+                  "src": "116:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -688,10 +688,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15133,
+                    "id": 15373,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "116:7:24",
+                    "src": "116:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -702,14 +702,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15136,
+                  "id": 15376,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "previousPriceMantissa",
-                  "nameLocation": "136:21:24",
+                  "nameLocation": "136:21:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "131:26:24",
+                  "scope": 15382,
+                  "src": "131:26:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -717,10 +717,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15135,
+                    "id": 15375,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "131:4:24",
+                    "src": "131:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -730,14 +730,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15138,
+                  "id": 15378,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "requestedPriceMantissa",
-                  "nameLocation": "164:22:24",
+                  "nameLocation": "164:22:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "159:27:24",
+                  "scope": 15382,
+                  "src": "159:27:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -745,10 +745,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15137,
+                    "id": 15377,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "159:4:24",
+                    "src": "159:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -758,14 +758,14 @@
                 },
                 {
                   "constant": false,
-                  "id": 15140,
+                  "id": 15380,
                   "indexed": false,
                   "mutability": "mutable",
                   "name": "newPriceMantissa",
-                  "nameLocation": "193:16:24",
+                  "nameLocation": "193:16:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15142,
-                  "src": "188:21:24",
+                  "scope": 15382,
+                  "src": "188:21:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -773,10 +773,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15139,
+                    "id": 15379,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "188:4:24",
+                    "src": "188:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -785,32 +785,32 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "115:95:24"
+              "src": "115:95:23"
             },
-            "src": "98:113:24"
+            "src": "98:113:23"
           },
           {
             "functionSelector": "fc57d4df",
-            "id": 15149,
+            "id": 15389,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getUnderlyingPrice",
-            "nameLocation": "226:18:24",
+            "nameLocation": "226:18:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15145,
+              "id": 15385,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15144,
+                  "id": 15384,
                   "mutability": "mutable",
                   "name": "cToken",
-                  "nameLocation": "253:6:24",
+                  "nameLocation": "253:6:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15149,
-                  "src": "245:14:24",
+                  "scope": 15389,
+                  "src": "245:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -818,10 +818,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15143,
+                    "id": 15383,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "245:7:24",
+                    "src": "245:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -831,21 +831,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "244:16:24"
+              "src": "244:16:23"
             },
             "returnParameters": {
-              "id": 15148,
+              "id": 15388,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15147,
+                  "id": 15387,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15149,
-                  "src": "284:4:24",
+                  "scope": 15389,
+                  "src": "284:4:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -853,10 +853,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15146,
+                    "id": 15386,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "284:4:24",
+                    "src": "284:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -865,36 +865,36 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "283:6:24"
+              "src": "283:6:23"
             },
-            "scope": 15171,
-            "src": "217:73:24",
+            "scope": 15411,
+            "src": "217:73:23",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "127ffda0",
-            "id": 15156,
+            "id": 15396,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setUnderlyingPrice",
-            "nameLocation": "305:18:24",
+            "nameLocation": "305:18:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15154,
+              "id": 15394,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15151,
+                  "id": 15391,
                   "mutability": "mutable",
                   "name": "cToken",
-                  "nameLocation": "332:6:24",
+                  "nameLocation": "332:6:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15156,
-                  "src": "324:14:24",
+                  "scope": 15396,
+                  "src": "324:14:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -902,10 +902,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15150,
+                    "id": 15390,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "324:7:24",
+                    "src": "324:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -916,13 +916,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15153,
+                  "id": 15393,
                   "mutability": "mutable",
                   "name": "underlyingPriceMantissa",
-                  "nameLocation": "345:23:24",
+                  "nameLocation": "345:23:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15156,
-                  "src": "340:28:24",
+                  "scope": 15396,
+                  "src": "340:28:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -930,10 +930,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15152,
+                    "id": 15392,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "340:4:24",
+                    "src": "340:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -942,42 +942,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "323:46:24"
+              "src": "323:46:23"
             },
             "returnParameters": {
-              "id": 15155,
+              "id": 15395,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "378:0:24"
+              "src": "378:0:23"
             },
-            "scope": 15171,
-            "src": "296:83:24",
+            "scope": 15411,
+            "src": "296:83:23",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "09a8acb0",
-            "id": 15163,
+            "id": 15403,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "setDirectPrice",
-            "nameLocation": "394:14:24",
+            "nameLocation": "394:14:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15161,
+              "id": 15401,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15158,
+                  "id": 15398,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "417:5:24",
+                  "nameLocation": "417:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15163,
-                  "src": "409:13:24",
+                  "scope": 15403,
+                  "src": "409:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -985,10 +985,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15157,
+                    "id": 15397,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "409:7:24",
+                    "src": "409:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -999,13 +999,13 @@
                 },
                 {
                   "constant": false,
-                  "id": 15160,
+                  "id": 15400,
                   "mutability": "mutable",
                   "name": "price",
-                  "nameLocation": "429:5:24",
+                  "nameLocation": "429:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15163,
-                  "src": "424:10:24",
+                  "scope": 15403,
+                  "src": "424:10:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1013,10 +1013,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15159,
+                    "id": 15399,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "424:4:24",
+                    "src": "424:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1025,42 +1025,42 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "408:27:24"
+              "src": "408:27:23"
             },
             "returnParameters": {
-              "id": 15162,
+              "id": 15402,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "444:0:24"
+              "src": "444:0:23"
             },
-            "scope": 15171,
-            "src": "385:60:24",
+            "scope": 15411,
+            "src": "385:60:23",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "external"
           },
           {
             "functionSelector": "5e9a523c",
-            "id": 15170,
+            "id": 15410,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "assetPrices",
-            "nameLocation": "521:11:24",
+            "nameLocation": "521:11:23",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 15166,
+              "id": 15406,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15165,
+                  "id": 15405,
                   "mutability": "mutable",
                   "name": "asset",
-                  "nameLocation": "541:5:24",
+                  "nameLocation": "541:5:23",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15170,
-                  "src": "533:13:24",
+                  "scope": 15410,
+                  "src": "533:13:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1068,10 +1068,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 15164,
+                    "id": 15404,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "533:7:24",
+                    "src": "533:7:23",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -1081,21 +1081,21 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "532:15:24"
+              "src": "532:15:23"
             },
             "returnParameters": {
-              "id": 15169,
+              "id": 15409,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 15168,
+                  "id": 15408,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 15170,
-                  "src": "571:4:24",
+                  "scope": 15410,
+                  "src": "571:4:23",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -1103,10 +1103,10 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 15167,
+                    "id": 15407,
                     "name": "uint",
                     "nodeType": "ElementaryTypeName",
-                    "src": "571:4:24",
+                    "src": "571:4:23",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -1115,29 +1115,29 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "570:6:24"
+              "src": "570:6:23"
             },
-            "scope": 15171,
-            "src": "512:65:24",
+            "scope": 15411,
+            "src": "512:65:23",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "external"
           }
         ],
-        "scope": 15172,
-        "src": "58:526:24",
+        "scope": 15412,
+        "src": "58:526:23",
         "usedErrors": []
       }
     ],
-    "src": "32:553:24"
+    "src": "32:553:23"
   },
   "compiler": {
     "name": "solc",
     "version": "0.8.9+commit.e5eed63a.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.4.3",
-  "updatedAt": "2021-10-11T09:30:14.515Z",
+  "schemaVersion": "3.4.1",
+  "updatedAt": "2021-10-21T12:04:19.523Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

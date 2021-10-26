@@ -106,7 +106,7 @@ contract PrimaryIndexToken is Initializable,
 
     event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress );//last parametr: "uint256 prjAmount"
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepaid);//last parametr: "uint256 prjAmount"
 
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
@@ -405,7 +405,7 @@ contract PrimaryIndexToken is Initializable,
                 uint256 lendingTokenIdCopy0 = lendingTokenId;
                 msgSenderBorrowPosition.amountBorrowed = 0;
                 msgSenderBorrowPosition.amountPit = 0;
-                emit RepayBorrow(_msgSender(), lendingTokenIdCopy0, lendingToken, amountRepayed, prj);
+                emit RepayBorrow(_msgSender(), lendingTokenIdCopy0, lendingToken, amountRepayed, prj, true);
                 return;
                 
             }else{
@@ -433,8 +433,7 @@ contract PrimaryIndexToken is Initializable,
                 msgSenderBorrowPosition.amountBorrowed = 0;
                 msgSenderBorrowPosition.amountPit = 0;
             }
-        }
-        else{
+        } else{
             require(amountLendingToken <= msgSenderBorrowPosition.amountBorrowed, "PIT: amountLendingToken<=amountBorrowed");
 
             currentBorrowBalance = IBLendingToken(bLendingToken).borrowBalanceCurrent(_msgSender());
@@ -457,7 +456,7 @@ contract PrimaryIndexToken is Initializable,
            
         }
         uint lendingTokenIdCopy1 = lendingTokenId;
-        emit RepayBorrow(_msgSender(), lendingTokenIdCopy1, lendingToken, amountRepayed, prj);
+
         for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
             UserBorrowPosition storage borrowPosition = userBorrowPosition[_msgSender()][lendingTokenIdCopy1][prjId];
             if(borrowPosition.amountBorrowed > 0){
@@ -465,6 +464,8 @@ contract PrimaryIndexToken is Initializable,
                 borrowPosition.amountPit = balanceOfPitPosition(_msgSender(),prjId);
             }
         }
+
+        emit RepayBorrow(_msgSender(), lendingTokenIdCopy1, lendingToken, amountRepayed, prj, msgSenderBorrowPosition.amountBorrowed == 0);
         
     }
 
@@ -485,7 +486,7 @@ contract PrimaryIndexToken is Initializable,
             //UserPrjPosition storage prjPosition = userPrjPosition[_msgSender()][prjId];
             borrowPosition.amountBorrowed = 0;
             borrowPosition.amountPit = 0;
-            emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, (2 ** 256) - 1, projectTokens[prjId]);
+            emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, (2 ** 256) - 1, projectTokens[prjId], true);
         }
 
         

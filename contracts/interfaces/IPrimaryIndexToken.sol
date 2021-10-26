@@ -249,7 +249,7 @@ interface IPrimaryIndexToken {
      * @param prjAddress - the address of project token that forwarded by frontend or backend
      * noparam prjAmount - the amount of project token that forwarded by frontend or backend
      */
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress);
+    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepaid);
 
     /**
      * @param liquidator - the initiator of event
