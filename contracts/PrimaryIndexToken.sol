@@ -8,10 +8,11 @@ import "../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "../openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
+import "../openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "../openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "./uniswap/UniswapPathFinder.sol";
 import "./interfaces/IBPrimaryIndexToken.sol";
 import "./interfaces/ISimplePriceOracle.sol";
@@ -25,7 +26,8 @@ contract PrimaryIndexToken is Initializable,
                               ERC20Upgradeable,
                               PausableUpgradeable,
                               AccessControlUpgradeable,
-                              ERC2771ContextUpgradeable
+                              ERC2771ContextUpgradeable,
+                              ReentrancyGuardUpgradeable
 {
     // using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -216,7 +218,7 @@ contract PrimaryIndexToken is Initializable,
         depositTo(prjId, amountPrj, _msgSender());
     }
 
-    function depositTo(uint256 prjId, uint256 amountPrj, address beneficiar) public {
+    function depositTo(uint256 prjId, uint256 amountPrj, address beneficiar) public nonReentrant {
         require(prjId < projectTokens.length && amountPrj > 0);
         address tokenPrj = projectTokens[prjId];
         UserPrjPosition storage beneficiarDepositPosition = userPrjPosition[beneficiar][prjId];
@@ -230,7 +232,7 @@ contract PrimaryIndexToken is Initializable,
         withdrawTo(prjId, amountPrj, _msgSender());
     }
     
-    function withdrawTo(uint256 prjId, uint256 amountPrj, address beneficiar) public {
+    function withdrawTo(uint256 prjId, uint256 amountPrj, address beneficiar) public nonReentrant {
         require(prjId < projectTokens.length && amountPrj > 0 && amountPrj <= userPrjPosition[_msgSender()][prjId].amountPrjDeposited);
         address tokenPrj = projectTokens[prjId];
         bool withdrawerIsBorrower = false;

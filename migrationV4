@@ -645,3 +645,37 @@ Summary
 =======
 > Total deployments:   1
 > Final cost:          0.44215047 ETH
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0xc31e40bcf64f41e42016d9164a9ba4b1561d3b1de92d0cc41bcf2cf332b3d135
+   > Blocks: 1            Seconds: 9
+   > contract address:    0x66645978Cfc79FCbd4213E8aa2CB136DC683279F
+   > block number:        9550932
+   > block timestamp:     1635524259
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             160.564585745924772732
+   > gas used:            4963352 (0x4bbc18)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.44670168 ETH
+
+PrimaryIndexToken master copy: 0x66645978Cfc79FCbd4213E8aa2CB136DC683279F
+Proxy admin upgraded primaryIndexToken at 0xBDC93176a2Bea09fd4509FEbc2ceDAfb9BD60934
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.44670168 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.44670168 ETH
