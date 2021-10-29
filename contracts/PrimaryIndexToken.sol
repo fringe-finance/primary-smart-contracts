@@ -516,9 +516,11 @@ contract PrimaryIndexToken is Initializable,
             uint amoutLendingTokenToReceive = getPrjEvaluationInBasicTokenWithSale(projectToken, prjDeposited);
             IERC20Upgradeable(lendingToken).safeTransferFrom(_msgSender(),address(this), amoutLendingTokenToReceive);
             
-            IERC20Upgradeable(lendingToken).approve(bLendingToken,amoutLendingTokenToReceive);
-            (, uint256 mintedAmount) = IBLendingToken(bLendingToken).mintTo(address(this),amoutLendingTokenToReceive);
-            require(mintedAmount > 0,"PIT: minted amount should be non zero!");
+            // IERC20Upgradeable(lendingToken).approve(bLendingToken,amoutLendingTokenToReceive);
+            // (, uint256 mintedAmount) = IBLendingToken(bLendingToken).mintTo(address(this),amoutLendingTokenToReceive);
+            // require(mintedAmount > 0,"PIT: minted amount should be non zero!");
+
+            IERC20Upgradeable(lendingToken).transfer(bLendingToken, amoutLendingTokenToReceive);
 
             IERC20Upgradeable(projectToken).safeTransfer(_msgSender(),prjDeposited);
             prjPosition.amountPrjDeposited -= prjDeposited;
