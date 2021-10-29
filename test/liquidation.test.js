@@ -508,7 +508,7 @@ contract('PrimaryIndexToken', (accounts) => {
     }
 
     async function getLiquidity(account){
-        let liquidity = await primaryIndexToken.getLiquidity(account,{from:account});
+        let liquidity = await comptroller.getAccountLiquidity(account,{from:account});
         return liquidity;
     }
 
