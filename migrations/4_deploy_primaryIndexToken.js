@@ -51,6 +51,7 @@ module.exports = async function (deployer,network,accounts) {
     }
     fs.writeFileSync('migrations/uniswapPathFinderProxyAddress.json', JSON.stringify(uniswapPathFinderProxyAddress_data, null, '\t'));
 
+    uniswapPathFinderProxyAddress = JSON.parse(fs.readFileSync('migrations/uniswapPathFinderProxyAddress.json', 'utf8')).uniswapPathFinderProxyAddress;
 
     let uniswapPathFinder = await UniswapPathFinder.at(uniswapPathFinderProxyAddress);
     
@@ -78,10 +79,6 @@ module.exports = async function (deployer,network,accounts) {
         primaryIndexTokenProxyAddress = instance.address;
     });
 
-    const data = {
-        "primaryIndexTokenProxyAddress": primaryIndexTokenProxyAddress
-    }
-    fs.writeFileSync('migrations/primaryIndexTokenProxyAddress.json', JSON.stringify(data, null, '\t'));
     primaryIndexTokenProxyAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
     let primaryIndexToken = await PrimaryIndexToken.at(primaryIndexTokenProxyAddress);
     let basicTokenAddress;
@@ -115,12 +112,15 @@ module.exports = async function (deployer,network,accounts) {
             ];
         let lvrNumerator = new BN(6);
         let lvrDenominator = new BN(10);
-        let ltfNumerator = new BN(12);
-        let ltfDenominator = new BN(10);
+        let ltfNumerator = new BN(1);
+        let ltfDenominator = new BN(1);
         let saleNumerator = new BN(8);
         let saleDenominator = new BN(10);
 
-        await primaryIndexToken.init(basicTokenAddress, uniswapPathFinderAddress, moderator, trustedForwarder, {from:deployMaster});
+        await primaryIndexToken.init(basicTokenAddress, uniswapPathFinderAddress, moderator, trustedForwarder, {from:deployMaster})
+        .then(function(){
+            console.log("Primary index token call init at "+primaryIndexTokenProxyAddress);
+        });
 
         for(var i = 0; i < PRJsAddresses.length; i++){
             await primaryIndexToken.addPrjToken(PRJsAddresses[i],
