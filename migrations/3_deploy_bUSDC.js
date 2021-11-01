@@ -29,6 +29,7 @@ module.exports = async function (deployer,network,accounts) {
         let jumpRateModelAddress = JSON.parse(fs.readFileSync('migrations/jumpRateModelAddress.json', 'utf8')).jumpRateModelAddress;
         
         let initialExchangeRateMantissa = multiplier18;
+        let reserveFactorMantissa = (new BN(25)).mul((new BN(10)).pow((new BN(16))));//same as cAAVE
         let name = "bUSDC Test Token";
         let symbol = "bUSDCTest";
         let decimals = new BN(6);
@@ -52,7 +53,12 @@ module.exports = async function (deployer,network,accounts) {
                 console.log ("bUSDC Proxy Instance Address: "+ instance.address);
                 
         });
-        
+
+        let bUsdcProxyAddress_data = {
+            "bUsdcProxyAddress":bUsdcProxyAddress
+        }
+        fs.writeFileSync('migrations/bUsdcProxyAddress.json', JSON.stringify(bUsdcProxyAddress_data, null, '\t'));
+
         let bUsdc = await BUSDC.at(bUsdcProxyAddress);
         await bUsdc.init(   usdctestAddress,
                             comptrollerAddress,
@@ -66,10 +72,9 @@ module.exports = async function (deployer,network,accounts) {
             console.log("bUSDC called init at "+bUsdcProxyAddress);
         });
 
-        let bUsdcProxyAddress_data = {
-            "bUsdcProxyAddress":bUsdcProxyAddress
-        }
-        fs.writeFileSync('migrations/bUsdcProxyAddress.json', JSON.stringify(bUsdcProxyAddress_data, null, '\t'));
+        await bUsdc.setReserveFactor(reserveFactorMantissa,{from:deployMaster}).then(function(){
+            console.log("bUSDC set reserve factor at "+bUsdcProxyAddress+" with value "+reserveFactorMantissa);
+        })
 
         let simplePriceOracle = await SimplePriceOracle.at(simplePriceOracleAddress);
         await simplePriceOracle.setUnderlyingPrice(bUsdcProxyAddress,multiplier18,{from:deployMaster});
