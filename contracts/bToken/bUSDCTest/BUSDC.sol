@@ -92,6 +92,9 @@ contract BUSDC is Initializable, BErc20{
         (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, payer, repayAmount);
     }
 
+    function setReserveFactor(uint256 reserveFactorMantissa) public onlyAdmin{
+        _setReserveFactorFresh(reserveFactorMantissa);
+    }
 
 
 
