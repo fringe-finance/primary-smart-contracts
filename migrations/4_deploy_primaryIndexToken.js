@@ -79,6 +79,12 @@ module.exports = async function (deployer,network,accounts) {
         primaryIndexTokenProxyAddress = instance.address;
     });
 
+    const primaryIndexTokenProxyAddress_data = {
+        "primaryIndexTokenProxyAddress": primaryIndexTokenProxyAddress
+    }
+    fs.writeFileSync('migrations/primaryIndexTokenProxyAddress.json', JSON.stringify(primaryIndexTokenProxyAddress_data, null, '\t'));
+
+
     primaryIndexTokenProxyAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
     let primaryIndexToken = await PrimaryIndexToken.at(primaryIndexTokenProxyAddress);
     let basicTokenAddress;
