@@ -281,8 +281,6 @@ contract('PrimaryIndexToken', (accounts) => {
         let borrower1PRJdepositedBefore = await getDepositedPrjAmount(borrower1,prjId);
         await printDepositedPrjAmount(borrower1PRJdepositedBefore);
 
-       
-
         await printUniswapPoolReserves(USDCaddress,PRJaddress);
 
         let borrower1BorrowPositionBefore = await getBorrowPosition(borrower1,lendingTokenId,prjId);
@@ -301,6 +299,8 @@ contract('PrimaryIndexToken', (accounts) => {
         pitLogger.info("Borrowed "+ amountLendingTokenToBorrow+" tokens");
         let borrowRes = await primaryIndexToken.borrow(lendingTokenId,amountLendingTokenToBorrow,PRJaddress,toBN(10),{from:borrower1});
         
+
+
         let borrower1USDCbalanceAfter = await getERC20balance(USDCaddress,borrower1);
         await printERC20balance(borrower1USDCbalanceAfter);
 

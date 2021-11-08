@@ -163,7 +163,7 @@ contract('PrimaryIndexToken', (accounts) => {
         USDCmultiplier = ten.pow(USDCdecimals);
         let amountUSDCsupplier1   = USDCmultiplier.mul(new BN(100_000_000_000));
         let amountUSDCborrower2   = USDCmultiplier.mul(new BN(100));
-        let amountUSDCliquidator1 = USDCmultiplier.mul(toBN(1_000_000));
+        let amountUSDCliquidator1 = USDCmultiplier.mul(toBN(9_000_000_000_000));
         await usdctest.mintTo(supplier1,amountUSDCsupplier1,{from:deployMaster});
         await usdctest.mintTo(borrower2,amountUSDCborrower2,{from:deployMaster});
         await usdctest.mintTo(liquidator1,amountUSDCliquidator1,{from:deployMaster});
@@ -439,11 +439,15 @@ contract('PrimaryIndexToken', (accounts) => {
         let borrower2AccountHealthBefore = await getAccountHealthFactorForPosition(borrower2,lendingTokenId,prjId);
         await printAccountHealth(borrower2AccountHealthBefore);
 
+        let borrowPosition = await getBorrowPosition(borrower2,0,prjId);
+        console.log("borrow amt: "+borrowPosition['0']);
+
         let amountPRJtoLiquidate = await primaryIndexToken.getDepositedPrjAmount(borrower2,prjId,{from:liquidator1});
         pitLogger.info("Deposited amount PRJ: "+amountPRJtoLiquidate);
-        let amountLendingTokenToSend = await primaryIndexToken.getPrjEvaluationInBasicTokenWithSale(PRJaddress,amountPRJtoLiquidate,{from:liquidator1});
+        let amountLendingTokenToSend = borrowPosition['0'];//await primaryIndexToken.getPrjEvaluationInBasicTokenWithSale(PRJaddress,amountPRJtoLiquidate,{from:liquidator1});
         pitLogger.info("Amount liquidator1 should send: "+amountLendingTokenToSend);
-        await approveTransferFrom(USDCaddress,primaryIndexTokenAddress,liquidator1,amountLendingTokenToSend);
+        //await approveTransferFrom(USDCaddress,primaryIndexTokenAddress,liquidator1,amountLendingTokenToSend);
+        await approveTransferFrom(USDCaddress,bUSDCAddress,liquidator1,amountLendingTokenToSend);
         let liquidateResult = await primaryIndexToken.liquidate(borrower2,lendingTokenId,prjId,{from:liquidator1});
 
         let liquidator1PRJbalanceAfter = await getERC20balance(PRJaddress,liquidator1);
