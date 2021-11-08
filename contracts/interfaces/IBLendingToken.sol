@@ -36,6 +36,8 @@ interface IBLendingToken{
 
     function repayBorrowTo(address payer, uint repayAmount) external returns (uint repayBorrowError, uint amountRepayed);
 
+    function repayBorrowToBorrower(address payer,address borrower, uint repayAmount) external returns (uint repayBorrowError, uint amountRepayed);
+
      /**
      * @notice Get the token balance of the `owner`
      * @param owner The address of the account to query
@@ -52,4 +54,6 @@ interface IBLendingToken{
     function totalBorrows() external view returns(uint256);
 
     function exchangeRateStored() external view returns (uint256);
+
+
 }
