@@ -505,27 +505,23 @@ contract PrimaryIndexToken is Initializable,
             revert("PIT:  no position to liquidate.");
         }
 
-        borrowPosition.amountBorrowed = IBLendingToken(bLendingToken).borrowBalanceCurrent(user);
-        
         (uint hf_numerator, uint hf_denominator) = healthFactorForPosition(user, lendingTokenId, prjId);
 
         if (hf_numerator >= hf_denominator){
             revert("PIT: health factor bigger than 1. Liquidation is forbidden by this condition.");
         }else{
             UserPrjPosition storage prjPosition = userPrjPosition[user][prjId];
+            //uint amoutLendingTokenToReceive = borrowPosition.amountBorrowed;//getPrjEvaluationInBasicTokenWithSale(projectToken, prjDeposited);
             
+            //IERC20Upgradeable(lendingToken).safeTransferFrom(_msgSender(),address(this), amoutLendingTokenToReceive);
+            
+            (, uint amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowToBorrower(_msgSender(), user, borrowPosition.amountBorrowed);
+            require(amountRepayed > 0,"PIT:repay error.");
+            //emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, amountRepayed, projectTokens[prjId], true);
             uint prjDeposited = prjPosition.amountPrjDeposited;
-            uint amoutLendingTokenToReceive = getPrjEvaluationInBasicTokenWithSale(projectToken, prjDeposited);
-            IERC20Upgradeable(lendingToken).safeTransferFrom(_msgSender(),address(this), amoutLendingTokenToReceive);
-            
-            // IERC20Upgradeable(lendingToken).approve(bLendingToken,amoutLendingTokenToReceive);
-            // (, uint256 mintedAmount) = IBLendingToken(bLendingToken).mintTo(address(this),amoutLendingTokenToReceive);
-            // require(mintedAmount > 0,"PIT: minted amount should be non zero!");
-
-            IERC20Upgradeable(lendingToken).transfer(bLendingToken, amoutLendingTokenToReceive);
-
             IERC20Upgradeable(projectToken).safeTransfer(_msgSender(),prjDeposited);
             prjPosition.amountPrjDeposited -= prjDeposited;
+            totalStakedPrj[projectToken] -= prjDeposited;
             borrowPosition.amountBorrowed = 0;
             borrowPosition.amountPit = 0;
 
