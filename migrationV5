@@ -474,3 +474,37 @@ Summary
 =======
 > Total deployments:   1
 > Final cost:          0.44610147 ETH
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Deploying 'Comptroller'
+   -----------------------
+   > transaction hash:    0xb75e3f4e78258060c651535fa57a0ce1bf00e53e86e37f11976d480e00ddc098
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x4593c4F86A1c9DE99A489d4b397cfAEb1ba776a4
+   > block number:        9628568
+   > block timestamp:     1636710973
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             164.278807741658194952
+   > gas used:            4775480 (0x48de38)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.4297932 ETH
+
+Comptroller address: 0x4593c4F86A1c9DE99A489d4b397cfAEb1ba776a4
+Proxy admin upgraded comptrollerProxyAddress at 0x58C098EeDA524441A0aA05c55106703749bea36D
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.4297932 ETH
+
+
+Summary
+=======
+> Total deployments:   1
