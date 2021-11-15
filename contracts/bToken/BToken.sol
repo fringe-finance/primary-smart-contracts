@@ -68,10 +68,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function transferTokens(address spender, address src, address dst, uint tokens) internal returns (uint) {
         /* Fail if transfer not allowed */
-        uint allowed = comptroller.transferAllowed(address(this), src, dst, tokens);
-        if (allowed != 0) {
-            return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.TRANSFER_COMPTROLLER_REJECTION, allowed);
-        }
+        // uint allowed = comptroller.transferAllowed(address(this), src, dst, tokens);
+        // if (allowed != 0) {
+        //     return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.TRANSFER_COMPTROLLER_REJECTION, allowed);
+        // }
 
         /* Do not allow self-transfers */
         if (src == dst) {
