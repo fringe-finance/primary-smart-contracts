@@ -508,3 +508,53 @@ Proxy admin upgraded comptrollerProxyAddress at 0x58C098EeDA524441A0aA05c5510670
 Summary
 =======
 > Total deployments:   1
+
+vchikhladze@vchikhladzes-MacBook-Pro ~/DApps/DeFi/bonded/primaryIndexToken % truffle migrate --network rinkeby --f 6 --to 6 --skip-dry-run
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+
+
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 29970648 (0x1c950d8)
+
+
+6_update_primaryIndexToken.js
+=============================
+Network: rinkeby
+DEPLOYMASTER: 0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+MODERATOR: 0x1D34aDCF309133eeDe23190c1D446C79b2c53f2E
+SUPPLIER: 0x4E80b5467F49016129d3aad76C556Bd88Bf98502
+
+   Replacing 'PrimaryIndexToken'
+   -----------------------------
+   > transaction hash:    0x16547d5127e6473ef8223c4523e2a4a720999672e5fa6ca4f431ff5bd1b82607
+   > Blocks: 0            Seconds: 8
+   > contract address:    0xf1E027BA2A296eDA6BA38205c555780866eE8b44
+   > block number:        9657851
+   > block timestamp:     1637150549
+   > account:             0xC04d245263fF5459CeA78C1800fdc69BD11B4b59
+   > balance:             160.465924621658194952
+   > gas used:            4940106 (0x4b614a)
+   > gas price:           90 gwei
+   > value sent:          0 ETH
+   > total cost:          0.44460954 ETH
+
+PrimaryIndexToken master copy: 0xf1E027BA2A296eDA6BA38205c555780866eE8b44
+Proxy admin upgraded primaryIndexToken at 0x908d17d8fD57Bc83F9197ab841782C675996650C
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.44460954 ETH
+
+
+Summary
+=======
+> Total deployments:   1
+> Final cost:          0.44460954 ETH
