@@ -77,7 +77,10 @@ module.exports = async function (deployer,network,accounts) {
         })
 
         let simplePriceOracle = await SimplePriceOracle.at(simplePriceOracleAddress);
-        await simplePriceOracle.setUnderlyingPrice(bUsdcProxyAddress,multiplier18,{from:deployMaster});
+        await simplePriceOracle.setUnderlyingPrice(bUsdcProxyAddress,multiplier18,{from:deployMaster})
+        .then(function(){
+            console.log("Setted underlying price for bUSDC");
+        });
         
 
         let comptroller = await Comptroller.at(comptrollerAddress);
