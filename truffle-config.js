@@ -47,7 +47,7 @@ module.exports = {
       provider: () => new HDWalletProvider(mnemonic, Infura.Rinkeby),
       gas: 6_000_000,
       gasPrice: '90000000000',
-      networkCheckTimeout: 99999999,
+      networkCheckTimeout: 999999999,
       timeoutBlocks: 2000,
     },
     mainnet: {
