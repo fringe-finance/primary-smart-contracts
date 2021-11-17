@@ -321,9 +321,9 @@ contract Comptroller is ComptrollerV5Storage, ComptrollerInterface, ComptrollerE
         if (err != Error.NO_ERROR) {
             return uint(err);
         }
-        if (shortfall > 0) {
-            return uint(Error.INSUFFICIENT_LIQUIDITY);
-        }
+        // if (shortfall > 0) {
+        //     return uint(Error.INSUFFICIENT_LIQUIDITY);
+        // }
 
         return uint(Error.NO_ERROR);
     }

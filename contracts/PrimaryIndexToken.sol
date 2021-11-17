@@ -309,7 +309,7 @@ contract PrimaryIndexToken is Initializable,
 
         uint redeemUnderlyingError = IBLendingToken(bLendingToken).redeemUnderlyingTo(_msgSender(), amountLendingToken);
         require(redeemUnderlyingError == 0,"PIT:redeem>=supply");
-        suppliedLendingToken[_msgSender()][lendingTokenId] -= amountLendingToken;
+        //suppliedLendingToken[_msgSender()][lendingTokenId] -= amountLendingToken;
 
 
         emit RedeemUnderlying(_msgSender(), lendingTokenId, lendingToken, bLendingToken, amountLendingToken);
