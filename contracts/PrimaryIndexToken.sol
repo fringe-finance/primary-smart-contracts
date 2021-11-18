@@ -235,39 +235,29 @@ contract PrimaryIndexToken is Initializable,
     function withdrawTo(uint256 prjId, uint256 amountPrj, address beneficiar) public nonReentrant {
         require(prjId < projectTokens.length && amountPrj > 0 && amountPrj <= userPrjPosition[_msgSender()][prjId].amountPrjDeposited);
         address tokenPrj = projectTokens[prjId];
-        bool withdrawerIsBorrower = false;
-        uint256 possibleLendingTokenIndexes = 0;
 
         UserPrjPosition storage msgSenderPrjPosition = userPrjPosition[_msgSender()][prjId];
         for(uint i=0; i < lendingTokens.length; i++){
             UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[_msgSender()][i][prjId];
             if(msgSenderBorrowPosition.amountBorrowed > 0){
-                withdrawerIsBorrower = true;
-                msgSenderBorrowPosition.amountBorrowed = IBLendingToken(bTokensList[lendingTokens[i]]).borrowBalanceCurrent(_msgSender());
-                msgSenderBorrowPosition.amountPit = balanceOfPit(_msgSender());
                 msgSenderPrjPosition.amountPrjDeposited -= amountPrj;
-                (uint newNum, uint newDenom) = healthFactor(_msgSender(), i);
+                (uint newNum, uint newDenom) = healthFactorForPosition(_msgSender(), i, prjId);
                 if(newNum >= newDenom){
-                    possibleLendingTokenIndexes++;
+                    totalStakedPrj[tokenPrj] -= amountPrj;
+                    IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
+                    emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+                    return;
+                }
+                else{
+                    revert("PIT: the new account health is less than 1 when withdrawing this amount of PRJ");
                 }
             }
         }
-        if(!withdrawerIsBorrower){
-            msgSenderPrjPosition.amountPrjDeposited -= amountPrj;
-            totalStakedPrj[tokenPrj] -= amountPrj;
-            IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-            emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
-            return;
-        }
-        if(possibleLendingTokenIndexes > 0){
-            totalStakedPrj[tokenPrj] -= amountPrj;
-            IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-            emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
-
-        }else{
-            revert("PIT: the new account health is less than 1 when withdrawing this amount of PRJ");
-        }
-         
+        msgSenderPrjPosition.amountPrjDeposited -= amountPrj;
+        totalStakedPrj[tokenPrj] -= amountPrj;
+        IERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
+        emit Withdraw(_msgSender(), prjId, tokenPrj, amountPrj, beneficiar);
+        return;
     }
 
     function supply(uint256 lendingTokenId, uint256 amountLendingToken) public {
