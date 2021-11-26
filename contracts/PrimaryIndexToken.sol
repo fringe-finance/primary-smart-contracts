@@ -305,7 +305,6 @@ contract PrimaryIndexToken is Initializable,
         emit RedeemUnderlying(_msgSender(), lendingTokenId, lendingToken, bLendingToken, amountLendingToken);
     }
 
-    //event Test2(uint currentBorrowBalance,uint cumulativeBorrowBalance,uint estimateInterest,uint borrowedPositions,uint amountBorrowed);
 
     function borrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj, uint256 prjAmount) public {
         require(lendingTokenId < lendingTokens.length && amountLendingToken > 0);
@@ -500,14 +499,37 @@ contract PrimaryIndexToken is Initializable,
         if (hf_numerator >= hf_denominator){
             revert("PIT: health factor bigger than 1. Liquidation is forbidden by this condition.");
         }else{
+            uint amountRepayed;
+            uint256 borrowedPositions = 0;
+            uint256 cumulativeBorrowBalance = 0;
+            for(uint256 prjIdInternal = 0; prjIdInternal < projectTokens.length; prjIdInternal++){
+                UserBorrowPosition storage cumulativeBorrowPosition = userBorrowPosition[_msgSender()][lendingTokenId][prjIdInternal];
+                if(cumulativeBorrowPosition.amountBorrowed > 0){
+                    cumulativeBorrowBalance += cumulativeBorrowPosition.amountBorrowed;
+                    borrowedPositions++;
+                }
+            }
+            
+            if(borrowedPositions == 1){
+                (, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowToBorrower(_msgSender(), user, ((2**256) - 1));
+                require(amountRepayed > 0,"PIT: repayBorrowError!=0");
+                
+            }else{
+                uint256 currentBorrowBalance = IBLendingToken(bLendingToken).borrowBalanceCurrent(_msgSender());
+                uint256 estimateInterest;
+
+                if(currentBorrowBalance > cumulativeBorrowBalance){
+                    estimateInterest = (currentBorrowBalance - cumulativeBorrowBalance) / borrowedPositions;
+                }else{
+                    estimateInterest = 0;
+                }
+                address userToLiquidate = user;
+                (, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowToBorrower(_msgSender(), userToLiquidate, borrowPosition.amountBorrowed + estimateInterest);
+                require(amountRepayed > 0, "PIT: repayBorrowError!=0");
+            
+            }
+
             UserPrjPosition storage prjPosition = userPrjPosition[user][prjId];
-            //uint amoutLendingTokenToReceive = borrowPosition.amountBorrowed;//getPrjEvaluationInBasicTokenWithSale(projectToken, prjDeposited);
-            
-            //IERC20Upgradeable(lendingToken).safeTransferFrom(_msgSender(),address(this), amoutLendingTokenToReceive);
-            
-            (, uint amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowToBorrower(_msgSender(), user, borrowPosition.amountBorrowed);
-            require(amountRepayed > 0,"PIT:repay error.");
-            //emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, amountRepayed, projectTokens[prjId], true);
             uint prjDeposited = prjPosition.amountPrjDeposited;
             IERC20Upgradeable(projectToken).safeTransfer(_msgSender(),prjDeposited);
             prjPosition.amountPrjDeposited -= prjDeposited;
