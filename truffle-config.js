@@ -46,9 +46,9 @@ module.exports = {
       network_id: 4,
       provider: () => new HDWalletProvider(mnemonic, Infura.Rinkeby),
       gas: 6_000_000,
-      gasPrice: '90000000000',
+      gasPrice: '100000000000',
       networkCheckTimeout: 999999999,
-      timeoutBlocks: 2000,
+      timeoutBlocks: 2000000,
     },
     mainnet: {
       network_id: 1,
@@ -99,4 +99,7 @@ module.exports = {
       }
     },
   },
+  plugins: [
+    'truffle-contract-size'
+  ]
 };
