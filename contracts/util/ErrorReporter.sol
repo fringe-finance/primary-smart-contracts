@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-contract ComptrollerErrorReporter {
+contract BondtrollerErrorReporter {
     enum Error {
         NO_ERROR,
         UNAUTHORIZED,
-        COMPTROLLER_MISMATCH,
+        BONDTROLLER_MISMATCH,
         INSUFFICIENT_SHORTFALL,
         INSUFFICIENT_LIQUIDITY,
         INVALID_CLOSE_FACTOR,

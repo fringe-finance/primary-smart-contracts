@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "../comptroller/ComptrollerInterface.sol";
+import "../bondtroller/Bondtroller.sol";
 import "../interestRateModel/InterestRateModel.sol";
 import "../interfaces/EIP20NonStandardInterface.sol";
 
@@ -50,7 +50,7 @@ contract BTokenStorage {
     /**
      * @notice Contract which oversees inter-cToken operations
      */
-    ComptrollerInterface public comptroller;
+    Bondtroller public bondtroller;
 
     /**
      * @notice Model which tells what the current interest rate should be
@@ -177,9 +177,9 @@ abstract contract BTokenInterface is BTokenStorage {
     event NewAdmin(address oldAdmin, address newAdmin);
 
     /**
-     * @notice Event emitted when comptroller is changed
+     * @notice Event emitted when bondtroller is changed
      */
-    event NewComptroller(ComptrollerInterface oldComptroller, ComptrollerInterface newComptroller);
+    event NewBondtroller(Bondtroller oldBondtroller, Bondtroller newBondtroller);
 
     /**
      * @notice Event emitted when interestRateModel is changed
@@ -235,14 +235,12 @@ abstract contract BTokenInterface is BTokenStorage {
     function exchangeRateStored() public virtual  view returns (uint);
     function getCash() external virtual  view returns (uint);
     function accrueInterest() public virtual  returns (uint);
-    function seize(address liquidator, address borrower, uint seizeTokens) external  virtual returns (uint);
-
 
     /*** Admin Functions ***/
 
     function _setPendingAdmin(address payable newPendingAdmin) external virtual  returns (uint);
     function _acceptAdmin() external virtual  returns (uint);
-    function _setComptroller(ComptrollerInterface newComptroller) public virtual  returns (uint);
+    function _setBondtroller(Bondtroller newBondtroller) public virtual  returns (uint);
     function _setReserveFactor(uint newReserveFactorMantissa) external virtual  returns (uint);
     function _reduceReserves(uint reduceAmount) external virtual  returns (uint);
     function _setInterestRateModel(InterestRateModel newInterestRateModel) public virtual  returns (uint);

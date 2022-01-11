@@ -13,9 +13,8 @@ import "../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.so
 import "../openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
-import "./uniswap/UniswapPathFinder.sol";
+import "./interfaces/IPriceProviderAggregator.sol";
 import "./interfaces/IBPrimaryIndexToken.sol";
-import "./interfaces/ISimplePriceOracle.sol";
 import "./interfaces/EIP20Interface.sol";
 import "./interfaces/IBLendingToken.sol";
 import "./interfaces/IComptroller.sol";
@@ -29,28 +28,21 @@ contract PrimaryIndexToken is Initializable,
                               ERC2771ContextUpgradeable,
                               ReentrancyGuardUpgradeable
 {
-    // using SafeMathUpgradeable for uint256;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    UniswapPathFinder public uniswapPathFinder; //contract address of uniswap path finder 
-
     address public basicToken;  //contract address of USDC by default or any stablecoin
 
-    IComptroller public comptroller;
-
-    IBPrimaryIndexToken public bPrimaryIndexToken;
-
-    ISimplePriceOracle public priceOracle;
+    address public priceOracle;
 
     address[] public projectTokens;
 
     address[] public lendingTokens;
 
-    mapping(address => LvrInfo) public lvr; //prj token address => Lvr (Loan to Value Ratio)
-    mapping(address => LtfInfo) public ltf; //prj token address => Ltf (Liquidation Threshold Factor)
-    mapping(address => PrjSaleInfo) public prjSales; //prj token address => PRJ sale info
+    mapping(address => Ratio) public lvr; //prj token address => Lvr (Loan to Value Ratio)
+    mapping(address => Ratio) public ltf; //prj token address => Ltf (Liquidation Threshold Factor)
+    mapping(address => Ratio) public prjSales; //prj token address => PRJ sale info
     mapping(address => uint256) public totalStakedPrj; //tokenAddress => PRJ token staked
     mapping(address => mapping(uint256 => UserPrjPosition)) public userPrjPosition; // user address => PRJ token index => UserPrjPosition
 
@@ -61,23 +53,11 @@ contract PrimaryIndexToken is Initializable,
     mapping(address => uint256) public indexPrjToken;   //prj address => index of prj in list `projectTokens`
     mapping(address => uint256) public indexLendingToken;//lending token address => index lending token in list `lendingTokens`
 
-    struct PrjSaleInfo{
+    struct Ratio{
         uint8 numerator;
         uint8 denominator;
     }
     
-    //Lvr = Loan to Value Ratio  
-    struct LvrInfo{
-        uint8 numerator;
-        uint8 denominator;
-    }
-
-    //Ltf = Liquidation Threshold Factor
-    struct LtfInfo{
-        uint8 numerator;
-        uint8 denominator;
-    }
-
     struct UserPrjPosition{
         uint256 amountPrjDeposited;
     }
@@ -112,7 +92,7 @@ contract PrimaryIndexToken is Initializable,
 
     event Liquidate(address indexed liquidator, address indexed borrower, uint lendingTokenId, uint prjId, uint amountPrjLiquidated);
 
-    function init(address _basicToken, address _uniswapPathFinder, address _moderator, address _trustedForwarder) public initializer{
+    function init(address _basicToken, address _moderator, address _trustedForwarder) public initializer{
         require(_basicToken != 0xdAC17F958D2ee523a2206206994597C13D831ec7, "_basicToken shouldnt be USDT!");
         basicToken = _basicToken;
         require(this.decimals() >= ERC20Upgradeable(_basicToken).decimals(), "PIT: basic token should have decimals less than PIT");
@@ -122,7 +102,6 @@ contract PrimaryIndexToken is Initializable,
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _setupRole(MODERATOR_ROLE, _moderator);
         __ERC2771Context_init_unchained(_trustedForwarder);
-        uniswapPathFinder = UniswapPathFinder(_uniswapPathFinder);
     }
 
     modifier onlyAdmin() {
@@ -147,29 +126,15 @@ contract PrimaryIndexToken is Initializable,
         _setPrjSale(_tokenPRJ, _saleNumerator, _saleDenominator);
     }
 
-    function addLendingToken(address _lendingToken) public onlyAdmin{
-        require(_lendingToken != address(0),"PIT: invalid _lendingToken address!");
+    function addLendingToken(address _lendingToken, address _bLendingToken) public onlyAdmin{
+        require(_lendingToken != address(0) && _bLendingToken != address(0), "PIT: invalid input!");
         indexLendingToken[_lendingToken] = lendingTokens.length;
         lendingTokens.push(_lendingToken);
-    }
-
-    function addBLendingToken(address _underlyingToken, address _bToken) public onlyAdmin{
-        require(_underlyingToken != address(0),"PIT: invalid underlying address!");
-        require(_bToken != address(0),"PIT: invalid bToken address!");
-        bTokensList[_underlyingToken] = _bToken;
-    }
-
-    function setComptroller(address _comptroller) public onlyAdmin{
-        comptroller = IComptroller(_comptroller);
-    }
-
-     function setBPrimaryIndexToken(address _bPrimaryIndexToken) public onlyAdmin{
-        bPrimaryIndexToken = IBPrimaryIndexToken(_bPrimaryIndexToken);
-        
+        bTokensList[_lendingToken] = _bLendingToken;
     }
 
     function setPriceOracle(address _priceOracle) public onlyAdmin{
-        priceOracle = ISimplePriceOracle(_priceOracle);
+        priceOracle = _priceOracle;
     }
     
     //************* MODERATOR FUNCTIONS ********************************
@@ -190,17 +155,17 @@ contract PrimaryIndexToken is Initializable,
     }
 
     function _setLvr(address _tokenPRJ, uint8 _lvrNumerator, uint8 _lvrDenominator) private {
-        lvr[_tokenPRJ] = LvrInfo({numerator:_lvrNumerator,denominator:_lvrDenominator});
+        lvr[_tokenPRJ] = Ratio({numerator:_lvrNumerator,denominator:_lvrDenominator});
         emit LoanToValueRatioSet(_msgSender(), _tokenPRJ, _lvrNumerator, _lvrDenominator);
     }
 
     function _setLtf(address _tokenPRJ, uint8 _ltfNumerator, uint8 _ltfDenominator) private {
-        ltf[_tokenPRJ] = LtfInfo({numerator:_ltfNumerator,denominator:_ltfDenominator});
+        ltf[_tokenPRJ] = Ratio({numerator:_ltfNumerator,denominator:_ltfDenominator});
         emit LiquidationThresholdFactorSet(_msgSender(), _tokenPRJ, _ltfNumerator, _ltfDenominator);
     }
 
     function _setPrjSale(address _tokenPRJ, uint8 _saleNumerator, uint8 _saleDenominator) private {
-        prjSales[_tokenPRJ] = PrjSaleInfo({numerator:_saleNumerator,denominator:_saleDenominator});
+        prjSales[_tokenPRJ] = Ratio({numerator:_saleNumerator,denominator:_saleDenominator});
         emit PrjSaleSet(_msgSender(), _tokenPRJ, _saleNumerator, _saleDenominator);
     }
 
@@ -260,7 +225,7 @@ contract PrimaryIndexToken is Initializable,
         return;
     }
 
-    function supply(uint256 lendingTokenId, uint256 amountLendingToken) public {
+    function supply(uint256 lendingTokenId, uint256 amountLendingToken) public whenNotPaused {
         require(lendingTokenId < lendingTokens.length && amountLendingToken > 0);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -272,7 +237,7 @@ contract PrimaryIndexToken is Initializable,
         emit Supply(_msgSender(), lendingTokenId, lendingToken, amountLendingToken,bLendingToken,mintedAmount);
     }
 
-    function redeem(uint256 lendingTokenId, uint256 amountBLendingToken) public {
+    function redeem(uint256 lendingTokenId, uint256 amountBLendingToken) public whenNotPaused {
         require(lendingTokenId < lendingTokens.length && amountBLendingToken > 0);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -292,7 +257,7 @@ contract PrimaryIndexToken is Initializable,
         emit Redeem(_msgSender(), lendingTokenId, lendingToken, bLendingToken, amountBLendingToken);
     }
 
-    function redeemUnderlying(uint256 lendingTokenId, uint256 amountLendingToken) public {
+    function redeemUnderlying(uint256 lendingTokenId, uint256 amountLendingToken) public whenNotPaused {
         require(lendingTokenId < lendingTokens.length && amountLendingToken > 0);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -306,7 +271,7 @@ contract PrimaryIndexToken is Initializable,
     }
 
 
-    function borrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj, uint256 prjAmount) public {
+    function borrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj, uint256 prjAmount) public whenNotPaused {
         require(lendingTokenId < lendingTokens.length && amountLendingToken > 0);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -314,12 +279,8 @@ contract PrimaryIndexToken is Initializable,
         UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[_msgSender()][lendingTokenId][projectTokenId];
         uint borrowError;
         if(msgSenderBorrowPosition.amountBorrowed == 0){
-            //uint enterMarketError = comptroller.enterMarket(address(bPrimaryIndexToken), _msgSender());
             uint currentBalancePitOfMsgSender = balanceOfPitPosition(_msgSender(), projectTokenId);
-            require(amountLendingToken <= currentBalancePitOfMsgSender /**&& enterMarketError == 0 */,"PIT: borrow more than PitPosition");
-            // _mint(_msgSender(), amountLendingToken/**currentBalancePitOfMsgSender*/);
-            // _approve(_msgSender(),address(bPrimaryIndexToken), amountLendingToken/**currentBalancePitOfMsgSender*/);
-            // bPrimaryIndexToken.mintTo(_msgSender(), amountLendingToken/**currentBalancePitOfMsgSender*/);
+            require(amountLendingToken <= currentBalancePitOfMsgSender, "PIT: borrow more than PitPosition");
             
             borrowError = IBLendingToken(bLendingToken).borrowTo(_msgSender(), amountLendingToken);
             
@@ -331,10 +292,6 @@ contract PrimaryIndexToken is Initializable,
             msgSenderBorrowPosition.amountPit = balanceOfPitPosition(_msgSender(), projectTokenId);
             require(amountLendingToken + msgSenderBorrowPosition.amountBorrowed <= msgSenderBorrowPosition.amountPit,"PIT: should amountLendingToken+borrow<amountPIT");
 
-            // _mint(_msgSender(), amountLendingToken/**currentBalancePitOfMsgSender*/);
-            // _approve(_msgSender(),address(bPrimaryIndexToken), amountLendingToken/**currentBalancePitOfMsgSender*/);
-            // bPrimaryIndexToken.mintTo(_msgSender(), amountLendingToken/**currentBalancePitOfMsgSender*/);
-            
             borrowError = IBLendingToken(bLendingToken).borrowTo(_msgSender(), amountLendingToken);
             msgSenderBorrowPosition.amountBorrowed += amountLendingToken;
 
@@ -357,16 +314,13 @@ contract PrimaryIndexToken is Initializable,
                     borrowPosition.amountPit = balanceOfPitPosition(_msgSender(),prjId);
                 }
             }
-            //emit Test2(currentBorrowBalance,cumulativeBorrowBalance,estimateInterest,borrowedPositions,msgSenderBorrowPosition.amountBorrowed);
         }
         require(borrowError == 0,"PIT: borrow more than PIT balance or no liquidity.");
 
         emit Borrow(_msgSender(),lendingTokenId, lendingToken, amountLendingToken,prj,prjAmount);
     }
 
-    //event Test5(uint amountLendingToken,uint currentBorrowBalance,uint cumulativeBorrowBalance,uint repayed,uint borrowedPositions,uint estimateInterest);
-
-    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj,uint256 prjAmount) public {
+    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address prj) public whenNotPaused {
         require(lendingTokenId < lendingTokens.length && amountLendingToken > 0);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -407,7 +361,6 @@ contract PrimaryIndexToken is Initializable,
                 else{
                     estimateInterest = 0;
                 }
-                //emit Test5(amountLendingToken, currentBorrowBalance,cumulativeBorrowBalance,0, borrowedPositions, estimateInterest);
 
                 (repayBorrowError, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowTo(_msgSender(), msgSenderBorrowPosition.amountBorrowed + estimateInterest);
                 require(repayBorrowError == 0 && amountRepayed > 0, "PIT: repayBorrowError!=0");
@@ -419,16 +372,14 @@ contract PrimaryIndexToken is Initializable,
                 else{
                     estimateInterest = 0;
                 }
-                //emit Test5(amountRepayed, currentBorrowBalance,cumulativeBorrowBalance,amountRepayed,borrowedPositions,estimateInterest);
 
                 msgSenderBorrowPosition.amountBorrowed = 0;
                 msgSenderBorrowPosition.amountPit = 0;
             }
-        } else{
+        }else{
             require(amountLendingToken <= msgSenderBorrowPosition.amountBorrowed, "PIT: amountLendingToken<=amountBorrowed");
 
             currentBorrowBalance = IBLendingToken(bLendingToken).borrowBalanceCurrent(_msgSender());
-            //emit Test5(amountLendingToken, currentBorrowBalance, cumulativeBorrowBalance,0, borrowedPositions,0);
             
             (repayBorrowError, amountRepayed)  = IBLendingToken(bLendingToken).repayBorrowTo(_msgSender(), amountLendingToken);
             require(repayBorrowError == 0 && amountRepayed > 0, "PIT: repayBorrowError not zero!");
@@ -440,8 +391,6 @@ contract PrimaryIndexToken is Initializable,
                 estimateInterest = 0;
             }
             
-            //emit Test5(amountRepayed, currentBorrowBalance, cumulativeBorrowBalance, amountRepayed, borrowedPositions, estimateInterest);
-
             msgSenderBorrowPosition.amountBorrowed -= amountLendingToken;
             msgSenderBorrowPosition.amountPit = balanceOfPitPosition(_msgSender(),indexPrjToken[prj]);
            
@@ -460,7 +409,7 @@ contract PrimaryIndexToken is Initializable,
         
     }
 
-    function repayBorrowAll(uint256 lendingTokenId) private {
+    function repayBorrowAll(uint256 lendingTokenId) public {
         require(lendingTokenId < lendingTokens.length);
         address lendingToken = lendingTokens[lendingTokenId];
         address bLendingToken = bTokensList[lendingToken];
@@ -474,13 +423,11 @@ contract PrimaryIndexToken is Initializable,
 
         for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
             UserBorrowPosition storage borrowPosition = userBorrowPosition[_msgSender()][lendingTokenId][prjId];
-            //UserPrjPosition storage prjPosition = userPrjPosition[_msgSender()][prjId];
             borrowPosition.amountBorrowed = 0;
             borrowPosition.amountPit = 0;
             emit RepayBorrow(_msgSender(), lendingTokenId, lendingToken, (2 ** 256) - 1, projectTokens[prjId], true);
         }
 
-        
     }
     
     function liquidate(address user, uint lendingTokenId, uint prjId) public {
@@ -544,6 +491,32 @@ contract PrimaryIndexToken is Initializable,
 
     //************* VIEW FUNCTIONS ********************************
 
+    /**
+     * @notice returns the amount of PIT of account in position `prjId`
+     */
+    function balanceOfPitPosition(address account, uint256 prjId) public view returns (uint256){
+        address tokenPrj = projectTokens[prjId];
+        uint8 lvrNumerator = lvr[tokenPrj].numerator;
+        uint8 lvrDenominator = lvr[tokenPrj].denominator;
+        uint256 prjInPosition = getDepositedPrjAmount(account, prjId);
+        uint256 positionEvaluation = getPrjEvaluationInBasicToken(projectTokens[prjId],prjInPosition);
+        return positionEvaluation * lvrNumerator / lvrDenominator;
+    }
+
+    function liquidationThresholdForPosition(address account, uint256 prjId) public view returns(uint256){
+        address tokenPrj = projectTokens[prjId];
+        uint8 ltfNumerator = ltf[tokenPrj].numerator;
+        uint8 ltfDenominator = ltf[tokenPrj].denominator;
+        uint256 pitCurrentBalance = balanceOfPitPosition(account,prjId);
+        return pitCurrentBalance * ltfNumerator / ltfDenominator;
+    }
+
+    function healthFactorForPosition(address account,uint256 lendingTokenId,uint prjId) public view returns(uint256 numerator, uint256 denominator){
+        uint256 lt = liquidationThresholdForPosition(account, prjId);
+        uint256 borrowedLendingToken = userBorrowPosition[account][lendingTokenId][prjId].amountBorrowed;
+        return (lt,borrowedLendingToken);
+    }
+
     function healthFactor(address account,uint256 lendingTokenId) public view returns(uint256 numerator, uint256 denominator){
         uint256 lt = liquidationThreshold(account);
         uint256 borrowedLendingToken;
@@ -553,19 +526,12 @@ contract PrimaryIndexToken is Initializable,
         return (lt, borrowedLendingToken);
     }
 
-    function healthFactorForPosition(address account,uint256 lendingTokenId,uint prjId) public view returns(uint256 numerator, uint256 denominator){
-        uint256 lt = liquidationThresholdForPosition(account, prjId);
-        uint256 borrowedLendingToken = userBorrowPosition[account][lendingTokenId][prjId].amountBorrowed;
-        return (lt,borrowedLendingToken);
-    }
-
-     function getPrjEvaluationInBasicToken(address prj,uint amountPrj) public view returns(uint256){
-        (uint reserveBasicToken, uint256 reservePrj) = getUniswapReserves(prj);
-        return amountPrj * reserveBasicToken / reservePrj;
+    function getPrjEvaluationInBasicToken(address prj,uint amountPrj) public view returns(uint256){
+        return IPriceProviderAggregator(priceOracle).getEvaluation(prj, amountPrj);
     }
 
     function getPrjEvaluationInBasicTokenWithSale(address projectToken, uint256 amountPrj) public view returns(uint256){ 
-        PrjSaleInfo storage sale = prjSales[projectToken];
+        Ratio storage sale = prjSales[projectToken];
         uint256 amountPrjEvaluationInBasicToken = getPrjEvaluationInBasicToken(projectToken,amountPrj);
         uint256 amoutLendingTokenWithSale = amountPrjEvaluationInBasicToken * sale.numerator / sale.denominator;
         return amoutLendingTokenWithSale;
@@ -592,26 +558,6 @@ contract PrimaryIndexToken is Initializable,
         return lt;
     }
 
-    function liquidationThresholdForPosition(address account, uint256 prjId) public view returns(uint256){
-        address tokenPrj = projectTokens[prjId];
-        uint8 ltfNumerator = ltf[tokenPrj].numerator;
-        uint8 ltfDenominator = ltf[tokenPrj].denominator;
-        uint256 pitCurrentBalance = balanceOfPitPosition(account,prjId);
-        return pitCurrentBalance * ltfNumerator / ltfDenominator;
-    }
-
-    /**
-     * @notice returns the amount of PIT of account in position `prjId`
-     */
-    function balanceOfPitPosition(address account, uint256 prjId) public view returns (uint256){
-        address tokenPrj = projectTokens[prjId];
-        uint8 lvrNumerator = lvr[tokenPrj].numerator;
-        uint8 lvrDenominator = lvr[tokenPrj].denominator;
-        uint256 prjInPosition = getDepositedPrjAmount(account, prjId);
-        uint256 positionEvaluation = getPrjEvaluationInBasicToken(projectTokens[prjId],prjInPosition);
-        return positionEvaluation * lvrNumerator / lvrDenominator;
-    }
-
     /**
      * @notice returns the amount of PIT of account
      */
@@ -636,11 +582,6 @@ contract PrimaryIndexToken is Initializable,
         return pitBalance;
     }
 
-    function getUniswapReserves(address prj) public view returns(uint reserveBasicToken,uint reservePrj){
-        (reserveBasicToken, reservePrj) = uniswapPathFinder.getUniswapPoolReserves(basicToken, prj);
-        return (reserveBasicToken, reservePrj);
-    }
-
     function totalSupplyPit() public view virtual returns (uint256) {
         uint256 pitTotalSupply;
         address tokenPrj;
@@ -648,15 +589,12 @@ contract PrimaryIndexToken is Initializable,
         uint8 lvrDenominator;
         uint256 basicTokenEvaluation;
         uint256 totalStaked;
-        uint256 reserveBasicToken;
-        uint256 reservePrj;
         for(uint256 prjId=0; prjId < projectTokens.length; prjId++){
             tokenPrj = projectTokens[prjId];
             lvrNumerator = lvr[tokenPrj].numerator;
             lvrDenominator = lvr[tokenPrj].denominator;
             totalStaked = totalStakedPrj[tokenPrj];
-            (reserveBasicToken, reservePrj) = getUniswapReserves(projectTokens[prjId]);
-            basicTokenEvaluation = totalStaked * reserveBasicToken / reservePrj;
+            basicTokenEvaluation = getPrjEvaluationInBasicToken(projectTokens[prjId],totalStaked);
             pitTotalSupply += basicTokenEvaluation * lvrNumerator / lvrDenominator;
         }
         return pitTotalSupply;

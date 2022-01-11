@@ -20,7 +20,7 @@ abstract contract BErc20 is BToken, BErc20Interface {
      * @param decimals_ ERC-20 decimal precision of this token
      */
     function initialize(address underlying_,
-                        ComptrollerInterface comptroller_,
+                        Bondtroller comptroller_,
                         InterestRateModel interestRateModel_,
                         uint initialExchangeRateMantissa_,
                         string memory name_,

@@ -11,7 +11,7 @@ import "./BToken.sol";
 contract BEther is BToken {
     /**
      * @notice Construct a new CEther money market
-     * @param comptroller_ The address of the Comptroller
+     * @param bondtroller_ The address of the Comptroller
      * @param interestRateModel_ The address of the interest rate model
      * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18
      * @param name_ ERC-20 name of this token
@@ -19,7 +19,7 @@ contract BEther is BToken {
      * @param decimals_ ERC-20 decimal precision of this token
      * @param admin_ Address of the administrator of this token
      */
-    constructor(ComptrollerInterface comptroller_,
+    constructor(Bondtroller bondtroller_,
                 InterestRateModel interestRateModel_,
                 uint initialExchangeRateMantissa_,
                 string memory name_,
@@ -29,7 +29,7 @@ contract BEther is BToken {
         // Creator of the contract is admin during initialization
         admin = payable(msg.sender);
 
-        initialize(comptroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
+        initialize(bondtroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
 
         // Set the proper admin now that initialization is done
         admin = admin_;
@@ -93,18 +93,6 @@ contract BEther is BToken {
     function repayBorrowBehalf(address borrower) external payable {
         (uint err,) = repayBorrowBehalfInternal(borrower, msg.value);
         requireNoError(err, "repayBorrowBehalf failed");
-    }
-
-    /**
-     * @notice The sender liquidates the borrowers collateral.
-     *  The collateral seized is transferred to the liquidator.
-     * @dev Reverts upon any failure
-     * @param borrower The borrower of this cToken to be liquidated
-     * @param cTokenCollateral The market in which to seize collateral from the borrower
-     */
-    function liquidateBorrow(address borrower, BToken cTokenCollateral) external payable {
-        (uint err,) = liquidateBorrowInternal(borrower, msg.value, cTokenCollateral);
-        requireNoError(err, "liquidateBorrow failed");
     }
 
     /**

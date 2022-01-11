@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../BErc20.sol";
-import "../../interfaces/IComptroller.sol";
+import "../../bondtroller/Bondtroller.sol";
 import "../../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract BUSDC is Initializable, BErc20{
@@ -10,7 +10,7 @@ contract BUSDC is Initializable, BErc20{
     address public primaryIndexToken;
 
     function init(  address underlying_,
-                    ComptrollerInterface comptroller_,
+                    Bondtroller bondtroller_,
                     InterestRateModel interestRateModel_,
                     uint initialExchangeRateMantissa_,
                     string memory name_, 
@@ -18,7 +18,7 @@ contract BUSDC is Initializable, BErc20{
                     uint8 decimals_,
                     address admin_) public initializer{
         admin = payable(msg.sender);
-        super.initialize(underlying_, comptroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
+        super.initialize(underlying_, bondtroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
         admin = payable(admin_);
     }
     
@@ -27,15 +27,18 @@ contract BUSDC is Initializable, BErc20{
         _;
     }
 
-    modifier onlyPrimaryIndexToken{
+    modifier onlyPrimaryIndexToken {
         require(msg.sender == primaryIndexToken);
         _;
     }
 
-    function setPrimaryIndexToken(address _primaryIndexToken) public onlyAdmin{
+    function setReserveFactor(uint256 reserveFactorMantissa) public onlyAdmin{
+        _setReserveFactorFresh(reserveFactorMantissa);
+    }
+
+    function setPrimaryIndexToken(address _primaryIndexToken) public onlyAdmin {
         primaryIndexToken = _primaryIndexToken;
     }
-    
 
     function mintTo(address minter, uint mintAmount) external onlyPrimaryIndexToken returns(uint err, uint mintedAmount){
         uint error = accrueInterest();
@@ -102,10 +105,7 @@ contract BUSDC is Initializable, BErc20{
         (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, borrower, repayAmount);
     }
 
-    function setReserveFactor(uint256 reserveFactorMantissa) public onlyAdmin{
-        _setReserveFactorFresh(reserveFactorMantissa);
-    }
-
+   
 
 
 }

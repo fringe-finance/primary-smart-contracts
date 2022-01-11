@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "../comptroller/ComptrollerInterface.sol";
+import "../bondtroller/Bondtroller.sol";
 import "./BTokenInterfaces.sol";
 import "../util/ErrorReporter.sol";
 import "../util/Exponential.sol";
@@ -16,14 +16,14 @@ import "../interestRateModel/InterestRateModel.sol";
 abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     /**
      * @notice Initialize the money market
-     * @param comptroller_ The address of the Comptroller
+     * @param bondtroller_ The address of the Bondtroller
      * @param interestRateModel_ The address of the interest rate model
      * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18
      * @param name_ EIP-20 name of this token
      * @param symbol_ EIP-20 symbol of this token
      * @param decimals_ EIP-20 decimal precision of this token
      */
-    function initialize(ComptrollerInterface comptroller_,
+    function initialize(Bondtroller bondtroller_,
                         InterestRateModel interestRateModel_,
                         uint initialExchangeRateMantissa_,
                         string memory name_,
@@ -36,11 +36,11 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         initialExchangeRateMantissa = initialExchangeRateMantissa_;
         require(initialExchangeRateMantissa > 0, "initial exchange rate must be greater than zero.");
 
-        // Set the comptroller
-        uint err = _setComptroller(comptroller_);
-        require(err == uint(Error.NO_ERROR), "setting comptroller failed");
+        // Set the bondtroller
+        uint err = _setBondtroller(bondtroller_);
+        require(err == uint(Error.NO_ERROR), "setting bondtroller failed");
 
-        // Initialize block number and borrow index (block number mocks depend on comptroller being set)
+        // Initialize block number and borrow index (block number mocks depend on bondtroller being set)
         accrualBlockNumber = getBlockNumber();
         borrowIndex = mantissaOne;
 
@@ -68,7 +68,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function transferTokens(address spender, address src, address dst, uint tokens) internal returns (uint) {
         /* Fail if transfer not allowed */
-        // uint allowed = comptroller.transferAllowed(address(this), src, dst, tokens);
+        // uint allowed = bondtroller.transferAllowed(address(this), src, dst, tokens);
         // if (allowed != 0) {
         //     return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.TRANSFER_COMPTROLLER_REJECTION, allowed);
         // }
@@ -123,7 +123,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         emit Transfer(src, dst, tokens);
 
         // unused function
-        // comptroller.transferVerify(address(this), src, dst, tokens);
+        // bondtroller.transferVerify(address(this), src, dst, tokens);
 
         return uint(Error.NO_ERROR);
     }
@@ -205,7 +205,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
     /**
      * @notice Get a snapshot of the account's balances, and the cached exchange rate
-     * @dev This is used by comptroller to more efficiently perform liquidity checks.
+     * @dev This is used by bondtroller to more efficiently perform liquidity checks.
      * @param account Address of the account to snapshot
      * @return (possible error, token balance, borrow balance, exchange rate mantissa)
      */
@@ -505,7 +505,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function mintFresh(address minter, uint mintAmount) internal returns (uint, uint) {
         /* Fail if mint not allowed */
-        uint allowed = comptroller.mintAllowed(address(this), minter, mintAmount);
+        uint allowed = bondtroller.mintAllowed(address(this), minter, mintAmount);
         if (allowed != 0) {
             return (failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.MINT_COMPTROLLER_REJECTION, allowed), 0);
         }
@@ -565,7 +565,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
         /* We call the defense hook */
         // unused function
-        // comptroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
+        // bondtroller.mintVerify(address(this), minter, vars.actualMintAmount, vars.mintTokens);
 
         return (uint(Error.NO_ERROR), vars.actualMintAmount);
     }
@@ -660,7 +660,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         }
 
         /* Fail if redeem not allowed */
-        uint allowed = comptroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
+        uint allowed = bondtroller.redeemAllowed(address(this), redeemer, vars.redeemTokens);
         if (allowed != 0) {
             return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REDEEM_COMPTROLLER_REJECTION, allowed);
         }
@@ -711,7 +711,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         emit Redeem(redeemer, vars.redeemAmount, vars.redeemTokens);
 
         /* We call the defense hook */
-        comptroller.redeemVerify(address(this), redeemer, vars.redeemAmount, vars.redeemTokens);
+        bondtroller.redeemVerify(address(this), redeemer, vars.redeemAmount, vars.redeemTokens);
 
         return uint(Error.NO_ERROR);
     }
@@ -746,7 +746,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
       */
     function borrowFresh(address payable borrower, uint borrowAmount) internal returns (uint) {
         /* Fail if borrow not allowed */
-        uint allowed = comptroller.borrowAllowed(address(this), borrower, borrowAmount);
+        uint allowed = bondtroller.borrowAllowed(address(this), borrower, borrowAmount);
         if (allowed != 0) {
             return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.BORROW_COMPTROLLER_REJECTION, allowed);
         }
@@ -805,7 +805,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
         /* We call the defense hook */
         // unused function
-        // comptroller.borrowVerify(address(this), borrower, borrowAmount);
+        // bondtroller.borrowVerify(address(this), borrower, borrowAmount);
 
         return uint(Error.NO_ERROR);
     }
@@ -861,7 +861,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function repayBorrowFresh(address payer, address borrower, uint repayAmount) internal returns (uint, uint) {
         /* Fail if repayBorrow not allowed */
-        uint allowed = comptroller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
+        uint allowed = bondtroller.repayBorrowAllowed(address(this), payer, borrower, repayAmount);
         if (allowed != 0) {
             return (failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.REPAY_BORROW_COMPTROLLER_REJECTION, allowed), 0);
         }
@@ -923,213 +923,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
         /* We call the defense hook */
         // unused function
-        // comptroller.repayBorrowVerify(address(this), payer, borrower, vars.actualRepayAmount, vars.borrowerIndex);
+        // bondtroller.repayBorrowVerify(address(this), payer, borrower, vars.actualRepayAmount, vars.borrowerIndex);
 
         return (uint(Error.NO_ERROR), vars.actualRepayAmount);
     }
-
-    /**
-     * @notice The sender liquidates the borrowers collateral.
-     *  The collateral seized is transferred to the liquidator.
-     * @param borrower The borrower of this cToken to be liquidated
-     * @param cTokenCollateral The market in which to seize collateral from the borrower
-     * @param repayAmount The amount of the underlying borrowed asset to repay
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
-     */
-    function liquidateBorrowInternal(address borrower, uint repayAmount, BTokenInterface cTokenCollateral) internal nonReentrant returns (uint, uint) {
-        uint error = accrueInterest();
-        if (error != uint(Error.NO_ERROR)) {
-            // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-            return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_BORROW_INTEREST_FAILED), 0);
-        }
-
-        error = cTokenCollateral.accrueInterest();
-        if (error != uint(Error.NO_ERROR)) {
-            // accrueInterest emits logs on errors, but we still want to log the fact that an attempted liquidation failed
-            return (fail(Error(error), FailureInfo.LIQUIDATE_ACCRUE_COLLATERAL_INTEREST_FAILED), 0);
-        }
-
-        // liquidateBorrowFresh emits borrow-specific logs on errors, so we don't need to
-        return liquidateBorrowFresh(msg.sender, borrower, repayAmount, cTokenCollateral);
-    }
-
-    /**
-     * @notice The liquidator liquidates the borrowers collateral.
-     *  The collateral seized is transferred to the liquidator.
-     * @param borrower The borrower of this cToken to be liquidated
-     * @param liquidator The address repaying the borrow and seizing collateral
-     * @param cTokenCollateral The market in which to seize collateral from the borrower
-     * @param repayAmount The amount of the underlying borrowed asset to repay
-     * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
-     */
-    function liquidateBorrowFresh(address liquidator, address borrower, uint repayAmount, BTokenInterface cTokenCollateral) internal returns (uint, uint) {
-        /* Fail if liquidate not allowed */
-        uint allowed = comptroller.liquidateBorrowAllowed(address(this), address(cTokenCollateral), liquidator, borrower, repayAmount);
-        if (allowed != 0) {
-            return (failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.LIQUIDATE_COMPTROLLER_REJECTION, allowed), 0);
-        }
-
-        /* Verify market's block number equals current block number */
-        if (accrualBlockNumber != getBlockNumber()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_FRESHNESS_CHECK), 0);
-        }
-
-        /* Verify cTokenCollateral market's block number equals current block number */
-        if (cTokenCollateral.accrualBlockNumber() != getBlockNumber()) {
-            return (fail(Error.MARKET_NOT_FRESH, FailureInfo.LIQUIDATE_COLLATERAL_FRESHNESS_CHECK), 0);
-        }
-
-        /* Fail if borrower = liquidator */
-        if (borrower == liquidator) {
-            return (fail(Error.INVALID_ACCOUNT_PAIR, FailureInfo.LIQUIDATE_LIQUIDATOR_IS_BORROWER), 0);
-        }
-
-        /* Fail if repayAmount = 0 */
-        if (repayAmount == 0) {
-            return (fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_ZERO), 0);
-        }
-
-        /* Fail if repayAmount = -1 */
-        if (repayAmount == ((2**256) - 1)) {
-            return (fail(Error.INVALID_CLOSE_AMOUNT_REQUESTED, FailureInfo.LIQUIDATE_CLOSE_AMOUNT_IS_UINT_MAX), 0);
-        }
-
-
-        /* Fail if repayBorrow fails */
-        (uint repayBorrowError, uint actualRepayAmount) = repayBorrowFresh(liquidator, borrower, repayAmount);
-        if (repayBorrowError != uint(Error.NO_ERROR)) {
-            return (fail(Error(repayBorrowError), FailureInfo.LIQUIDATE_REPAY_BORROW_FRESH_FAILED), 0);
-        }
-
-        /////////////////////////
-        // EFFECTS & INTERACTIONS
-        // (No safe failures beyond this point)
-
-        /* We calculate the number of collateral tokens that will be seized */
-        (uint amountSeizeError, uint seizeTokens) = comptroller.liquidateCalculateSeizeTokens(address(this), address(cTokenCollateral), actualRepayAmount);
-        require(amountSeizeError == uint(Error.NO_ERROR), "LIQUIDATE_COMPTROLLER_CALCULATE_AMOUNT_SEIZE_FAILED");
-
-        /* Revert if borrower collateral token balance < seizeTokens */
-        require(cTokenCollateral.balanceOf(borrower) >= seizeTokens, "LIQUIDATE_SEIZE_TOO_MUCH");
-
-        // If this is also the collateral, run seizeInternal to avoid re-entrancy, otherwise make an external call
-        uint seizeError;
-        if (address(cTokenCollateral) == address(this)) {
-            seizeError = seizeInternal(address(this), liquidator, borrower, seizeTokens);
-        } else {
-            seizeError = cTokenCollateral.seize(liquidator, borrower, seizeTokens);
-        }
-
-        /* Revert if seize tokens fails (since we cannot be sure of side effects) */
-        require(seizeError == uint(Error.NO_ERROR), "token seizure failed");
-
-        /* We emit a LiquidateBorrow event */
-        emit LiquidateBorrow(liquidator, borrower, actualRepayAmount, address(cTokenCollateral), seizeTokens);
-
-        /* We call the defense hook */
-        // unused function
-        // comptroller.liquidateBorrowVerify(address(this), address(cTokenCollateral), liquidator, borrower, actualRepayAmount, seizeTokens);
-
-        return (uint(Error.NO_ERROR), actualRepayAmount);
-    }
-
-    /**
-     * @notice Transfers collateral tokens (this market) to the liquidator.
-     * @dev Will fail unless called by another cToken during the process of liquidation.
-     *  Its absolutely critical to use msg.sender as the borrowed cToken and not a parameter.
-     * @param liquidator The account receiving seized collateral
-     * @param borrower The account having collateral seized
-     * @param seizeTokens The number of cTokens to seize
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    function seize(address liquidator, address borrower, uint seizeTokens) external override  nonReentrant returns (uint) {
-        return seizeInternal(msg.sender, liquidator, borrower, seizeTokens);
-    }
-
-    struct SeizeInternalLocalVars {
-        MathError mathErr;
-        uint borrowerTokensNew;
-        uint liquidatorTokensNew;
-        uint liquidatorSeizeTokens;
-        uint protocolSeizeTokens;
-        uint protocolSeizeAmount;
-        uint exchangeRateMantissa;
-        uint totalReservesNew;
-        uint totalSupplyNew;
-    }
-
-    /**
-     * @notice Transfers collateral tokens (this market) to the liquidator.
-     * @dev Called only during an in-kind liquidation, or by liquidateBorrow during the liquidation of another CToken.
-     *  Its absolutely critical to use msg.sender as the seizer cToken and not a parameter.
-     * @param seizerToken The contract seizing the collateral (i.e. borrowed cToken)
-     * @param liquidator The account receiving seized collateral
-     * @param borrower The account having collateral seized
-     * @param seizeTokens The number of cTokens to seize
-     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-     */
-    function seizeInternal(address seizerToken, address liquidator, address borrower, uint seizeTokens) internal returns (uint) {
-        /* Fail if seize not allowed */
-        uint allowed = comptroller.seizeAllowed(address(this), seizerToken, liquidator, borrower, seizeTokens);
-        if (allowed != 0) {
-            return failOpaque(Error.COMPTROLLER_REJECTION, FailureInfo.LIQUIDATE_SEIZE_COMPTROLLER_REJECTION, allowed);
-        }
-
-        /* Fail if borrower = liquidator */
-        if (borrower == liquidator) {
-            return fail(Error.INVALID_ACCOUNT_PAIR, FailureInfo.LIQUIDATE_SEIZE_LIQUIDATOR_IS_BORROWER);
-        }
-
-        SeizeInternalLocalVars memory vars;
-
-        /*
-         * We calculate the new borrower and liquidator token balances, failing on underflow/overflow:
-         *  borrowerTokensNew = accountTokens[borrower] - seizeTokens
-         *  liquidatorTokensNew = accountTokens[liquidator] + seizeTokens
-         */
-        (vars.mathErr, vars.borrowerTokensNew) = subUInt(accountTokens[borrower], seizeTokens);
-        if (vars.mathErr != MathError.NO_ERROR) {
-            return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_DECREMENT_FAILED, uint(vars.mathErr));
-        }
-
-        vars.protocolSeizeTokens = mul_(seizeTokens, Exp({mantissa: protocolSeizeShareMantissa}));
-        vars.liquidatorSeizeTokens = sub_(seizeTokens, vars.protocolSeizeTokens);
-
-        (vars.mathErr, vars.exchangeRateMantissa) = exchangeRateStoredInternal();
-        require(vars.mathErr == MathError.NO_ERROR, "exchange rate math error");
-
-        vars.protocolSeizeAmount = mul_ScalarTruncate(Exp({mantissa: vars.exchangeRateMantissa}), vars.protocolSeizeTokens);
-
-        vars.totalReservesNew = add_(totalReserves, vars.protocolSeizeAmount);
-        vars.totalSupplyNew = sub_(totalSupply, vars.protocolSeizeTokens);
-
-        (vars.mathErr, vars.liquidatorTokensNew) = addUInt(accountTokens[liquidator], vars.liquidatorSeizeTokens);
-        if (vars.mathErr != MathError.NO_ERROR) {
-            return failOpaque(Error.MATH_ERROR, FailureInfo.LIQUIDATE_SEIZE_BALANCE_INCREMENT_FAILED, uint(vars.mathErr));
-        }
-
-        /////////////////////////
-        // EFFECTS & INTERACTIONS
-        // (No safe failures beyond this point)
-
-        /* We write the previously calculated values into storage */
-        totalReserves = vars.totalReservesNew;
-        totalSupply = vars.totalSupplyNew;
-        accountTokens[borrower] = vars.borrowerTokensNew;
-        accountTokens[liquidator] = vars.liquidatorTokensNew;
-
-        /* Emit a Transfer event */
-        emit Transfer(borrower, liquidator, vars.liquidatorSeizeTokens);
-        emit Transfer(borrower, address(this), vars.protocolSeizeTokens);
-        emit ReservesAdded(address(this), vars.protocolSeizeAmount, vars.totalReservesNew);
-
-        /* We call the defense hook */
-        // unused function
-        // comptroller.seizeVerify(address(this), seizerToken, liquidator, borrower, seizeTokens);
-
-        return uint(Error.NO_ERROR);
-    }
-
 
     /*** Admin Functions ***/
 
@@ -1185,25 +982,25 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-      * @notice Sets a new comptroller for the market
-      * @dev Admin function to set a new comptroller
+      * @notice Sets a new bondtroller for the market
+      * @dev Admin function to set a new bondtroller
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
-    function _setComptroller(ComptrollerInterface newComptroller) public override  returns (uint) {
+    function _setBondtroller(Bondtroller newBondtroller) public override  returns (uint) {
         // Check caller is admin
         if (msg.sender != admin) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_COMPTROLLER_OWNER_CHECK);
         }
 
-        ComptrollerInterface oldComptroller = comptroller;
-        // Ensure invoke comptroller.isComptroller() returns true
-        require(newComptroller.isComptroller(), "marker method returned false");
+        Bondtroller oldBondtroller = bondtroller;
+        // Ensure invoke bondtroller.isBondtroller() returns true
+        require(newBondtroller.isBondtroller(), "marker method returned false");
 
-        // Set market's comptroller to newComptroller
-        comptroller = newComptroller;
+        // Set market's bondtroller to newBondtroller
+        bondtroller = newBondtroller;
 
-        // Emit NewComptroller(oldComptroller, newComptroller)
-        emit NewComptroller(oldComptroller, newComptroller);
+        // Emit NewBondtroller(oldBondtroller, newBondtroller)
+        emit NewBondtroller(oldBondtroller, newBondtroller);
 
         return uint(Error.NO_ERROR);
     }
