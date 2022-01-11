@@ -1,10 +1,8 @@
-const PrimaryIndexToken = artifacts.require("PrimaryIndexToken");
 const ProxyAdmin = artifacts.require("ProxyAdmin");
 const TransparentUpgradeableProxy = artifacts.require("TransparentUpgradeableProxy");
-const UniswapPathFinder = artifacts.require("UniswapPathFinder");
-const Comptroller = artifacts.require("Comptroller");
-const SimplePriceOracle = artifacts.require("SimplePriceOracle");
+const Bondtroller = artifacts.require("Bondtroller");
 const BUSDC = artifacts.require("BUSDC");
+const PrimaryIndexToken = artifacts.require("PrimaryIndexToken");
 
 const BN = web3.utils.BN;
 const fs = require('fs');
@@ -20,44 +18,8 @@ module.exports = async function (deployer,network,accounts) {
     console.log("MODERATOR: "+moderator);
     console.log("SUPPLIER: "+supplier);
 
-    let proxyAdminAddress = JSON.parse(fs.readFileSync('migrations/proxyAdminAddress.json', 'utf8')).proxyAdminAddress;
-    let uniswapRouterAddress;
+    let proxyAdminAddress = JSON.parse(fs.readFileSync('migrations/addresses/proxyAdminAddress.json', 'utf8')).proxyAdminAddress;
 //============================================================================
-
-    if(network == 'testmainnet' || network == 'mainnet' || network == 'mainnet-fork'){
-    }
-    if(network == 'testrinkeby' || network == 'rinkeby'|| network == 'rinkeby-fork'){
-        uniswapRouterAddress = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
-    }
-    let uniswapPathFinderMasterCopyAddress;
-    await deployer.deploy(UniswapPathFinder,{from:deployMaster}).then(function(){
-        console.log("UniswapPathFinder master copy: " , UniswapPathFinder.address);
-        uniswapPathFinderMasterCopyAddress = UniswapPathFinder.address;
-    });
-    
-    let uniswapPathFinderProxyAddress;
-    await deployer.deploy(  TransparentUpgradeableProxy,
-                            uniswapPathFinderMasterCopyAddress, 
-                            proxyAdminAddress,
-                            web3.utils.hexToBytes('0x'),
-                            {from:deployMaster})
-    .then(function(instance){
-        console.log ("UniswapPathFinder Proxy Instance Address: "+ instance.address);
-        uniswapPathFinderProxyAddress = instance.address;
-    });
-
-    const uniswapPathFinderProxyAddress_data = {
-        "uniswapPathFinderProxyAddress": uniswapPathFinderProxyAddress
-    }
-    fs.writeFileSync('migrations/uniswapPathFinderProxyAddress.json', JSON.stringify(uniswapPathFinderProxyAddress_data, null, '\t'));
-
-    uniswapPathFinderProxyAddress = JSON.parse(fs.readFileSync('migrations/uniswapPathFinderProxyAddress.json', 'utf8')).uniswapPathFinderProxyAddress;
-
-    let uniswapPathFinder = await UniswapPathFinder.at(uniswapPathFinderProxyAddress);
-    
-    await uniswapPathFinder.initialize(uniswapRouterAddress,{from:deployMaster}).then(function(){
-        console.log ("UniswapPathFinder: call initialize at "+ uniswapPathFinderProxyAddress);
-    });
 
 //============================================================================
 
@@ -82,16 +44,16 @@ module.exports = async function (deployer,network,accounts) {
     const primaryIndexTokenProxyAddress_data = {
         "primaryIndexTokenProxyAddress": primaryIndexTokenProxyAddress
     }
-    fs.writeFileSync('migrations/primaryIndexTokenProxyAddress.json', JSON.stringify(primaryIndexTokenProxyAddress_data, null, '\t'));
+    fs.writeFileSync('migrations/addresses/primaryIndexTokenProxyAddress.json', JSON.stringify(primaryIndexTokenProxyAddress_data, null, '\t'));
 
 
-    primaryIndexTokenProxyAddress = JSON.parse(fs.readFileSync('migrations/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
+    primaryIndexTokenProxyAddress = JSON.parse(fs.readFileSync('migrations/addresses/primaryIndexTokenProxyAddress.json', 'utf8')).primaryIndexTokenProxyAddress;
     let primaryIndexToken = await PrimaryIndexToken.at(primaryIndexTokenProxyAddress);
     let basicTokenAddress;
     let uniswapPathFinderAddress;
     let trustedForwarder;
     let bBasicTokenAddress;
-    let comptrollerAddress;
+    let bondtrollerAddress;
     let priceOracleAddress;
     let bUsdcAddress;
 
@@ -100,13 +62,12 @@ module.exports = async function (deployer,network,accounts) {
     if(network == 'testrinkeby' || network == 'rinkeby'|| network == 'rinkeby-fork'){
         //look at ProxyAdmin address!!!!
         basicTokenAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        uniswapPathFinderAddress = JSON.parse(fs.readFileSync('migrations/uniswapPathFinderProxyAddress.json', 'utf8')).uniswapPathFinderProxyAddress;
         moderator = deployMaster;
         trustedForwarder = '0x83A54884bE4657706785D7309cf46B58FE5f6e8a';
-        bUsdcAddress = JSON.parse(fs.readFileSync('migrations/bUsdcProxyAddress.json', 'utf8')).bUsdcProxyAddress;
-        comptrollerAddress = JSON.parse(fs.readFileSync('migrations/comptrollerProxyAddress.json', 'utf8')).comptrollerProxyAddress;
-        bBasicTokenAddress = JSON.parse(fs.readFileSync('migrations/bUsdcProxyAddress.json', 'utf8')).bUsdcProxyAddress;
-        priceOracleAddress = JSON.parse(fs.readFileSync('migrations/simplePriceOracleProxyAddress.json', 'utf8')).simplePriceOracleProxyAddress;
+        bUsdcAddress = JSON.parse(fs.readFileSync('migrations/addresses/bUsdcProxyAddress.json', 'utf8')).bUsdcProxyAddress;
+        bondtrollerAddress = JSON.parse(fs.readFileSync('migrations/addresses/bondtrollerProxyAddress.json', 'utf8')).bondtrollerProxyAddress;
+        bBasicTokenAddress = JSON.parse(fs.readFileSync('migrations/addresses/bUsdcProxyAddress.json', 'utf8')).bUsdcProxyAddress;
+        priceOracleAddress = '';
 
         let PRJsAddresses = [
             '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
@@ -123,7 +84,7 @@ module.exports = async function (deployer,network,accounts) {
         let saleNumerator = new BN(8);
         let saleDenominator = new BN(10);
 
-        await primaryIndexToken.init(basicTokenAddress, uniswapPathFinderAddress, moderator, trustedForwarder, {from:deployMaster})
+        await primaryIndexToken.init(basicTokenAddress, moderator, trustedForwarder, {from:deployMaster})
         .then(function(){
             console.log("Primary index token call init at "+primaryIndexTokenProxyAddress);
         });
@@ -140,34 +101,19 @@ module.exports = async function (deployer,network,accounts) {
         }
 
        
-        await primaryIndexToken.addLendingToken(basicTokenAddress,{from:deployMaster}).then(function(){
+        await primaryIndexToken.addLendingToken(basicTokenAddress, bBasicTokenAddress, {from:deployMaster})
+        .then(function(){
             console.log("Added lending token: "+basicTokenAddress);
         });
-        
-
-        await primaryIndexToken.addBLendingToken(basicTokenAddress, bBasicTokenAddress, {from:deployMaster}).then(function(){
-            console.log("Added bLending token: "+bBasicTokenAddress);
-        });
-        
-
-        await primaryIndexToken.setComptroller(comptrollerAddress,{from:deployMaster}).then(function(){
-            console.log("Set comptroller: "+comptrollerAddress);
-        });
-        
        
-        await primaryIndexToken.setPriceOracle(priceOracleAddress,{from:deployMaster}).then(function(){
-            console.log("Set price oracle: "+priceOracleAddress);
-        });
-       
-
-        let comptroller = await Comptroller.at(comptrollerAddress);
-        await comptroller._setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
-            console.log("comptroller setPrimaryIndexToken at "+comptrollerAddress);
+        let bondtroller = await Bondtroller.at(bondtrollerAddress);
+        await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
+            console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ primaryIndexTokenProxyAddress);
         });
         
         let bUsdc = await BUSDC.at(bUsdcAddress);
         await bUsdc.setPrimaryIndexToken(primaryIndexTokenProxyAddress,{from:deployMaster}).then(function(){
-            console.log("bUsdc set primaryIndexToken at "+bUsdcAddress);
+            console.log("BUSDC " + bUsdcAddress +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
         });
         
     }
