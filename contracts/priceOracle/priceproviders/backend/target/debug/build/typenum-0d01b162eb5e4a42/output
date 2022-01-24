@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/vchikhladze/DApps/DeFi/bonded/USB/contracts/USBPriceOracle/priceproviders/backendPriceProvider/target/debug/build/typenum-0d01b162eb5e4a42/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/vchikhladze/DApps/DeFi/bonded/USB/contracts/USBPriceOracle/priceproviders/backendPriceProvider/target/debug/build/typenum-0d01b162eb5e4a42/out/op.rs

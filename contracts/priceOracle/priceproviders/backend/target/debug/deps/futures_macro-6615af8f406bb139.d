@@ -1,0 +1,9 @@
+/Users/vchikhladze/DApps/DeFi/bonded/USB/contracts/USBPriceOracle/priceproviders/backendPriceProvider/target/debug/deps/libfutures_macro-6615af8f406bb139.dylib: /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/lib.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/executor.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/join.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/select.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/stream_select.rs
+
+/Users/vchikhladze/DApps/DeFi/bonded/USB/contracts/USBPriceOracle/priceproviders/backendPriceProvider/target/debug/deps/futures_macro-6615af8f406bb139.d: /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/lib.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/executor.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/join.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/select.rs /Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/stream_select.rs
+
+/Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/lib.rs:
+/Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/executor.rs:
+/Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/join.rs:
+/Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/select.rs:
+/Users/vchikhladze/.cargo/registry/src/github.com-1ecc6299db9ec823/futures-macro-0.3.19/src/stream_select.rs:
