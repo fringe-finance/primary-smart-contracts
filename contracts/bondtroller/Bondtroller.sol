@@ -441,17 +441,17 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      */
     function transferAllowed(address bToken, address src, address dst, uint transferTokens) external returns (uint) {
         // Shh - currently unused
-        dst;
+        bToken;src;dst;transferTokens;
         
         // Pausing is a very serious situation - we revert to sound the alarms
         require(!transferGuardianPaused, "transfer is paused");
 
         // Currently the only consideration is whether or not
         //  the src is allowed to redeem this many tokens
-        uint allowed = redeemAllowedInternal(bToken, src, transferTokens);
-        if (allowed != uint(Error.NO_ERROR)) {
-            return allowed;
-        }
+        // uint allowed = redeemAllowedInternal(bToken, src, transferTokens);
+        // if (allowed != uint(Error.NO_ERROR)) {
+        //     return allowed;
+        // }
 
         // Shh - we don't ever want this hook to be marked pure
         if (false) {
