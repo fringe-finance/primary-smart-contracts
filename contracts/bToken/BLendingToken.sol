@@ -1,11 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "../BErc20.sol";
-import "../../bondtroller/Bondtroller.sol";
-import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./BErc20.sol";
+import "./../bondtroller/Bondtroller.sol";
+import "./../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-contract BUSDC is Initializable, BErc20{
+
+contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
+
+    bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     address public primaryIndexToken;
 
@@ -23,9 +27,12 @@ contract BUSDC is Initializable, BErc20{
                     string memory symbol_,
                     uint8 decimals_,
                     address admin_) public initializer{
+        
         admin = payable(msg.sender);
         super.initialize(underlying_, bondtroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
         admin = payable(admin_);
+        __AccessControl_init();
+        _setupRole(MODERATOR_ROLE, admin);
     }
     
     modifier onlyAdmin(){
@@ -37,24 +44,42 @@ contract BUSDC is Initializable, BErc20{
         require(msg.sender == primaryIndexToken);
         _;
     }
+
+    modifier onlyModerator {
+        require(hasRole(MODERATOR_ROLE, msg.sender), "msg.sender not moderator");
+        _;
+    }
     
     /********************** ADMIN FUNCTIONS ********************** */
 
-    function setReserveFactor(uint256 reserveFactorMantissa) public onlyAdmin{
-        _setReserveFactorFresh(reserveFactorMantissa);
-    }
-
     function setPrimaryIndexToken(address _primaryIndexToken) public onlyAdmin {
+        require(primaryIndexToken == address(0), "BLendingToken: primary index token is set");
         emit SetPrimaryIndexToken(primaryIndexToken, _primaryIndexToken);
         primaryIndexToken = _primaryIndexToken;
     }
 
-    function setBorrowLimit(address projectToken, uint256 newBorrowLimit) public onlyAdmin {
+    function grandModerator(address newModerator) public onlyAdmin {
+        grantRole(MODERATOR_ROLE, newModerator);
+    }
+
+    function revokeModerator(address moderator) public onlyAdmin {
+        revokeRole(MODERATOR_ROLE, moderator);
+    }
+
+    /********************** END ADMIN FUNCTIONS ********************** */
+
+    /********************** MODERATOR FUNCTIONS ********************** */
+
+    function setBorrowLimit(address projectToken, uint256 newBorrowLimit) public onlyModerator {
         emit SetBorrowLimit(projectToken, borrowLimit[projectToken], newBorrowLimit);
         borrowLimit[projectToken] = newBorrowLimit;
     }
 
-    /********************** ADMIN FUNCTIONS ********************** */
+    function setReserveFactor(uint256 reserveFactorMantissa) public onlyModerator{
+        _setReserveFactorFresh(reserveFactorMantissa);
+    }
+
+    /********************** END MODERATOR FUNCTIONS ********************** */
 
 
     function mintTo(address minter, uint mintAmount) external onlyPrimaryIndexToken returns(uint err, uint mintedAmount){
@@ -66,8 +91,8 @@ contract BUSDC is Initializable, BErc20{
         }
        
         (err, mintedAmount) = mintFresh(minter, mintAmount);
-        require(err == 0,"cPrimaryIndexToken: err is not zero!");
-        require(mintedAmount > 0, "cPrimaryIndexToken: minted amount is zero!");
+        require(err == 0,"BLendingToken: err is not zero!");
+        require(mintedAmount > 0, "BLendingToken: minted amount is zero!");
         
     }
 
