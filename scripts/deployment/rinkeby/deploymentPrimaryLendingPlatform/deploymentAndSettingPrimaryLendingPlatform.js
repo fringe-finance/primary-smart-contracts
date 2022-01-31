@@ -19,7 +19,7 @@ module.exports = {
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
         let JumpRateModelV2 = await hre.ethers.getContractFactory("JumpRateModelV2");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
-        let BUSDC = await hre.ethers.getContractFactory("BUSDC");
+        let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
         let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
 
         let jumpRateModelV2;
@@ -47,8 +47,8 @@ module.exports = {
             proxyAdminAddress = proxyAdmin.address;
             console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
         }else{
-            console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
             proxyAdminAddress = input_proxyAdminAddress;
+            console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
         }
 
     //====================================================
@@ -119,10 +119,10 @@ module.exports = {
         console.log();
         console.log("***** BUSDC DEPLOYMENT *****");
 
-        busdc = await BUSDC.connect(deployMaster).deploy();
+        busdc = await BLendingToken.connect(deployMaster).deploy();
         await busdc.deployed();
         let busdcMasterCopyAddress = busdc.address;
-        console.log("BUSDC masterCopy address: " + busdcMasterCopyAddress);
+        console.log("BLendingToken masterCopy address: " + busdcMasterCopyAddress);
         busdcAddress = busdcMasterCopyAddress;
 
         let busdcProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
@@ -132,10 +132,10 @@ module.exports = {
         );
         await busdcProxy.deployed();
         let busdcProxyAddress = busdcProxy.address;
-        console.log("BUSDC proxy address: " + busdcProxyAddress);
+        console.log("BLendingToken proxy address: " + busdcProxyAddress);
         busdcAddress = busdcProxyAddress;
 
-        busdc = await BUSDC.attach(busdcAddress).connect(deployMaster);
+        busdc = await BLendingToken.attach(busdcAddress).connect(deployMaster);
         
         let usdctestAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
         let initialExchangeRateMantissa = toBN(10).pow(toBN(18));
@@ -188,7 +188,6 @@ module.exports = {
 
         let basicTokenAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
         let moderatorAddress = deployMasterAddress;
-        let trustedForwarder = '0x83A54884bE4657706785D7309cf46B58FE5f6e8a';
         let lvrNumerator = toBN(6);
         let lvrDenominator = toBN(10);
         let ltfNumerator = toBN(1);
@@ -205,7 +204,7 @@ module.exports = {
             '0x16E2f279A9BabD4CE133745DdA69C910CBe2e490' //PRJ6
             ];
 
-        await pit.init(basicTokenAddress,moderatorAddress, trustedForwarder).then(function(){
+        await pit.init(basicTokenAddress,moderatorAddress).then(function(){
             console.log("PrimaryIndexToken call initialize at " + pitAddress)
         });
 
@@ -214,11 +213,11 @@ module.exports = {
         });
 
         for(var i = 0; i < PRJsAddresses.length; i++){
-            await pit.addPrjToken(  PRJsAddresses[i],
-                                    lvrNumerator,lvrDenominator,
-                                    ltfNumerator,ltfDenominator,
-                                    saleNumerator,saleDenominator,
-                                    );
+            await pit.addProjectToken(  PRJsAddresses[i],
+                                        lvrNumerator,lvrDenominator,
+                                        ltfNumerator,ltfDenominator,
+                                        saleNumerator,saleDenominator,
+                                        );
             console.log("Added prj token: "+PRJsAddresses[i]+" with values:");
             console.log("   Numerator:   "+lvrNumerator);
             console.log("   Denominator: "+lvrDenominator);
