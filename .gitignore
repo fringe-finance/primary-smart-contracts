@@ -11,3 +11,4 @@ package-lock.json
 yarn.lock
 deployments
 .DS_Store
+deploymentLogs
