@@ -4,8 +4,8 @@ const BN = hre.ethers.BigNumber;
 
 const toBN = (num) => BN.from(num);
 
-let proxyAdmingAddress = '0xdb1322bfC303A3431f31eDf01360CF556eFAAB0E';
-let primaryIndexTokenProxyAddress = '0x8D492475D2136Ae64b172b23F519840d5775C8Cd';
+let proxyAdmingAddress = '0x6D618b0d22EE3ff6e7DB5040A61b69f46Fb6A4e6';
+let primaryIndexTokenProxyAddress = '0xD012072051ebD1A086F17C5fAF5893832312FB81';
 
 async function main() {
    
