@@ -559,6 +559,10 @@ contract PrimaryIndexToken is Initializable,
         return pitTotalSupply;
     }
 
+    function lendingTokensLength() public view returns (uint256) {
+        return lendingTokens.length;
+    }
+
     function decimals() public override view returns(uint8){
         return ERC20Upgradeable(basicToken).decimals();
     }
