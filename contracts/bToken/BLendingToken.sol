@@ -13,11 +13,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
     address public primaryIndexToken;
 
-    mapping(address => uint256) public borrowLimit; // prj token address => borrow limit in USD
-    mapping(address => uint256) public totalBorrow; // prj token address => totalBorrow of 
-
     event SetPrimaryIndexToken(address indexed oldPrimaryIndexToken, address indexed newPrimaryIndexToken);
-    event SetBorrowLimit(address indexed projectToken, uint256 oldBorrowLimit, uint256 newBorrowLimit);
 
     function init(  address underlying_,
                     Bondtroller bondtroller_,
@@ -70,11 +66,6 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
     /********************** MODERATOR FUNCTIONS ********************** */
 
-    function setBorrowLimit(address projectToken, uint256 newBorrowLimit) public onlyModerator {
-        emit SetBorrowLimit(projectToken, borrowLimit[projectToken], newBorrowLimit);
-        borrowLimit[projectToken] = newBorrowLimit;
-    }
-
     function setReserveFactor(uint256 reserveFactorMantissa) public onlyModerator{
         _setReserveFactorFresh(reserveFactorMantissa);
     }
@@ -82,7 +73,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
     /********************** END MODERATOR FUNCTIONS ********************** */
 
 
-    function mintTo(address minter, uint mintAmount) external onlyPrimaryIndexToken returns(uint err, uint mintedAmount){
+    function mintTo(address minter, uint256 mintAmount) external onlyPrimaryIndexToken returns(uint err, uint mintedAmount){
         uint error = accrueInterest();
         
         if (error != uint(Error.NO_ERROR)) {
@@ -96,7 +87,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         
     }
 
-     function redeemTo(address redeemer,uint redeemTokens) external onlyPrimaryIndexToken returns(uint redeemErr){
+     function redeemTo(address redeemer,uint256 redeemTokens) external onlyPrimaryIndexToken returns(uint redeemErr){
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
@@ -107,7 +98,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         redeemErr = redeemFresh(payable(redeemer), redeemTokens, 0);
     }
 
-    function redeemUnderlyingTo(address redeemer, uint redeemAmount) external onlyPrimaryIndexToken returns(uint redeemUnderlyingError){
+    function redeemUnderlyingTo(address redeemer, uint256 redeemAmount) external onlyPrimaryIndexToken returns(uint redeemUnderlyingError){
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted redeem failed
@@ -117,10 +108,8 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         redeemUnderlyingError = redeemFresh(payable(redeemer), 0, redeemAmount);
     }
 
-    function borrowTo(address projectToken, address borrower, uint borrowAmount) external onlyPrimaryIndexToken returns (uint borrowError) {
+    function borrowTo(address projectToken, address borrower, uint256 borrowAmount) external onlyPrimaryIndexToken returns (uint borrowError) {
         uint error = accrueInterest();
-        totalBorrow[projectToken] += borrowAmount;
-        require(totalBorrow[projectToken] <= borrowLimit[projectToken], "bToken: totalBorrow exceeded borrowLimit");
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
             return fail(Error(error), FailureInfo.BORROW_ACCRUE_INTEREST_FAILED);
@@ -129,7 +118,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         borrowError = borrowFresh(payable(borrower), borrowAmount);
     }
 
-    function repayBorrowTo(address projectToken, address payer, uint repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
+    function repayBorrowTo(address projectToken, address payer, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
@@ -137,10 +126,9 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         }
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, payer, repayAmount);
-        totalBorrow[projectToken] -= amountRepayed;
     }
 
-    function repayBorrowToBorrower(address projectToken, address payer,address borrower, uint repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
+    function repayBorrowToBorrower(address projectToken, address payer, address borrower, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
@@ -148,7 +136,6 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         }
         // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
         (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, borrower, repayAmount);
-        totalBorrow[projectToken] -= amountRepayed;
     }
 
     

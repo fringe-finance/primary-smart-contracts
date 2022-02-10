@@ -350,7 +350,7 @@ contract PrimaryIndexToken is Initializable,
                 require(repayBorrowError == 0 && amountRepayed > 0, "PIT: repayBorrowError!=0");
             
                 currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-                if(currentBorrowBalance > cumulativeBorrowBalance - amountRepayed){
+                if(cumulativeBorrowBalance > amountRepayed && currentBorrowBalance > cumulativeBorrowBalance - amountRepayed){
                     estimateInterest = (currentBorrowBalance - (cumulativeBorrowBalance - amountRepayed))/borrowedPositions;
                 }else{
                     estimateInterest = 0;
