@@ -4,8 +4,8 @@ const BN = hre.ethers.BigNumber;
 
 const toBN = (num) => BN.from(num);
 
-let proxyAdmingAddress = '0xdb1322bfC303A3431f31eDf01360CF556eFAAB0E';
-let busdcProxyAddress = '0xe137572e83f93aE50F3C1F4762135E2D9A8f384A';
+let proxyAdmingAddress = '0xa9D799AF1c4B0aF6a927bC864ffbf35Aef42177a';
+let busdcProxyAddress = '0xe1b0273C21d509D6D3D7a02bFEaa694dd9363168';
 
 async function main() {
    
@@ -14,17 +14,17 @@ async function main() {
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
-    let BUSDC = await hre.ethers.getContractFactory("BUSDC");
+    let BUSDC = await hre.ethers.getContractFactory("BLendingToken");
     
-    let bondtroller = await BUSDC.connect(deployMaster).deploy();
-    await bondtroller.deployed();
-    let bondtrollerMasterCopyAddress = bondtroller.address;
-    console.log("BUSDC masterCopy address: " + bondtrollerMasterCopyAddress);
+    let busdc = await BUSDC.connect(deployMaster).deploy();
+    await busdc.deployed();
+    let busdcMasterCopyAddress = busdc.address;
+    console.log("BUSDC masterCopy address: " + busdcMasterCopyAddress);
   
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
-    await proxyAdmin.upgrade(busdcProxyAddress, bondtrollerMasterCopyAddress)
+    await proxyAdmin.upgrade(busdcProxyAddress, busdcMasterCopyAddress)
     .then(function(instance){
-        console.log("ProxyAdmin upgraded " + busdcProxyAddress + " to " + bondtrollerMasterCopyAddress);
+        console.log("ProxyAdmin upgraded " + busdcProxyAddress + " to " + busdcMasterCopyAddress);
         return instance;
     });
 

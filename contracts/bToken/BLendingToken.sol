@@ -110,7 +110,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         redeemUnderlyingError = redeemFresh(payable(redeemer), 0, redeemAmount);
     }
 
-    function borrowTo(address projectToken, address borrower, uint256 borrowAmount) external onlyPrimaryIndexToken returns (uint borrowError) {
+    function borrowTo(address borrower, uint256 borrowAmount) external onlyPrimaryIndexToken returns (uint borrowError) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
@@ -120,7 +120,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         borrowError = borrowFresh(payable(borrower), borrowAmount);
     }
 
-    function repayTo(address projectToken, address payer, address borrower, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
+    function repayTo(address payer, address borrower, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
@@ -130,6 +130,105 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, borrower, repayAmount);
     }
 
+    function getEstimatedBorrowIndex() public view returns (uint256) {
+        /* Remember the initial block number */
+        uint currentBlockNumber = getBlockNumber();
+        uint accrualBlockNumberPrior = accrualBlockNumber;
+
+        /* Short-circuit accumulating 0 interest */
+        if (accrualBlockNumberPrior == currentBlockNumber) {
+            return uint(Error.NO_ERROR);
+        }
+
+        /* Read the previous values out of storage */
+        uint cashPrior = getCashPrior();
+        uint borrowsPrior = totalBorrows;
+        uint reservesPrior = totalReserves;
+        uint borrowIndexPrior = borrowIndex;
+
+        /* Calculate the current borrow interest rate */
+        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
+        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+
+        /* Calculate the number of blocks elapsed since the last accrual */
+        (MathError mathErr, uint blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);
+        require(mathErr == MathError.NO_ERROR, "could not calculate block delta");
+
+        /*
+         * Calculate the interest accumulated into borrows and reserves and the new index:
+         *  simpleInterestFactor = borrowRate * blockDelta
+         *  interestAccumulated = simpleInterestFactor * totalBorrows
+         *  totalBorrowsNew = interestAccumulated + totalBorrows
+         *  totalReservesNew = interestAccumulated * reserveFactor + totalReserves
+         *  borrowIndexNew = simpleInterestFactor * borrowIndex + borrowIndex
+         */
+
+        Exp memory simpleInterestFactor;
+        uint interestAccumulated;
+        uint totalBorrowsNew;
+        uint totalReservesNew;
+        uint borrowIndexNew;
+
+        (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), blockDelta);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        (mathErr, totalBorrowsNew) = addUInt(interestAccumulated, borrowsPrior);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        (mathErr, totalReservesNew) = mulScalarTruncateAddUInt(Exp({mantissa: reserveFactorMantissa}), interestAccumulated, reservesPrior);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        (mathErr, borrowIndexNew) = mulScalarTruncateAddUInt(simpleInterestFactor, borrowIndexPrior, borrowIndexPrior);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        return borrowIndexNew;
+    }
+
+    function getEstimatedBorrowBalanceStored(address account) public view returns(uint accrual) {
+        
+        uint256 borrowIndexNew = getEstimatedBorrowIndex();
+        MathError mathErr;
+        uint principalTimesIndex;
+        uint result;
+
+        /* Get borrowBalance and borrowIndex */
+        BorrowSnapshot memory borrowSnapshot = accountBorrows[account];
+
+        /* If borrowBalance = 0 then borrowIndex is likely also 0.
+         * Rather than failing the calculation with a division by 0, we immediately return 0 in this case.
+         */
+        if (borrowSnapshot.principal == 0) {
+            return 0;
+        }
+
+        /* Calculate new borrow balance using the interest index:
+         *  recentBorrowBalance = borrower.borrowBalance * market.borrowIndex / borrower.borrowIndex
+         */
+        (mathErr, principalTimesIndex) = mulUInt(borrowSnapshot.principal, borrowIndexNew);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        (mathErr, result) = divUInt(principalTimesIndex, borrowSnapshot.interestIndex);
+        if (mathErr != MathError.NO_ERROR) {
+            return 0;
+        }
+
+        return result;
+    } 
     
 
 

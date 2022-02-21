@@ -309,11 +309,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         if (_borrowPosition.loanBody == 0) {
-            info.bLendingToken.borrowTo(projectToken, msg.sender, lendingTokenAmount);
+            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
             _borrowPosition.loanBody += lendingTokenAmount;
             totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
         } else {
-            info.bLendingToken.borrowTo(projectToken, msg.sender, lendingTokenAmount);
+            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
             _borrowPosition.loanBody += lendingTokenAmount;
             totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
         }
@@ -342,13 +342,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
-                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, type(uint256).max);
+                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, type(uint256).max);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower,  lendingTokenAmountToRepay);
+                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower,  lendingTokenAmountToRepay);
                 if (lendingTokenAmountToRepay > _borrowPosition.accrual) {
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -360,13 +360,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             }
         } else {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
-                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, _totalOutstanding);
+                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, _totalOutstanding);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, lendingTokenAmountToRepay);
+                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, lendingTokenAmountToRepay);
                 if(lendingTokenAmountToRepay > _borrowPosition.accrual){
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -472,7 +472,25 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         return projectTokens.length;
     }
 
-    /****************** ERC20 functions ****************** */
+    function getPosition(address account, address projectToken, address lendingToken) public view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual) {
+        depositedProjectTokenAmount = depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount;
+        loanBody = borrowPosition[account][projectToken][lendingToken].loanBody;
+        uint256 borrowPositions = 0;
+        uint256 cumulativeTotalOutstanding = 0;
+        uint256 _totalOutstanding;
+        for(uint256 projectTokenId = 0; projectTokenId < projectTokens.length; projectTokenId++){
+            _totalOutstanding = totalOutstanding(account, projectTokens[projectTokenId], lendingToken);
+            if (_totalOutstanding > 0) {
+                cumulativeTotalOutstanding += _totalOutstanding;
+                borrowPositions++;
+            }
+        }
+        uint256 estimatedBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.getEstimatedBorrowBalanceStored(account);
+        accrual = borrowPosition[account][projectToken][lendingToken].accrual;
+        if (borrowPositions > 0 && estimatedBorrowBalance >= cumulativeTotalOutstanding) {
+            accrual += ((estimatedBorrowBalance - cumulativeTotalOutstanding) / borrowPositions);
+        }
+    }
 
     function decimals() public view returns (uint8) {
         return 6;
