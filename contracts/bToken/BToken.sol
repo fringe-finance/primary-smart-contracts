@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
+import "hardhat/console.sol";
+
 import "../bondtroller/Bondtroller.sol";
 import "./BTokenInterfaces.sol";
 import "../util/ErrorReporter.sol";
@@ -738,7 +740,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         uint totalBorrowsNew;
     }
 
-    event Test3(uint allowed);
+   
+
     /**
       * @notice Users borrow assets from the protocol to their own address
       * @param borrowAmount The amount of the underlying asset to borrow
@@ -911,7 +914,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED");
 
         (vars.mathErr, vars.totalBorrowsNew) = subUInt(totalBorrows, vars.actualRepayAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED");
+        //require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED"); // not sufficient
 
         /* We write the previously calculated values into storage */
         accountBorrows[borrower].principal = vars.accountBorrowsNew;

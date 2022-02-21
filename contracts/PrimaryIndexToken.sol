@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
+import "hardhat/console.sol";
+
 import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "./openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import "./openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "./openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "./openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
@@ -13,82 +14,69 @@ import "./openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradea
 import "./interfaces/IPriceProviderAggregator.sol";
 import "./bToken/BLendingToken.sol";
 
-contract PrimaryIndexToken is Initializable,
-                                        ERC20Upgradeable,
-                                        PausableUpgradeable,
-                                        AccessControlUpgradeable,
-                                        ReentrancyGuardUpgradeable
+contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    address public basicToken;  // address of USDC by default or any stablecoin
+    string public name;
 
-    address public priceOracle; // address of price oracle with interface of PriceProviderAggregator
+    string public symbol;
+
+    address public basicToken;
+
+    IPriceProviderAggregator public priceOracle; // address of price oracle with interface of PriceProviderAggregator
 
     address[] public projectTokens;
+    mapping(address => ProjectTokenInfo) public projectTokenInfo; // project token address => ProjectTokenInfo
 
     address[] public lendingTokens;
+    mapping(address => LendingTokenInfo) public lendingTokenInfo; // lending token address => LendingTokenInfo
 
-    mapping(address => Ratio) public lvr; // project token address => Lvr (Loan to Value Ratio)
-    mapping(address => Ratio) public ltf; // project token address => Ltf (Liquidation Threshold Factor)
-    mapping(address => Ratio) public prjSales; // project token address => PRJ sale info
-    mapping(address => uint256) public totalStakedPrj; // tokenAddress => PRJ token staked
-    mapping(address => mapping(uint256 => UserDepositPosition)) public userDepositPosition; // user address => PRJ token index => UserDepositPosition
-    mapping(address => address) public bLendingTokensList; // underlying token address => BLendingToken address
-    
-    mapping(address => mapping(uint256 => mapping(uint256 => UserBorrowPosition))) public userBorrowPosition; //user address => lending tokens index => project token collateral => UserBorrowPosition
-    mapping(address => bool) public isProjectTokenListed;   // project token address => isListed
-    mapping(address => uint256) public indexProjectToken;   // project token address => index of project token in list `projectTokens`
-    mapping(address => uint256) public indexLendingToken;   // lending token address => index of lending token in list `lendingTokens`
+    mapping(address => uint256) public totalDepositedProjectToken; // tokenAddress => PRJ token staked
+    mapping(address => mapping(address => mapping(address => DepositPosition))) public depositPosition; // user address => PRJ token address => lendingToken address => DepositPosition
+    mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
-    struct Ratio{
+    mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token []
+    mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borowing; [borrowLimit]=$
+
+    struct Ratio {
         uint8 numerator;
         uint8 denominator;
     }
-    
-    struct UserDepositPosition{
-        uint256 amountProjectTokenAvailable;
+
+    struct ProjectTokenInfo {
+        bool isListed;
+        bool isPaused;
+        Ratio loanToValueRatio;
+        Ratio liquidationThresholdFactor;
+        Ratio liquidationIncentive;
     }
 
-    struct UserBorrowPosition{
-        uint256 amountBorrowed;
-        uint256 amountPit;
+    struct LendingTokenInfo {
+        bool isListed;
+        bool isPaused;
+        BLendingToken bLendingToken;
+    }
+    
+    struct DepositPosition {
+        uint256 depositedProjectTokenAmount;
     }
 
+    struct BorrowPosition {
+        uint256 loanBody;   // [loanBody] = lendingToken
+        uint256 interest;   // [interest] = lendingToken
+    }
 
-    event AddPrjToken(address indexed who, address indexed tokenPrj);
-
-    event LoanToValueRatioSet(address indexed who, address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
-
-    event LiquidationThresholdFactorSet(address indexed who, address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
-
-    event PrjSaleSet(address indexed who, address indexed tokenPrj, uint8 saleNumerator, uint8 saleDenominator);
-
-    event Deposit(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiar);
-
-    event Withdraw(address indexed who, uint256 tokenPrjId, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiar);
-
-    event Supply(address indexed who, uint256 supplyTokenId, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
-
-    event Redeem(address indexed who, uint256 redeemTokenId, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmount);
-    
-    event RedeemUnderlying(address indexed who, uint256 redeemTokenId, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmountUnderlying);
-
-    event Borrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
-
-    event RepayBorrow(address indexed who, uint256 borrowTokenId, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepaid);
-
-    event Liquidate(address indexed liquidator, address indexed borrower, uint256 lendingTokenId, uint256 prjId, uint256 amountPrjLiquidated);
-
-    function init(address _basicToken, address _moderator) public initializer{
+    function initialize(address _basicToken) public initializer {
+        name = "Primary Index Token";
+        symbol = "PIT";
         basicToken = _basicToken;
-        __ERC20_init("Primary Index Token", "PIT");
-        __Pausable_init_unchained();
-        __AccessControl_init_unchained();
+        __AccessControl_init();
+        __ReentrancyGuard_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        _setupRole(MODERATOR_ROLE, _moderator);
+        _setupRole(MODERATOR_ROLE, msg.sender);
     }
 
     modifier onlyAdmin() {
@@ -101,470 +89,360 @@ contract PrimaryIndexToken is Initializable,
         _;
     }
 
+    modifier isProjectTokenListed(address projectToken) {
+        require(projectTokenInfo[projectToken].isListed, "PIT: project token is not listed");
+        _;
+    }
+
+    modifier isLendingTokenListed(address lendingToken) {
+        require(lendingTokenInfo[lendingToken].isListed, "PIT: lending token is not listed");
+        _;
+    }
+
     //************* ADMIN FUNCTIONS ********************************
 
-    function addProjectToken(address _projectToken,
-                             uint8 _lvrNumerator, uint8 _lvrDenominator, 
-                             uint8 _ltfNumerator, uint8 _ltfDenominator,
-                             uint8 _saleNumerator, uint8 _saleDenominator
-                             ) public onlyAdmin {
-        require(_lvrNumerator <= _lvrDenominator, "PIT: _lvrNumerator <= _lvrDenominator!");
-        indexProjectToken[_projectToken] = projectTokens.length;
-        projectTokens.push(_projectToken);
-        emit AddPrjToken(msg.sender, _projectToken);
-        _setLvr(_projectToken, _lvrNumerator, _lvrDenominator);
-        _setLtf(_projectToken, _ltfNumerator, _ltfDenominator);
-        _setPrjSale(_projectToken, _saleNumerator, _saleDenominator);
-        isProjectTokenListed[_projectToken] = true;
+    function addProjectToken(
+        address _projectToken,
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator,
+        uint8 _liquidationTresholdFactorNumerator,
+        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationIncentiveNumerator,
+        uint8 _liquidationIncentiveDenominator
+    ) public onlyAdmin {
+        require(_projectToken != address(0), "invalid _projectToken");
+
+        if(!projectTokenInfo[_projectToken].isListed){ 
+            projectTokens.push(_projectToken);
+            projectTokenInfo[_projectToken].isListed = true;
+        }
+        
+        setProjectTokenInfo(
+            _projectToken, 
+            _isPaused,
+            _loanToValueRatioNumerator, 
+            _loanToValueRatioDenominator, 
+            _liquidationTresholdFactorNumerator, 
+            _liquidationTresholdFactorDenominator, 
+            _liquidationIncentiveNumerator, 
+            _liquidationIncentiveDenominator
+        );
     }
 
-    function addLendingToken(address _lendingToken, address _bLendingToken) public onlyAdmin {
-        require(_lendingToken != address(0) && _bLendingToken != address(0), "PIT: invalid input!");
-        require(bLendingTokensList[_lendingToken] == address(0), "PIT: lendingToken is listed");
-        indexLendingToken[_lendingToken] = lendingTokens.length;
-        lendingTokens.push(_lendingToken);
-        bLendingTokensList[_lendingToken] = _bLendingToken;
+    function removeProjectToken(
+        uint256 _projectTokenId
+    ) public onlyAdmin isProjectTokenListed(projectTokens[_projectTokenId]) {
+        address projectToken = projectTokens[_projectTokenId];
+        delete projectTokenInfo[projectToken];
+
+        projectTokens[_projectTokenId] = projectTokens[projectTokens.length - 1];
+        projectTokens.pop();
     }
 
-    function setPriceOracle(address _priceOracle) public onlyAdmin{
-        priceOracle = _priceOracle;
+    function addLendingToken(
+        address _lendingToken, 
+        address _bLendingToken,
+        bool _isPaused
+    ) public onlyAdmin {
+        require(_lendingToken != address(0), "invalid _lendingToken");
+
+        if(!lendingTokenInfo[_lendingToken].isListed){
+            lendingTokens.push(_lendingToken);
+            lendingTokenInfo[_lendingToken].isListed = true;
+        }
+
+        setLendingTokenInfo(
+            _lendingToken, 
+            _bLendingToken, 
+            _isPaused
+        );
     }
 
-    function grandModerator(address newModerator) public onlyAdmin{
+    function removeLendingToken(
+        uint256 _lendingTokenId
+    ) public onlyAdmin isLendingTokenListed(lendingTokens[_lendingTokenId]) {
+        address lendingToken = lendingTokens[_lendingTokenId];
+        delete lendingTokenInfo[lendingToken];
+
+        lendingTokens[_lendingTokenId] = lendingTokens[lendingTokens.length - 1];
+        lendingTokens.pop();
+    }
+
+    function setPriceOracle(address _priceOracle) public onlyAdmin {
+        require(_priceOracle != address(0));
+        priceOracle = IPriceProviderAggregator(_priceOracle);
+    }
+
+    function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
-    function revokeModerator(address moderator) public onlyAdmin{
+    function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
     }
-    
+
     //************* MODERATOR FUNCTIONS ********************************
 
-    function setLvr(address _projectToken, uint8 _lvrNumerator, uint8 _lvrDenominator) public onlyModerator{
-        require(_lvrNumerator <= _lvrDenominator && _lvrDenominator > 0, "PIT: _lvrNumerator <= _lvrDenominator!");
-        _setLvr(_projectToken, _lvrNumerator, _lvrDenominator);
+    function setBorrowLimit(address projectToken, address lendingToken, uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
+        require(_borrowLimit > 0, "PIT: borrowLimit=0");
+        borrowLimit[projectToken][lendingToken] = _borrowLimit;
+        //emit set borrow limit
     }
 
-    function setLtf(address _projectToken, uint8 _ltfNumerator, uint8 _ltfDenominator) public onlyModerator{
-        require(_ltfNumerator >= _ltfDenominator && _ltfDenominator > 0, "PIT: _ltfNumerator >= _ltfDenominator!");
-        _setLtf(_projectToken, _ltfNumerator, _ltfDenominator);
+     function setProjectTokenInfo(
+        address _projectToken,
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator,
+        uint8 _liquidationTresholdFactorNumerator,
+        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationIncentiveNumerator,
+        uint8 _liquidationIncentiveDenominator
+    ) public onlyModerator isProjectTokenListed(_projectToken) {
+        require(_loanToValueRatioNumerator <= _loanToValueRatioDenominator, "invalid loanToValueRatio");
+        require(_liquidationTresholdFactorNumerator >= _liquidationTresholdFactorDenominator, "invalid liquidationTresholdFactor");
+        require(_liquidationIncentiveNumerator <= _liquidationIncentiveDenominator, "invalid liquidationIncentive");
+        
+        ProjectTokenInfo storage info = projectTokenInfo[_projectToken];
+        info.isPaused = _isPaused;
+        info.loanToValueRatio = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
+        info.liquidationThresholdFactor = Ratio(_liquidationTresholdFactorNumerator, _liquidationTresholdFactorDenominator);
+        info.liquidationIncentive = Ratio(_liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     }
 
-    function setPrjSale(address _projectToken, uint8 _saleNumerator, uint8 _saleDenominator) public onlyModerator{
-        require(_saleNumerator <= _saleDenominator && _saleDenominator > 0, "PIT: _saleNumerator <= _saleDenominator!");
-        _setPrjSale(_projectToken,_saleNumerator, _saleDenominator);
+    function setLendingTokenInfo(
+        address _lendingToken, 
+        address _bLendingToken,
+        bool _isPaused
+    ) public onlyModerator isLendingTokenListed(_lendingToken){
+        require(_bLendingToken != address(0), "invalid _bLendingToken");
+        LendingTokenInfo storage info = lendingTokenInfo[_lendingToken];
+        
+        info.isPaused = _isPaused;
+        info.bLendingToken = BLendingToken(_bLendingToken);
     }
 
-    function _setLvr(address _projectToken, uint8 _lvrNumerator, uint8 _lvrDenominator) private {
-        lvr[_projectToken] = Ratio({numerator:_lvrNumerator, denominator:_lvrDenominator});
-        emit LoanToValueRatioSet(msg.sender, _projectToken, _lvrNumerator, _lvrDenominator);
-    }
-
-    function _setLtf(address _projectToken, uint8 _ltfNumerator, uint8 _ltfDenominator) private {
-        ltf[_projectToken] = Ratio({numerator:_ltfNumerator, denominator:_ltfDenominator});
-        emit LiquidationThresholdFactorSet(msg.sender, _projectToken, _ltfNumerator, _ltfDenominator);
-    }
-
-    function _setPrjSale(address _projectToken, uint8 _saleNumerator, uint8 _saleDenominator) private {
-        prjSales[_projectToken] = Ratio({numerator:_saleNumerator, denominator:_saleDenominator});
-        emit PrjSaleSet(msg.sender, _projectToken, _saleNumerator, _saleDenominator);
-    }
-
-    function pause() public onlyModerator {
-        _pause();
-    }
-
-    function unpause() public onlyModerator{
-        _unpause();
-    }
-  
     //************* PUBLIC FUNCTIONS ********************************
 
-    function deposit(uint256 prjId, uint256 amountProjectToken) public {
-        depositTo(prjId, amountProjectToken, msg.sender);
+    function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant() {
+        require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken not active");
+        require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
+        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
+        ERC20Upgradeable(projectToken).safeTransferFrom(msg.sender, address(this), projectTokenAmount);
+        _depositPosition.depositedProjectTokenAmount += projectTokenAmount;
+        totalDepositedProjectToken[projectToken] += projectTokenAmount;
+        //emit Deposit(msg.sender, prjId, tokenPrj, amountProjectToken, beneficiar);
     }
 
-    function depositTo(uint256 prjId, uint256 amountProjectToken, address beneficiar) public nonReentrant {
-        require(prjId < projectTokens.length && amountProjectToken > 0, "PIT: invalid input");
-        address tokenPrj = projectTokens[prjId];
-        UserDepositPosition storage beneficiarDepositPosition = userDepositPosition[beneficiar][prjId];
-        ERC20Upgradeable(tokenPrj).safeTransferFrom(msg.sender, address(this), amountProjectToken);
-        beneficiarDepositPosition.amountProjectTokenAvailable += amountProjectToken;
-        totalStakedPrj[tokenPrj] += amountProjectToken;
-        emit Deposit(msg.sender, prjId, tokenPrj, amountProjectToken, beneficiar);
-    }
-
-    function withdraw(uint256 prjId, uint256 amountPrj) public {
-        withdrawTo(prjId, amountPrj, msg.sender);
-    }
-
-    function withdrawTo(uint256 prjId, uint256 amountPrj, address beneficiar) public nonReentrant whenNotPaused {
-        require(prjId < projectTokens.length && amountPrj > 0 && amountPrj <= userDepositPosition[msg.sender][prjId].amountProjectTokenAvailable, "PIT: invalid input");
-        address tokenPrj = projectTokens[prjId];
-
-        UserDepositPosition storage msgSenderPrjPosition = userDepositPosition[msg.sender][prjId];
-        for(uint256 lendingTokenId = 0; lendingTokenId < lendingTokens.length; lendingTokenId++){
-            UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[msg.sender][lendingTokenId][prjId];
-            if(msgSenderBorrowPosition.amountBorrowed > 0){
-                msgSenderPrjPosition.amountProjectTokenAvailable -= amountPrj;
-                (uint256 newNum, uint256 newDenom) = healthFactorForPosition(msg.sender, lendingTokenId, prjId);
-                if(newNum < newDenom){
-                    revert("PIT: the new account health is less than 1 when withdrawing this amount of PRJ");
-                }
-                totalStakedPrj[tokenPrj] -= amountPrj;
-                ERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-                emit Withdraw(msg.sender, prjId, tokenPrj, amountPrj, beneficiar);
-                return;
-            }
+    function withdraw(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant {
+        require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
+        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
+        require(projectTokenAmount <= _depositPosition.depositedProjectTokenAmount, "PIT: try to withdraw more than available");
+        _depositPosition.depositedProjectTokenAmount -= projectTokenAmount;
+        (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(msg.sender, projectToken, lendingToken);
+        if (healthFactorNumerator < healthFactorDenominator) {
+            revert("PIT: withdrawable amount makes healthFactor<1");
         }
-        msgSenderPrjPosition.amountProjectTokenAvailable -= amountPrj;
-        totalStakedPrj[tokenPrj] -= amountPrj;
-        ERC20Upgradeable(tokenPrj).safeTransfer(beneficiar, amountPrj);
-        emit Withdraw(msg.sender, prjId, tokenPrj, amountPrj, beneficiar);
-        return;
+        totalDepositedProjectToken[projectToken] -= projectTokenAmount;
+        ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenAmount);
+        //emit withdraw
     }
 
-    function supply(uint256 lendingTokenId, uint256 amountLendingToken) public {
-        require(lendingTokenId < lendingTokens.length && amountLendingToken > 0, "PIT: invalid input");
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
-        
-        (uint256 mintError, uint256 mintedAmount) = BLendingToken(bLendingToken).mintTo(msg.sender,amountLendingToken);
-        require(mintError == 0,"PIT:minting error");
+    function supply(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {
+        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: lending token not active");
+        require(lendingTokenAmount > 0, "PIT: lendingTokenAmount==0");
 
-        emit Supply(msg.sender, lendingTokenId, lendingToken, amountLendingToken,bLendingToken,mintedAmount);
+        (uint256 mintError, uint256 mintedAmount) = lendingTokenInfo[lendingToken].bLendingToken.mintTo(msg.sender, lendingTokenAmount);
+        require(mintError == 0,"PIT: mintError!=0");
+        require(mintedAmount > 0, "PIT: mintedAmount==0");
+
+        //emit Supply(msg.sender, lendingTokenId, lendingToken, amountLendingToken,bLendingToken,mintedAmount);
     }
 
-    function redeem(uint256 lendingTokenId, uint256 amountBLendingToken) public {
-        require(lendingTokenId < lendingTokens.length && amountBLendingToken > 0, "PIT: invalid input");
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
-        
-        (uint256 redeemError) = BLendingToken(bLendingToken).redeemTo(msg.sender, amountBLendingToken);
+    function redeem(address lendingToken, uint256 bLendingTokenAmount) public isLendingTokenListed(lendingToken) {
+        require(bLendingTokenAmount > 0, "PIT: bLendingTokenAmount==0");
+
+        uint256 redeemError = lendingTokenInfo[lendingToken].bLendingToken.redeemTo(msg.sender, bLendingTokenAmount);
         require(redeemError == 0,"PIT: redeemError!=0. redeem>=supply.");
-     
-        emit Redeem(msg.sender, lendingTokenId, lendingToken, bLendingToken, amountBLendingToken);
+
+        //emit Redeem
     }
 
-    function redeemUnderlying(uint256 lendingTokenId, uint256 amountLendingToken) public {
-        require(lendingTokenId < lendingTokens.length && amountLendingToken > 0, "PIT: invalid input");
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
+    function redeemUnderlying(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {
+        require(lendingTokenAmount > 0, "PIT: lendingTokenAmount==0");
 
-        uint256 redeemUnderlyingError = BLendingToken(bLendingToken).redeemUnderlyingTo(msg.sender, amountLendingToken);
+        uint256 redeemUnderlyingError = lendingTokenInfo[lendingToken].bLendingToken.redeemUnderlyingTo(msg.sender, lendingTokenAmount);
         require(redeemUnderlyingError == 0,"PIT:redeem>=supply");
 
-        emit RedeemUnderlying(msg.sender, lendingTokenId, lendingToken, bLendingToken, amountLendingToken);
+        //emit RedeemUnderlying
     }
 
-    function borrow(uint256 lendingTokenId, uint256 amountLendingToken, address projectToken, uint256 amountProjectToken) public {
-        require(lendingTokenId < lendingTokens.length && amountLendingToken > 0, "PIT: invalid input");
-        require(isProjectTokenListed[projectToken],"PIT: projectToken not listed");
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
-        uint256 projectTokenId = indexProjectToken[projectToken];
-        UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[msg.sender][lendingTokenId][projectTokenId];
-        uint256 borrowError;
-        if(msgSenderBorrowPosition.amountBorrowed == 0){
-            uint256 currentBalancePitOfMsgSender = balanceOfPitPosition(msg.sender, projectTokenId);
-            require(amountLendingToken <= currentBalancePitOfMsgSender, "PIT: borrow > pitPosition");
-            
-            borrowError = BLendingToken(bLendingToken).borrowTo(projectToken, msg.sender, amountLendingToken);
-            
-            msgSenderBorrowPosition.amountBorrowed += amountLendingToken;
-            msgSenderBorrowPosition.amountPit = currentBalancePitOfMsgSender;
-
-        }else{
-            msgSenderBorrowPosition.amountPit = balanceOfPitPosition(msg.sender, projectTokenId);
-            require(amountLendingToken + msgSenderBorrowPosition.amountBorrowed <= msgSenderBorrowPosition.amountPit,"PIT: should amountLendingToken+borrow<amountPIT");
-
-            borrowError = BLendingToken(bLendingToken).borrowTo(projectToken, msg.sender, amountLendingToken);
-            msgSenderBorrowPosition.amountBorrowed += amountLendingToken;
-
-            uint256 borrowedPositions = 0;
-            uint256 cumulativeBorrowBalance = 0;
-            for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
-                UserBorrowPosition storage borrowPosition = userBorrowPosition[msg.sender][lendingTokenId][prjId];
-                if(borrowPosition.amountBorrowed > 0){
-                    cumulativeBorrowBalance += borrowPosition.amountBorrowed;
-                    borrowedPositions++;
-                }
-            }
-            uint256 currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-            uint256 estimateInterest = (currentBorrowBalance - cumulativeBorrowBalance)/borrowedPositions;
-            uint256 lendingTokenIdCopy = lendingTokenId;
-            for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
-                UserBorrowPosition storage borrowPosition = userBorrowPosition[msg.sender][lendingTokenIdCopy][prjId];
-                if(borrowPosition.amountBorrowed > 0){
-                    borrowPosition.amountBorrowed += estimateInterest;
-                    borrowPosition.amountPit = balanceOfPitPosition(msg.sender,prjId);
-                }
-            }
+    function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {        
+        updateInterestInBorrowPosition(msg.sender, projectToken, lendingToken);
+        require(lendingTokenAmount <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
+        require(totalBorrow[projectToken][lendingToken] <= borrowLimit[projectToken][lendingToken] );
+        BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
+        LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
+        if (_borrowPosition.loanBody == 0) {
+            info.bLendingToken.borrowTo(projectToken, msg.sender, lendingTokenAmount);
+            _borrowPosition.loanBody += lendingTokenAmount;
+            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
+        } else {
+            info.bLendingToken.borrowTo(projectToken, msg.sender, lendingTokenAmount);
+            _borrowPosition.loanBody += lendingTokenAmount;
+            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
         }
-        require(borrowError == 0,"PIT: borrow more than PIT balance or no liquidity.");
-
-        emit Borrow(msg.sender,lendingTokenId, lendingToken, amountLendingToken, projectToken, amountProjectToken);
-    }
-
-    function repayBorrow(uint256 lendingTokenId, uint256 amountLendingToken, address projectToken) public {
-        require(lendingTokenId < lendingTokens.length && amountLendingToken > 0, "PIT: invalid input");
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
-        uint256 repayBorrowError;
-        uint256 amountRepayed;
-
-        UserBorrowPosition storage msgSenderBorrowPosition = userBorrowPosition[msg.sender][lendingTokenId][indexProjectToken[projectToken]];
-
-        uint256 borrowedPositions = 0;
-        uint256 cumulativeBorrowBalance = 0;
-        for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
-            UserBorrowPosition storage borrowPosition = userBorrowPosition[msg.sender][lendingTokenId][prjId];
-            if(borrowPosition.amountBorrowed > 0){
-                cumulativeBorrowBalance += borrowPosition.amountBorrowed;
-                borrowedPositions++;
-            }
-        }
-        if(borrowedPositions == 0){
-            revert("PIT: no borrow positions");
-        }
-        uint256 currentBorrowBalance;
-        uint256 estimateInterest;
-        if(amountLendingToken == type(uint256).max){
-            if(borrowedPositions == 1){
-                (repayBorrowError, amountRepayed)  = BLendingToken(bLendingToken).repayBorrowTo(projectToken, msg.sender, type(uint256).max);
-                require(repayBorrowError == 0 && amountRepayed > 0,"PIT: repayBorrowError!=0");
-                uint256 lendingTokenIdCopy0 = lendingTokenId;
-                msgSenderBorrowPosition.amountBorrowed = 0;
-                msgSenderBorrowPosition.amountPit = 0;
-                emit RepayBorrow(msg.sender, lendingTokenIdCopy0, lendingToken, amountRepayed, projectToken, true);
-                return;
-            }else{
-                currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-                if(currentBorrowBalance > cumulativeBorrowBalance){
-                    estimateInterest = (currentBorrowBalance - cumulativeBorrowBalance) / borrowedPositions;
-                }else{
-                    estimateInterest = 0;
-                }
-
-                (repayBorrowError, amountRepayed)  = BLendingToken(bLendingToken).repayBorrowTo(projectToken, msg.sender, msgSenderBorrowPosition.amountBorrowed + estimateInterest);
-                require(repayBorrowError == 0 && amountRepayed > 0, "PIT: repayBorrowError!=0");
-            
-                currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-                if(cumulativeBorrowBalance > amountRepayed && currentBorrowBalance > cumulativeBorrowBalance - amountRepayed){
-                    estimateInterest = (currentBorrowBalance - (cumulativeBorrowBalance - amountRepayed))/borrowedPositions;
-                }else{
-                    estimateInterest = 0;
-                }
-
-                msgSenderBorrowPosition.amountBorrowed = 0;
-                msgSenderBorrowPosition.amountPit = 0;
-            }
-        }else{
-            require(amountLendingToken <= msgSenderBorrowPosition.amountBorrowed, "PIT: amountLendingToken<=amountBorrowed");
-
-            currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-            
-            (repayBorrowError, amountRepayed)  = BLendingToken(bLendingToken).repayBorrowTo(projectToken, msg.sender, amountLendingToken);
-            require(repayBorrowError == 0 && amountRepayed > 0, "PIT: repayBorrowError not zero!");
-            currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-            if(currentBorrowBalance > cumulativeBorrowBalance - amountRepayed){
-                estimateInterest = (currentBorrowBalance - (cumulativeBorrowBalance - amountRepayed)) / borrowedPositions;
-            }else{
-                estimateInterest = 0;
-            }
-            
-            msgSenderBorrowPosition.amountBorrowed -= amountLendingToken;
-            msgSenderBorrowPosition.amountPit = balanceOfPitPosition(msg.sender,indexProjectToken[projectToken]);
-           
-        }
-        uint256 lendingTokenIdCopy1 = lendingTokenId;
-
-        for(uint256 prjId = 0; prjId < projectTokens.length;prjId++){
-            UserBorrowPosition storage borrowPosition = userBorrowPosition[msg.sender][lendingTokenIdCopy1][prjId];
-            if(borrowPosition.amountBorrowed > 0){
-                borrowPosition.amountBorrowed += estimateInterest;
-                borrowPosition.amountPit = balanceOfPitPosition(msg.sender,prjId);
-            }
-        }
-
-        emit RepayBorrow(msg.sender, lendingTokenIdCopy1, lendingToken, amountRepayed, projectToken, msgSenderBorrowPosition.amountBorrowed == 0);
-        
     }
     
-    function liquidate(address user, uint256 lendingTokenId, uint256 prjId) public {
-        require(prjId < projectTokens.length);
-        address lendingToken = lendingTokens[lendingTokenId];
-        address bLendingToken = bLendingTokensList[lendingToken];
-        address projectToken = projectTokens[prjId];
+    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) returns (uint256) {
+        require(lendingTokenAmount > 0, "PIT: lendingTokenAmount==0");
+        return repayInternal(msg.sender, msg.sender, projectToken, lendingToken, lendingTokenAmount);
+    }
 
-        UserBorrowPosition storage borrowPosition = userBorrowPosition[user][lendingTokenId][prjId];
-        if(borrowPosition.amountBorrowed == 0){
-            revert("PIT: no position to liquidate.");
+    function repayInternal(address repayer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount) internal returns (uint256) {
+        uint256 borrowPositionsAmount = 0;
+        for(uint256 i = 0; i < projectTokens.length; i++) { 
+            if (borrowPosition[borrower][projectTokens[i]][lendingToken].loanBody > 0) {
+                borrowPositionsAmount++;
+            }
         }
-
-        (uint256 hf_numerator, uint256 hf_denominator) = healthFactorForPosition(user, lendingTokenId, prjId);
-
-        if (hf_numerator >= hf_denominator){
-            revert("PIT: health factor bigger than 1. Liquidation is forbidden by this condition.");
+        BorrowPosition storage _borrowPosition = borrowPosition[borrower][projectToken][lendingToken];
+        if (borrowPositionsAmount == 0 || _borrowPosition.loanBody == 0) {
+            revert("PIT: no borrow position");
         }
+        LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
+        updateInterestInBorrowPosition(borrower, projectToken, lendingToken);
         uint256 amountRepayed;
-        uint256 borrowedPositions = 0;
-        uint256 cumulativeBorrowBalance = 0;
-        for(uint256 prjIdInternal = 0; prjIdInternal < projectTokens.length; prjIdInternal++){
-            UserBorrowPosition storage cumulativeBorrowPosition = userBorrowPosition[msg.sender][lendingTokenId][prjIdInternal];
-            if(cumulativeBorrowPosition.amountBorrowed > 0){
-                cumulativeBorrowBalance += cumulativeBorrowPosition.amountBorrowed;
-                borrowedPositions++;
+        uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
+        if (borrowPositionsAmount == 1) {
+            if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
+                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, type(uint256).max);
+                totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
+                _borrowPosition.loanBody = 0;
+                _borrowPosition.interest = 0;
+            } else {
+                uint256 lendingTokenAmountToRepay = lendingTokenAmount;
+                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower,  lendingTokenAmountToRepay);
+                if (lendingTokenAmountToRepay > _borrowPosition.interest) {
+                    lendingTokenAmountToRepay -= _borrowPosition.interest;
+                    _borrowPosition.interest = 0;
+                    totalBorrow[projectToken][lendingToken] -= lendingTokenAmountToRepay;
+                    _borrowPosition.loanBody -= lendingTokenAmountToRepay;
+                } else {
+                    _borrowPosition.interest -= lendingTokenAmountToRepay;
+                }
+            }
+        } else {
+            if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
+                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, _totalOutstanding);
+                totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
+                _borrowPosition.loanBody = 0;
+                _borrowPosition.interest = 0;
+            } else {
+                uint256 lendingTokenAmountToRepay = lendingTokenAmount;
+                (, amountRepayed) = info.bLendingToken.repayTo(projectToken, repayer, borrower, lendingTokenAmountToRepay);
+                if(lendingTokenAmountToRepay > _borrowPosition.interest){
+                    lendingTokenAmountToRepay -= _borrowPosition.interest;
+                    _borrowPosition.interest = 0;
+                    totalBorrow[projectToken][lendingToken] -= lendingTokenAmountToRepay;
+                    _borrowPosition.loanBody -= lendingTokenAmountToRepay;
+                } else {
+                    _borrowPosition.interest -= lendingTokenAmountToRepay;
+                }
             }
         }
-        
-        if(borrowedPositions == 1){
-            (, amountRepayed)  = BLendingToken(bLendingToken).repayBorrowToBorrower(projectToken, msg.sender, user, type(uint256).max);
-            require(amountRepayed > 0,"PIT: repayBorrowError!=0");     
-        }else{
-            uint256 currentBorrowBalance = BLendingToken(bLendingToken).borrowBalanceCurrent(msg.sender);
-            uint256 estimateInterest;
 
-            if(currentBorrowBalance > cumulativeBorrowBalance){
-                estimateInterest = (currentBorrowBalance - cumulativeBorrowBalance) / borrowedPositions;
-            }else{
-                estimateInterest = 0;
-            }
-            address userToLiquidate = user;
-            (, amountRepayed)  = BLendingToken(bLendingToken).repayBorrowToBorrower(projectToken, msg.sender, userToLiquidate, borrowPosition.amountBorrowed + estimateInterest);
-            require(amountRepayed > 0, "PIT: repayBorrowError!=0");
-        
+        //event Repay(address repayer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount, bool isPositionAllRepayed);
+        //emit Repay(msg.sender, msg.sender, projectToken, lendingToken, amountRepayed, isPositionAllRepayed);
+        return amountRepayed;
+    }
+    
+    function liquidate(address account, address projectToken, address lendingToken) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
+        //liquidation v3.0
+        updateInterestInBorrowPosition(account, projectToken, lendingToken);
+        (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(account, projectToken, lendingToken);
+        if(healthFactorNumerator >= healthFactorDenominator){ 
+            revert("PIT: borrow position is healty");
         }
+        ProjectTokenInfo memory info = projectTokenInfo[projectToken];
+        uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
+        uint256 repayed = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
+        uint256 priceForOneProjectToken = getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals);
+        uint256 projectTokenEvaluation = repayed * (10 ** projectTokenDecimals) / priceForOneProjectToken;
+        uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationThresholdFactor.numerator / info.liquidationThresholdFactor.denominator;
+        
+        depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
+        ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenToSendToLiquidator);
 
-        UserDepositPosition storage depositPosition = userDepositPosition[user][prjId];
-        uint256 prjDeposited = depositPosition.amountProjectTokenAvailable;
-        ERC20Upgradeable(projectToken).safeTransfer(msg.sender,prjDeposited);
-        depositPosition.amountProjectTokenAvailable -= prjDeposited;
-        totalStakedPrj[projectToken] -= prjDeposited;
-        borrowPosition.amountBorrowed = 0;
-        borrowPosition.amountPit = 0;
+    }
 
-        emit Liquidate(msg.sender, user, lendingTokenId, prjId, prjDeposited);
-
+    function updateInterestInBorrowPosition(address account, address projectToken, address lendingToken) public {
+        BorrowPosition storage _borrowPosition = borrowPosition[account][projectToken][lendingToken];
+        uint256 cumulativeTotalOutstanding = 0;
+        if(_borrowPosition.loanBody != 0) {
+            for(uint256 projectTokenId = 0; projectTokenId < projectTokens.length; projectTokenId++){
+                cumulativeTotalOutstanding += totalOutstanding(account, projectTokens[projectTokenId], lendingToken);
+            }
+            uint256 currentBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.borrowBalanceCurrent(msg.sender);
+            if (currentBorrowBalance >= cumulativeTotalOutstanding){
+                _borrowPosition.interest += (currentBorrowBalance - cumulativeTotalOutstanding);
+            }
+        }
     }
 
     //************* VIEW FUNCTIONS ********************************
 
-    /**
-     * @notice returns the amount of PIT of account in position `prjId`
-     */
-    function balanceOfPitPosition(address account, uint256 prjId) public view returns (uint256){
-        address tokenPrj = projectTokens[prjId];
-        uint8 lvrNumerator = lvr[tokenPrj].numerator;
-        uint8 lvrDenominator = lvr[tokenPrj].denominator;
-        uint256 prjInPosition = getDepositedPrjAmount(account, prjId);
-        uint256 positionEvaluation = getPrjEvaluationInBasicToken(projectTokens[prjId],prjInPosition);
-        return positionEvaluation * lvrNumerator / lvrDenominator;
+    function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
+        uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
+        uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount);
+        return evaluation * lvrNumerator / lvrDenominator;
     }
 
-    function liquidationThresholdForPosition(address account, uint256 prjId) public view returns(uint256){
-        address tokenPrj = projectTokens[prjId];
-        uint8 ltfNumerator = ltf[tokenPrj].numerator;
-        uint8 ltfDenominator = ltf[tokenPrj].denominator;
-        uint256 pitCurrentBalance = balanceOfPitPosition(account, prjId);
-        return pitCurrentBalance * ltfNumerator / ltfDenominator;
-    }
-
-    function healthFactorForPosition(address account,uint256 lendingTokenId,uint256 prjId) public view returns(uint256 numerator, uint256 denominator){
-        uint256 lt = liquidationThresholdForPosition(account, prjId);
-        uint256 borrowedLendingToken = userBorrowPosition[account][lendingTokenId][prjId].amountBorrowed;
-        return (lt,borrowedLendingToken);
-    }
-
-    function healthFactor(address account,uint256 lendingTokenId) public view returns(uint256 numerator, uint256 denominator){
-        uint256 lt = liquidationThreshold(account);
-        uint256 borrowedLendingToken;
-        for(uint256 prjId = 0; prjId < projectTokens.length; prjId++){
-            borrowedLendingToken += userBorrowPosition[account][lendingTokenId][prjId].amountBorrowed;
+    function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        uint256 _pit = pit(account, projectToken, lendingToken);
+        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken);
+        if (_pit >= _totalOutstanding) {
+            return _pit - _totalOutstanding;
+        } else {
+            return 0;
         }
-        return (lt, borrowedLendingToken);
     }
 
-    function getPrjEvaluationInBasicToken(address projectToken,uint256 amountPrj) public view returns(uint256){
-        return IPriceProviderAggregator(priceOracle).getEvaluation(projectToken, amountPrj);
+    function liquidationThreshold(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        ProjectTokenInfo memory info = projectTokenInfo[projectToken];   
+        uint256 liquidationThresholdFactorNumerator = info.liquidationThresholdFactor.numerator;
+        uint256 liquidationThresholdFactorDenominator = info.liquidationThresholdFactor.denominator;
+        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken);
+        return _totalOutstanding * liquidationThresholdFactorNumerator / liquidationThresholdFactorDenominator;
     }
 
-    function getPrjEvaluationInBasicTokenWithSale(address projectToken, uint256 amountPrj) public view returns(uint256){ 
-        Ratio storage sale = prjSales[projectToken];
-        uint256 amountPrjEvaluationInBasicToken = getPrjEvaluationInBasicToken(projectToken,amountPrj);
-        uint256 amoutLendingTokenWithSale = amountPrjEvaluationInBasicToken * sale.numerator / sale.denominator;
-        return amoutLendingTokenWithSale;
+    function totalOutstanding(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        BorrowPosition memory _borrowPosition = borrowPosition[account][projectToken][lendingToken];
+        return _borrowPosition.loanBody + _borrowPosition.interest;
     }
 
-    function getBToken(address underlying) public view returns(address) {
-        return bLendingTokensList[underlying];
+    function healthFactor(address account, address projectToken, address lendingToken) public view returns (uint256 numerator, uint256 denominator) {
+        numerator = pit(account, projectToken, lendingToken);
+        denominator = totalOutstanding(account, projectToken, lendingToken);
     }
 
-    function getDepositedPrjAmount(address account, uint256 prjId) public view returns(uint256){
-        return userDepositPosition[account][prjId].amountProjectTokenAvailable;
-    }
-
-    function getBorrowPosition(address account, uint256 lendingTokenId, uint256 prjId) public view returns(uint256,uint256){
-        UserBorrowPosition storage borrowPosition = userBorrowPosition[account][lendingTokenId][prjId];
-        return (borrowPosition.amountBorrowed, borrowPosition.amountPit);
-    }
-
-    function liquidationThreshold(address account) public view returns(uint256){
-        uint256 lt;
-        for(uint256 prjId=0; prjId < projectTokens.length; prjId++){
-            lt += liquidationThresholdForPosition(account,prjId);
-        }
-        return lt;
-    }
-
-    /**
-     * @notice returns the amount of PIT of account
-     */
-    function balanceOfPit(address account) public view returns (uint256){
-        uint256 pitBalance;
-        for(uint256 prjId = 0; prjId < projectTokens.length; prjId++){
-            pitBalance += balanceOfPitPosition(account,prjId);
-        }
-        return pitBalance;
-    }
-
-    /**
-     * @notice return the pitBalance depending on input prj indexes
-     */
-    function balanceOfPitDependingOnPrj(address account, uint256[] memory prjIndexes) public view returns(uint256){
-        uint256 prjIndexesLength = prjIndexes.length;
-        require(prjIndexesLength <= projectTokens.length,"Invalid length of prj Indexes");
-        uint256 pitBalance;
-        for(uint256 i = 0; i < prjIndexesLength; i++){
-            pitBalance += balanceOfPitPosition(account,prjIndexes[i]);
-        }
-        return pitBalance;
-    }
-
-    function totalSupplyPit() public view virtual returns (uint256) {
-        uint256 pitTotalSupply;
-        address tokenPrj;
-        uint8 lvrNumerator;
-        uint8 lvrDenominator;
-        uint256 basicTokenEvaluation;
-        uint256 totalStaked;
-        for(uint256 prjId=0; prjId < projectTokens.length; prjId++){
-            tokenPrj = projectTokens[prjId];
-            lvrNumerator = lvr[tokenPrj].numerator;
-            lvrDenominator = lvr[tokenPrj].denominator;
-            totalStaked = totalStakedPrj[tokenPrj];
-            basicTokenEvaluation = getPrjEvaluationInBasicToken(projectTokens[prjId],totalStaked);
-            pitTotalSupply += basicTokenEvaluation * lvrNumerator / lvrDenominator;
-        }
-        return pitTotalSupply;
+    function getProjectTokenEvaluation(address projectToken, uint256 projectTokenAmount) public view returns (uint256) {
+        return priceOracle.getEvaluation(projectToken, projectTokenAmount);
     }
 
     function lendingTokensLength() public view returns (uint256) {
         return lendingTokens.length;
     }
 
-    function decimals() public override view returns(uint8){
+    function projectTokensLength() public view returns (uint256) {
+        return projectTokens.length;
+    }
+
+    /****************** ERC20 functions ****************** */
+
+    function decimals() public view returns (uint8) {
         return ERC20Upgradeable(basicToken).decimals();
     }
-   
 }

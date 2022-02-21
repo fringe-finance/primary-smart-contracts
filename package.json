@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
-    "printContractSizes": "hardhat size-contracts",
+    "size-contracts": "hardhat size-contracts",
     "forkmainnet": "hardhat node --fork https://mainnet.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
     "forkrinkeby": "hardhat node --fork https://rinkeby.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
     "localDeploy": "hardhat run --network hardhat scripts/deployment/deployToRinkeby.js",
