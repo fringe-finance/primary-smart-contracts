@@ -194,7 +194,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
             });
 
 
-            it("borrower repays some part of accrued interest in borrow position", async function() {
+            it("borrower repays some part of accrued accrual in borrow position", async function() {
                 await printSeparator();
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
@@ -203,7 +203,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
-                let amountUsdcToRepay = borrowPositionBefore.interest.div(toBN(2));
+                let amountUsdcToRepay = borrowPositionBefore.accrual.div(toBN(2));
                 await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
                 console.log("Repayed: " + amountUsdcToRepay);
                 await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
@@ -218,7 +218,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await printSeparator();
             });
 
-            it("borrower repays all interest and some part of loan in borrow position", async function(){
+            it("borrower repays all accrual and some part of loan in borrow position", async function(){
                 await printSeparator();
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
@@ -228,7 +228,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
 
-                let amountUsdcToRepay = borrowPositionBefore.loanBody.div(toBN(2)).add(borrowPositionBefore.interest);
+                let amountUsdcToRepay = borrowPositionBefore.loanBody.div(toBN(2)).add(borrowPositionBefore.accrual);
                 await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
                 console.log("Repayed: " + amountUsdcToRepay);
                 await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
@@ -391,7 +391,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await pit.updateInterestInBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
             });
 
-            it("Borrower repays some part of accrued interest in PRJ1 position", async function() {
+            it("Borrower repays some part of accrued accrual in PRJ1 position", async function() {
                 await printSeparator();
                 console.log("=====PRJ1=====")
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
@@ -417,7 +417,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await printSeparator();
             });
 
-            it("Borrower repays all interest and some part of loan in PRJ1 position", async function(){
+            it("Borrower repays all accrual and some part of loan in PRJ1 position", async function(){
                 await printSeparator();
                 console.log("=====PRJ1=====")
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
@@ -427,7 +427,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorPRJ1Before = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
-                let amountUsdcToRepay = borrowPositionPRJ1Before.loanBody.div(toBN(2)).add(borrowPositionPRJ1Before.interest);
+                let amountUsdcToRepay = borrowPositionPRJ1Before.loanBody.div(toBN(2)).add(borrowPositionPRJ1Before.accrual);
                 await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
                 console.log("Repayed: " + amountUsdcToRepay);
                 await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
@@ -470,7 +470,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await printSeparator();
             });
 
-            it("Borrower repays all interest and some part of loan in PRJ2 position", async function(){
+            it("Borrower repays all accrual and some part of loan in PRJ2 position", async function(){
                 await printSeparator();
 
                 console.log("=====PRJ2=====")
@@ -481,7 +481,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
                 let healthFactorPRJ2Before = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
 
-                let amountUsdcToRepay = borrowPositionPRJ2Before.loanBody.div(toBN(2)).add(borrowPositionPRJ2Before.interest);
+                let amountUsdcToRepay = borrowPositionPRJ2Before.loanBody.div(toBN(2)).add(borrowPositionPRJ2Before.accrual);
                 await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
                 console.log("Repayed: " + amountUsdcToRepay);
                 await pit.connect(borrower).repay(prj2Address, usdcAddress, amountUsdcToRepay);
@@ -631,7 +631,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
             let borrowPosition = await pit.borrowPosition(accountAddress, projectTokenAddress, lendingTokenAddress);
             console.log("Borrow position: ");
             console.log("   loanBody:   " + borrowPosition.loanBody);
-            console.log("   interest:   " + borrowPosition.interest);
+            console.log("   accrual:   " + borrowPosition.accrual);
             return borrowPosition;
         }
 

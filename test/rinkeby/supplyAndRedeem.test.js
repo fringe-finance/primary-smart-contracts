@@ -227,7 +227,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
             let borrowPosition = await pit.borrowPosition(accountAddress, projectTokenAddress, lendingTokenAddress);
             console.log("Borrow position: ");
             console.log("   loanBody:   " + borrowPosition.loanBody);
-            console.log("   interest:   " + borrowPosition.interest);
+            console.log("   accrual:   " + borrowPosition.accrual);
             return borrowPosition;
         }
 

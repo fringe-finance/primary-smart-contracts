@@ -193,8 +193,8 @@ module.exports = {
         let loanToValueRatioDenominator = toBN(10);
         let liquidationTresholdFactorNumerator = toBN(1);
         let liquidationTresholdFactorDenominator = toBN(1);
-        let liquidationIncentiveNumerator = toBN(8);
-        let liquidationIncentiveDenominator = toBN(10);
+        let liquidationIncentiveNumerator = toBN(115);
+        let liquidationIncentiveDenominator = toBN(100);
         
         let PRJsAddresses = [
             '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
@@ -205,7 +205,7 @@ module.exports = {
             '0x16E2f279A9BabD4CE133745DdA69C910CBe2e490' //PRJ6
             ];
 
-        await pit.initialize(basicTokenAddress)
+        await pit.initialize()
         .then(function(){
             console.log("PrimaryIndexToken call initialize at " + pitAddress)
         });

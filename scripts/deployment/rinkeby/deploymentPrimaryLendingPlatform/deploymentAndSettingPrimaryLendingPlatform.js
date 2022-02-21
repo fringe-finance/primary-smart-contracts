@@ -236,12 +236,12 @@ module.exports = {
             console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + pitAddress);
         });
 
-        for(var i = 0; i < PRJsAddresses.length; i++){
-            await busdc.setBorrowLimit(PRJsAddresses[i], borrowLimit)
-            .then(function(){
-                console.log("BUSDC set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
-            });
-        }
+        // for(var i = 0; i < PRJsAddresses.length; i++){
+        //     await busdc.setBorrowLimit(PRJsAddresses[i], borrowLimit)
+        //     .then(function(){
+        //         console.log("BUSDC set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
+        //     });
+        // }
         return {
             bondtrollerAddress: bondtrollerAddress,
             busdcAddress: busdcAddress,

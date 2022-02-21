@@ -120,16 +120,6 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         borrowError = borrowFresh(payable(borrower), borrowAmount);
     }
 
-    // function repayBorrowTo(address projectToken, address payer, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
-    //     uint error = accrueInterest();
-    //     if (error != uint(Error.NO_ERROR)) {
-    //         // accrueInterest emits logs on errors, but we still want to log the fact that an attempted borrow failed
-    //         return (fail(Error(error), FailureInfo.REPAY_BORROW_ACCRUE_INTEREST_FAILED), 0);
-    //     }
-    //     // repayBorrowFresh emits repay-borrow-specific logs on errors, so we don't need to
-    //     (repayBorrowError,amountRepayed) = repayBorrowFresh(payer, payer, repayAmount);
-    // }
-
     function repayTo(address projectToken, address payer, address borrower, uint256 repayAmount) external onlyPrimaryIndexToken returns (uint repayBorrowError, uint amountRepayed) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
