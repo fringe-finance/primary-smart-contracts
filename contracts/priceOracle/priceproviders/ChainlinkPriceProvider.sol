@@ -7,11 +7,6 @@ import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-/**
- * Uniswap v2 price provider 
- * This implementation can be affected by price manipulation due to not using TWAP
- * For development purposes only
- */
 contract ChainlinkPriceProvider is PriceProvider,
                                    Initializable,
                                    AccessControlUpgradeable

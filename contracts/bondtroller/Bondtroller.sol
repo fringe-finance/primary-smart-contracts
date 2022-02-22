@@ -89,15 +89,15 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
 
     /**
      * @notice Add assets to be included in account liquidity calculation
-     * @param cTokens The list of addresses of the bToken markets to be enabled
+     * @param bTokens The list of addresses of the bToken markets to be enabled
      * @return Success indicator for whether each corresponding market was entered
      */
-    function enterMarkets(address[] memory cTokens) public onlyPrimaryIndexToken returns (uint[] memory) {
-        uint len = cTokens.length;
+    function enterMarkets(address[] memory bTokens) public onlyPrimaryIndexToken returns (uint[] memory) {
+        uint len = bTokens.length;
 
         uint[] memory results = new uint[](len);
         for (uint i = 0; i < len; i++) {
-            BToken bToken = BToken(cTokens[i]);
+            BToken bToken = BToken(bTokens[i]);
 
             results[i] = uint(addToMarketInternal(bToken, msg.sender));
         }
@@ -262,7 +262,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @notice Checks if the account should be allowed to redeem tokens in the given market
      * @param bToken The market to verify the redeem against
      * @param redeemer The account which would redeem the tokens
-     * @param redeemTokens The number of cTokens to exchange for the underlying asset in the market
+     * @param redeemTokens The number of bTokens to exchange for the underlying asset in the market
      * @return 0 if the redeem is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
     function redeemAllowed(address bToken, address redeemer, uint redeemTokens) external view returns (uint) {
@@ -329,7 +329,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         }
 
         if (!accountMembership[borrower][address(bToken)]) {
-            // only cTokens may call borrowAllowed if borrower not in market
+            // only bTokens may call borrowAllowed if borrower not in market
             //require(msg.sender == bToken, "sender must be bToken");
 
             // attempt to add borrower to the market
@@ -436,7 +436,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param bToken The market to verify the transfer against
      * @param src The account which sources the tokens
      * @param dst The account which receives the tokens
-     * @param transferTokens The number of cTokens to transfer
+     * @param transferTokens The number of bTokens to transfer
      * @return 0 if the transfer is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
     function transferAllowed(address bToken, address src, address dst, uint transferTokens) external returns (uint) {
@@ -466,7 +466,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param bToken Asset being transferred
      * @param src The account which sources the tokens
      * @param dst The account which receives the tokens
-     * @param transferTokens The number of cTokens to transfer
+     * @param transferTokens The number of bTokens to transfer
      */
     function transferVerify(address bToken, address src, address dst, uint transferTokens) external onlyPrimaryIndexToken {
         // Shh - currently unused
@@ -558,20 +558,20 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /**
       * @notice Set the given borrow caps for the given bToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
       * @dev Admin or borrowCapGuardian function to set the borrow caps. A borrow cap of 0 corresponds to unlimited borrowing.
-      * @param cTokens The addresses of the markets (tokens) to change the borrow caps for
+      * @param bTokens The addresses of the markets (tokens) to change the borrow caps for
       * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
       */
-    function setMarketBorrowCaps(BToken[] calldata cTokens, uint[] calldata newBorrowCaps) external {
+    function setMarketBorrowCaps(BToken[] calldata bTokens, uint[] calldata newBorrowCaps) external {
     	require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps"); 
 
-        uint numMarkets = cTokens.length;
+        uint numMarkets = bTokens.length;
         uint numBorrowCaps = newBorrowCaps.length;
 
         require(numMarkets != 0 && numMarkets == numBorrowCaps, "invalid input");
 
         for(uint i = 0; i < numMarkets; i++) {
-            borrowCaps[address(cTokens[i])] = newBorrowCaps[i];
-            emit NewBorrowCap(cTokens[i], newBorrowCaps[i]);
+            borrowCaps[address(bTokens[i])] = newBorrowCaps[i];
+            emit NewBorrowCap(bTokens[i], newBorrowCaps[i]);
         }
     }
 
