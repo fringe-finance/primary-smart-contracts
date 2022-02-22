@@ -139,7 +139,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         
         setProjectTokenInfo(
             _projectToken, 
-            _isPaused,
             _loanToValueRatioNumerator, 
             _loanToValueRatioDenominator, 
             _liquidationTresholdFactorNumerator, 
@@ -147,6 +146,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             _liquidationIncentiveNumerator, 
             _liquidationIncentiveDenominator
         );
+
+        setPausedProjectToken(_projectToken, _isPaused);
 
         emit AddPrjToken(_projectToken);
     }
@@ -211,9 +212,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         //emit set borrow limit
     }
 
-     function setProjectTokenInfo(
+    function setProjectTokenInfo(
         address _projectToken,
-        bool _isPaused,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
         uint8 _liquidationTresholdFactorNumerator,
@@ -226,13 +226,16 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         require(_liquidationIncentiveNumerator >= _liquidationIncentiveDenominator, "invalid liquidationIncentive");
         
         ProjectTokenInfo storage info = projectTokenInfo[_projectToken];
-        info.isPaused = _isPaused;
         info.loanToValueRatio = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
         info.liquidationThresholdFactor = Ratio(_liquidationTresholdFactorNumerator, _liquidationTresholdFactorDenominator);
         info.liquidationIncentive = Ratio(_liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     
         emit LoanToValueRatioSet(_projectToken, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
         emit LiquidationThresholdFactorSet(_projectToken, _liquidationTresholdFactorNumerator, _liquidationTresholdFactorDenominator);
+    }
+
+    function setPausedProjectToken(address _projectToken, bool _isPaused) public onlyModerator isProjectTokenListed(_projectToken) {
+        projectTokenInfo[_projectToken].isPaused = _isPaused;
     }
 
     function setLendingTokenInfo(
@@ -247,10 +250,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         info.bLendingToken = BLendingToken(_bLendingToken);
     }
 
+    function setPausedLendingToken(address _lendingToken, bool _isPaused) public onlyModerator isLendingTokenListed(_lendingToken) {
+        lendingTokenInfo[_lendingToken].isPaused = _isPaused;
+    }
+
     //************* PUBLIC FUNCTIONS ********************************
 
     function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant() {
-        require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken not active");
+        require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken is paused");
         require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
         DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
         ERC20Upgradeable(projectToken).safeTransferFrom(msg.sender, address(this), projectTokenAmount);
@@ -260,6 +267,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function withdraw(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant {
+        require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken is paused");
         require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
         DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
         require(projectTokenAmount <= _depositPosition.depositedProjectTokenAmount, "PIT: try to withdraw more than available");
@@ -274,7 +282,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function supply(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {
-        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: lending token not active");
+        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: lending token is paused");
         require(lendingTokenAmount > 0, "PIT: lendingTokenAmount==0");
 
         (uint256 mintError, uint256 mintedAmount) = lendingTokenInfo[lendingToken].bLendingToken.mintTo(msg.sender, lendingTokenAmount);
@@ -285,6 +293,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function redeem(address lendingToken, uint256 bLendingTokenAmount) public isLendingTokenListed(lendingToken) {
+        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: lending token is paused");
         require(bLendingTokenAmount > 0, "PIT: bLendingTokenAmount==0");
 
         uint256 redeemError = lendingTokenInfo[lendingToken].bLendingToken.redeemTo(msg.sender, bLendingTokenAmount);
@@ -294,6 +303,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function redeemUnderlying(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {
+        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: lending token is paused");
         require(lendingTokenAmount > 0, "PIT: lendingTokenAmount==0");
 
         uint256 redeemUnderlyingError = lendingTokenInfo[lendingToken].bLendingToken.redeemUnderlyingTo(msg.sender, lendingTokenAmount);
@@ -381,9 +391,10 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         emit RepayBorrow(repayer, lendingToken, lendingTokenAmount, projectToken);
         return amountRepayed;
     }
-    
+
     function liquidate(address account, address projectToken, address lendingToken) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
         //liquidation v3.0
+        require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken is paused");
         updateInterestInBorrowPosition(account, projectToken, lendingToken);
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(account, projectToken, lendingToken);
         if(healthFactorNumerator >= healthFactorDenominator){ 
@@ -397,6 +408,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationThresholdFactor.numerator / info.liquidationThresholdFactor.denominator;
         
         depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
+        totalDepositedProjectToken[projectToken] -= projectTokenToSendToLiquidator;
         ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenToSendToLiquidator);
         emit Liquidate(msg.sender, account, lendingToken, projectToken, projectTokenToSendToLiquidator);
     }
@@ -472,7 +484,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         return projectTokens.length;
     }
 
-    function getPosition(address account, address projectToken, address lendingToken) public view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual) {
+    function getPosition(address account, address projectToken, address lendingToken) public view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, uint256 healthFactorNumerator, uint256 healthFactorDenominator) {
         depositedProjectTokenAmount = depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount;
         loanBody = borrowPosition[account][projectToken][lendingToken].loanBody;
         uint256 borrowPositions = 0;
@@ -490,9 +502,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (borrowPositions > 0 && estimatedBorrowBalance >= cumulativeTotalOutstanding) {
             accrual += ((estimatedBorrowBalance - cumulativeTotalOutstanding) / borrowPositions);
         }
+        healthFactorNumerator = pit(account, projectToken, lendingToken);
+        healthFactorDenominator = loanBody + accrual;
     }
 
-    function decimals() public view returns (uint8) {
+    function decimals() public pure returns (uint8) {
         return 6;
     }
 }
