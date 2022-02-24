@@ -5,7 +5,7 @@ const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentAndSettingPIT : async function (input_proxyAdminAddress, input_priceOracleAddress) {
+    deploymentAndSettingPrimaryLendingPlatform : async function (input_proxyAdminAddress, input_priceOracleAddress) {
         let network = await hre.network;
         console.log("Network name: "+network.name);
        
