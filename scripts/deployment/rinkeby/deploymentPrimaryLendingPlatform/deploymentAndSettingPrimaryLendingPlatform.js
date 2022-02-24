@@ -5,7 +5,7 @@ const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentAndSettingPrimaryLendingPlatform : async function (input_proxyAdminAddress, input_priceOracleAddress) {
+    deploymentAndSettingPIT : async function (input_proxyAdminAddress, input_priceOracleAddress) {
         let network = await hre.network;
         console.log("Network name: "+network.name);
        
@@ -32,7 +32,7 @@ module.exports = {
         let busdcAddress;
         let pitAddress;
 
-        const {
+        let {
             borrowLimit
         } = require("../config.js");
 
@@ -92,6 +92,7 @@ module.exports = {
     //====================================================
         console.log();
         console.log("***** BONDTROLLER DEPLOYMENT *****");
+
         bondtroller = await Bondtroller.connect(deployMaster).deploy();
         await bondtroller.deployed();
         let bondtrollerMasterCopyAddress = bondtroller.address;
@@ -187,14 +188,14 @@ module.exports = {
         pit = await PrimaryIndexToken.attach(pitAddress).connect(deployMaster);
 
         let basicTokenAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        let moderatorAddress = deployMasterAddress;
-        let lvrNumerator = toBN(6);
-        let lvrDenominator = toBN(10);
-        let ltfNumerator = toBN(1);
-        let ltfDenominator = toBN(1);
-        let saleNumerator = toBN(8);
-        let saleDenominator = toBN(10);
-
+        let isPaused = false;
+        let loanToValueRatioNumerator = toBN(6);
+        let loanToValueRatioDenominator = toBN(10);
+        let liquidationTresholdFactorNumerator = toBN(1);
+        let liquidationTresholdFactorDenominator = toBN(1);
+        let liquidationIncentiveNumerator = toBN(115);
+        let liquidationIncentiveDenominator = toBN(100);
+        
         let PRJsAddresses = [
             '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
             '0x69648Ef43B7496B1582E900569cd9dDEc49C045e',//PRJ2
@@ -204,51 +205,70 @@ module.exports = {
             '0x16E2f279A9BabD4CE133745DdA69C910CBe2e490' //PRJ6
             ];
 
-        await pit.init(basicTokenAddress,moderatorAddress).then(function(){
+        await pit.initialize()
+        .then(function(){
             console.log("PrimaryIndexToken call initialize at " + pitAddress)
         });
 
-        await pit.setPriceOracle(input_priceOracleAddress).then(function(){
+        await pit.setPriceOracle(input_priceOracleAddress)
+        .then(function(){
             console.log("PrimaryIndexToken set priceOracle: " + input_priceOracleAddress);
         });
 
         for(var i = 0; i < PRJsAddresses.length; i++){
-            await pit.addProjectToken(  PRJsAddresses[i],
-                                        lvrNumerator,lvrDenominator,
-                                        ltfNumerator,ltfDenominator,
-                                        saleNumerator,saleDenominator,
-                                        );
-            console.log("Added prj token: "+PRJsAddresses[i]+" with values:");
-            console.log("   Numerator:   "+lvrNumerator);
-            console.log("   Denominator: "+lvrDenominator);
+            await pit.addProjectToken( 
+                PRJsAddresses[i],
+                isPaused,
+                loanToValueRatioNumerator,
+                loanToValueRatioDenominator,
+                liquidationTresholdFactorNumerator,
+                liquidationTresholdFactorDenominator,
+                liquidationIncentiveNumerator,
+                liquidationIncentiveDenominator,
+            ).then(function(){
+                console.log("Added prj token: "+PRJsAddresses[i]+" with:");
+                console.log("LoanToValueRatio: ")
+                console.log("   Numerator:   "+loanToValueRatioNumerator);
+                console.log("   Denominator: "+loanToValueRatioDenominator);
+                console.log("LiquidationTresholdFactor: ")
+                console.log("   Numerator:   "+liquidationTresholdFactorNumerator);
+                console.log("   Denominator: "+liquidationTresholdFactorDenominator);
+                console.log("LiquidationIncentive: ");
+                console.log("   Numerator:   "+liquidationIncentiveNumerator);
+                console.log("   Denominator: "+liquidationIncentiveDenominator);
+            });
+            
         }
 
-        await pit.addLendingToken(basicTokenAddress, busdcAddress)
+        await pit.addLendingToken(basicTokenAddress, busdcAddress, isPaused)
         .then(function(){
             console.log("Added lending token: "+basicTokenAddress);
         });
 
-        await bondtroller.setPrimaryIndexTokenAddress(pitAddress).then(function(){
+
+        for(var i = 0; i < PRJsAddresses.length; i++){
+            await pit.setBorrowLimit(PRJsAddresses[i], basicTokenAddress, borrowLimit)
+            .then(function(){
+                console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
+            });
+        }
+
+        await bondtroller.setPrimaryIndexTokenAddress(pitAddress)
+        .then(function(){
             console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ pitAddress);
         });
 
-        await busdc.setPrimaryIndexToken(pitAddress).then(function(){
+        await busdc.setPrimaryIndexToken(pitAddress)
+        .then(function(){
             console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + pitAddress);
         });
 
-        // for(var i = 0; i < PRJsAddresses.length; i++){
-        //     await busdc.setBorrowLimit(PRJsAddresses[i], borrowLimit)
-        //     .then(function(){
-        //         console.log("BUSDC set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
-        //     });
-        // }
-        return {
+        let addresses = {
             bondtrollerAddress: bondtrollerAddress,
             busdcAddress: busdcAddress,
             pitAddress: pitAddress,
         }
-        
+        console.log(addresses);
+        return addresses;
     }
-
-
 };

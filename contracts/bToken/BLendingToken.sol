@@ -164,9 +164,9 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
          */
 
         Exp memory simpleInterestFactor;
-        uint interestAccumulated;
-        uint totalBorrowsNew;
-        uint totalReservesNew;
+        // uint interestAccumulated;
+        // uint totalBorrowsNew;
+        // uint totalReservesNew;
         uint borrowIndexNew;
 
         (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), blockDelta);
@@ -174,20 +174,20 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
             return 0;
         }
 
-        (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
-        if (mathErr != MathError.NO_ERROR) {
-            return 0;
-        }
+        // (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
+        // if (mathErr != MathError.NO_ERROR) {
+        //     return 0;
+        // }
 
-        (mathErr, totalBorrowsNew) = addUInt(interestAccumulated, borrowsPrior);
-        if (mathErr != MathError.NO_ERROR) {
-            return 0;
-        }
+        // (mathErr, totalBorrowsNew) = addUInt(interestAccumulated, borrowsPrior);
+        // if (mathErr != MathError.NO_ERROR) {
+        //     return 0;
+        // }
 
-        (mathErr, totalReservesNew) = mulScalarTruncateAddUInt(Exp({mantissa: reserveFactorMantissa}), interestAccumulated, reservesPrior);
-        if (mathErr != MathError.NO_ERROR) {
-            return 0;
-        }
+        // (mathErr, totalReservesNew) = mulScalarTruncateAddUInt(Exp({mantissa: reserveFactorMantissa}), interestAccumulated, reservesPrior);
+        // if (mathErr != MathError.NO_ERROR) {
+        //     return 0;
+        // }
 
         (mathErr, borrowIndexNew) = mulScalarTruncateAddUInt(simpleInterestFactor, borrowIndexPrior, borrowIndexPrior);
         if (mathErr != MathError.NO_ERROR) {
