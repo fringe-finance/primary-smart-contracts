@@ -37,7 +37,7 @@ module.exports = {
         let priceProviderAggregator;
 
         //contracts addresses
-        let proxyAdminAddress;
+        let primaryLendingPlatformProxyAdminAddress;
         let chainlinkPriceProviderAddress;
         let backendPriceProviderAddress;
         let uniswapV2PriceProviderAddress;
@@ -88,11 +88,11 @@ module.exports = {
             await primaryLendingPlatformProxyAdmin.deployed().then(function(instance){
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             });
-            proxyAdminAddress = primaryLendingPlatformProxyAdmin.address;
-            console.log("PrimaryLendingPlatformProxyAdmin deployed at: " + proxyAdminAddress);
+            primaryLendingPlatformProxyAdminAddress = primaryLendingPlatformProxyAdmin.address;
+            console.log("PrimaryLendingPlatformProxyAdmin deployed at: " + primaryLendingPlatformProxyAdminAddress);
         }else{
             console.log("PrimaryLendingPlatformProxyAdmin is deployed at: " + input_proxyAdminAddress);
-            proxyAdminAddress = input_proxyAdminAddress;
+            primaryLendingPlatformProxyAdminAddress = input_proxyAdminAddress;
         }
 
     //====================================================
@@ -109,7 +109,7 @@ module.exports = {
 
         let chainlinkPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             chainlinkPriceProviderMasterCopyAddress,
-            proxyAdminAddress,
+            primaryLendingPlatformProxyAdminAddress,
             "0x"
         );
         await chainlinkPriceProviderProxy.deployed().then(function(instance){
@@ -133,7 +133,7 @@ module.exports = {
 
         let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             backendPriceProviderMasterCopyAddress,
-            proxyAdminAddress,
+            primaryLendingPlatformProxyAdminAddress,
             "0x"
         );
         await backendPriceProviderProxy.deployed().then(function(instance){
@@ -158,7 +158,7 @@ module.exports = {
 
         let usbPriceOracleProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             usbPriceOracleMasterCopyAddress,
-            proxyAdminAddress,
+            primaryLendingPlatformProxyAdminAddress,
             "0x"
         );
         await usbPriceOracleProxy.deployed().then(function(instance){
@@ -197,19 +197,19 @@ module.exports = {
         await chainlinkPriceProvider.setTokenAndAggregator(LINK, chainlinkAggregatorV3_LINKmainnet)
         .then(function(instance){
             console.log("\nTransaction hash: " + instance.hash);
-            console.log("ChainlinkPriceProvider set token "+ LINK +" and aggregator " + chainlinkAggregatorV3_LINKmainnet);
+            console.log("ChainlinkPriceProvider set token "+ LINK +" and price provider " + chainlinkAggregatorV3_LINKmainnet);
         });
 
         await chainlinkPriceProvider.setTokenAndAggregator(REN, chainlinkAggregatorV3_RENmainnet)
         .then(function(instance){
             console.log("\nTransaction hash: " + instance.hash);
-            console.log("ChainlinkPriceProvider set token "+ REN +" and aggregator " + chainlinkAggregatorV3_RENmainnet);
+            console.log("ChainlinkPriceProvider set token "+ REN +" and price provider  " + chainlinkAggregatorV3_RENmainnet);
         });
 
         await chainlinkPriceProvider.setTokenAndAggregator(MATIC, chainlinkAggregatorV3_MATICmainnet)
         .then(function(instance){
             console.log("\nTransaction hash: " + instance.hash);
-            console.log("ChainlinkPriceProvider set token "+ MATIC +" and aggregator " + chainlinkAggregatorV3_MATICmainnet);
+            console.log("ChainlinkPriceProvider set token "+ MATIC +" and price provider  " + chainlinkAggregatorV3_MATICmainnet);
         });
 
         //==============================
@@ -411,12 +411,16 @@ module.exports = {
             console.log("PriceProviderAggregator set token "+ DFYN + " with priceOracle " + backendPriceProviderAddress);
         });
 
-        return {
-            proxyAdminAddress : proxyAdminAddress,
+        let addresses = {
+            primaryLendingPlatformProxyAdminAddress : primaryLendingPlatformProxyAdminAddress,
             chainlinkPriceProviderAddress : chainlinkPriceProviderAddress,
             backendPriceProviderAddress : backendPriceProviderAddress,
             priceProviderAggregatorAddress : priceProviderAggregatorAddress,
         }
+        
+        console.log(addresses);
+
+        return addresses;
     }
 
 
