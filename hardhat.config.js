@@ -36,19 +36,25 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
+        url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
       },
       allowUnlimitedContractSize: false,
       timeout: 99999999,
-      blockGasLimit: 100000000,
-      gas: 100000000,
+      blockGasLimit: 100_000_000,
+      gas: 100_000_000,
+      gasMultiplier: 1,
+      gasPrice: 50_000_000_000, // 50 gwei
       accounts: {mnemonic: MNEMONIC}
     },
     
     mainnet :{
       url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
-      gas: 1_000_000,
-      gasPrice: 90000000000,
+      allowUnlimitedContractSize:false,
+      timeout: 99999999,
+      blockGasLimit: 100_000_000,
+      gas: 100_000_000,
+      gasMultiplier: 1,
+      gasPrice: 90_000_000_000, // 90 gwei
       accounts: {mnemonic: MNEMONIC}
     },
     rinkeby: {
