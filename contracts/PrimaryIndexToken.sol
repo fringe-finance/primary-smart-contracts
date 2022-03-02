@@ -405,7 +405,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 repayed = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
         uint256 priceForOneProjectToken = getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals);
         uint256 projectTokenEvaluation = repayed * (10 ** projectTokenDecimals) / priceForOneProjectToken;
-        uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationThresholdFactor.numerator / info.liquidationThresholdFactor.denominator;
+        uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationIncentive.numerator / info.liquidationIncentive.denominator;
         
         depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
         totalDepositedProjectToken[projectToken] -= projectTokenToSendToLiquidator;
