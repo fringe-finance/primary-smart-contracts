@@ -85,7 +85,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     event Borrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
-    event RepayBorrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepayed);
+    event RepayBorrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepaid);
 
     event Liquidate(address indexed liquidator, address indexed borrower, address lendingToken, address indexed prjAddress, uint256 amountPrjLiquidated);
 
@@ -349,7 +349,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         updateInterestInBorrowPosition(borrower, projectToken, lendingToken);
         uint256 amountRepayed;
-        bool isPositionFullyRepayed;
+        bool isPositionFullyRepaid;
         uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
@@ -357,7 +357,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
-                isPositionFullyRepayed = true;
+                isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
                 (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower,  lendingTokenAmountToRepay);
@@ -369,7 +369,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
-                isPositionFullyRepayed = false;
+                isPositionFullyRepaid = false;
             }
         } else {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
@@ -377,7 +377,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
-                isPositionFullyRepayed = true;
+                isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
                 (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, lendingTokenAmountToRepay);
@@ -389,11 +389,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
-                isPositionFullyRepayed = false;
+                isPositionFullyRepaid = false;
             }
         }
 
-        emit RepayBorrow(repayer, lendingToken, amountRepayed, projectToken, isPositionFullyRepayed);
+        emit RepayBorrow(repayer, lendingToken, amountRepayed, projectToken, isPositionFullyRepaid);
         return amountRepayed;
     }
 
