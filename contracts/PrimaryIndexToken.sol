@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
 
 import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "./openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -270,6 +270,22 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         require(!projectTokenInfo[projectToken].isPaused, "PIT: projectToken is paused");
         require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
         DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
+        if (projectTokenAmount == type(uint256).max) {
+            if (borrowPosition[msg.sender][projectToken][lendingToken].loanBody > 0) {
+                updateInterestInBorrowPosition(msg.sender, projectToken, lendingToken);
+                uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
+                Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
+                uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
+                uint256 collateralProjectTokenAmount = totalOutstanding(msg.sender, projectToken, lendingToken) * lvr.denominator * (10 ** projectTokenDecimals) / getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
+                if (depositedProjectTokenAmount >= collateralProjectTokenAmount){
+                    projectTokenAmount = depositedProjectTokenAmount - collateralProjectTokenAmount;
+                } else {
+                    revert("Position under liquidation");
+                }
+            } else {
+                projectTokenAmount = _depositPosition.depositedProjectTokenAmount;
+            }
+        }
         require(projectTokenAmount <= _depositPosition.depositedProjectTokenAmount, "PIT: try to withdraw more than available");
         _depositPosition.depositedProjectTokenAmount -= projectTokenAmount;
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(msg.sender, projectToken, lendingToken);
@@ -314,6 +330,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {        
         updateInterestInBorrowPosition(msg.sender, projectToken, lendingToken);
+        if (lendingTokenAmount == type(uint256).max) {
+            lendingTokenAmount = pitRemaining(msg.sender, projectToken, lendingToken);
+        }
         require(lendingTokenAmount <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
         require(totalBorrow[projectToken][lendingToken] + lendingTokenAmount <= borrowLimit[projectToken][lendingToken], "PIT: totalBorrow exceeded borrowLimit");
         BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
