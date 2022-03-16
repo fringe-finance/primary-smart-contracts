@@ -58,11 +58,11 @@ contract UniswapV2PriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grandModerator(address newModerator) public /**onlyAdmin*/ {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
-    function revokeModerator(address moderator) public onlyAdmin {
+    function revokeModerator(address moderator) public /**onlyAdmin*/ {
         revokeRole(MODERATOR_ROLE,moderator);
     }
 

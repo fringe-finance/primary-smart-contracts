@@ -71,7 +71,8 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
             emit Upgrade(address(proxy), block.timestamp, _upgrade.oldImplementation, implementation);
             delete upgradeData[address(proxy)];
         } else {
-            revert("PrimaryLendingPlatformProxyAdmin: difference in stored newImplementation and given implementation");
+            // proxy contract dont upgrade the implementation
+            delete upgradeData[address(proxy)];
         }
     }
 

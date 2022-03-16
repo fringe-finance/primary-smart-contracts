@@ -25,16 +25,17 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         uint8 decimals_,
         address admin_
     ) public initializer{
-        
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(MODERATOR_ROLE, admin);
         admin = payable(msg.sender);
         super.initialize(underlying_, bondtroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
         admin = payable(admin_);
-        __AccessControl_init();
-        _setupRole(MODERATOR_ROLE, admin);
+       
     }
     
     modifier onlyAdmin(){
-        require(msg.sender == admin,"msg.sender not admin!");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender),"msg.sender not admin!");
         _;
     }
 

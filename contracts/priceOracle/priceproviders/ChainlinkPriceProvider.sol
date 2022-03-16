@@ -52,12 +52,12 @@ contract ChainlinkPriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grandModerator(address newModerator) public /**onlyAdmin*/ {
         grantRole(MODERATOR_ROLE, newModerator);
         emit GrandModeratorRole(msg.sender, newModerator);
     }
 
-    function revokeModerator(address moderator) public onlyAdmin {
+    function revokeModerator(address moderator) public /**onlyAdmin*/ {
         revokeRole(MODERATOR_ROLE,moderator);
         emit RevokeModeratorRole(msg.sender, moderator);
     }

@@ -52,12 +52,12 @@ contract BackendPriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandTrustedBackendRole(address newTrustedBackend) public onlyAdmin {
+    function grandTrustedBackendRole(address newTrustedBackend) public /**onlyAdmin*/ {
         grantRole(TRUSTED_BACKEND_ROLE, newTrustedBackend);
         emit GrandTrustedBackendRole(msg.sender, newTrustedBackend);
     }
 
-    function revokeTrustedBackendRole(address trustedBackend) public onlyAdmin {
+    function revokeTrustedBackendRole(address trustedBackend) public /**onlyAdmin*/ {
         revokeRole(TRUSTED_BACKEND_ROLE, trustedBackend);
         emit RevokeTrustedBackendRole(msg.sender, trustedBackend);
     }
