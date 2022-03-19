@@ -37,7 +37,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
     mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token []
-    mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borowing; [borrowLimit]=$
+    mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
 
     struct Ratio {
         uint8 numerator;
@@ -76,9 +76,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     event LiquidationIncentiveSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
-    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiar);
+    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
 
-    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiar);
+    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     event Supply(address indexed who, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
 
@@ -127,8 +127,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         address _projectToken,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
-        uint8 _liquidationTresholdFactorNumerator,
-        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationThresholdFactorNumerator,
+        uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) public onlyAdmin {
@@ -143,8 +143,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             _projectToken, 
             _loanToValueRatioNumerator, 
             _loanToValueRatioDenominator, 
-            _liquidationTresholdFactorNumerator, 
-            _liquidationTresholdFactorDenominator, 
+            _liquidationThresholdFactorNumerator,
+            _liquidationThresholdFactorDenominator,
             _liquidationIncentiveNumerator, 
             _liquidationIncentiveDenominator
         );
@@ -224,22 +224,22 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         address _projectToken,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
-        uint8 _liquidationTresholdFactorNumerator,
-        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationThresholdFactorNumerator,
+        uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) public onlyModerator isProjectTokenListed(_projectToken) {
         require(_loanToValueRatioNumerator <= _loanToValueRatioDenominator, "invalid loanToValueRatio");
-        require(_liquidationTresholdFactorNumerator >= _liquidationTresholdFactorDenominator, "invalid liquidationTresholdFactor");
+        require(_liquidationThresholdFactorNumerator >= _liquidationThresholdFactorDenominator, "invalid liquidationTresholdFactor");
         require(_liquidationIncentiveNumerator >= _liquidationIncentiveDenominator, "invalid liquidationIncentive");
         
         ProjectTokenInfo storage info = projectTokenInfo[_projectToken];
         info.loanToValueRatio = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
-        info.liquidationThresholdFactor = Ratio(_liquidationTresholdFactorNumerator, _liquidationTresholdFactorDenominator);
+        info.liquidationThresholdFactor = Ratio(_liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         info.liquidationIncentive = Ratio(_liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     
         emit LoanToValueRatioSet(_projectToken, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
-        emit LiquidationThresholdFactorSet(_projectToken, _liquidationTresholdFactorNumerator, _liquidationTresholdFactorDenominator);
+        emit LiquidationThresholdFactorSet(_projectToken, _liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         emit LiquidationIncentiveSet(_projectToken, _liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     }
 
@@ -374,7 +374,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         return repayInternal(msg.sender, msg.sender, projectToken, lendingToken, lendingTokenAmount);
     }
 
-    function repayInternal(address repayer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount) internal returns (uint256) {
+    function repayInternal(address repairer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount) internal returns (uint256) {
         uint256 borrowPositionsAmount = 0;
         for(uint256 i = 0; i < projectTokens.length; i++) { 
             if (borrowPosition[borrower][projectTokens[i]][lendingToken].loanBody > 0) {
@@ -387,19 +387,19 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         updateInterestInBorrowPosition(borrower, projectToken, lendingToken);
-        uint256 amountRepayed;
+        uint256 amountRepaid;
         bool isPositionFullyRepaid;
         uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
-                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, type(uint256).max);
+                (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, type(uint256).max);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower,  lendingTokenAmountToRepay);
+                (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower,  lendingTokenAmountToRepay);
                 if (lendingTokenAmountToRepay > _borrowPosition.accrual) {
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -412,14 +412,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             }
         } else {
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
-                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, _totalOutstanding);
+                (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, _totalOutstanding);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                (, amountRepayed) = info.bLendingToken.repayTo(repayer, borrower, lendingTokenAmountToRepay);
+                (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, lendingTokenAmountToRepay);
                 if(lendingTokenAmountToRepay > _borrowPosition.accrual){
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -432,8 +432,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             }
         }
 
-        emit RepayBorrow(repayer, lendingToken, amountRepayed, projectToken, isPositionFullyRepaid);
-        return amountRepayed;
+        emit RepayBorrow(repairer, lendingToken, amountRepaid, projectToken, isPositionFullyRepaid);
+        return amountRepaid;
     }
 
     function liquidate(address account, address projectToken, address lendingToken) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
@@ -446,9 +446,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         ProjectTokenInfo memory info = projectTokenInfo[projectToken];
         uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
-        uint256 repayed = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
+        uint256 repaid = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
         uint256 priceForOneProjectToken = getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals);
-        uint256 projectTokenEvaluation = repayed * (10 ** projectTokenDecimals) / priceForOneProjectToken;
+        uint256 projectTokenEvaluation = repaid * (10 ** projectTokenDecimals) / priceForOneProjectToken;
         uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationIncentive.numerator / info.liquidationIncentive.denominator;
         
         depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;

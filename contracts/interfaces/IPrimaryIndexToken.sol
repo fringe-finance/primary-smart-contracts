@@ -60,9 +60,9 @@ interface IPrimaryIndexToken {
 
     event LiquidationThresholdFactorSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
-    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiar);
+    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
 
-    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiar);
+    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     event Supply(address indexed who, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
 
@@ -85,8 +85,8 @@ interface IPrimaryIndexToken {
         bool _isPaused,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
-        uint8 _liquidationTresholdFactorNumerator,
-        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationThresholdFactorNumerator,
+        uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) external;
@@ -130,8 +130,8 @@ interface IPrimaryIndexToken {
         bool _isPaused,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
-        uint8 _liquidationTresholdFactorNumerator,
-        uint8 _liquidationTresholdFactorDenominator,
+        uint8 _liquidationThresholdFactorNumerator,
+        uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) external;
