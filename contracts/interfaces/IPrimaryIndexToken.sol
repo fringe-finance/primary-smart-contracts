@@ -186,4 +186,7 @@ interface IPrimaryIndexToken {
     function getPosition(address account, address projectToken, address lendingToken) external view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, uint256 healthFactorNumerator, uint256 healthFactorDenominator);
 
     function decimals() external view returns (uint8);
+
+    // ERC20Upgradeable methods
+    function symbol() external view returns (string);
 }
