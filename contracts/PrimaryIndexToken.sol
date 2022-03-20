@@ -76,9 +76,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     event LiquidationIncentiveSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
-    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
+    event Deposit(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjDepositAmount, address indexed beneficiary);
 
-    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiary);
+    event Withdraw(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     event Supply(address indexed who, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
 
@@ -278,7 +278,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         ERC20Upgradeable(projectToken).safeTransferFrom(msg.sender, address(this), projectTokenAmount);
         _depositPosition.depositedProjectTokenAmount += projectTokenAmount;
         totalDepositedProjectToken[projectToken] += projectTokenAmount;
-        emit Deposit(msg.sender,  projectToken, projectTokenAmount, msg.sender);
+        emit Deposit(msg.sender,  projectToken, lendingToken, projectTokenAmount, msg.sender);
     }
 
     function withdraw(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant {
@@ -314,7 +314,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         totalDepositedProjectToken[projectToken] -= projectTokenAmount;
         ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenAmount);
-        emit Withdraw(msg.sender, projectToken, projectTokenAmount, msg.sender);
+        emit Withdraw(msg.sender, projectToken, lendingToken, projectTokenAmount, msg.sender);
     }
 
     function supply(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {

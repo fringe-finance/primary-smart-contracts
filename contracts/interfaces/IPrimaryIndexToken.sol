@@ -60,9 +60,9 @@ interface IPrimaryIndexToken {
 
     event LiquidationThresholdFactorSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
-    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
+    event Deposit(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjDepositAmount, address indexed beneficiary);
 
-    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiary);
+    event Withdraw(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     event Supply(address indexed who, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
 
