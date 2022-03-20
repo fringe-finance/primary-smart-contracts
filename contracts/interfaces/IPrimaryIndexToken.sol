@@ -60,9 +60,9 @@ interface IPrimaryIndexToken {
 
     event LiquidationThresholdFactorSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
-    event Deposit(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjDepositAmount, address indexed beneficiary);
+    event Deposit(address indexed who, address indexed tokenPrj, address lendingToken, uint256 prjDepositAmount, address indexed beneficiary);
 
-    event Withdraw(address indexed who, address indexed tokenPrj, address indexed lendingToken, uint256 prjWithdrawAmount, address indexed beneficiary);
+    event Withdraw(address indexed who, address indexed tokenPrj, address lendingToken, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     event Supply(address indexed who, address indexed supplyToken, uint256 supplyAmount, address indexed supplyBToken, uint256 amountSupplyBTokenReceived);
 
@@ -186,7 +186,4 @@ interface IPrimaryIndexToken {
     function getPosition(address account, address projectToken, address lendingToken) external view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, uint256 healthFactorNumerator, uint256 healthFactorDenominator);
 
     function decimals() external view returns (uint8);
-
-    // ERC20Upgradeable methods
-    function symbol() external view returns (string);
 }
