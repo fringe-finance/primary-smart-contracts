@@ -26,8 +26,8 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         address admin_
     ) public initializer{
         __AccessControl_init();
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _setupRole(MODERATOR_ROLE, admin);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin_);
+        _setupRole(MODERATOR_ROLE, admin_);
         admin = payable(msg.sender);
         super.initialize(underlying_, bondtroller_, interestRateModel_, initialExchangeRateMantissa_, name_, symbol_, decimals_);
         admin = payable(admin_);
