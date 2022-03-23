@@ -33,7 +33,8 @@ interface IPrimaryIndexToken {
 
     struct ProjectTokenInfo {
         bool isListed;
-        bool isPaused;
+        bool isDepositPaused; // true - paused, false - not paused
+        bool isWithdrawPaused; // true - paused, false - not paused
         Ratio loanToValueRatio;
         Ratio liquidationThresholdFactor;
         Ratio liquidationIncentive;
@@ -82,14 +83,13 @@ interface IPrimaryIndexToken {
 
     function addProjectToken(
         address _projectToken,
-        bool _isPaused,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
         uint8 _liquidationTresholdFactorNumerator,
         uint8 _liquidationTresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
-    ) external;
+    )  external;
 
     function removeProjectToken(
         uint256 _projectTokenId
@@ -125,9 +125,8 @@ interface IPrimaryIndexToken {
         uint256 _borrowLimit
     ) external;
 
-     function setProjectTokenInfo(
+    function setProjectTokenInfo(
         address _projectToken,
-        bool _isPaused,
         uint8 _loanToValueRatioNumerator,
         uint8 _loanToValueRatioDenominator,
         uint8 _liquidationTresholdFactorNumerator,
@@ -136,7 +135,11 @@ interface IPrimaryIndexToken {
         uint8 _liquidationIncentiveDenominator
     ) external;
 
-    function setPausedProjectToken(address _projectToken, bool _isPaused) external;
+     function setPausedProjectToken(
+        address _projectToken, 
+        bool _isDepositPaused, 
+        bool _isWithdrawPaused
+    ) external;
 
     function setLendingTokenInfo(
         address _lendingToken, 
