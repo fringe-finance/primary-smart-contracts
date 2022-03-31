@@ -23,8 +23,8 @@ contract BackendPriceProvider is PriceProvider,
     mapping(address => BackendMetadata) public backendMetadata;
 
     struct BackendMetadata {
-        bool isActive;
-        uint8 tokenDecimals;
+        bool isListed; // true - listed, false - not listed
+        bool isActive; // true - active, false - not active
     }
 
     event GrandTrustedBackendRole(address indexed who, address indexed newTrustedBackend);
@@ -52,12 +52,12 @@ contract BackendPriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandTrustedBackendRole(address newTrustedBackend) public /**onlyAdmin*/ {
+    function grandTrustedBackendRole(address newTrustedBackend) public onlyAdmin {
         grantRole(TRUSTED_BACKEND_ROLE, newTrustedBackend);
         emit GrandTrustedBackendRole(msg.sender, newTrustedBackend);
     }
 
-    function revokeTrustedBackendRole(address trustedBackend) public /**onlyAdmin*/ {
+    function revokeTrustedBackendRole(address trustedBackend) public onlyAdmin {
         revokeRole(TRUSTED_BACKEND_ROLE, trustedBackend);
         emit RevokeTrustedBackendRole(msg.sender, trustedBackend);
     }
@@ -65,13 +65,12 @@ contract BackendPriceProvider is PriceProvider,
     /****************** TrustedBackendRole functions ****************** */
 
     function setToken(address token) public onlyTrustedBackend {
+        backendMetadata[token].isListed = true;
         backendMetadata[token].isActive = true;
-        backendMetadata[token].tokenDecimals = ERC20Upgradeable(token).decimals();
         emit SetToken(msg.sender, token);
     }
 
     function changeActive(address token, bool active) public override onlyTrustedBackend {
-        require(backendMetadata[token].tokenDecimals > 0, "BackendPriceProvider: token is not listed");
         backendMetadata[token].isActive = active;
         emit ChangeActive(msg.sender, token, active);
     }
@@ -83,11 +82,10 @@ contract BackendPriceProvider is PriceProvider,
      * @dev returns the keccak256 of concatenated input data
      * @param token the address of asset
      * @param priceMantissa the price of asset that include decimals
-     * @param priceDecimals the decimals of price
      * @param validTo the unix timestamp in seconds that define the validity of given price to `validTo` timestamp
      */
-    function getMessageHash(address token, uint256 priceMantissa, uint8 priceDecimals, uint256 validTo) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(token, priceMantissa, priceDecimals, validTo));
+    function getMessageHash(address token, uint256 priceMantissa, uint256 validTo) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(token, priceMantissa, validTo));
     }
 
     /**
@@ -132,14 +130,13 @@ contract BackendPriceProvider is PriceProvider,
      * @dev returns true if the message is signed by trusted backend. Else returns false.
      * @param token the address of asset
      * @param priceMantissa the price of asset that include decimals
-     * @param priceDecimals the decimals of price
      * @param validTo the unix timestamp in seconds that define the validity of given price to `validTo` timestamp
      * @param signature the sign of message.
      */
-    function verify(address token, uint256 priceMantissa, uint8 priceDecimals, uint256 validTo, bytes memory signature) public view returns(bool){
+    function verify(address token, uint256 priceMantissa, uint256 validTo, bytes memory signature) public view returns (bool) {
         require(block.timestamp <= validTo, "BackendPriceProvider: expired price!");
         
-        bytes32 messageHash = getMessageHash(token, priceMantissa, priceDecimals, validTo);
+        bytes32 messageHash = getMessageHash(token, priceMantissa, validTo);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
         address messageSigner = recoverSigner(ethSignedMessageHash, signature);
@@ -177,11 +174,7 @@ contract BackendPriceProvider is PriceProvider,
     /****************** View functions ****************** */
 
     function isListed(address token) public override view returns(bool){
-        if(backendMetadata[token].tokenDecimals > 0){
-            return true;
-        }else{
-            return false;
-        }
+        return backendMetadata[token].isListed;
     }
 
     function isActive(address token) public override view returns(bool){
@@ -197,26 +190,38 @@ contract BackendPriceProvider is PriceProvider,
         revert("Use getPriceSigned(...)");
     }
 
-    function getPriceSigned(address token, uint256 priceMantissa, uint8 priceDecimals, uint256 validTo, bytes memory signature) public override view returns(uint256 _priceMantissa, uint8 _priceDecimals){
+    function getPriceSigned(address token, uint256 priceMantissa, uint256 validTo, bytes memory signature) public override view returns(uint256 _priceMantissa, uint8 priceDecimals){
         require(isActive(token),"BackendPriceProvider: token is not active!");
-        require(verify(token, priceMantissa, priceDecimals, validTo, signature),"BackendPriceProvider: signer is not moderator");
-        return (priceMantissa, priceDecimals);
+        require(verify(token, priceMantissa, validTo, signature),"BackendPriceProvider: signer is not moderator");
+        return (priceMantissa, getPriceDecimals());
     }
 
     function getEvaluation(address token, uint256 tokenAmount) public override pure returns(uint256 evaluation) {
         token; tokenAmount; evaluation;
         revert("Use getEvaluationSigned(...)");
     }
-
-    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint8 priceDecimals, uint256 validTo, bytes memory signature) public override view returns(uint256 evaluation){
+    
+    /**
+     * @dev return the evaluation in $ of `tokenAmount` with signed price
+     * @param token the address of token to get evaluation in $
+     * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals
+     * @param priceMantissa the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token
+     * @param validTo the timestamp in seconds, when price is gonna be not valid.
+     * @param signature the ECDSA sign on eliptic curve secp256k1.        
+     */
+    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint256 validTo, bytes memory signature) public override view returns(uint256 evaluation){
         require(isActive(token),"BackendPriceProvider: token is not active!");
-        require(verify(token, priceMantissa, priceDecimals, validTo, signature),"BackendPriceProvider: signer is not moderator");
-        evaluation = tokenAmount * priceMantissa / (10 ** priceDecimals);
-        uint8 tokenDecimals = backendMetadata[token].tokenDecimals;
-        if(tokenDecimals >= usdDecimals){
+        require(verify(token, priceMantissa, validTo, signature), "BackendPriceProvider: signer is not moderator");
+        evaluation = tokenAmount * priceMantissa / (10 ** getPriceDecimals());
+        uint8 tokenDecimals = ERC20Upgradeable(token).decimals();
+        if (tokenDecimals >= usdDecimals) {
             evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        }else{
+        } else {
             evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals)); 
         }
+    }
+
+    function getPriceDecimals() public view override returns (uint8) {
+        return usdDecimals;
     }
 }

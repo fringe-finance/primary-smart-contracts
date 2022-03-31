@@ -76,7 +76,7 @@ fn main() {
     println!("message {:?}", message);
     println!("message hex: {:?}",hex::encode(&message));
     
-    let private_key = "1dd9ab7163ccf43b3f2d7cf76d932f11d59aec016da760a4b6a6247a522ad049";
+    let private_key = "";
     let private_key_vector = hex::decode(private_key).unwrap();
     println!("private_key_vector: {:?}",private_key_vector);
     let secret_key = SecretKey::from_slice(&private_key_vector).expect("Should correct private key");

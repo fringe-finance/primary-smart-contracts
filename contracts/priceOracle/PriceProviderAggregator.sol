@@ -45,12 +45,12 @@ contract PriceProviderAggregator is Initializable,
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public /**onlyAdmin*/ {
+    function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
         emit GrandModeratorRole(msg.sender, newModerator);
     }
 
-    function revokeModerator(address moderator) public /**onlyAdmin*/ {
+    function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
         emit RevokeModeratorRole(msg.sender, moderator);
     }    
@@ -59,9 +59,16 @@ contract PriceProviderAggregator is Initializable,
 
     /****************** Moderator functions ****************** */
 
+    /**
+     * @dev sets price provider to `token`
+     * @param token the address of token
+     * @param priceProvider the address of price provider. Should implememnt the interface of `PriceProvider`
+     * @param hasFunctionWithSign true - if price provider has function with signatures
+     *                            false - if price provider does not have function with signatures
+     */
     function setTokenAndPriceProvider(address token, address priceProvider, bool hasFunctionWithSign) public onlyModerator {
-        require(token != address(0), "USBPriceOracle: invalid token!");
-        require(priceProvider != address(0), "USBPriceOracle: invalid priceProvider!");
+        require(token != address(0), "USBPriceOracle: invalid token");
+        require(priceProvider != address(0), "USBPriceOracle: invalid priceProvider");
         PriceProviderInfo storage priceProviderInfo = tokenPriceProvider[token];
         priceProviderInfo.priceProvider = priceProvider;
         priceProviderInfo.hasSignedFunction = hasFunctionWithSign;
@@ -88,20 +95,19 @@ contract PriceProviderAggregator is Initializable,
     }
 
     /**
-     * @dev returns the price of token multiplied by 10 ** priceDecimals given by price provider.
+     * @dev returns the tupple (priceMantissa, priceDecimals) of token multiplied by 10 ** priceDecimals given by price provider.
      * price can be calculated as  priceMantissa / (10 ** priceDecimals)
      * i.e. price = priceMantissa / (10 ** priceDecimals)
      * @param token the address of token
-     * @param _priceMantissa - the price of token (used in verifying the signature)
-     * @param _priceDecimals - the price decimals (used in verifying the signature)
+     * @param priceMantissa - the price of token (used in verifying the signature)
      * @param validTo - the timestamp in seconds (used in verifying the signature)
      * @param signature - the backend signature of secp256k1. length is 65 bytes
      */
-    function getPriceSigned(address token, uint256 _priceMantissa, uint8 _priceDecimals, uint256 validTo, bytes memory signature) public view returns(uint256 priceMantissa, uint8 priceDecimals){
+    function getPriceSigned(address token, uint256 priceMantissa, uint256 validTo, bytes memory signature) public view returns(uint256 priceMantissa_, uint8 priceDecimals){
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        if(priceProviderInfo.hasSignedFunction){
-            return PriceProvider(priceProviderInfo.priceProvider).getPriceSigned(token, _priceMantissa, _priceDecimals, validTo, signature);
-        }else{
+        if (priceProviderInfo.hasSignedFunction) {
+            return PriceProvider(priceProviderInfo.priceProvider).getPriceSigned(token, priceMantissa, validTo, signature);
+        } else {
             return PriceProvider(priceProviderInfo.priceProvider).getPrice(token);
         }
     }
@@ -122,15 +128,14 @@ contract PriceProviderAggregator is Initializable,
      * @param token the address of token
      * @param tokenAmount the amount of token including decimals
      * @param priceMantissa - the price of token (used in verifying the signature)
-     * @param priceDecimals - the price decimals (used in verifying the signature)
      * @param validTo - the timestamp in seconds (used in verifying the signature)
      * @param signature - the backend signature of secp256k1. length is 65 bytes
      */
-    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint8 priceDecimals, uint256 validTo, bytes memory signature) public view returns(uint256 evaluation){
+    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint256 validTo, bytes memory signature) public view returns(uint256 evaluation){
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        if(priceProviderInfo.hasSignedFunction){
-            return PriceProvider(priceProviderInfo.priceProvider).getEvaluationSigned(token, tokenAmount, priceMantissa, priceDecimals, validTo, signature);
-        }else{
+        if (priceProviderInfo.hasSignedFunction) {
+            return PriceProvider(priceProviderInfo.priceProvider).getEvaluationSigned(token, tokenAmount, priceMantissa, validTo, signature);
+        } else {
             return PriceProvider(priceProviderInfo.priceProvider).getEvaluation(token, tokenAmount);
         }
     }

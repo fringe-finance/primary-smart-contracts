@@ -58,11 +58,11 @@ contract UniswapV2PriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public /**onlyAdmin*/ {
+    function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
-    function revokeModerator(address moderator) public /**onlyAdmin*/ {
+    function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE,moderator);
     }
 
@@ -132,4 +132,7 @@ contract UniswapV2PriceProvider is PriceProvider,
         (reserveA, reserveB) = (tokenA == token0) ? (reserve0, reserve1) : (reserve1, reserve0);    //form the correct order of reserves
     } 
 
+    function getPriceDecimals() public override view returns (uint8) {
+        return usdDecimals;
+    }
 }

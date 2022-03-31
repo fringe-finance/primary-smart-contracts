@@ -7,10 +7,10 @@ import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-contract ChainlinkPriceProvider is PriceProvider,
-                                   Initializable,
-                                   AccessControlUpgradeable
-{
+/**
+ * Chainlink price provider
+ */
+contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
@@ -22,14 +22,12 @@ contract ChainlinkPriceProvider is PriceProvider,
 
     struct ChainlinkMetadata{
         bool isActive;
-        address aggregatorV3; // address of aggregator
-        uint8 priceDecimals;  // the decimals of chainlink price
-        uint8 tokenDecimals; // the project token decimals
+        address[] aggregatorPath;
     }
 
     event GrandModeratorRole(address indexed who, address indexed newModerator);
     event RevokeModeratorRole(address indexed who, address indexed moderator);
-    event SetTokenAndAggregator(address indexed who, address indexed token, address indexed aggeregator);
+    event SetTokenAndAggregator(address indexed who, address indexed token, address[] aggeregatorPath);
     event ChangeActive(address indexed who, address indexed token, bool active);
 
 
@@ -52,29 +50,28 @@ contract ChainlinkPriceProvider is PriceProvider,
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public /**onlyAdmin*/ {
+    function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
         emit GrandModeratorRole(msg.sender, newModerator);
     }
 
-    function revokeModerator(address moderator) public /**onlyAdmin*/ {
+    function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE,moderator);
         emit RevokeModeratorRole(msg.sender, moderator);
     }
 
     /****************** Moderator functions ****************** */
 
-    function setTokenAndAggregator(address token, address aggregatorV3) public onlyModerator {
+    function setTokenAndAggregator(address token, address[] memory aggregatorPath) public onlyModerator {
         ChainlinkMetadata storage metadata = chainlinkMetadata[token];
         metadata.isActive = true;
-        metadata.aggregatorV3 = aggregatorV3;
-        metadata.priceDecimals = AggregatorV3Interface(aggregatorV3).decimals();
-        metadata.tokenDecimals = ERC20Upgradeable(token).decimals();
-        emit SetTokenAndAggregator(msg.sender, token, aggregatorV3);
+        require(aggregatorPath.length <= 5, "ChainlinkPriceProvider: too long path");
+        metadata.aggregatorPath = aggregatorPath;
+        emit SetTokenAndAggregator(msg.sender, token, aggregatorPath);
     }
 
     function changeActive(address token, bool active) public override onlyModerator {
-        require(chainlinkMetadata[token].aggregatorV3 != address(0),"ChainlinkPriceProvider: token is not listed!");
+        require(chainlinkMetadata[token].aggregatorPath[0] != address(0),"ChainlinkPriceProvider: token is not listed!");
         chainlinkMetadata[token].isActive = active;
         emit ChangeActive(msg.sender, token, active);
     }
@@ -82,7 +79,7 @@ contract ChainlinkPriceProvider is PriceProvider,
     /****************** View functions ****************** */
 
     function isListed(address token) public override view returns(bool){
-        if(chainlinkMetadata[token].aggregatorV3 != address(0)){
+        if(chainlinkMetadata[token].aggregatorPath[0] != address(0)){
             return true;
         }else{
             return false;
@@ -94,15 +91,30 @@ contract ChainlinkPriceProvider is PriceProvider,
     }
 
     /**
-     * @notice Returns the latest asset price and price decimals
+     * @notice Returns the latest asset price mantissa and price decimals
      * @notice [price] = USD/token
      * @param token the token address
+     * @dev First step is get priceMantissa with priceDecimals by this formula:
+     *      price = 1 * 10 ** tokenDecimals * (chainlinkPrice_1 / 10 ** priceDecimals_1) * ... * (chainlinkPrice_n / 10 ** priceDecimals_n) = 
+     *            = 10 ** tokenDecimals (chainlinkPrice_1 * ... * chainlinkPrice_n) / 10 ** (priceDecimals_1 + ... + priceDecimals_n)
+     *      Second step is scale priceMantissa to usdDecimals
      */
     function getPrice(address token) public override view returns (uint256 priceMantissa, uint8 priceDecimals) {
         ChainlinkMetadata memory metadata = chainlinkMetadata[token];
         require(metadata.isActive,"ChainlinkPriceProvider: token is not available!");
-        priceMantissa = AggregatorV3Interface(metadata.aggregatorV3).latestAnswer();
-        priceDecimals = metadata.priceDecimals;
+        address[] memory aggregatorPath = metadata.aggregatorPath;
+        priceMantissa = 1;
+        priceDecimals = 0;
+        for(uint8 i = 0; i < aggregatorPath.length; i++) {
+            priceMantissa *= AggregatorV3Interface(aggregatorPath[i]).latestAnswer();   // earn price
+            priceDecimals += AggregatorV3Interface(aggregatorPath[i]).decimals();       // earn price decimals
+        }
+        if (priceDecimals >= usdDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        } else {
+            priceMantissa *= 10 ** (usdDecimals - priceDecimals);
+        }
+        priceDecimals = usdDecimals;
     }
 
     /**
@@ -113,11 +125,15 @@ contract ChainlinkPriceProvider is PriceProvider,
     function getEvaluation(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
         (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
         evaluation = tokenAmount * priceMantissa / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-        uint8 tokenDecimals = chainlinkMetadata[token].tokenDecimals;
+        uint8 tokenDecimals = ERC20Upgradeable(token).decimals();
         if(tokenDecimals >= usdDecimals){
             evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
         }else{
             evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals)); 
         }
+    }
+
+    function getPriceDecimals() public view override returns (uint8) {
+        return usdDecimals;
     }
 }
