@@ -88,6 +88,22 @@ async function findBorrowRatePerBlock(wishedApy) {
     return Math.floor(supplyRateMiddle)
 }
 
+async function calculateSupplyRatePerBlock(wishedApy) {
+    const ethMantissa = 1e18;
+    const blocksPerDay = 6570; // 13.15 seconds per block
+    const daysPerYear = 365;
+
+    return Math.floor((Math.exp(Math.log(wishedApy/100 + 1.0) / daysPerYear) - 1.0) * ethMantissa / blocksPerDay)
+}
+
+async function calculateBorrowRatePerBlock(wishedApy) {
+    const ethMantissa = 1e18;
+    const blocksPerDay = 6570; // 13.15 seconds per block
+    const daysPerYear = 365;
+
+    return Math.floor((Math.exp(Math.log(wishedApy/100 + 1.0) / daysPerYear) - 1.0) * ethMantissa / blocksPerDay)
+}
+
 async function main() {
     let wishedBorrowAPY = 0.25 //[APY] = %
     let borrowRatePerBlock = await findBorrowRatePerBlock(wishedBorrowAPY)
@@ -100,6 +116,13 @@ async function main() {
     console.log("supplyRatePerBlock: " + supplyRatePerBlock)
     let supplyAPY = calculateSupplyApy(supplyRatePerBlock)
     console.log("supplyAPY: " + supplyAPY)
+
+    let borrowRatePerBlock_exact = await calculateBorrowRatePerBlock(wishedBorrowAPY)
+    console.log("borrowRatePerBlock exact: " + borrowRatePerBlock_exact)
+
+    let supplyRatePerBlock_exact = await calculateSupplyRatePerBlock(wishedSupplyAPY)
+    console.log("supplyRatePerBlock exact: " + supplyRatePerBlock_exact)
+
 }
 
 main().catch((error) => {

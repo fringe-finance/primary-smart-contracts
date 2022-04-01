@@ -27,10 +27,11 @@ module.exports = {
         let busdc;
         let pit;
 
-        let jumpRateModelV2Address;
-        let bondtrollerAddress;
-        let busdcAddress;
-        let pitAddress;
+        let jumpRateModelV2Address
+        let bondtrollerAddress
+        let busdcAddress
+        let pitAddress
+        let priceOracleAddress
 
         let {
             borrowLimit
@@ -43,12 +44,28 @@ module.exports = {
         console.log("***** PROXY ADMIN DEPLOYMENT *****");
         if(input_proxyAdminAddress == undefined){
             proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-            await proxyAdmin.deployed();
+            await proxyAdmin.deployed().then(function(instance){
+                console.log("ProxyAdmin deployed at: " + instance.address);
+            });
             proxyAdminAddress = proxyAdmin.address;
-            console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
+           
         }else{
             proxyAdminAddress = input_proxyAdminAddress;
             console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
+        }
+
+    //====================================================
+    //deploy price oracle
+
+        console.log();
+        console.log("***** PRICE ORACLE DEPLOYMENT *****");
+        if (input_priceOracleAddress == undefined) {
+            const { deploymentPriceOracle } = require('../priceOracle/deploymentPriceOracle.js')
+            let priceOracleAddresses = await deploymentPriceOracle(proxyAdminAddress)
+            priceOracleAddress = priceOracleAddresses.priceProviderAggregatorAddress
+        } else {
+            priceOracleAddress = input_priceOracleAddress;
+            console.log("PriceOracle is deployed at: " + input_priceOracleAddress);
         }
 
     //====================================================
@@ -74,9 +91,10 @@ module.exports = {
             kink,
             owner,
         );
-        await jumpRateModelV2.deployed();
+        await jumpRateModelV2.deployed().then(function(instance){
+            console.log("JumpRateModelV2 masterCopy address: " + instance.address);
+        });
         let jumpRateModelV2MasterCopyAddress = jumpRateModelV2.address;
-        console.log("JumpRateModelV2 masterCopy address: " + jumpRateModelV2MasterCopyAddress);
         jumpRateModelV2Address = jumpRateModelV2MasterCopyAddress;
 
         // let jumpRateModelV2Proxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
@@ -94,25 +112,26 @@ module.exports = {
         console.log("***** BONDTROLLER DEPLOYMENT *****");
 
         bondtroller = await Bondtroller.connect(deployMaster).deploy();
-        await bondtroller.deployed();
+        await bondtroller.deployed().then(function(instance){
+            console.log("Bondtroller masterCopy address: " + instance.address);
+        });
         let bondtrollerMasterCopyAddress = bondtroller.address;
-        console.log("Bondtroller masterCopy address: " + bondtrollerMasterCopyAddress);
-        bondtrollerAddress = bondtrollerMasterCopyAddress;
 
         let bondtrollerProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             bondtrollerMasterCopyAddress,
             proxyAdminAddress,
             "0x"
         );
-        await bondtrollerProxy.deployed();
+        await bondtrollerProxy.deployed().then(function(instance){
+            console.log("Bondtroller proxy address: " + instance.address);
+        });
         let bondtrollerProxyAddress = bondtrollerProxy.address;
-        console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
         bondtrollerAddress = bondtrollerProxyAddress;
 
         bondtroller = await Bondtroller.attach(bondtrollerAddress).connect(deployMaster);
         
-        await bondtroller.init().then(function(){
-            console.log("Bondtroller call init at " + bondtrollerAddress);
+        await bondtroller.init().then(function(instance){
+            console.log("Bondtroller call init at " + bondtroller.address);
         });
 
     //====================================================
@@ -121,19 +140,20 @@ module.exports = {
         console.log("***** BUSDC DEPLOYMENT *****");
 
         busdc = await BLendingToken.connect(deployMaster).deploy();
-        await busdc.deployed();
+        await busdc.deployed().then(function(instance){
+            console.log("BLendingToken masterCopy address: " + instance.address);
+        });
         let busdcMasterCopyAddress = busdc.address;
-        console.log("BLendingToken masterCopy address: " + busdcMasterCopyAddress);
-        busdcAddress = busdcMasterCopyAddress;
 
         let busdcProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             busdcMasterCopyAddress,
             proxyAdminAddress,
             "0x"
         );
-        await busdcProxy.deployed();
+        await busdcProxy.deployed().then(function(instance){
+            console.log("BLendingToken proxy address: " + instance.address);
+        });
         let busdcProxyAddress = busdcProxy.address;
-        console.log("BLendingToken proxy address: " + busdcProxyAddress);
         busdcAddress = busdcProxyAddress;
 
         busdc = await BLendingToken.attach(busdcAddress).connect(deployMaster);
@@ -156,7 +176,7 @@ module.exports = {
             decimals,
             admin
         ).then(function(){
-            console.log("BUSDC call init at " + busdcAddress);
+            console.log("BUSDC call init at " + busdc.address);
         });
 
         await busdc.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(){
@@ -169,26 +189,30 @@ module.exports = {
 
         //====================================================
 
+        console.log();
+        console.log("***** PRIMARY INDEX TOKEN DEPLOYMENT *****");
+
         pit = await PrimaryIndexToken.connect(deployMaster).deploy();
-        await pit.deployed();
+        await pit.deployed().then(function(instance){
+            console.log("PrimaryIndexToken masterCopy address: " + instance.address);
+        });
         let pitMasterCopyAddress = pit.address;
-        console.log("PrimaryIndexToken masterCopy address: " + pitMasterCopyAddress);
-        pitAddress = pitMasterCopyAddress;
 
         let pitProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             pitMasterCopyAddress,
             proxyAdminAddress,
             "0x"
         );
-        await pitProxy.deployed();
+        await pitProxy.deployed().then(function(instance){
+            console.log("PrimaryIndexToken proxy address: " + instance.address);
+        });
         let pitProxyAddress = pitProxy.address;
-        console.log("PrimaryIndexToken proxy address: " + pitProxyAddress);
         pitAddress = pitProxyAddress;
 
         pit = await PrimaryIndexToken.attach(pitAddress).connect(deployMaster);
 
         let isPaused = false;
-        let basicTokenAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
+        let usdcAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
         let loanToValueRatioNumerator = toBN(6);
         let loanToValueRatioDenominator = toBN(10);
         let liquidationTresholdFactorNumerator = toBN(1);
@@ -207,12 +231,11 @@ module.exports = {
 
         await pit.initialize()
         .then(function(){
-            console.log("PrimaryIndexToken call initialize at " + pitAddress)
+            console.log("PrimaryIndexToken call initialize at " + pit.address)
         });
 
-        await pit.setPriceOracle(input_priceOracleAddress)
-        .then(function(){
-            console.log("PrimaryIndexToken set priceOracle: " + input_priceOracleAddress);
+        await pit.setPriceOracle(priceOracleAddress).then(function(){
+            console.log("PrimaryIndexToken set priceOracle: " + priceOracleAddress);
         });
 
         for(var i = 0; i < PRJsAddresses.length; i++){
@@ -239,26 +262,30 @@ module.exports = {
             
         }
 
-        await pit.addLendingToken(basicTokenAddress, busdcAddress, isPaused)
-        .then(function(){
-            console.log("Added lending token: "+basicTokenAddress);
+        await pit.addLendingToken(
+            usdcAddress, 
+            busdcAddress, 
+            isPaused
+        ).then(function(){
+            console.log("Added lending token: "+usdcAddress);
         });
 
 
         for(var i = 0; i < PRJsAddresses.length; i++){
-            await pit.setBorrowLimit(PRJsAddresses[i], basicTokenAddress, borrowLimit)
-            .then(function(){
+            await pit.setBorrowLimit(
+                PRJsAddresses[i], 
+                usdcAddress, 
+                borrowLimit
+            ).then(function(){
                 console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
             });
         }
 
-        await bondtroller.setPrimaryIndexTokenAddress(pitAddress)
-        .then(function(){
+        await bondtroller.setPrimaryIndexTokenAddress(pitAddress).then(function(){
             console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ pitAddress);
         });
 
-        await busdc.setPrimaryIndexToken(pitAddress)
-        .then(function(){
+        await busdc.setPrimaryIndexToken(pitAddress).then(function(){
             console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + pitAddress);
         });
 

@@ -5,7 +5,7 @@ const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentAllToRinkeby : async function () {
+    deploymentRinkeby : async function () {
 
     //====================================================
     //declare parametrs
@@ -24,11 +24,9 @@ module.exports = {
         let ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
     
-
         //instances of contracts
         let proxyAdmin;
         
-
         //contracts addresses
         let proxyAdminAddress;
         let backendPriceProviderAddress;
@@ -52,29 +50,28 @@ module.exports = {
         console.log();
         console.log("***** PROXY ADMIN DEPLOYMENT *****");
         proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-        await proxyAdmin.deployed();
+        await proxyAdmin.deployed().then(function(instance){
+            console.log("ProxyAdmin deployed at: "+proxyAdminAddress);
+        });
         proxyAdminAddress = proxyAdmin.address;
-        console.log("ProxyAdmin deployed at: "+proxyAdminAddress);
 
     //====================================================================
     //deploy all system of PriceProviderAggregator
     
-        // const { deploymentAndSettingPriceOracle } = require("./deploymentPriceOracle/deploymentAndSettingPriceOracle.js");
-        // let priceOracleAddresses = await deploymentAndSettingPriceOracle(proxyAdminAddress);
-        // console.log(priceOracleAddresses);
+        const { deploymentPriceOracle } = require("./priceOracle/deploymentPriceOracle.js");
+        let priceOracleAddresses = await deploymentPriceOracle(proxyAdminAddress);
+        console.log(priceOracleAddresses);
 
-        // chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
-        // backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
-        // uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
-        // priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
-
-        priceProviderAggregatorAddress = '0xB7D77809d1Ef631FCaeA6b151d6453dBA727F6EC';
+        chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
+        backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
+        uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
+        priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
     //====================================================================
     //deploy all system of USBPlatform
     
-        const { deploymentAndSettingPrimaryLendingPlatform } = require("./deploymentPrimaryLendingPlatform/deploymentAndSettingPrimaryLendingPlatform.js");
-        let primaryLendingPlatformAddresses = await deploymentAndSettingPrimaryLendingPlatform(proxyAdminAddress, priceProviderAggregatorAddress);
+        const { deploymentPrimaryLendingPlatform } = require("./primaryLendingPlatform/deploymentPrimaryLendingPlatform.js");
+        let primaryLendingPlatformAddresses = await deploymentPrimaryLendingPlatform(proxyAdminAddress, priceProviderAggregatorAddress);
 
         console.log(primaryLendingPlatformAddresses);
         bondtrollerAddress = primaryLendingPlatformAddresses.bondtrollerAddress;
@@ -84,15 +81,20 @@ module.exports = {
     //====================================================
     //return uses for tests
     
-        return {
+        let addresses = {
             proxyAdminAddress : proxyAdminAddress,
             chainlinkPriceProviderAddress : chainlinkPriceProviderAddress,
+            backendPriceProviderAddress : backendPriceProviderAddress,
             uniswapV2PriceProviderAddress : uniswapV2PriceProviderAddress,
             priceProviderAggregatorAddress : priceProviderAggregatorAddress,
             bondtrollerAddress: bondtrollerAddress,
             busdcAddress: busdcAddress,
             pitAddress: pitAddress,
         }
+
+        console.log(addresses)
+        
+        return addresses
     }
 
 

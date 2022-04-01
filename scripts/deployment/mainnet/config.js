@@ -3,7 +3,26 @@ const BN = hre.ethers.BigNumber;
 
 const toBN = (num) => BN.from(num);
 
-let USDCmultiplier = toBN(10).pow(toBN(6));
+let USDCmultiplier = toBN(10).pow(toBN(6))
+
+let BONDmultiplier = toBN(10).mul(8)
+let LINKmultiplier = toBN(10).mul(18)
+
+let RENmultiplier = toBN(10).mul(18)
+let MATICmultiplier = toBN(10).mul(18)
+let OGNmultiplier = toBN(10).mul(18)
+let UNNmultiplier = toBN(10).mul(18)
+
+let PROSmultiplier = toBN(10).mul(18)
+let IOTXmultiplier = toBN(10).mul(18)
+ 
+let STAKmultiplier = toBN(10).mul(18)
+let KAMPAYmultiplier = toBN(10).mul(18)
+let TOMOmultiplier = toBN(10).mul(18)
+ 
+let GLCHmultiplier = toBN(10).mul(18)
+let GTONmultiplier = toBN(10).mul(18)
+let DFYNmultiplier = toBN(10).mul(18)
 
 module.exports = {
 
@@ -19,7 +38,7 @@ module.exports = {
     //===== LENDING TOKEN =====//
 
     USDC : '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-    USDCmultiplier : USDCmultiplier,
+    
 
     //===== END LENDING TOKEN =====//
 
@@ -57,6 +76,30 @@ module.exports = {
 
     //===== END PROJECT TOKENS =====//
 
+    //===== PROJECT TOKENS multipliers=====//
+
+    // BONDmultiplier : toBN(10).mul(8),
+    // LINKmultiplier : toBN(10).mul(18),
+
+    // RENmultiplier : toBN(10).mul(18),
+    // MATICmultiplier : toBN(10).mul(18),
+    // OGNmultiplier : toBN(10).mul(18),
+    // UNNmultiplier : toBN(10).mul(18),
+
+
+    // PROSmultiplier : toBN(10).mul(18),
+    // IOTXmultiplier : toBN(10).mul(18),
+
+    // STAKmultiplier : toBN(10).mul(18),
+    // KAMPAYmultiplier : toBN(10).mul(18),
+    // TOMOmultiplier : toBN(10).mul(18),
+
+    // GLCHmultiplier : toBN(10).mul(18),
+    // GTONmultiplier : toBN(10).mul(18),
+    // DFYNmultiplier : toBN(10).mul(18),    
+
+    //===== END PROJECT TOKENS multipliers=====//
+
     //===== PROJECT TOKENS PARAMS =====//
     
     MATIC_loanToValueRatioNumerator : toBN(6),
@@ -65,7 +108,7 @@ module.exports = {
     MATIC_liquidationTresholdFactorDenominator : toBN(1),
     MATIC_liquidationIncentiveNumerator : toBN(115),
     MATIC_liquidationIncentiveDenominator : toBN(100),
-    MATIC_borrowLimit : toBN(1_000_000).mul(USDCmultiplier),
+    MATIC_borrowLimit : toBN(1_000_000).mul(MATICmultiplier),
     
     LINK_loanToValueRatioNumerator : toBN(6),
     LINK_loanToValueRatioDenominator : toBN(10),
@@ -73,7 +116,7 @@ module.exports = {
     LINK_liquidationTresholdFactorDenominator : toBN(1),
     LINK_liquidationIncentiveNumerator : toBN(115),
     LINK_liquidationIncentiveDenominator : toBN(100),
-    LINK_borrowLimit : toBN(1_000_000).mul(USDCmultiplier),
+    LINK_borrowLimit : toBN(1_000_000).mul(LINKmultiplier),
 
     REN_loanToValueRatioNumerator : toBN(6),
     REN_loanToValueRatioDenominator : toBN(10),
@@ -81,16 +124,27 @@ module.exports = {
     REN_liquidationTresholdFactorDenominator : toBN(1),
     REN_liquidationIncentiveNumerator : toBN(115),
     REN_liquidationIncentiveDenominator : toBN(100),
-    REN_borrowLimit : toBN(1_000_000).mul(USDCmultiplier),
+    REN_borrowLimit : toBN(1_000_000).mul(RENmultiplier),
 
-    //===== PROJECT TOKENS PARAMS =====//
+    OGN_loanToValueRatioNumerator : toBN(6),
+    OGN_loanToValueRatioDenominator : toBN(10),
+    OGN_liquidationTresholdFactorNumerator : toBN(1),
+    OGN_liquidationTresholdFactorDenominator : toBN(1),
+    OGN_liquidationIncentiveNumerator : toBN(115),
+    OGN_liquidationIncentiveDenominator : toBN(100),
+    OGN_borrowLimit : toBN(1_000_000).mul(OGNmultiplier),
+
+    //===== END  PROJECT TOKENS PARAMS =====//
 
     //===== CHAINLINK PRICE FEED =====//
     // chainlink price feeds https://docs.chain.link/docs/ethereum-addresses/
 
-    chainlinkAggregatorV3_LINKmainnet : '0x2c1d072e956affc0d435cb7ac38ef18d24d9127c',
-    chainlinkAggregatorV3_RENmainnet : '0x0f59666ede214281e956cb3b2d0d69415aff4a01',
-    chainlinkAggregatorV3_MATICmainnet : '0x7bac85a8a13a4bcd8abb3eb7d6b4d632c5a57676',
+    chainlinkAggregatorV3_LINK_USD : '0x2c1d072e956affc0d435cb7ac38ef18d24d9127c', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair LINK/USD
+    chainlinkAggregatorV3_REN_USD : '0x0f59666ede214281e956cb3b2d0d69415aff4a01', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair REN/USD
+    chainlinkAggregatorV3_MATIC_USD : '0x7bac85a8a13a4bcd8abb3eb7d6b4d632c5a57676', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair MATIC/USD
+    chainlinkAggregatorV3_OGN_ETH : '0x2c881B6f3f6B5ff6C975813F87A4dad0b241C15b', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair OGN/ETH
+    chainlinkAggregatorV3_ETH_USD : '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair ETH/USD
+
 
     //===== END CHAINLINK PRICE FEED =====//
 }
