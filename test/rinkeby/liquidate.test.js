@@ -51,11 +51,11 @@ describe("Tests for PrimaryIndexToken contract", async function () {
             borrowerAddress = borrower.address;
             liquidatorAddress = liquidator.address;
           
-            const { deploymentAndSettingPIT } = require("../../scripts/deployment/rinkeby/deploymentPIT/deploymentAndSettingPIT.js")
+            const { deploymentPrimaryLendingPlatform } = require("../../scripts/deployment/rinkeby/primaryLendingPlatform/deploymentPrimaryLendingPlatform.js")
             
-            let proxyAdminAddress;
-            let priceOracleAddress = '0xB7D77809d1Ef631FCaeA6b151d6453dBA727F6EC';
-            let addresses = await deploymentAndSettingPIT(proxyAdminAddress, priceOracleAddress);
+            let proxyAdminAddress = '0xaB31DB6Fea864760Ab1F2870E0B3849Ece9C2CE1' 
+            let priceOracleAddress = '0xB7D77809d1Ef631FCaeA6b151d6453dBA727F6EC'
+            let addresses = await deploymentPrimaryLendingPlatform(proxyAdminAddress, priceOracleAddress);
             console.log(addresses);
 
             console.log("DeployMasterAddress: " + deployMasterAddress);
@@ -84,513 +84,25 @@ describe("Tests for PrimaryIndexToken contract", async function () {
 
         });
 
-       
-        // describe.skip("Borrow and Repay by one borrow position by PRJ1 collateral", async function(){
-            
-        //     it("DeployMaster supply 1_000_000 USDC", async function(){
-        //         await printSeparator();
-        //         let deployMasterUsdcAmountBefore = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountBefore = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         let usdcToSupply = toBN(1_000_000).mul(usdcMultiplier);
-        //         await usdc.connect(deployMaster).approve(busdcAddress, usdcToSupply);
-        //         await pit.connect(deployMaster).supply(usdcAddress, usdcToSupply);
-        //         console.log("=====NEW STATE======")
-        //         let deployMasterUsdcAmountAfter = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountAfter = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         await printSeparator();
-        //     });
+        it("DeployMaster supply 1_000_000 USDC", async function(){
+            await printSeparator();
+            let deployMasterUsdcAmountBefore = await getAndPrintPRJBalance(usdcAddress, deployMasterAddress);
+            let deployMasterBusdcAmountBefore = await getAndPrintPRJBalance(busdcAddress, deployMasterAddress);
+            let usdcToSupply = toBN(1_000_000).mul(usdcMultiplier);
+            await usdc.connect(deployMaster).approve(busdcAddress, usdcToSupply);
+            await pit.connect(deployMaster).supply(usdcAddress, usdcToSupply);
+            console.log("=====NEW STATE======")
+            let deployMasterUsdcAmountAfter = await getAndPrintPRJBalance(usdcAddress, deployMasterAddress);
+            let deployMasterBusdcAmountAfter = await getAndPrintPRJBalance(busdcAddress, deployMasterAddress);
+            await printSeparator();
+        });
 
-        //     it("Borrower deposits PRJ1", async function(){
-        //         await printSeparator();
-        //         let prj1BalanceBefore = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountPRJ1ToDeposit = toBN(14_000).mul(prj1Multiplier);
-        //         await prj1.connect(borrower).mintTo(borrowerAddress, amountPRJ1ToDeposit);
-        //         await prj1.connect(borrower).approve(pitAddress, amountPRJ1ToDeposit);
-        //         await pit.connect(borrower).deposit(prj1Address, usdcAddress,  amountPRJ1ToDeposit);
-        //         console.log("Deposit: " + amountPRJ1ToDeposit);
-    
-        //         let prj1BalanceAfter = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("First borrower USDC borrow by PRJ1 collateral", async function(){
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToBorrow = toBN(4_000).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrow);
-        //         console.log("Borrowed: " + amountUsdcToBorrow);
-                
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-
-        //     it("Second borrower USDC borrow by PRJ1 collateral", async function(){
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToBorrow = toBN(500).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrow);
-        //         console.log("Borrowed: " + amountUsdcToBorrow);
-                
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-            
-        //     it("Mine 50 blocks", async function(){
-        //         await mineBlocks(50);
-        //     });
-
-        //     it("Third borrower USDC borrow by PRJ1 collateral", async function(){
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToBorrow = toBN(200).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrow);
-        //         console.log("Borrowed: " + amountUsdcToBorrow);
-                
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-
-        //     it("borrower repays some part of accrued accrual in borrow position", async function() {
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToRepay = borrowPositionBefore.accrual.div(toBN(2));
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
-
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("borrower repays all accrual and some part of loan in borrow position", async function(){
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-
-        //         let amountUsdcToRepay = borrowPositionBefore.loanBody.div(toBN(2)).add(borrowPositionBefore.accrual);
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
-
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("borrower repays all borrow in borrow position", async function(){
-        //         // TODO to see that in BToken there are no borrow.
-        //         await printSeparator();
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToRepay = toBN(2).pow(toBN(256)).sub(toBN(1));
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
-
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-
-        //         await printSeparator();
-        //     });
-
-        //     it("DeployMaster redeem all his supply", async function(){
-        //         await printSeparator();
-        //         let deployMasterUsdcAmountBefore = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountBefore = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-                
-        //         let amountBusdcToRedeem = deployMasterBusdcAmountBefore;
-        //         await pit.connect(deployMaster).redeem(usdcAddress, amountBusdcToRedeem);
-                
-        //         console.log("=====NEW STATE======")
-        //         let deployMasterUsdcAmountAfter = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountAfter = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         await printSeparator();
-        //     });
-
-        // });
-
-        // describe.skip("Borrow and Repay by two borrow positions by PRJ1, PRJ2 collaterals", async function(){
-            
-        //     it("DeployMaster supply 1_000_000 USDC", async function(){
-        //         await printSeparator();
-        //         let deployMasterUsdcAmountBefore = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountBefore = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         let usdcToSupply = toBN(1_000_000).mul(usdcMultiplier);
-        //         await usdc.connect(deployMaster).approve(busdcAddress, usdcToSupply);
-        //         await pit.connect(deployMaster).supply(usdcAddress, usdcToSupply);
-        //         console.log("=====NEW STATE======")
-        //         let deployMasterUsdcAmountAfter = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountAfter = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         await printSeparator();
-        //     });
-
-        //     it("Borrower deposits PRJ1 and PRJ2", async function(){
-        //         await printSeparator();
-        //         console.log("=====PRJ1=====")
-        //         let prj1BalanceBefore = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
-        //         let depositPositionPRJ1Before = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         console.log("=====PRJ2=====")
-        //         let prj2BalanceBefore = await getAndPrintERC20Balance(prj2Address, borrowerAddress);
-        //         let depositPositionPRJ2Before = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-
-
-        //         let amountPRJ1ToDeposit = toBN(14_000).mul(prj1Multiplier);
-        //         await prj1.connect(borrower).mintTo(borrowerAddress, amountPRJ1ToDeposit);
-        //         await prj1.connect(borrower).approve(pitAddress, amountPRJ1ToDeposit);
-        //         await pit.connect(borrower).deposit(prj1Address, usdcAddress,  amountPRJ1ToDeposit);
-        //         console.log("Deposited PRJ1: " + amountPRJ1ToDeposit);
-
-        //         let amountPRJ2ToDeposit = toBN(14_000).mul(prj2Multiplier);
-        //         await prj2.connect(borrower).mintTo(borrowerAddress, amountPRJ2ToDeposit);
-        //         await prj2.connect(borrower).approve(pitAddress, amountPRJ2ToDeposit);
-        //         await pit.connect(borrower).deposit(prj2Address, usdcAddress,  amountPRJ2ToDeposit);
-        //         console.log("Deposited PRJ2: " + amountPRJ1ToDeposit);
-
-        //         console.log("=====PRJ1=====")
-        //         let prj1BalanceAfter = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
-        //         let depositPositionPRJ1After = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let pitRemainingPRJ1After = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         console.log("=====PRJ2=====")
-        //         let prj2BalanceAfter = await getAndPrintERC20Balance(prj2Address, borrowerAddress);
-        //         let depositPositionPRJ2After = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("Borrower borrow USDC by PRJ1", async function(){
-        //         await printSeparator();
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1Before = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1Before = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1Before = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-                
-        //         let amountUsdcToBorrowByPRJ1 = toBN(4_000).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrowByPRJ1);
-        //         console.log("Borrowed: " + amountUsdcToBorrowByPRJ1);
-               
-                
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1After = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1After = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1After = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1After = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-               
-        //         await printSeparator();
-        //     });
-
-        //     it("Borrower borrow USDC by PRJ2", async function(){
-        //         await printSeparator();
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2Before = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2Before = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2Before = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-                
-        //         let amountUsdcToBorrowByPRJ2 = toBN(7_000).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj2Address, usdcAddress, amountUsdcToBorrowByPRJ2);
-        //         console.log("Borrowed: " + amountUsdcToBorrowByPRJ2);
-
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2After = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2After = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2After = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-        //         await printSeparator();
-        //     });
-
-        //     it("Mine 50 blocks", async function(){
-        //         await mineBlocks(50);
-        //         await pit.updateInterestInBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //     });
-
-        //     it("Borrower repays some part of accrued accrual in PRJ1 position", async function() {
-        //         await printSeparator();
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1Before = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1Before = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1Before = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToRepayPRJ1position = toBN(100);
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepayPRJ1position);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepayPRJ1position);
-        //         console.log("Repayed: " + amountUsdcToRepayPRJ1position);
-
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1After = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1After = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1After = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("Borrower repays all accrual and some part of loan in PRJ1 position", async function(){
-        //         await printSeparator();
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1Before = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1Before = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1Before = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToRepay = borrowPositionPRJ1Before.loanBody.div(toBN(2)).add(borrowPositionPRJ1Before.accrual);
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
-
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1After = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1After = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalancePRJ1After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1After = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1After = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("borrower repays all borrow in borrow PRJ1", async function(){
-                
-        //         await printSeparator();
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1Before = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1Before = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1Before = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1Before = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         let amountUsdcToRepay = toBN(2).pow(toBN(256)).sub(toBN(1));
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj1Address, usdcAddress, amountUsdcToRepay);
-
-        //         console.log("=====PRJ1=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ1After = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let borrowPositionPRJ1After = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ1After = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
-        //         let healthFactorPRJ1After = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("Borrower repays all accrual and some part of loan in PRJ2 position", async function(){
-        //         await printSeparator();
-
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2Before = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2Before = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2Before = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-
-        //         let amountUsdcToRepay = borrowPositionPRJ2Before.loanBody.div(toBN(2)).add(borrowPositionPRJ2Before.accrual);
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj2Address, usdcAddress, amountUsdcToRepay);
-
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2After = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2After = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2After = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("Mine 50 blocks", async function(){
-        //         await mineBlocks(50);
-        //         await pit.updateInterestInBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //     });
-
-        //     it("Borrower borrow extra USDC by PRJ2", async function(){
-        //         await printSeparator();
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2Before = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2Before = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2Before = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2Before = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-                
-        //         let amountUsdcToBorrowByPRJ2 = toBN(7_000).mul(usdcMultiplier);
-        //         await pit.connect(borrower).borrow(prj2Address, usdcAddress, amountUsdcToBorrowByPRJ2);
-        //         console.log("Borrowed: " + amountUsdcToBorrowByPRJ2);
-
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2After = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2After = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalancePRJ2After = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2After = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-        //         await printSeparator();
-        //     });
-
-        //     it("Mine 50 blocks", async function(){
-        //         await mineBlocks(50);
-        //         await pit.updateInterestInBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //     });
-
-        //     it("borrower repays all borrow in borrow PRJ2", async function(){
-                
-        //         await printSeparator();
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2Before = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2Before = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2Before = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-
-        //         let amountUsdcToRepay = toBN(2).pow(toBN(256)).sub(toBN(1));
-        //         await usdc.connect(borrower).approve(busdcAddress, amountUsdcToRepay);
-        //         console.log("Repayed: " + amountUsdcToRepay);
-        //         await pit.connect(borrower).repay(prj2Address, usdcAddress, amountUsdcToRepay);
-
-        //         console.log("=====PRJ2=====")
-        //         let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
-        //         let depositPositionPRJ2After = await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let borrowPositionPRJ2After = await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress);
-        //         let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
-        //         let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
-        //         let healthFactorPRJ2After = await getAndPrintHealthFactor(borrowerAddress, prj2Address, usdcAddress);
-
-        //         await printSeparator();
-        //     });
-
-        //     it("DeployMaster redeem all his supply", async function(){
-        //         await printSeparator();
-        //         let deployMasterUsdcAmountBefore = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountBefore = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-                
-        //         let amountBusdcToRedeem = deployMasterBusdcAmountBefore;
-        //         await pit.connect(deployMaster).redeem(usdcAddress, amountBusdcToRedeem);
-                
-        //         console.log("=====NEW STATE======")
-        //         let deployMasterUsdcAmountAfter = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-        //         let deployMasterBusdcAmountAfter = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-        //         await printSeparator();
-        //     });
-            
-        // });
 
         describe("Liquidate one borrow PRJ1 position", async function(){
-            it("DeployMaster supply 1_000_000 USDC", async function(){
-                await printSeparator();
-                let deployMasterUsdcAmountBefore = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-                let deployMasterBusdcAmountBefore = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-                let usdcToSupply = toBN(1_000_000).mul(usdcMultiplier);
-                await usdc.connect(deployMaster).approve(busdcAddress, usdcToSupply);
-                await pit.connect(deployMaster).supply(usdcAddress, usdcToSupply);
-                console.log("=====NEW STATE======")
-                let deployMasterUsdcAmountAfter = await getAndPrintERC20Balance(usdcAddress, deployMasterAddress);
-                let deployMasterBusdcAmountAfter = await getAndPrintERC20Balance(busdcAddress, deployMasterAddress);
-                await printSeparator();
-            });
-
+            
             it("Borrower deposits PRJ1", async function(){
                 await printSeparator();
-                let prj1BalanceBefore = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
+                let prj1BalanceBefore = await getAndPrintPRJBalance(prj1Address, borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
 
@@ -600,7 +112,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await pit.connect(borrower).deposit(prj1Address, usdcAddress,  amountPRJ1ToDeposit);
                 console.log("Deposit: " + amountPRJ1ToDeposit);
     
-                let prj1BalanceAfter = await getAndPrintERC20Balance(prj1Address, borrowerAddress);
+                let prj1BalanceAfter = await getAndPrintPRJBalance(prj1Address, borrowerAddress);
                 let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
 
@@ -612,7 +124,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceBefore = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
@@ -620,13 +132,10 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrow);
                 console.log("Borrowed: " + amountUsdcToBorrow);
                 
-                // await mineBlocks(5000);
-                // await pit.connect(liquidator).updateInterestInBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-        
                 let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceAfter = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
@@ -653,12 +162,12 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceBefore = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
                 console.log("=====liquidator=====")
-                let liquidatorPRJ1BalanceBefore = await getAndPrintERC20Balance(prj1Address, liquidatorAddress);
-                let liquidatorUSDCBalanceBefore = await getAndPrintERC20Balance(usdcAddress, liquidatorAddress);
+                let liquidatorPRJ1BalanceBefore = await getAndPrintPRJBalance(prj1Address, liquidatorAddress);
+                let liquidatorUSDCBalanceBefore = await getAndPrintPRJBalance(usdcAddress, liquidatorAddress);
 
                 let PRJ1eval = await getAndPrintProjectTokenEvaluation(prj1Address, prj1Multiplier);
                 await usdc.connect(liquidator).approve(busdcAddress, liquidatorUSDCBalanceBefore);
@@ -669,12 +178,12 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceAfter = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
                 console.log("=====liquidator=====")
-                let liquidatorPRJ1BalanceAfter = await getAndPrintERC20Balance(prj1Address, liquidatorAddress);
-                let liquidatorUSDCBalanceAfter = await getAndPrintERC20Balance(usdcAddress, liquidatorAddress);
+                let liquidatorPRJ1BalanceAfter = await getAndPrintPRJBalance(prj1Address, liquidatorAddress);
+                let liquidatorUSDCBalanceAfter = await getAndPrintPRJBalance(usdcAddress, liquidatorAddress);
                 
                 await printSeparator();
             });
@@ -684,7 +193,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceBefore = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
@@ -695,7 +204,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceAfter = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
 
@@ -709,12 +218,12 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredBefore = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionBefore = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionBefore = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceBefore = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceBefore = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingBefore = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorBefore = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
                 console.log("=====liquidator=====")
-                let liquidatorPRJ1BalanceBefore = await getAndPrintERC20Balance(prj1Address, liquidatorAddress);
-                let liquidatorUSDCBalanceBefore = await getAndPrintERC20Balance(usdcAddress, liquidatorAddress);
+                let liquidatorPRJ1BalanceBefore = await getAndPrintPRJBalance(prj1Address, liquidatorAddress);
+                let liquidatorUSDCBalanceBefore = await getAndPrintPRJBalance(usdcAddress, liquidatorAddress);
 
                 let PRJ1eval = await getAndPrintProjectTokenEvaluation(prj1Address, prj1Multiplier);
                 await usdc.connect(liquidator).approve(busdcAddress, liquidatorUSDCBalanceBefore);
@@ -725,27 +234,102 @@ describe("Tests for PrimaryIndexToken contract", async function () {
                 let borrowBalanceStoredAfter = await getAndPrintBorrowBalanceStored(borrowerAddress);
                 let depositPositionAfter = await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
                 let borrowPositionAfter = await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress);
-                let usdcBalanceAfter = await getAndPrintERC20Balance(usdcAddress, borrowerAddress);
+                let usdcBalanceAfter = await getAndPrintPRJBalance(usdcAddress, borrowerAddress);
                 let pitRemainingAfter = await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
                 let healthFactorAfter = await getAndPrintHealthFactor(borrowerAddress, prj1Address, usdcAddress);
                 console.log("=====liquidator=====")
-                let liquidatorPRJ1BalanceAfter = await getAndPrintERC20Balance(prj1Address, liquidatorAddress);
-                let liquidatorUSDCBalanceAfter = await getAndPrintERC20Balance(usdcAddress, liquidatorAddress);
+                let liquidatorPRJ1BalanceAfter = await getAndPrintPRJBalance(prj1Address, liquidatorAddress);
+                let liquidatorUSDCBalanceAfter = await getAndPrintPRJBalance(usdcAddress, liquidatorAddress);
                 
                 await printSeparator();
             });
 
         });
 
+        describe('Liquidate PRJ1 when borrow PRJ1 and PRJ2', async function(){
+            it("Borrower deposits PRJ1 and PRJ2", async function(){
+                await printSeparator("Borrower deposits PRJ1 and PRJ2");
 
-        async function printSeparator(){
+                await getAndPrintPRJBalance(prj1Address, borrowerAddress);
+                await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
+                await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
+
+                await getAndPrintPRJBalance(prj2Address, borrowerAddress);
+                await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
+                await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
+
+                let amountPRJ1ToDeposit = toBN(14_000).mul(prj1Multiplier);
+                await prj1.connect(borrower).mintTo(borrowerAddress, amountPRJ1ToDeposit);
+                await prj1.connect(borrower).approve(pitAddress, amountPRJ1ToDeposit);
+                await pit.connect(borrower).deposit(prj1Address, usdcAddress,  amountPRJ1ToDeposit);
+                console.log("\nDeposit PRJ1: " + amountPRJ1ToDeposit);
+
+                let amountPRJ2ToDeposit = toBN(10_000).mul(prj2Multiplier);
+                await prj2.connect(borrower).mintTo(borrowerAddress, amountPRJ2ToDeposit);
+                await prj2.connect(borrower).approve(pitAddress, amountPRJ2ToDeposit);
+                await pit.connect(borrower).deposit(prj2Address, usdcAddress, amountPRJ2ToDeposit);
+                console.log("\nDeposit PRJ1: " + amountPRJ1ToDeposit);
+    
+                await getAndPrintPRJBalance(prj1Address, borrowerAddress);
+                await getAndPrintDepositPosition(borrowerAddress, prj1Address, usdcAddress);
+                await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress);
+
+                await getAndPrintPRJBalance(prj2Address, borrowerAddress);
+                await getAndPrintDepositPosition(borrowerAddress, prj2Address, usdcAddress);
+                await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress);
+
+                await printSeparator();
+            });
+
+            it('Borrower borrow USDC using all PRJ1 and half of PRJ2', async function(){
+                console.log("\n*** DEPOSIT PRJ1 ***")
+                await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress)
+                await getAndPrintPRJBalance(prj1Address, borrowerAddress)
+                await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress)
+                await getAndPrintPRJBalance(usdcAddress, borrowerAddress)
+
+                let amountUsdcToBorrowByPrj1Collateral = toBN(2).pow(toBN(256)).sub(toBN(1))
+                await pit.connect(borrower).borrow(prj1Address, usdcAddress, amountUsdcToBorrowByPrj1Collateral)
+                console.log("\nBorrowed: " + amountUsdcToBorrowByPrj1Collateral)
+
+                await getAndPrintBorrowPosition(borrowerAddress, prj1Address, usdcAddress)
+                await getAndPrintPRJBalance(prj1Address, borrowerAddress)
+                await getAndPrintPitRemaining(borrowerAddress, prj1Address, usdcAddress)
+                await getAndPrintPRJBalance(usdcAddress, borrowerAddress)
+
+                console.log("\n*** DEPOSIT PRJ2 ***")
+
+                await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress)
+                await getAndPrintPRJBalance(prj2Address, borrowerAddress)
+                let pitRemainingPRJ2Before = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress)
+                await getAndPrintPRJBalance(usdcAddress, borrowerAddress)
+
+                let amountUsdcToBorrowByPrj2Collateral = pitRemainingPRJ2Before
+                await pit.connect(borrower).borrow(prj2Address, usdcAddress, amountUsdcToBorrowByPrj2Collateral)
+                console.log("\nBorrowed: " + amountUsdcToBorrowByPrj2Collateral)
+
+                await getAndPrintBorrowPosition(borrowerAddress, prj2Address, usdcAddress)
+                await getAndPrintPRJBalance(prj2Address, borrowerAddress)
+                let pitRemainingPRJ2After = await getAndPrintPitRemaining(borrowerAddress, prj2Address, usdcAddress)
+                await getAndPrintPRJBalance(usdcAddress, borrowerAddress)
+            })
+
+
+
+        });
+
+
+        async function printSeparator(text){
             console.log("==========================================");
+            if(text != undefined){
+                console.log(text)
+            }
         }
 
         async function getAndPrintHealthFactor(accountAddress, projectTokenAddress, lendingTokenAddress) {
             let healthFactor = await pit.healthFactor(accountAddress, projectTokenAddress, lendingTokenAddress);
             
-            console.log("Health factor: ");
+            console.log("\nHealth factor: ");
             console.log("   numerator:   " + healthFactor.numerator);
             console.log("   denominator: " + healthFactor.denominator);
 
@@ -760,48 +344,63 @@ describe("Tests for PrimaryIndexToken contract", async function () {
 
         async function getAndPrintPitRemaining(accountAddress, projectTokenAddress, lendingTokenAddress) {
             let pitRemaining = await pit.pitRemaining(accountAddress, projectTokenAddress, lendingTokenAddress);
-            console.log("pitRemaining: " + pitRemaining);
+            console.log("\nPIT_remaining: ")
+            console.log("   account: " + accountAddress)
+            console.log("   pitRemaining: " + pitRemaining)
             return pitRemaining;
         }
 
         async function getAndPrintBorrowBalanceStored(accountAddress) {
             let borrowStored = await busdc.borrowBalanceStored(accountAddress);
-            console.log("Borrow stored: " + borrowStored);
+            console.log("\nBorrowBalanceStored: ")
+            console.log("   accountAddress" + accountAddress)
+            console.log("   borrowStored: " + borrowStored)
             return borrowStored;
         }
 
         async function getAndPrintTotalOutstanding(accountAddress, projectTokenAddress, lendingTokenAddress) {
             let totalOutstanding = await pit.totalOutstanding(accountAddress, projectTokenAddress, lendingTokenAddress);
-            console.log("TotalOutstanging: " + totalOutstanding);
+            console.log("\nTotalOutstanging: ")
+            console.log("   accountAddress: " + accountAddress);
+            console.log("   projectTokenAddress: " + projectTokenAddress)
+            console.log("   lendingTokenAddress: " + lendingTokenAddress)
+            console.log("   total outstanding: " + totalOutstanding)
             return totalOutstanding;
         }
 
         async function getAndPrintProjectTokenEvaluation(projectTokenAddress, projectTokenAmount) {
             let projectTokenEvaluation = await pit.getProjectTokenEvaluation(projectTokenAddress, projectTokenAmount);
-            console.log("Evaluation: " + projectTokenEvaluation);
+            console.log("\nEvaluation:")
+            console.log("   projectToken: " + projectTokenAddress)
+            console.log("   projectTokenAmount: " + projectTokenAmount)
+            console.log("   projectTokenEvaluation: " + projectTokenEvaluation)
             return projectTokenEvaluation;
         }
 
         async function getAndPrintDepositPosition(accountAddress, projectTokenAddress, lendingTokenAddress) {
             let depositPosition = await pit.depositPosition(accountAddress, projectTokenAddress, lendingTokenAddress);
-            //console.log(depositPosition)
-            console.log("Deposit position: ");
-            console.log("   depositedProjectTokenAmount: " + depositPosition);
+            console.log("\nDeposit position: ");
+            console.log("   accountAddress: " + accountAddress)
+            console.log("   projectTokenAddress: " + projectTokenAddress)
+            console.log("   lendingTokenAddress: " + lendingTokenAddress)
+            console.log("   depositedProjectTokenAmount: " + depositPosition)
             return depositPosition;
         }   
 
         async function getAndPrintBorrowPosition(accountAddress, projectTokenAddress, lendingTokenAddress) {
             let borrowPosition = await pit.borrowPosition(accountAddress, projectTokenAddress, lendingTokenAddress);
-            console.log("Borrow position: ");
-            console.log("   loanBody:   " + borrowPosition.loanBody);
-            console.log("   accrual:   " + borrowPosition.accrual);
+            console.log("\nBorrow position: ");
+            console.log("   account: " + accountAddress)
+            console.log("   projectTokenAddress: "+ projectTokenAddress)
+            console.log("   loanBody:   " + borrowPosition.loanBody)
+            console.log("   accrual:   " + borrowPosition.accrual)
             return borrowPosition;
         }
 
-        async function getAndPrintERC20Balance(tokenAddress, accountAddress) {
+        async function getAndPrintPRJBalance(tokenAddress, accountAddress) {
             let token = await ERC20.attach(tokenAddress).connect(deployMaster);
             let balance = await token.balanceOf(accountAddress);
-            console.log("ERC20 account balance: ")
+            console.log("\nERC20 account balance: ")
             console.log("   Address: " + tokenAddress);
             console.log("   Account: " + accountAddress);
             console.log("   Balance: " + balance);
@@ -809,7 +408,7 @@ describe("Tests for PrimaryIndexToken contract", async function () {
         }
 
         async function mineBlocks(blockNumbers) {
-            console.log("Mined "+ (blockNumbers+1) + " blocks");
+            console.log("\nMined "+ (blockNumbers+1) + " blocks");
             for(var i = 0; i < blockNumbers; i++){
                 await ethers.provider.send('evm_mine');
             }
