@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-//import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "./openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
@@ -391,15 +391,28 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         bool isPositionFullyRepaid;
         uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
+            console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
+            console.log("PIT_totalOutstanding: %s",_totalOutstanding);
+            
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
+                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
+                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, type(uint256).max);
+                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
+                // console.log("PIT_amountRepaid: %s", amountRepaid);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
+                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower,  lendingTokenAmountToRepay);
+                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
+                // console.log("PIT_amountRepaid0: %s", amountRepaid);
+                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 if (lendingTokenAmountToRepay > _borrowPosition.accrual) {
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -408,18 +421,34 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
+                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = false;
             }
         } else {
+            console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
+            console.log("PIT_totalOutstanding: %s",_totalOutstanding);
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
+                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, _totalOutstanding);
+                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
+                // console.log("PIT_amountRepaid1: %s", amountRepaid);
+                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
+                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
+                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, lendingTokenAmountToRepay);
+                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
+                // console.log("PIT_amountRepaid2: %s", amountRepaid);
+                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 if(lendingTokenAmountToRepay > _borrowPosition.accrual){
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -428,6 +457,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
+                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
+                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = false;
             }
         }
@@ -445,12 +476,16 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             revert("PIT: healthFactor>=1");
         }
         ProjectTokenInfo memory info = projectTokenInfo[projectToken];
-        uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
+        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(projectToken).decimals();
         uint256 repaid = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
-        uint256 priceForOneProjectToken = getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals);
-        uint256 projectTokenEvaluation = repaid * (10 ** projectTokenDecimals) / priceForOneProjectToken;
+        uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / getProjectTokenEvaluation(projectToken, projectTokenMultiplier);
         uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationIncentive.numerator / info.liquidationIncentive.denominator;
         
+        uint256 depositedProjectTokenAmount = depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount;
+        if(projectTokenToSendToLiquidator > depositedProjectTokenAmount){
+            projectTokenToSendToLiquidator = depositedProjectTokenAmount;
+        }
+
         depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
         totalDepositedProjectToken[projectToken] -= projectTokenToSendToLiquidator;
         ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenToSendToLiquidator);
@@ -460,12 +495,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     function updateInterestInBorrowPosition(address account, address projectToken, address lendingToken) public {
         BorrowPosition storage _borrowPosition = borrowPosition[account][projectToken][lendingToken];
         uint256 cumulativeTotalOutstanding = 0;
+        uint256 cumulativeLoanBody = 0;
         if(_borrowPosition.loanBody != 0) {
             uint256 borrowPositions = 0;
             uint256 _totalOutstanding;
             for(uint256 projectTokenId = 0; projectTokenId < projectTokens.length; projectTokenId++){
                 _totalOutstanding = totalOutstanding(account, projectTokens[projectTokenId], lendingToken);
                 if (_totalOutstanding > 0) {
+                    cumulativeLoanBody += borrowPosition[account][projectTokens[projectTokenId]][lendingToken].loanBody;
                     cumulativeTotalOutstanding += _totalOutstanding;
                     borrowPositions++;
                 }  
@@ -474,7 +511,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             // console.log("currentBorrowBalance: %s", currentBorrowBalance);
             // console.log("cumulativeTotalOutstanding: %s", cumulativeTotalOutstanding);
             if (currentBorrowBalance >= cumulativeTotalOutstanding){
-                _borrowPosition.accrual += (currentBorrowBalance - cumulativeTotalOutstanding) / borrowPositions;
+                uint256 accrual = currentBorrowBalance - cumulativeTotalOutstanding;
+                _borrowPosition.accrual += accrual * _borrowPosition.loanBody / cumulativeLoanBody;
             }
         }
     }

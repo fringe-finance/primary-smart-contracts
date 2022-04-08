@@ -914,8 +914,13 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         (vars.mathErr, vars.accountBorrowsNew) = subUInt(vars.accountBorrows, vars.actualRepayAmount);
         require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED");
 
+        console.log("totalBorrows:           %s", totalBorrows);
+        console.log("vars.actualRepayAmount: %s", vars.actualRepayAmount);
+
         (vars.mathErr, vars.totalBorrowsNew) = subUInt(totalBorrows, vars.actualRepayAmount);
-        require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_TOTAL_BALANCE_CALCULATION_FAILED");
+        if(vars.mathErr == MathError.INTEGER_UNDERFLOW) {
+            vars.totalBorrowsNew = 0; // Repaid all borrows to platform
+        }
 
         /* We write the previously calculated values into storage */
         accountBorrows[borrower].principal = vars.accountBorrowsNew;
