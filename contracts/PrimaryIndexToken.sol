@@ -393,8 +393,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (borrowPositionsAmount == 1) {
             console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
             console.log("PIT_totalOutstanding: %s",_totalOutstanding);
-            
-            if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
+            console.log("PIT__borrowPosition.loanBodyBefore1: %s", _borrowPosition.loanBody);
+            console.log("PIT__borrowPosition.accrualBefore1: %s",_borrowPosition.accrual);
+            if (lendingTokenAmount > info.bLendingToken.borrowBalanceStored(borrower) || 
+                lendingTokenAmount >= _totalOutstanding || 
+                lendingTokenAmount == type(uint256).max) {
                 // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
                 // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
@@ -428,6 +431,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         } else {
             console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
             console.log("PIT_totalOutstanding: %s",_totalOutstanding);
+            console.log("PIT__borrowPosition.loanBodyBefore2: %s", _borrowPosition.loanBody);
+            console.log("PIT__borrowPosition.accrualBefore2: %s",_borrowPosition.accrual);
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
                 // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, _totalOutstanding);
@@ -508,8 +513,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 }  
             }
             uint256 currentBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.borrowBalanceCurrent(account);
-            // console.log("currentBorrowBalance: %s", currentBorrowBalance);
-            // console.log("cumulativeTotalOutstanding: %s", cumulativeTotalOutstanding);
+            console.log("currentBorrowBalance: %s", currentBorrowBalance);
+            console.log("cumulativeTotalOutstanding: %s", cumulativeTotalOutstanding);
             if (currentBorrowBalance >= cumulativeTotalOutstanding){
                 uint256 accrual = currentBorrowBalance - cumulativeTotalOutstanding;
                 _borrowPosition.accrual += accrual * _borrowPosition.loanBody / cumulativeLoanBody;
