@@ -389,7 +389,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         updateInterestInBorrowPosition(borrower, projectToken, lendingToken);
         uint256 amountRepaid;
         bool isPositionFullyRepaid;
-        uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);        
+        uint256 _totalOutstanding = totalOutstanding(borrower, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
             console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
             console.log("PIT_totalOutstanding: %s",_totalOutstanding);
@@ -577,10 +577,12 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         loanBody = borrowPosition[account][projectToken][lendingToken].loanBody;
         uint256 borrowPositions = 0;
         uint256 cumulativeTotalOutstanding = 0;
+        uint256 cumulativeLoanBody = 0;
         uint256 _totalOutstanding;
         for(uint256 projectTokenId = 0; projectTokenId < projectTokens.length; projectTokenId++){
             _totalOutstanding = totalOutstanding(account, projectTokens[projectTokenId], lendingToken);
             if (_totalOutstanding > 0) {
+                cumulativeLoanBody += borrowPosition[account][projectTokens[projectTokenId]][lendingToken].loanBody;
                 cumulativeTotalOutstanding += _totalOutstanding;
                 borrowPositions++;
             }
@@ -588,7 +590,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 estimatedBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.getEstimatedBorrowBalanceStored(account);
         accrual = borrowPosition[account][projectToken][lendingToken].accrual;
         if (borrowPositions > 0 && estimatedBorrowBalance >= cumulativeTotalOutstanding) {
-            accrual += ((estimatedBorrowBalance - cumulativeTotalOutstanding) / borrowPositions);
+            accrual += loanBody * (estimatedBorrowBalance - cumulativeTotalOutstanding) / cumulativeLoanBody;
         }
         healthFactorNumerator = pit(account, projectToken, lendingToken);
         healthFactorDenominator = loanBody + accrual;
