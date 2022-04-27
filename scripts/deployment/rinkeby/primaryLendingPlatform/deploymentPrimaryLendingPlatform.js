@@ -161,8 +161,8 @@ module.exports = {
         let usdctestAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
         let initialExchangeRateMantissa = toBN(10).pow(toBN(18));
         let reserveFactorMantissa = toBN(25).mul(toBN(10).pow(toBN(16)));//same as cAAVE
-        let name = "bUSDC Test Token";
-        let symbol = "bUSDCTest";
+        let name = "fUSDC";
+        let symbol = "fUSDC";
         let decimals = toBN(6);
         let admin = deployMasterAddress;
 
