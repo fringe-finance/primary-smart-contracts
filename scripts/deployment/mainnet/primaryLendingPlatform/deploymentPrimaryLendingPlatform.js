@@ -228,8 +228,8 @@ module.exports = {
         let underlying = USDC
         let initialExchangeRateMantissa = toBN(10).pow(toBN(18));
         let reserveFactorMantissa = toBN(25).mul(toBN(10).pow(toBN(16)));//same as cAAVE
-        let name = "bUSDC Token";
-        let symbol = "bUSDC";
+        let name = "fUSDC";
+        let symbol = "fUSDC";
         let decimals = toBN(6);
         let admin = deployMasterAddress;
 
