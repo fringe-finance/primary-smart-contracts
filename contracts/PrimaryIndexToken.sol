@@ -581,7 +581,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         uint256 estimatedBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.getEstimatedBorrowBalanceStored(account);
         accrual = borrowPosition[account][projectToken][lendingToken].accrual;
-        if (estimatedBorrowBalance >= cumulativeTotalOutstanding) {
+        if (estimatedBorrowBalance >= cumulativeTotalOutstanding && cumulativeLoanBody > 0) {
             accrual += loanBody * (estimatedBorrowBalance - cumulativeTotalOutstanding) / cumulativeLoanBody;
         }
         healthFactorNumerator = pit(account, projectToken, lendingToken);
