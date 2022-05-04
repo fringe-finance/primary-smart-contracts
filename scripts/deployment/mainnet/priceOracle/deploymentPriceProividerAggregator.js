@@ -44,6 +44,7 @@ module.exports = {
     //initialize deploy parametrs
 
         ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
+        PrimaryLendingPlatformProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
         TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
         ChainlinkPriceProvider = await hre.ethers.getContractFactory("ChainlinkPriceProvider");
         BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
@@ -80,19 +81,39 @@ module.exports = {
     //====================================================
     //deploy proxy admin
 
+        // console.log();
+        // console.log("***** PROXY ADMIN DEPLOYMENT *****");
+        // if(input_proxyAdminAddress == undefined){
+        //     proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
+        //     await proxyAdmin.deployed().then(function(instance){
+        //         console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+        //         console.log("ProxyAdmin deployed at: " + instance.address);
+        //     });
+        //     proxyAdminAddress = proxyAdmin.address;
+        // }else{
+        //     console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
+        //     proxyAdminAddress = input_proxyAdminAddress;
+        // }
+
+    //====================================================
+    //deploy proxy admin
+
         console.log();
-        console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        if(input_proxyAdminAddress == undefined){
-            proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-            await proxyAdmin.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
-                console.log("ProxyAdmin deployed at: " + instance.address);
+        console.log("***** PRIMARY LENDING PLATFORM PROXY ADMIN DEPLOYMENT *****");
+        if(input_primaryLendingPlatformProxyAdminAddress == undefined){
+            primaryLendingPlatformProxyAdmin = await PrimaryLendingPlatformProxyAdmin.connect(deployMaster).deploy();
+            await primaryLendingPlatformProxyAdmin.deployed()
+            .then(function(instance){
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+                console.log("PrimaryLendingPlatformProxyAdmin deployed at: " + instance.address);
             });
-            proxyAdminAddress = proxyAdmin.address;
+            proxyAdminAddress = primaryLendingPlatformProxyAdmin.address;
+            
         }else{
-            console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
-            proxyAdminAddress = input_proxyAdminAddress;
-        }
+            console.log("PrimaryLendingPlatformProxyAdmin is deployed at: " + input_primaryLendingPlatformProxyAdminAddress);
+            proxyAdminAddress = input_primaryLendingPlatformProxyAdminAddress
+        }   
+
 
     //====================================================
     //deploy chainlinkPriceProvider
