@@ -5,6 +5,7 @@ require("@nomiclabs/hardhat-waffle");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require('hardhat-contract-sizer');
+require('solidity-docgen');
 
 const {
     INFURA_KEY, 
@@ -36,14 +37,14 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
+        url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
       },
       allowUnlimitedContractSize: false,
       timeout: 99999999,
       blockGasLimit: 100_000_000,
       gas: 100_000_000,
       gasMultiplier: 1,
-      gasPrice: 50_000_000_000, // 50 gwei
+      gasPrice: 500_000_000_000, // 500 gwei
       accounts: {mnemonic: MNEMONIC}
     },
     
@@ -83,5 +84,11 @@ module.exports = {
     runOnCompile: false,
     strict: true,
     only: [],
+  },
+  docgen:{
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
+    pages: 'files',
   }
 };
