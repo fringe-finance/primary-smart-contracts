@@ -1,0 +1,432 @@
+# Solidity API
+
+## ERC777Upgradeable
+
+_Implementation of the {IERC777} interface.
+
+This implementation is agnostic to the way tokens are created. This means
+that a supply mechanism has to be added in a derived contract using {_mint}.
+
+Support for ERC20 is included in this contract, as specified by the EIP: both
+the ERC777 and ERC20 interfaces can be safely used when interacting with it.
+Both {IERC777-Sent} and {IERC20-Transfer} events are emitted on token
+movements.
+
+Additionally, the {IERC777-granularity} value is hard-coded to &#x60;1&#x60;, meaning that there
+are no special restrictions in the amount of tokens that created, moved, or
+destroyed. This makes integration with ERC20 applications seamless._
+
+### _ERC1820_REGISTRY
+
+```solidity
+contract IERC1820RegistryUpgradeable _ERC1820_REGISTRY
+```
+
+### _balances
+
+```solidity
+mapping(address &#x3D;&gt; uint256) _balances
+```
+
+### _totalSupply
+
+```solidity
+uint256 _totalSupply
+```
+
+### _name
+
+```solidity
+string _name
+```
+
+### _symbol
+
+```solidity
+string _symbol
+```
+
+### _TOKENS_SENDER_INTERFACE_HASH
+
+```solidity
+bytes32 _TOKENS_SENDER_INTERFACE_HASH
+```
+
+### _TOKENS_RECIPIENT_INTERFACE_HASH
+
+```solidity
+bytes32 _TOKENS_RECIPIENT_INTERFACE_HASH
+```
+
+### _defaultOperatorsArray
+
+```solidity
+address[] _defaultOperatorsArray
+```
+
+### _defaultOperators
+
+```solidity
+mapping(address &#x3D;&gt; bool) _defaultOperators
+```
+
+### _operators
+
+```solidity
+mapping(address &#x3D;&gt; mapping(address &#x3D;&gt; bool)) _operators
+```
+
+### _revokedDefaultOperators
+
+```solidity
+mapping(address &#x3D;&gt; mapping(address &#x3D;&gt; bool)) _revokedDefaultOperators
+```
+
+### _allowances
+
+```solidity
+mapping(address &#x3D;&gt; mapping(address &#x3D;&gt; uint256)) _allowances
+```
+
+### __ERC777_init
+
+```solidity
+function __ERC777_init(string name_, string symbol_, address[] defaultOperators_) internal
+```
+
+_&#x60;defaultOperators&#x60; may be an empty array._
+
+### __ERC777_init_unchained
+
+```solidity
+function __ERC777_init_unchained(string name_, string symbol_, address[] defaultOperators_) internal
+```
+
+### name
+
+```solidity
+function name() public view virtual returns (string)
+```
+
+_See {IERC777-name}._
+
+### symbol
+
+```solidity
+function symbol() public view virtual returns (string)
+```
+
+_See {IERC777-symbol}._
+
+### decimals
+
+```solidity
+function decimals() public pure virtual returns (uint8)
+```
+
+_See {ERC20-decimals}.
+
+Always returns 18, as per the
+[ERC777 EIP](https://eips.ethereum.org/EIPS/eip-777#backward-compatibility)._
+
+### granularity
+
+```solidity
+function granularity() public view virtual returns (uint256)
+```
+
+_See {IERC777-granularity}.
+
+This implementation always returns &#x60;1&#x60;._
+
+### totalSupply
+
+```solidity
+function totalSupply() public view virtual returns (uint256)
+```
+
+_See {IERC777-totalSupply}._
+
+### balanceOf
+
+```solidity
+function balanceOf(address tokenHolder) public view virtual returns (uint256)
+```
+
+_Returns the amount of tokens owned by an account (&#x60;tokenHolder&#x60;)._
+
+### send
+
+```solidity
+function send(address recipient, uint256 amount, bytes data) public virtual
+```
+
+_See {IERC777-send}.
+
+Also emits a {IERC20-Transfer} event for ERC20 compatibility._
+
+### transfer
+
+```solidity
+function transfer(address recipient, uint256 amount) public virtual returns (bool)
+```
+
+_See {IERC20-transfer}.
+
+Unlike &#x60;send&#x60;, &#x60;recipient&#x60; is _not_ required to implement the {IERC777Recipient}
+interface if it is a contract.
+
+Also emits a {Sent} event._
+
+### burn
+
+```solidity
+function burn(uint256 amount, bytes data) public virtual
+```
+
+_See {IERC777-burn}.
+
+Also emits a {IERC20-Transfer} event for ERC20 compatibility._
+
+### isOperatorFor
+
+```solidity
+function isOperatorFor(address operator, address tokenHolder) public view virtual returns (bool)
+```
+
+_See {IERC777-isOperatorFor}._
+
+### authorizeOperator
+
+```solidity
+function authorizeOperator(address operator) public virtual
+```
+
+_See {IERC777-authorizeOperator}._
+
+### revokeOperator
+
+```solidity
+function revokeOperator(address operator) public virtual
+```
+
+_See {IERC777-revokeOperator}._
+
+### defaultOperators
+
+```solidity
+function defaultOperators() public view virtual returns (address[])
+```
+
+_See {IERC777-defaultOperators}._
+
+### operatorSend
+
+```solidity
+function operatorSend(address sender, address recipient, uint256 amount, bytes data, bytes operatorData) public virtual
+```
+
+_See {IERC777-operatorSend}.
+
+Emits {Sent} and {IERC20-Transfer} events._
+
+### operatorBurn
+
+```solidity
+function operatorBurn(address account, uint256 amount, bytes data, bytes operatorData) public virtual
+```
+
+_See {IERC777-operatorBurn}.
+
+Emits {Burned} and {IERC20-Transfer} events._
+
+### allowance
+
+```solidity
+function allowance(address holder, address spender) public view virtual returns (uint256)
+```
+
+_See {IERC20-allowance}.
+
+Note that operator and allowance concepts are orthogonal: operators may
+not have allowance, and accounts with allowance may not be operators
+themselves._
+
+### approve
+
+```solidity
+function approve(address spender, uint256 value) public virtual returns (bool)
+```
+
+_See {IERC20-approve}.
+
+Note that accounts cannot have allowance issued by their operators._
+
+### transferFrom
+
+```solidity
+function transferFrom(address holder, address recipient, uint256 amount) public virtual returns (bool)
+```
+
+_See {IERC20-transferFrom}.
+
+Note that operator and allowance concepts are orthogonal: operators cannot
+call &#x60;transferFrom&#x60; (unless they have allowance), and accounts with
+allowance cannot call &#x60;operatorSend&#x60; (unless they are operators).
+
+Emits {Sent}, {IERC20-Transfer} and {IERC20-Approval} events._
+
+### _mint
+
+```solidity
+function _mint(address account, uint256 amount, bytes userData, bytes operatorData) internal virtual
+```
+
+_Creates &#x60;amount&#x60; tokens and assigns them to &#x60;account&#x60;, increasing
+the total supply.
+
+If a send hook is registered for &#x60;account&#x60;, the corresponding function
+will be called with &#x60;operator&#x60;, &#x60;data&#x60; and &#x60;operatorData&#x60;.
+
+See {IERC777Sender} and {IERC777Recipient}.
+
+Emits {Minted} and {IERC20-Transfer} events.
+
+Requirements
+
+- &#x60;account&#x60; cannot be the zero address.
+- if &#x60;account&#x60; is a contract, it must implement the {IERC777Recipient}
+interface._
+
+### _mint
+
+```solidity
+function _mint(address account, uint256 amount, bytes userData, bytes operatorData, bool requireReceptionAck) internal virtual
+```
+
+_Creates &#x60;amount&#x60; tokens and assigns them to &#x60;account&#x60;, increasing
+the total supply.
+
+If &#x60;requireReceptionAck&#x60; is set to true, and if a send hook is
+registered for &#x60;account&#x60;, the corresponding function will be called with
+&#x60;operator&#x60;, &#x60;data&#x60; and &#x60;operatorData&#x60;.
+
+See {IERC777Sender} and {IERC777Recipient}.
+
+Emits {Minted} and {IERC20-Transfer} events.
+
+Requirements
+
+- &#x60;account&#x60; cannot be the zero address.
+- if &#x60;account&#x60; is a contract, it must implement the {IERC777Recipient}
+interface._
+
+### _send
+
+```solidity
+function _send(address from, address to, uint256 amount, bytes userData, bytes operatorData, bool requireReceptionAck) internal virtual
+```
+
+_Send tokens_
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| from | address | address token holder address |
+| to | address | address recipient address |
+| amount | uint256 | uint256 amount of tokens to transfer |
+| userData | bytes | bytes extra information provided by the token holder (if any) |
+| operatorData | bytes | bytes extra information provided by the operator (if any) |
+| requireReceptionAck | bool | if true, contract recipients are required to implement ERC777TokensRecipient |
+
+### _burn
+
+```solidity
+function _burn(address from, uint256 amount, bytes data, bytes operatorData) internal virtual
+```
+
+_Burn tokens_
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| from | address | address token holder address |
+| amount | uint256 | uint256 amount of tokens to burn |
+| data | bytes | bytes extra information provided by the token holder |
+| operatorData | bytes | bytes extra information provided by the operator (if any) |
+
+### _move
+
+```solidity
+function _move(address operator, address from, address to, uint256 amount, bytes userData, bytes operatorData) private
+```
+
+### _approve
+
+```solidity
+function _approve(address holder, address spender, uint256 value) internal
+```
+
+_See {ERC20-_approve}.
+
+Note that accounts cannot have allowance issued by their operators._
+
+### _callTokensToSend
+
+```solidity
+function _callTokensToSend(address operator, address from, address to, uint256 amount, bytes userData, bytes operatorData) private
+```
+
+_Call from.tokensToSend() if the interface is registered_
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| operator | address | address operator requesting the transfer |
+| from | address | address token holder address |
+| to | address | address recipient address |
+| amount | uint256 | uint256 amount of tokens to transfer |
+| userData | bytes | bytes extra information provided by the token holder (if any) |
+| operatorData | bytes | bytes extra information provided by the operator (if any) |
+
+### _callTokensReceived
+
+```solidity
+function _callTokensReceived(address operator, address from, address to, uint256 amount, bytes userData, bytes operatorData, bool requireReceptionAck) private
+```
+
+_Call to.tokensReceived() if the interface is registered. Reverts if the recipient is a contract but
+tokensReceived() was not registered for the recipient_
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| operator | address | address operator requesting the transfer |
+| from | address | address token holder address |
+| to | address | address recipient address |
+| amount | uint256 | uint256 amount of tokens to transfer |
+| userData | bytes | bytes extra information provided by the token holder (if any) |
+| operatorData | bytes | bytes extra information provided by the operator (if any) |
+| requireReceptionAck | bool | if true, contract recipients are required to implement ERC777TokensRecipient |
+
+### _beforeTokenTransfer
+
+```solidity
+function _beforeTokenTransfer(address operator, address from, address to, uint256 amount) internal virtual
+```
+
+_Hook that is called before any token transfer. This includes
+calls to {send}, {transfer}, {operatorSend}, minting and burning.
+
+Calling conditions:
+
+- when &#x60;from&#x60; and &#x60;to&#x60; are both non-zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens
+will be to transferred to &#x60;to&#x60;.
+- when &#x60;from&#x60; is zero, &#x60;amount&#x60; tokens will be minted for &#x60;to&#x60;.
+- when &#x60;to&#x60; is zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens will be burned.
+- &#x60;from&#x60; and &#x60;to&#x60; are never both zero.
+
+To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks]._
+
+### __gap
+
+```solidity
+uint256[41] __gap
+```
+
