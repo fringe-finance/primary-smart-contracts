@@ -1,125 +1,588 @@
-# Solidity API
+# GovernorTimelockCompoundUpgradeable
 
-## ICompoundTimelockUpgradeable
 
-https://github.com/compound-finance/compound-protocol/blob/master/contracts/Timelock.sol[Compound&#x27;s timelock] interface
 
-### receive
 
-```solidity
-receive() external payable
-```
 
-### GRACE_PERIOD
 
-```solidity
-function GRACE_PERIOD() external view returns (uint256)
-```
 
-### MINIMUM_DELAY
+*Extension of {Governor} that binds the execution process to a Compound Timelock. This adds a delay, enforced by the external timelock to all successful proposal (in addition to the voting duration). The {Governor} needs to be the admin of the timelock for any operation to be performed. A public, unrestricted, {GovernorTimelockCompound-__acceptAdmin} is available to accept ownership of the timelock. Using this model means the proposal will be operated by the {TimelockController} and not by the {Governor}. Thus, the assets and permissions must be attached to the {TimelockController}. Any asset sent to the {Governor} will be inaccessible. _Available since v4.3._*
+
+## Methods
+
+### BALLOT_TYPEHASH
 
 ```solidity
-function MINIMUM_DELAY() external view returns (uint256)
+function BALLOT_TYPEHASH() external view returns (bytes32)
 ```
 
-### MAXIMUM_DELAY
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### COUNTING_MODE
 
 ```solidity
-function MAXIMUM_DELAY() external view returns (uint256)
+function COUNTING_MODE() external pure returns (string)
 ```
 
-### admin
+module:voting
+
+*A description of the possible `support` values for {castVote} and the way these votes are counted, meant to be consumed by UIs to show correct vote options and interpret the results. The string is a URL-encoded sequence of key-value pairs that each describe one aspect, for example `support=bravo&amp;quorum=for,abstain`. There are 2 standard keys: `support` and `quorum`. - `support=bravo` refers to the vote options 0 = For, 1 = Against, 2 = Abstain, as in `GovernorBravo`. - `quorum=bravo` means that only For votes are counted towards quorum. - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum. NOTE: The string can be decoded by the standard https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams[`URLSearchParams`] JavaScript class.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### __acceptAdmin
 
 ```solidity
-function admin() external view returns (address)
+function __acceptAdmin() external nonpayable
 ```
 
-### pendingAdmin
+
+
+*Accept admin right over the timelock.*
+
+
+### castVote
 
 ```solidity
-function pendingAdmin() external view returns (address)
+function castVote(uint256 proposalId, uint8 support) external nonpayable returns (uint256)
 ```
 
-### delay
+
+
+*See {IGovernor-castVote}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### castVoteBySig
 
 ```solidity
-function delay() external view returns (uint256)
+function castVoteBySig(uint256 proposalId, uint8 support, uint8 v, bytes32 r, bytes32 s) external nonpayable returns (uint256)
 ```
 
-### queuedTransactions
+
+
+*See {IGovernor-castVoteBySig}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### castVoteWithReason
 
 ```solidity
-function queuedTransactions(bytes32) external view returns (bool)
+function castVoteWithReason(uint256 proposalId, uint8 support, string reason) external nonpayable returns (uint256)
 ```
 
-### setDelay
+
+
+*See {IGovernor-castVoteWithReason}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+| reason | string | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### execute
 
 ```solidity
-function setDelay(uint256) external
+function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) external payable returns (uint256)
 ```
 
-### acceptAdmin
+
+
+*See {IGovernor-execute}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| descriptionHash | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### getVotes
 
 ```solidity
-function acceptAdmin() external
+function getVotes(address account, uint256 blockNumber) external view returns (uint256)
 ```
 
-### setPendingAdmin
+module:reputation
+
+*Voting power of an `account` at a specific `blockNumber`. Note: this can be implemented in a number of ways, for example by reading the delegated balance from one (or multiple), {ERC20Votes} tokens.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### hasVoted
 
 ```solidity
-function setPendingAdmin(address) external
+function hasVoted(uint256 proposalId, address account) external view returns (bool)
 ```
 
-### queueTransaction
+module:voting
+
+*Returns weither `account` has cast a vote on `proposalId`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### hashProposal
 
 ```solidity
-function queueTransaction(address target, uint256 value, string signature, bytes data, uint256 eta) external returns (bytes32)
+function hashProposal(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) external pure returns (uint256)
 ```
 
-### cancelTransaction
+
+
+*See {IGovernor-hashProposal}. The proposal id is produced by hashing the RLC encoded `targets` array, the `values` array, the `calldatas` array and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in advance, before the proposal is submitted. Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the same proposal (with same operation and same description) will have the same id if submitted on multiple governors accross multiple networks. This also means that in order to execute the same operation twice (on the same governor) the proposer will have to change the description in order to avoid proposal id conflicts.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| descriptionHash | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### name
 
 ```solidity
-function cancelTransaction(address target, uint256 value, string signature, bytes data, uint256 eta) external
+function name() external view returns (string)
 ```
 
-### executeTransaction
+
+
+*See {IGovernor-name}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### proposalDeadline
 
 ```solidity
-function executeTransaction(address target, uint256 value, string signature, bytes data, uint256 eta) external payable returns (bytes)
+function proposalDeadline(uint256 proposalId) external view returns (uint256)
 ```
 
-## GovernorTimelockCompoundUpgradeable
 
-_Extension of {Governor} that binds the execution process to a Compound Timelock. This adds a delay, enforced by
-the external timelock to all successful proposal (in addition to the voting duration). The {Governor} needs to be
-the admin of the timelock for any operation to be performed. A public, unrestricted,
-{GovernorTimelockCompound-__acceptAdmin} is available to accept ownership of the timelock.
 
-Using this model means the proposal will be operated by the {TimelockController} and not by the {Governor}. Thus,
-the assets and permissions must be attached to the {TimelockController}. Any asset sent to the {Governor} will be
-inaccessible.
+*See {IGovernor-proposalDeadline}.*
 
-_Available since v4.3.__
+#### Parameters
 
-### ProposalTimelock
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### proposalEta
 
 ```solidity
-struct ProposalTimelock {
-  struct TimersUpgradeable.Timestamp timer;
-}
+function proposalEta(uint256 proposalId) external view returns (uint256)
 ```
 
-### _timelock
+
+
+*Public accessor to check the eta of a queued proposal*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### proposalSnapshot
 
 ```solidity
-contract ICompoundTimelockUpgradeable _timelock
+function proposalSnapshot(uint256 proposalId) external view returns (uint256)
 ```
 
-### _proposalTimelocks
+
+
+*See {IGovernor-proposalSnapshot}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### propose
 
 ```solidity
-mapping(uint256 &#x3D;&gt; struct GovernorTimelockCompoundUpgradeable.ProposalTimelock) _proposalTimelocks
+function propose(address[] targets, uint256[] values, bytes[] calldatas, string description) external nonpayable returns (uint256)
 ```
+
+
+
+*See {IGovernor-propose}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| description | string | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### queue
+
+```solidity
+function queue(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) external nonpayable returns (uint256)
+```
+
+
+
+*Function to queue a proposal to the timelock.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| descriptionHash | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### quorum
+
+```solidity
+function quorum(uint256 blockNumber) external view returns (uint256)
+```
+
+module:user-config
+
+*Minimum number of cast voted required for a proposal to be successful. Note: The `blockNumber` parameter corresponds to the snaphot used for counting vote. This allows to scale the quroum depending on values such as the totalSupply of a token at this block (see {ERC20Votes}).*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### state
+
+```solidity
+function state(uint256 proposalId) external view returns (enum IGovernorUpgradeable.ProposalState)
+```
+
+
+
+*Overriden version of the {Governor-state} function with added support for the `Queued` and `Expired` status.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | enum IGovernorUpgradeable.ProposalState | undefined |
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
+```
+
+
+
+*See {IERC165-supportsInterface}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### timelock
+
+```solidity
+function timelock() external view returns (address)
+```
+
+
+
+*Public accessor to check the address of the timelock*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### updateTimelock
+
+```solidity
+function updateTimelock(contract ICompoundTimelockUpgradeable newTimelock) external nonpayable
+```
+
+
+
+*Public endpoint to update the underlying timelock instance. Restricted to the timelock itself, so updates must be proposed, scheduled and executed using the {Governor} workflow. For security reason, the timelock must be handed over to another admin before setting up a new one. The two operations (hand over the timelock) and do the update can be batched in a single proposal. Note that if the timelock admin has been handed over in a previous operation, we refuse updates made through the timelock if admin of the timelock has already been accepted and the operation is executed outside the scope of governance.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newTimelock | contract ICompoundTimelockUpgradeable | undefined |
+
+### version
+
+```solidity
+function version() external view returns (string)
+```
+
+
+
+*See {IGovernor-version}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### votingDelay
+
+```solidity
+function votingDelay() external view returns (uint256)
+```
+
+module:user-config
+
+*delay, in number of block, between the proposal is created and the vote starts. This can be increassed to leave time for users to buy voting power, of delegate it, before the voting of a proposal starts.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### votingPeriod
+
+```solidity
+function votingPeriod() external view returns (uint256)
+```
+
+module:user-config
+
+*delay, in number of blocks, between the vote start and vote ends. Note: the {votingDelay} can delay the start of the vote. This must be considered when setting the voting duration compared to the voting delay.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+
+
+## Events
+
+### ProposalCanceled
+
+```solidity
+event ProposalCanceled(uint256 proposalId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+
+### ProposalCreated
+
+```solidity
+event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+| proposer  | address | undefined |
+| targets  | address[] | undefined |
+| values  | uint256[] | undefined |
+| signatures  | string[] | undefined |
+| calldatas  | bytes[] | undefined |
+| startBlock  | uint256 | undefined |
+| endBlock  | uint256 | undefined |
+| description  | string | undefined |
+
+### ProposalExecuted
+
+```solidity
+event ProposalExecuted(uint256 proposalId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+
+### ProposalQueued
+
+```solidity
+event ProposalQueued(uint256 proposalId, uint256 eta)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+| eta  | uint256 | undefined |
 
 ### TimelockChange
 
@@ -127,120 +590,36 @@ mapping(uint256 &#x3D;&gt; struct GovernorTimelockCompoundUpgradeable.ProposalTi
 event TimelockChange(address oldTimelock, address newTimelock)
 ```
 
-_Emitted when the timelock controller used for proposal execution is modified._
 
-### __GovernorTimelockCompound_init
 
-```solidity
-function __GovernorTimelockCompound_init(contract ICompoundTimelockUpgradeable timelockAddress) internal
-```
+*Emitted when the timelock controller used for proposal execution is modified.*
 
-_Set the timelock._
+#### Parameters
 
-### __GovernorTimelockCompound_init_unchained
+| Name | Type | Description |
+|---|---|---|
+| oldTimelock  | address | undefined |
+| newTimelock  | address | undefined |
 
-```solidity
-function __GovernorTimelockCompound_init_unchained(contract ICompoundTimelockUpgradeable timelockAddress) internal
-```
-
-### supportsInterface
+### VoteCast
 
 ```solidity
-function supportsInterface(bytes4 interfaceId) public view virtual returns (bool)
+event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)
 ```
 
-_See {IERC165-supportsInterface}._
 
-### state
 
-```solidity
-function state(uint256 proposalId) public view virtual returns (enum IGovernorUpgradeable.ProposalState)
-```
 
-_Overriden version of the {Governor-state} function with added support for the &#x60;Queued&#x60; and &#x60;Expired&#x60; status._
 
-### timelock
+#### Parameters
 
-```solidity
-function timelock() public view virtual returns (address)
-```
+| Name | Type | Description |
+|---|---|---|
+| voter `indexed` | address | undefined |
+| proposalId  | uint256 | undefined |
+| support  | uint8 | undefined |
+| weight  | uint256 | undefined |
+| reason  | string | undefined |
 
-_Public accessor to check the address of the timelock_
 
-### proposalEta
-
-```solidity
-function proposalEta(uint256 proposalId) public view virtual returns (uint256)
-```
-
-_Public accessor to check the eta of a queued proposal_
-
-### queue
-
-```solidity
-function queue(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) public virtual returns (uint256)
-```
-
-_Function to queue a proposal to the timelock._
-
-### _execute
-
-```solidity
-function _execute(uint256 proposalId, address[] targets, uint256[] values, bytes[] calldatas, bytes32) internal virtual
-```
-
-_Overriden execute function that run the already queued proposal through the timelock._
-
-### _cancel
-
-```solidity
-function _cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) internal virtual returns (uint256)
-```
-
-_Overriden version of the {Governor-_cancel} function to cancel the timelocked proposal if it as already
-been queued._
-
-### _executor
-
-```solidity
-function _executor() internal view virtual returns (address)
-```
-
-_Address through which the governor executes action. In this case, the timelock._
-
-### __acceptAdmin
-
-```solidity
-function __acceptAdmin() public
-```
-
-_Accept admin right over the timelock._
-
-### updateTimelock
-
-```solidity
-function updateTimelock(contract ICompoundTimelockUpgradeable newTimelock) external virtual
-```
-
-_Public endpoint to update the underlying timelock instance. Restricted to the timelock itself, so updates
-must be proposed, scheduled and executed using the {Governor} workflow.
-
-For security reason, the timelock must be handed over to another admin before setting up a new one. The two
-operations (hand over the timelock) and do the update can be batched in a single proposal.
-
-Note that if the timelock admin has been handed over in a previous operation, we refuse updates made through the
-timelock if admin of the timelock has already been accepted and the operation is executed outside the scope of
-governance._
-
-### _updateTimelock
-
-```solidity
-function _updateTimelock(contract ICompoundTimelockUpgradeable newTimelock) private
-```
-
-### __gap
-
-```solidity
-uint256[48] __gap
-```
 

@@ -1,36 +1,37 @@
-# Solidity API
+# ERC2771Context
 
-## ERC2771Context
 
-_Context variant with ERC2771 support._
 
-### _trustedForwarder
 
-```solidity
-address _trustedForwarder
-```
 
-### constructor
 
-```solidity
-constructor(address trustedForwarder) internal
-```
+
+*Context variant with ERC2771 support.*
+
+## Methods
 
 ### isTrustedForwarder
 
 ```solidity
-function isTrustedForwarder(address forwarder) public view virtual returns (bool)
+function isTrustedForwarder(address forwarder) external view returns (bool)
 ```
 
-### _msgSender
 
-```solidity
-function _msgSender() internal view virtual returns (address sender)
-```
 
-### _msgData
 
-```solidity
-function _msgData() internal view virtual returns (bytes)
-```
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| forwarder | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
 

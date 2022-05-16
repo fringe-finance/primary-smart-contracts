@@ -1,80 +1,555 @@
-# Solidity API
+# TimelockController
 
-## TimelockController
 
-_Contract module which acts as a timelocked controller. When set as the
-owner of an &#x60;Ownable&#x60; smart contract, it enforces a timelock on all
-&#x60;onlyOwner&#x60; maintenance operations. This gives time for users of the
-controlled contract to exit before a potentially dangerous maintenance
-operation is applied.
 
-By default, this contract is self administered, meaning administration tasks
-have to go through the timelock process. The proposer (resp executor) role
-is in charge of proposing (resp executing) operations. A common use case is
-to position this {TimelockController} as the owner of a smart contract, with
-a multisig or a DAO as the sole proposer.
 
-_Available since v3.3.__
 
-### TIMELOCK_ADMIN_ROLE
+
+
+*Contract module which acts as a timelocked controller. When set as the owner of an `Ownable` smart contract, it enforces a timelock on all `onlyOwner` maintenance operations. This gives time for users of the controlled contract to exit before a potentially dangerous maintenance operation is applied. By default, this contract is self administered, meaning administration tasks have to go through the timelock process. The proposer (resp executor) role is in charge of proposing (resp executing) operations. A common use case is to position this {TimelockController} as the owner of a smart contract, with a multisig or a DAO as the sole proposer. _Available since v3.3._*
+
+## Methods
+
+### DEFAULT_ADMIN_ROLE
 
 ```solidity
-bytes32 TIMELOCK_ADMIN_ROLE
+function DEFAULT_ADMIN_ROLE() external view returns (bytes32)
 ```
 
-### PROPOSER_ROLE
 
-```solidity
-bytes32 PROPOSER_ROLE
-```
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### EXECUTOR_ROLE
 
 ```solidity
-bytes32 EXECUTOR_ROLE
+function EXECUTOR_ROLE() external view returns (bytes32)
 ```
 
-### _DONE_TIMESTAMP
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### PROPOSER_ROLE
 
 ```solidity
-uint256 _DONE_TIMESTAMP
+function PROPOSER_ROLE() external view returns (bytes32)
 ```
 
-### _timestamps
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### TIMELOCK_ADMIN_ROLE
 
 ```solidity
-mapping(bytes32 &#x3D;&gt; uint256) _timestamps
+function TIMELOCK_ADMIN_ROLE() external view returns (bytes32)
 ```
 
-### _minDelay
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### cancel
 
 ```solidity
-uint256 _minDelay
+function cancel(bytes32 id) external nonpayable
 ```
 
-### CallScheduled
+
+
+*Cancel an operation. Requirements: - the caller must have the &#39;proposer&#39; role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+### execute
 
 ```solidity
-event CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)
+function execute(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt) external payable
 ```
 
-_Emitted when a call is scheduled as part of operation &#x60;id&#x60;._
+
+
+*Execute an (ready) operation containing a single transaction. Emits a {CallExecuted} event. Requirements: - the caller must have the &#39;executor&#39; role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| target | address | undefined |
+| value | uint256 | undefined |
+| data | bytes | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+
+### executeBatch
+
+```solidity
+function executeBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt) external payable
+```
+
+
+
+*Execute an (ready) operation containing a batch of transactions. Emits one {CallExecuted} event per transaction in the batch. Requirements: - the caller must have the &#39;executor&#39; role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| datas | bytes[] | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+
+### getMinDelay
+
+```solidity
+function getMinDelay() external view returns (uint256 duration)
+```
+
+
+
+*Returns the minimum delay for an operation to become valid. This value can be changed by executing an operation that calls `updateDelay`.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| duration | uint256 | undefined |
+
+### getRoleAdmin
+
+```solidity
+function getRoleAdmin(bytes32 role) external view returns (bytes32)
+```
+
+
+
+*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {_setRoleAdmin}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### getTimestamp
+
+```solidity
+function getTimestamp(bytes32 id) external view returns (uint256 timestamp)
+```
+
+
+
+*Returns the timestamp at with an operation becomes ready (0 for unset operations, 1 for done operations).*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| timestamp | uint256 | undefined |
+
+### grantRole
+
+```solidity
+function grantRole(bytes32 role, address account) external nonpayable
+```
+
+
+
+*Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``&#39;s admin role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+### hasRole
+
+```solidity
+function hasRole(bytes32 role, address account) external view returns (bool)
+```
+
+
+
+*Returns `true` if `account` has been granted `role`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### hashOperation
+
+```solidity
+function hashOperation(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt) external pure returns (bytes32 hash)
+```
+
+
+
+*Returns the identifier of an operation containing a single transaction.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| target | address | undefined |
+| value | uint256 | undefined |
+| data | bytes | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| hash | bytes32 | undefined |
+
+### hashOperationBatch
+
+```solidity
+function hashOperationBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt) external pure returns (bytes32 hash)
+```
+
+
+
+*Returns the identifier of an operation containing a batch of transactions.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| datas | bytes[] | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| hash | bytes32 | undefined |
+
+### isOperation
+
+```solidity
+function isOperation(bytes32 id) external view returns (bool pending)
+```
+
+
+
+*Returns whether an id correspond to a registered operation. This includes both Pending, Ready and Done operations.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| pending | bool | undefined |
+
+### isOperationDone
+
+```solidity
+function isOperationDone(bytes32 id) external view returns (bool done)
+```
+
+
+
+*Returns whether an operation is done or not.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| done | bool | undefined |
+
+### isOperationPending
+
+```solidity
+function isOperationPending(bytes32 id) external view returns (bool pending)
+```
+
+
+
+*Returns whether an operation is pending or not.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| pending | bool | undefined |
+
+### isOperationReady
+
+```solidity
+function isOperationReady(bytes32 id) external view returns (bool ready)
+```
+
+
+
+*Returns whether an operation is ready or not.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| ready | bool | undefined |
+
+### renounceRole
+
+```solidity
+function renounceRole(bytes32 role, address account) external nonpayable
+```
+
+
+
+*Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+### revokeRole
+
+```solidity
+function revokeRole(bytes32 role, address account) external nonpayable
+```
+
+
+
+*Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``&#39;s admin role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+### schedule
+
+```solidity
+function schedule(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt, uint256 delay) external nonpayable
+```
+
+
+
+*Schedule an operation containing a single transaction. Emits a {CallScheduled} event. Requirements: - the caller must have the &#39;proposer&#39; role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| target | address | undefined |
+| value | uint256 | undefined |
+| data | bytes | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+| delay | uint256 | undefined |
+
+### scheduleBatch
+
+```solidity
+function scheduleBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt, uint256 delay) external nonpayable
+```
+
+
+
+*Schedule an operation containing a batch of transactions. Emits one {CallScheduled} event per transaction in the batch. Requirements: - the caller must have the &#39;proposer&#39; role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| datas | bytes[] | undefined |
+| predecessor | bytes32 | undefined |
+| salt | bytes32 | undefined |
+| delay | uint256 | undefined |
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
+```
+
+
+
+*See {IERC165-supportsInterface}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### updateDelay
+
+```solidity
+function updateDelay(uint256 newDelay) external nonpayable
+```
+
+
+
+*Changes the minimum timelock duration for future operations. Emits a {MinDelayChange} event. Requirements: - the caller must be the timelock itself. This can only be achieved by scheduling and later executing an operation where the timelock is the target and the data is the ABI-encoded call to this function.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newDelay | uint256 | undefined |
+
+
+
+## Events
 
 ### CallExecuted
 
 ```solidity
-event CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)
+event CallExecuted(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data)
 ```
 
-_Emitted when a call is performed as part of operation &#x60;id&#x60;._
+
+
+*Emitted when a call is performed as part of operation `id`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
+| index `indexed` | uint256 | undefined |
+| target  | address | undefined |
+| value  | uint256 | undefined |
+| data  | bytes | undefined |
+
+### CallScheduled
+
+```solidity
+event CallScheduled(bytes32 indexed id, uint256 indexed index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)
+```
+
+
+
+*Emitted when a call is scheduled as part of operation `id`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
+| index `indexed` | uint256 | undefined |
+| target  | address | undefined |
+| value  | uint256 | undefined |
+| data  | bytes | undefined |
+| predecessor  | bytes32 | undefined |
+| delay  | uint256 | undefined |
 
 ### Cancelled
 
 ```solidity
-event Cancelled(bytes32 id)
+event Cancelled(bytes32 indexed id)
 ```
 
-_Emitted when operation &#x60;id&#x60; is cancelled._
+
+
+*Emitted when operation `id` is cancelled.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| id `indexed` | bytes32 | undefined |
 
 ### MinDelayChange
 
@@ -82,219 +557,70 @@ _Emitted when operation &#x60;id&#x60; is cancelled._
 event MinDelayChange(uint256 oldDuration, uint256 newDuration)
 ```
 
-_Emitted when the minimum delay for future operations is modified._
 
-### constructor
 
-```solidity
-constructor(uint256 minDelay, address[] proposers, address[] executors) public
-```
+*Emitted when the minimum delay for future operations is modified.*
 
-_Initializes the contract with a given &#x60;minDelay&#x60;._
+#### Parameters
 
-### onlyRoleOrOpenRole
+| Name | Type | Description |
+|---|---|---|
+| oldDuration  | uint256 | undefined |
+| newDuration  | uint256 | undefined |
 
-```solidity
-modifier onlyRoleOrOpenRole(bytes32 role)
-```
-
-_Modifier to make a function callable only by a certain role. In
-addition to checking the sender&#x27;s role, &#x60;address(0)&#x60; &#x27;s role is also
-considered. Granting a role to &#x60;address(0)&#x60; is equivalent to enabling
-this role for everyone._
-
-### receive
+### RoleAdminChanged
 
 ```solidity
-receive() external payable
+event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
 ```
 
-_Contract might receive/hold ETH as part of the maintenance process._
 
-### isOperation
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| previousAdminRole `indexed` | bytes32 | undefined |
+| newAdminRole `indexed` | bytes32 | undefined |
+
+### RoleGranted
 
 ```solidity
-function isOperation(bytes32 id) public view virtual returns (bool pending)
+event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
 ```
 
-_Returns whether an id correspond to a registered operation. This
-includes both Pending, Ready and Done operations._
 
-### isOperationPending
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+
+### RoleRevoked
 
 ```solidity
-function isOperationPending(bytes32 id) public view virtual returns (bool pending)
+event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
 ```
 
-_Returns whether an operation is pending or not._
 
-### isOperationReady
 
-```solidity
-function isOperationReady(bytes32 id) public view virtual returns (bool ready)
-```
 
-_Returns whether an operation is ready or not._
 
-### isOperationDone
+#### Parameters
 
-```solidity
-function isOperationDone(bytes32 id) public view virtual returns (bool done)
-```
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
 
-_Returns whether an operation is done or not._
 
-### getTimestamp
-
-```solidity
-function getTimestamp(bytes32 id) public view virtual returns (uint256 timestamp)
-```
-
-_Returns the timestamp at with an operation becomes ready (0 for
-unset operations, 1 for done operations)._
-
-### getMinDelay
-
-```solidity
-function getMinDelay() public view virtual returns (uint256 duration)
-```
-
-_Returns the minimum delay for an operation to become valid.
-
-This value can be changed by executing an operation that calls &#x60;updateDelay&#x60;._
-
-### hashOperation
-
-```solidity
-function hashOperation(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt) public pure virtual returns (bytes32 hash)
-```
-
-_Returns the identifier of an operation containing a single
-transaction._
-
-### hashOperationBatch
-
-```solidity
-function hashOperationBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt) public pure virtual returns (bytes32 hash)
-```
-
-_Returns the identifier of an operation containing a batch of
-transactions._
-
-### schedule
-
-```solidity
-function schedule(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt, uint256 delay) public virtual
-```
-
-_Schedule an operation containing a single transaction.
-
-Emits a {CallScheduled} event.
-
-Requirements:
-
-- the caller must have the &#x27;proposer&#x27; role._
-
-### scheduleBatch
-
-```solidity
-function scheduleBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt, uint256 delay) public virtual
-```
-
-_Schedule an operation containing a batch of transactions.
-
-Emits one {CallScheduled} event per transaction in the batch.
-
-Requirements:
-
-- the caller must have the &#x27;proposer&#x27; role._
-
-### _schedule
-
-```solidity
-function _schedule(bytes32 id, uint256 delay) private
-```
-
-_Schedule an operation that is to becomes valid after a given delay._
-
-### cancel
-
-```solidity
-function cancel(bytes32 id) public virtual
-```
-
-_Cancel an operation.
-
-Requirements:
-
-- the caller must have the &#x27;proposer&#x27; role._
-
-### execute
-
-```solidity
-function execute(address target, uint256 value, bytes data, bytes32 predecessor, bytes32 salt) public payable virtual
-```
-
-_Execute an (ready) operation containing a single transaction.
-
-Emits a {CallExecuted} event.
-
-Requirements:
-
-- the caller must have the &#x27;executor&#x27; role._
-
-### executeBatch
-
-```solidity
-function executeBatch(address[] targets, uint256[] values, bytes[] datas, bytes32 predecessor, bytes32 salt) public payable virtual
-```
-
-_Execute an (ready) operation containing a batch of transactions.
-
-Emits one {CallExecuted} event per transaction in the batch.
-
-Requirements:
-
-- the caller must have the &#x27;executor&#x27; role._
-
-### _beforeCall
-
-```solidity
-function _beforeCall(bytes32 id, bytes32 predecessor) private view
-```
-
-_Checks before execution of an operation&#x27;s calls._
-
-### _afterCall
-
-```solidity
-function _afterCall(bytes32 id) private
-```
-
-_Checks after execution of an operation&#x27;s calls._
-
-### _call
-
-```solidity
-function _call(bytes32 id, uint256 index, address target, uint256 value, bytes data) private
-```
-
-_Execute an operation&#x27;s call.
-
-Emits a {CallExecuted} event._
-
-### updateDelay
-
-```solidity
-function updateDelay(uint256 newDelay) external virtual
-```
-
-_Changes the minimum timelock duration for future operations.
-
-Emits a {MinDelayChange} event.
-
-Requirements:
-
-- the caller must be the timelock itself. This can only be achieved by scheduling and later executing
-an operation where the timelock is the target and the data is the ABI-encoded call to this function._
 

@@ -1,55 +1,84 @@
-# Solidity API
+# MinimalForwarder
 
-## MinimalForwarder
 
-_Simple minimal forwarder to be used together with an ERC2771 compatible contract. See {ERC2771Context}._
 
-### ForwardRequest
 
-```solidity
-struct ForwardRequest {
-  address from;
-  address to;
-  uint256 value;
-  uint256 gas;
-  uint256 nonce;
-  bytes data;
-}
-```
 
-### _TYPEHASH
 
-```solidity
-bytes32 _TYPEHASH
-```
 
-### _nonces
+*Simple minimal forwarder to be used together with an ERC2771 compatible contract. See {ERC2771Context}.*
 
-```solidity
-mapping(address &#x3D;&gt; uint256) _nonces
-```
-
-### constructor
-
-```solidity
-constructor() public
-```
-
-### getNonce
-
-```solidity
-function getNonce(address from) public view returns (uint256)
-```
-
-### verify
-
-```solidity
-function verify(struct MinimalForwarder.ForwardRequest req, bytes signature) public view returns (bool)
-```
+## Methods
 
 ### execute
 
 ```solidity
-function execute(struct MinimalForwarder.ForwardRequest req, bytes signature) public payable returns (bool, bytes)
+function execute(MinimalForwarder.ForwardRequest req, bytes signature) external payable returns (bool, bytes)
 ```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| req | MinimalForwarder.ForwardRequest | undefined |
+| signature | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+| _1 | bytes | undefined |
+
+### getNonce
+
+```solidity
+function getNonce(address from) external view returns (uint256)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### verify
+
+```solidity
+function verify(MinimalForwarder.ForwardRequest req, bytes signature) external view returns (bool)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| req | MinimalForwarder.ForwardRequest | undefined |
+| signature | bytes | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
 

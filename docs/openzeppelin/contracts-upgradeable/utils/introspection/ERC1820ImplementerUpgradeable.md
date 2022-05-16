@@ -1,61 +1,38 @@
-# Solidity API
+# ERC1820ImplementerUpgradeable
 
-## ERC1820ImplementerUpgradeable
 
-_Implementation of the {IERC1820Implementer} interface.
 
-Contracts may inherit from this and call {_registerInterfaceForAddress} to
-declare their willingness to be implementers.
-{IERC1820Registry-setInterfaceImplementer} should then be called for the
-registration to be complete._
 
-### __ERC1820Implementer_init
 
-```solidity
-function __ERC1820Implementer_init() internal
-```
 
-### __ERC1820Implementer_init_unchained
 
-```solidity
-function __ERC1820Implementer_init_unchained() internal
-```
+*Implementation of the {IERC1820Implementer} interface. Contracts may inherit from this and call {_registerInterfaceForAddress} to declare their willingness to be implementers. {IERC1820Registry-setInterfaceImplementer} should then be called for the registration to be complete.*
 
-### _ERC1820_ACCEPT_MAGIC
-
-```solidity
-bytes32 _ERC1820_ACCEPT_MAGIC
-```
-
-### _supportedInterfaces
-
-```solidity
-mapping(bytes32 &#x3D;&gt; mapping(address &#x3D;&gt; bool)) _supportedInterfaces
-```
+## Methods
 
 ### canImplementInterfaceForAddress
 
 ```solidity
-function canImplementInterfaceForAddress(bytes32 interfaceHash, address account) public view virtual returns (bytes32)
+function canImplementInterfaceForAddress(bytes32 interfaceHash, address account) external view returns (bytes32)
 ```
 
-_See {IERC1820Implementer-canImplementInterfaceForAddress}._
 
-### _registerInterfaceForAddress
 
-```solidity
-function _registerInterfaceForAddress(bytes32 interfaceHash, address account) internal virtual
-```
+*See {IERC1820Implementer-canImplementInterfaceForAddress}.*
 
-_Declares the contract as willing to be an implementer of
-&#x60;interfaceHash&#x60; for &#x60;account&#x60;.
+#### Parameters
 
-See {IERC1820Registry-setInterfaceImplementer} and
-{IERC1820Registry-interfaceHash}._
+| Name | Type | Description |
+|---|---|---|
+| interfaceHash | bytes32 | undefined |
+| account | address | undefined |
 
-### __gap
+#### Returns
 
-```solidity
-uint256[49] __gap
-```
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+
+
 

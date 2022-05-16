@@ -1,11 +1,14 @@
-# Solidity API
+# IERC1820Implementer
 
-## IERC1820Implementer
 
-_Interface for an ERC1820 implementer, as defined in the
-https://eips.ethereum.org/EIPS/eip-1820#interface-implementation-erc1820implementerinterface[EIP].
-Used by contracts that will be registered as implementers in the
-{IERC1820Registry}._
+
+
+
+
+
+*Interface for an ERC1820 implementer, as defined in the https://eips.ethereum.org/EIPS/eip-1820#interface-implementation-erc1820implementerinterface[EIP]. Used by contracts that will be registered as implementers in the {IERC1820Registry}.*
+
+## Methods
 
 ### canImplementInterfaceForAddress
 
@@ -13,8 +16,23 @@ Used by contracts that will be registered as implementers in the
 function canImplementInterfaceForAddress(bytes32 interfaceHash, address account) external view returns (bytes32)
 ```
 
-_Returns a special value (&#x60;ERC1820_ACCEPT_MAGIC&#x60;) if this contract
-implements &#x60;interfaceHash&#x60; for &#x60;account&#x60;.
 
-See {IERC1820Registry-setInterfaceImplementer}._
+
+*Returns a special value (`ERC1820_ACCEPT_MAGIC`) if this contract implements `interfaceHash` for `account`. See {IERC1820Registry-setInterfaceImplementer}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceHash | bytes32 | undefined |
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+
+
 

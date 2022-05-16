@@ -1,218 +1,551 @@
-# Solidity API
+# ERC20Votes
 
-## ERC20Votes
 
-_Extension of ERC20 to support Compound-like voting and delegation. This version is more generic than Compound&#x27;s,
-and supports token supply up to 2^224^ - 1, while COMP is limited to 2^96^ - 1.
 
-NOTE: If exact COMP compatibility is required, use the {ERC20VotesComp} variant of this module.
 
-This extension keeps a history (checkpoints) of each account&#x27;s vote power. Vote power can be delegated either
-by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting
-power can be queried through the public accessors {getVotes} and {getPastVotes}.
 
-By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it
-requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked.
-Enabling self-delegation can easily be done by overriding the {delegates} function. Keep in mind however that this
-will significantly increase the base gas cost of transfers.
 
-_Available since v4.2.__
 
-### Checkpoint
+*Extension of ERC20 to support Compound-like voting and delegation. This version is more generic than Compound&#39;s, and supports token supply up to 2^224^ - 1, while COMP is limited to 2^96^ - 1. NOTE: If exact COMP compatibility is required, use the {ERC20VotesComp} variant of this module. This extension keeps a history (checkpoints) of each account&#39;s vote power. Vote power can be delegated either by calling the {delegate} function directly, or by providing a signature to be used with {delegateBySig}. Voting power can be queried through the public accessors {getVotes} and {getPastVotes}. By default, token balance does not account for voting power. This makes transfers cheaper. The downside is that it requires users to delegate to themselves in order to activate checkpoints and have their voting power tracked. Enabling self-delegation can easily be done by overriding the {delegates} function. Keep in mind however that this will significantly increase the base gas cost of transfers. _Available since v4.2._*
+
+## Methods
+
+### DOMAIN_SEPARATOR
 
 ```solidity
-struct Checkpoint {
-  uint32 fromBlock;
-  uint224 votes;
-}
+function DOMAIN_SEPARATOR() external view returns (bytes32)
 ```
 
-### _DELEGATION_TYPEHASH
+
+
+*See {IERC20Permit-DOMAIN_SEPARATOR}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### allowance
 
 ```solidity
-bytes32 _DELEGATION_TYPEHASH
+function allowance(address owner, address spender) external view returns (uint256)
 ```
 
-### _delegates
+
+
+*See {IERC20-allowance}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### approve
 
 ```solidity
-mapping(address &#x3D;&gt; address) _delegates
+function approve(address spender, uint256 amount) external nonpayable returns (bool)
 ```
 
-### _checkpoints
+
+
+*See {IERC20-approve}. Requirements: - `spender` cannot be the zero address.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### balanceOf
 
 ```solidity
-mapping(address &#x3D;&gt; struct ERC20Votes.Checkpoint[]) _checkpoints
+function balanceOf(address account) external view returns (uint256)
 ```
 
-### _totalSupplyCheckpoints
 
-```solidity
-struct ERC20Votes.Checkpoint[] _totalSupplyCheckpoints
-```
 
-### DelegateChanged
+*See {IERC20-balanceOf}.*
 
-```solidity
-event DelegateChanged(address delegator, address fromDelegate, address toDelegate)
-```
+#### Parameters
 
-_Emitted when an account changes their delegate._
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
 
-### DelegateVotesChanged
+#### Returns
 
-```solidity
-event DelegateVotesChanged(address delegate, uint256 previousBalance, uint256 newBalance)
-```
-
-_Emitted when a token transfer or delegate change results in changes to an account&#x27;s voting power._
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### checkpoints
 
 ```solidity
-function checkpoints(address account, uint32 pos) public view virtual returns (struct ERC20Votes.Checkpoint)
+function checkpoints(address account, uint32 pos) external view returns (struct ERC20Votes.Checkpoint)
 ```
 
-_Get the &#x60;pos&#x60;-th checkpoint for &#x60;account&#x60;._
 
-### numCheckpoints
+
+*Get the `pos`-th checkpoint for `account`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| pos | uint32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | ERC20Votes.Checkpoint | undefined |
+
+### decimals
 
 ```solidity
-function numCheckpoints(address account) public view virtual returns (uint32)
+function decimals() external view returns (uint8)
 ```
 
-_Get number of checkpoints for &#x60;account&#x60;._
 
-### delegates
+
+*Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint8 | undefined |
+
+### decreaseAllowance
 
 ```solidity
-function delegates(address account) public view virtual returns (address)
+function decreaseAllowance(address spender, uint256 subtractedValue) external nonpayable returns (bool)
 ```
 
-_Get the address &#x60;account&#x60; is currently delegating to._
 
-### getVotes
 
-```solidity
-function getVotes(address account) public view returns (uint256)
-```
+*Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`.*
 
-_Gets the current votes balance for &#x60;account&#x60;_
+#### Parameters
 
-### getPastVotes
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| subtractedValue | uint256 | undefined |
 
-```solidity
-function getPastVotes(address account, uint256 blockNumber) public view returns (uint256)
-```
+#### Returns
 
-_Retrieve the number of votes for &#x60;account&#x60; at the end of &#x60;blockNumber&#x60;.
-
-Requirements:
-
-- &#x60;blockNumber&#x60; must have been already mined_
-
-### getPastTotalSupply
-
-```solidity
-function getPastTotalSupply(uint256 blockNumber) public view returns (uint256)
-```
-
-_Retrieve the &#x60;totalSupply&#x60; at the end of &#x60;blockNumber&#x60;. Note, this value is the sum of all balances.
-It is but NOT the sum of all the delegated votes!
-
-Requirements:
-
-- &#x60;blockNumber&#x60; must have been already mined_
-
-### _checkpointsLookup
-
-```solidity
-function _checkpointsLookup(struct ERC20Votes.Checkpoint[] ckpts, uint256 blockNumber) private view returns (uint256)
-```
-
-_Lookup a value in a list of (sorted) checkpoints._
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### delegate
 
 ```solidity
-function delegate(address delegatee) public virtual
+function delegate(address delegatee) external nonpayable
 ```
 
-_Delegate votes from the sender to &#x60;delegatee&#x60;._
+
+
+*Delegate votes from the sender to `delegatee`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| delegatee | address | undefined |
 
 ### delegateBySig
 
 ```solidity
-function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) public virtual
+function delegateBySig(address delegatee, uint256 nonce, uint256 expiry, uint8 v, bytes32 r, bytes32 s) external nonpayable
 ```
 
-_Delegates votes from signer to &#x60;delegatee&#x60;_
 
-### _maxSupply
+
+*Delegates votes from signer to `delegatee`*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| delegatee | address | undefined |
+| nonce | uint256 | undefined |
+| expiry | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+### delegates
 
 ```solidity
-function _maxSupply() internal view virtual returns (uint224)
+function delegates(address account) external view returns (address)
 ```
 
-_Maximum token supply. Defaults to &#x60;type(uint224).max&#x60; (2^224^ - 1)._
 
-### _mint
+
+*Get the address `account` is currently delegating to.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### getPastTotalSupply
 
 ```solidity
-function _mint(address account, uint256 amount) internal virtual
+function getPastTotalSupply(uint256 blockNumber) external view returns (uint256)
 ```
 
-_Snapshots the totalSupply after it has been increased._
 
-### _burn
+
+*Retrieve the `totalSupply` at the end of `blockNumber`. Note, this value is the sum of all balances. It is but NOT the sum of all the delegated votes! Requirements: - `blockNumber` must have been already mined*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### getPastVotes
 
 ```solidity
-function _burn(address account, uint256 amount) internal virtual
+function getPastVotes(address account, uint256 blockNumber) external view returns (uint256)
 ```
 
-_Snapshots the totalSupply after it has been decreased._
 
-### _afterTokenTransfer
+
+*Retrieve the number of votes for `account` at the end of `blockNumber`. Requirements: - `blockNumber` must have been already mined*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### getVotes
 
 ```solidity
-function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual
+function getVotes(address account) external view returns (uint256)
 ```
 
-_Move voting power when tokens are transferred.
 
-Emits a {DelegateVotesChanged} event._
 
-### _delegate
+*Gets the current votes balance for `account`*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### increaseAllowance
 
 ```solidity
-function _delegate(address delegator, address delegatee) internal virtual
+function increaseAllowance(address spender, uint256 addedValue) external nonpayable returns (bool)
 ```
 
-_Change delegation for &#x60;delegator&#x60; to &#x60;delegatee&#x60;.
 
-Emits events {DelegateChanged} and {DelegateVotesChanged}._
 
-### _moveVotingPower
+*Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| addedValue | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### name
 
 ```solidity
-function _moveVotingPower(address src, address dst, uint256 amount) private
+function name() external view returns (string)
 ```
 
-### _writeCheckpoint
+
+
+*Returns the name of the token.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### nonces
 
 ```solidity
-function _writeCheckpoint(struct ERC20Votes.Checkpoint[] ckpts, function (uint256,uint256) view returns (uint256) op, uint256 delta) private returns (uint256 oldWeight, uint256 newWeight)
+function nonces(address owner) external view returns (uint256)
 ```
 
-### _add
+
+
+*See {IERC20Permit-nonces}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### numCheckpoints
 
 ```solidity
-function _add(uint256 a, uint256 b) private pure returns (uint256)
+function numCheckpoints(address account) external view returns (uint32)
 ```
 
-### _subtract
+
+
+*Get number of checkpoints for `account`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint32 | undefined |
+
+### permit
 
 ```solidity
-function _subtract(uint256 a, uint256 b) private pure returns (uint256)
+function permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external nonpayable
 ```
+
+
+
+*See {IERC20Permit-permit}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+| value | uint256 | undefined |
+| deadline | uint256 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+### symbol
+
+```solidity
+function symbol() external view returns (string)
+```
+
+
+
+*Returns the symbol of the token, usually a shorter version of the name.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### totalSupply
+
+```solidity
+function totalSupply() external view returns (uint256)
+```
+
+
+
+*See {IERC20-totalSupply}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### transfer
+
+```solidity
+function transfer(address recipient, uint256 amount) external nonpayable returns (bool)
+```
+
+
+
+*See {IERC20-transfer}. Requirements: - `recipient` cannot be the zero address. - the caller must have a balance of at least `amount`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### transferFrom
+
+```solidity
+function transferFrom(address sender, address recipient, uint256 amount) external nonpayable returns (bool)
+```
+
+
+
+*See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for ``sender``&#39;s tokens of at least `amount`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| sender | address | undefined |
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
+## Events
+
+### Approval
+
+```solidity
+event Approval(address indexed owner, address indexed spender, uint256 value)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner `indexed` | address | undefined |
+| spender `indexed` | address | undefined |
+| value  | uint256 | undefined |
+
+### DelegateChanged
+
+```solidity
+event DelegateChanged(address indexed delegator, address indexed fromDelegate, address indexed toDelegate)
+```
+
+
+
+*Emitted when an account changes their delegate.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| delegator `indexed` | address | undefined |
+| fromDelegate `indexed` | address | undefined |
+| toDelegate `indexed` | address | undefined |
+
+### DelegateVotesChanged
+
+```solidity
+event DelegateVotesChanged(address indexed delegate, uint256 previousBalance, uint256 newBalance)
+```
+
+
+
+*Emitted when a token transfer or delegate change results in changes to an account&#39;s voting power.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| delegate `indexed` | address | undefined |
+| previousBalance  | uint256 | undefined |
+| newBalance  | uint256 | undefined |
+
+### Transfer
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
+| value  | uint256 | undefined |
+
+
 

@@ -1,101 +1,214 @@
-# Solidity API
+# BToken
 
-## BToken
+*Compound*
+
+> Compound&#39;s CToken Contract
 
 Abstract base for CTokens
 
-### initialize
+
+
+## Methods
+
+### _acceptAdmin
 
 ```solidity
-function initialize(contract Bondtroller bondtroller_, contract InterestRateModel interestRateModel_, uint256 initialExchangeRateMantissa_, string name_, string symbol_, uint8 decimals_) public
+function _acceptAdmin() external nonpayable returns (uint256)
 ```
 
-Initialize the money market
+Accepts transfer of admin rights. msg.sender must be pendingAdmin
+
+*Admin function for pending admin to accept role and update admin*
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| bondtroller_ | contract Bondtroller | The address of the Bondtroller |
-| interestRateModel_ | contract InterestRateModel | The address of the interest rate model |
-| initialExchangeRateMantissa_ | uint256 | The initial exchange rate, scaled by 1e18 |
-| name_ | string | EIP-20 name of this token |
-| symbol_ | string | EIP-20 symbol of this token |
-| decimals_ | uint8 | EIP-20 decimal precision of this token |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
 
-### transferTokens
+### _reduceReserves
 
 ```solidity
-function transferTokens(address spender, address src, address dst, uint256 tokens) internal returns (uint256)
+function _reduceReserves(uint256 reduceAmount) external nonpayable returns (uint256)
 ```
 
-Transfer &#x60;tokens&#x60; tokens from &#x60;src&#x60; to &#x60;dst&#x60; by &#x60;spender&#x60;
+Accrues interest and reduces reserves by transferring to admin
 
-_Called by both &#x60;transfer&#x60; and &#x60;transferFrom&#x60; internally_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| spender | address | The address of the account performing the transfer |
-| src | address | The address of the source account |
-| dst | address | The address of the destination account |
-| tokens | uint256 | The number of tokens to transfer |
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | Whether or not the transfer succeeded |
+|---|---|---|
+| reduceAmount | uint256 | Amount of reduction to reserves |
 
-### transfer
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### _setBondtroller
 
 ```solidity
-function transfer(address dst, uint256 amount) external returns (bool)
+function _setBondtroller(contract Bondtroller newBondtroller) external nonpayable returns (uint256)
 ```
 
-Transfer &#x60;amount&#x60; tokens from &#x60;msg.sender&#x60; to &#x60;dst&#x60;
+Sets a new bondtroller for the market
+
+*Admin function to set a new bondtroller*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| dst | address | The address of the destination account |
-| amount | uint256 | The number of tokens to transfer |
+|---|---|---|
+| newBondtroller | contract Bondtroller | undefined |
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | Whether or not the transfer succeeded |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
 
-### transferFrom
+### _setInterestRateModel
 
 ```solidity
-function transferFrom(address src, address dst, uint256 amount) external returns (bool)
+function _setInterestRateModel(contract InterestRateModel newInterestRateModel) external nonpayable returns (uint256)
 ```
 
-Transfer &#x60;amount&#x60; tokens from &#x60;src&#x60; to &#x60;dst&#x60;
+accrues interest and updates the interest rate model using _setInterestRateModelFresh
+
+*Admin function to accrue interest and update the interest rate model*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| src | address | The address of the source account |
-| dst | address | The address of the destination account |
-| amount | uint256 | The number of tokens to transfer |
+|---|---|---|
+| newInterestRateModel | contract InterestRateModel | the new interest rate model to use |
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | Whether or not the transfer succeeded |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
 
-### approve
+### _setPendingAdmin
 
 ```solidity
-function approve(address spender, uint256 amount) external returns (bool)
+function _setPendingAdmin(address payable newPendingAdmin) external nonpayable returns (uint256)
 ```
 
-Approve &#x60;spender&#x60; to transfer up to &#x60;amount&#x60; from &#x60;src&#x60;
+Begins transfer of admin rights. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.
 
-_This will overwrite the approval amount for &#x60;spender&#x60;
- and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)_
+*Admin function to begin change of admin. The newPendingAdmin must call `_acceptAdmin` to finalize the transfer.*
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| spender | address | The address of the account which may transfer tokens |
-| amount | uint256 | The number of tokens that are approved (-1 means infinite) |
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bool | Whether or not the approval succeeded |
+|---|---|---|
+| newPendingAdmin | address payable | New pending admin. |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### _setReserveFactor
+
+```solidity
+function _setReserveFactor(uint256 newReserveFactorMantissa) external nonpayable returns (uint256)
+```
+
+accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
+
+*Admin function to accrue interest and set a new reserve factor*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| newReserveFactorMantissa | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### accountTokens
+
+```solidity
+function accountTokens(address) external view returns (uint256)
+```
+
+Official record of token balances for each account
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### accrualBlockNumber
+
+```solidity
+function accrualBlockNumber() external view returns (uint256)
+```
+
+Block number that interest was last accrued at
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### accrueInterest
+
+```solidity
+function accrueInterest() external nonpayable returns (uint256)
+```
+
+Applies accrued interest to total borrows and reserves
+
+*This calculates interest accrued from the last checkpointed block   up to the current block and writes new checkpoint to storage.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### admin
+
+```solidity
+function admin() external view returns (address payable)
+```
+
+Administrator for this contract
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address payable | undefined |
 
 ### allowance
 
@@ -103,16 +216,45 @@ _This will overwrite the approval amount for &#x60;spender&#x60;
 function allowance(address owner, address spender) external view returns (uint256)
 ```
 
-Get the current allowance from &#x60;owner&#x60; for &#x60;spender&#x60;
+Get the current allowance from `owner` for `spender`
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | owner | address | The address of the account which owns the tokens to be spent |
 | spender | address | The address of the account which may transfer tokens |
 
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The number of tokens allowed to be spent (-1 means infinite) |
+|---|---|---|
+| _0 | uint256 | The number of tokens allowed to be spent (-1 means infinite) |
+
+### approve
+
+```solidity
+function approve(address spender, uint256 amount) external nonpayable returns (bool)
+```
+
+Approve `spender` to transfer up to `amount` from `src`
+
+*This will overwrite the approval amount for `spender`  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | The address of the account which may transfer tokens |
+| amount | uint256 | The number of tokens that are approved (-1 means infinite) |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | Whether or not the approval succeeded |
 
 ### balanceOf
 
@@ -120,33 +262,43 @@ Get the current allowance from &#x60;owner&#x60; for &#x60;spender&#x60;
 function balanceOf(address owner) external view returns (uint256)
 ```
 
-Get the token balance of the &#x60;owner&#x60;
+Get the token balance of the `owner`
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | owner | address | The address of the account to query |
 
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The number of tokens owned by &#x60;owner&#x60; |
+|---|---|---|
+| _0 | uint256 | The number of tokens owned by `owner` |
 
 ### balanceOfUnderlying
 
 ```solidity
-function balanceOfUnderlying(address owner) external returns (uint256)
+function balanceOfUnderlying(address owner) external nonpayable returns (uint256)
 ```
 
-Get the underlying balance of the &#x60;owner&#x60;
+Get the underlying balance of the `owner`
 
-_This also accrues interest in a transaction_
+*This also accrues interest in a transaction*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | owner | address | The address of the account to query |
 
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The amount of underlying owned by &#x60;owner&#x60; |
+|---|---|---|
+| _0 | uint256 | The amount of underlying owned by `owner` |
 
 ### balanceOfUnderlyingView
 
@@ -154,35 +306,99 @@ _This also accrues interest in a transaction_
 function balanceOfUnderlyingView(address owner) external view returns (uint256)
 ```
 
-### getAccountSnapshot
 
-```solidity
-function getAccountSnapshot(address account) external view returns (uint256, uint256, uint256, uint256)
-```
 
-Get a snapshot of the account&#x27;s balances, and the cached exchange rate
 
-_This is used by bondtroller to more efficiently perform liquidity checks._
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | Address of the account to snapshot |
+|---|---|---|
+| owner | address | undefined |
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (possible error, token balance, borrow balance, exchange rate mantissa) |
-| [1] | uint256 |  |
-| [2] | uint256 |  |
-| [3] | uint256 |  |
+|---|---|---|
+| _0 | uint256 | undefined |
 
-### getBlockNumber
+### bondtroller
 
 ```solidity
-function getBlockNumber() internal view returns (uint256)
+function bondtroller() external view returns (contract Bondtroller)
 ```
 
-_Function to simply retrieve block number
- This exists mainly for inheriting test contracts to stub this result._
+Contract which oversees inter-cToken operations
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | contract Bondtroller | undefined |
+
+### borrowBalanceCurrent
+
+```solidity
+function borrowBalanceCurrent(address account) external nonpayable returns (uint256)
+```
+
+Accrue interest to updated borrowIndex and then calculate account&#39;s borrow balance using the updated borrowIndex
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | The address whose balance should be calculated after updating borrowIndex |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The calculated balance |
+
+### borrowBalanceStored
+
+```solidity
+function borrowBalanceStored(address account) external view returns (uint256)
+```
+
+Return the borrow balance of account based on stored data
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | The address whose balance should be calculated |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The calculated balance |
+
+### borrowIndex
+
+```solidity
+function borrowIndex() external view returns (uint256)
+```
+
+Accumulator of the total earned interest rate since the opening of the market
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### borrowRatePerBlock
 
@@ -192,123 +408,90 @@ function borrowRatePerBlock() external view returns (uint256)
 
 Returns the current per-block borrow interest rate for this cToken
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The borrow interest rate per block, scaled by 1e18 |
 
-### supplyRatePerBlock
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The borrow interest rate per block, scaled by 1e18 |
+
+### decimals
 
 ```solidity
-function supplyRatePerBlock() external view returns (uint256)
+function decimals() external view returns (uint8)
 ```
 
-Returns the current per-block supply interest rate for this cToken
+EIP-20 token decimals for this token
+
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The supply interest rate per block, scaled by 1e18 |
-
-### totalBorrowsCurrent
-
-```solidity
-function totalBorrowsCurrent() external returns (uint256)
-```
-
-Returns the current total borrows plus accrued interest
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The total borrows with interest |
-
-### borrowBalanceCurrent
-
-```solidity
-function borrowBalanceCurrent(address account) external returns (uint256)
-```
-
-Accrue interest to updated borrowIndex and then calculate account&#x27;s borrow balance using the updated borrowIndex
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | The address whose balance should be calculated after updating borrowIndex |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The calculated balance |
-
-### borrowBalanceStored
-
-```solidity
-function borrowBalanceStored(address account) public view returns (uint256)
-```
-
-Return the borrow balance of account based on stored data
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | The address whose balance should be calculated |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The calculated balance |
-
-### borrowBalanceStoredInternal
-
-```solidity
-function borrowBalanceStoredInternal(address account) internal view returns (enum CarefulMath.MathError, uint256)
-```
-
-Return the borrow balance of account based on stored data
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | The address whose balance should be calculated |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | enum CarefulMath.MathError | (error code, the calculated balance or 0 if error code is non-zero) |
-| [1] | uint256 |  |
+|---|---|---|
+| _0 | uint8 | undefined |
 
 ### exchangeRateCurrent
 
 ```solidity
-function exchangeRateCurrent() public returns (uint256)
+function exchangeRateCurrent() external nonpayable returns (uint256)
 ```
 
 Accrue interest then return the up-to-date exchange rate
 
+
+
+
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | Calculated exchange rate scaled by 1e18 |
+|---|---|---|
+| _0 | uint256 | Calculated exchange rate scaled by 1e18 |
 
 ### exchangeRateStored
 
 ```solidity
-function exchangeRateStored() public view returns (uint256)
+function exchangeRateStored() external view returns (uint256)
 ```
 
 Calculates the exchange rate from the underlying to the CToken
 
-_This function does not accrue interest before calculating the exchange rate_
+*This function does not accrue interest before calculating the exchange rate*
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | Calculated exchange rate scaled by 1e18 |
+|---|---|---|
+| _0 | uint256 | Calculated exchange rate scaled by 1e18 |
 
-### exchangeRateStoredInternal
+### getAccountSnapshot
 
 ```solidity
-function exchangeRateStoredInternal() internal view returns (enum CarefulMath.MathError, uint256)
+function getAccountSnapshot(address account) external view returns (uint256, uint256, uint256, uint256)
 ```
 
-Calculates the exchange rate from the underlying to the CToken
+Get a snapshot of the account&#39;s balances, and the cached exchange rate
 
-_This function does not accrue interest before calculating the exchange rate_
+*This is used by bondtroller to more efficiently perform liquidity checks.*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | enum CarefulMath.MathError | (error code, calculated exchange rate scaled by 1e18) |
-| [1] | uint256 |  |
+|---|---|---|
+| account | address | Address of the account to snapshot |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | (possible error, token balance, borrow balance, exchange rate mantissa) |
+| _1 | uint256 | undefined |
+| _2 | uint256 | undefined |
+| _3 | uint256 | undefined |
 
 ### getCash
 
@@ -318,480 +501,579 @@ function getCash() external view returns (uint256)
 
 Get cash balance of this cToken in the underlying asset
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The quantity of underlying asset owned by this contract |
 
-### accrueInterest
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The quantity of underlying asset owned by this contract |
+
+### initialize
 
 ```solidity
-function accrueInterest() public returns (uint256)
+function initialize(contract Bondtroller bondtroller_, contract InterestRateModel interestRateModel_, uint256 initialExchangeRateMantissa_, string name_, string symbol_, uint8 decimals_) external nonpayable
 ```
 
-Applies accrued interest to total borrows and reserves
+Initialize the money market
 
-_This calculates interest accrued from the last checkpointed block
-  up to the current block and writes new checkpoint to storage._
 
-### mintInternal
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| bondtroller_ | contract Bondtroller | The address of the Bondtroller |
+| interestRateModel_ | contract InterestRateModel | The address of the interest rate model |
+| initialExchangeRateMantissa_ | uint256 | The initial exchange rate, scaled by 1e18 |
+| name_ | string | EIP-20 name of this token |
+| symbol_ | string | EIP-20 symbol of this token |
+| decimals_ | uint8 | EIP-20 decimal precision of this token |
+
+### interestRateModel
 
 ```solidity
-function mintInternal(uint256 mintAmount) internal returns (uint256, uint256)
+function interestRateModel() external view returns (contract InterestRateModel)
 ```
 
-Sender supplies assets into the market and receives cTokens in exchange
+Model which tells what the current interest rate should be
 
-_Accrues interest whether or not the operation succeeds, unless reverted_
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| mintAmount | uint256 | The amount of the underlying asset to supply |
+|---|---|---|
+| _0 | contract InterestRateModel | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount. |
-| [1] | uint256 |  |
-
-### MintLocalVars
+### isCToken
 
 ```solidity
-struct MintLocalVars {
-  enum TokenErrorReporter.Error err;
-  enum CarefulMath.MathError mathErr;
-  uint256 exchangeRateMantissa;
-  uint256 mintTokens;
-  uint256 totalSupplyNew;
-  uint256 accountTokensNew;
-  uint256 actualMintAmount;
-}
+function isCToken() external view returns (bool)
 ```
 
-### mintFresh
+Indicator that this is a CToken contract (for inspection)
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### name
 
 ```solidity
-function mintFresh(address minter, uint256 mintAmount) internal returns (uint256, uint256)
+function name() external view returns (string)
 ```
 
-User supplies assets into the market and receives cTokens in exchange
+EIP-20 token name for this token
 
-_Assumes interest has already been accrued up to the current block_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| minter | address | The address of the account which is supplying the assets |
-| mintAmount | uint256 | The amount of the underlying asset to supply |
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount. |
-| [1] | uint256 |  |
+|---|---|---|
+| _0 | string | undefined |
 
-### redeemInternal
+### pendingAdmin
 
 ```solidity
-function redeemInternal(uint256 redeemTokens) internal returns (uint256)
+function pendingAdmin() external view returns (address payable)
 ```
 
-Sender redeems cTokens in exchange for the underlying asset
+Pending administrator for this contract
 
-_Accrues interest whether or not the operation succeeds, unless reverted_
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| redeemTokens | uint256 | The number of cTokens to redeem into underlying |
+|---|---|---|
+| _0 | address payable | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### redeemUnderlyingInternal
+### protocolSeizeShareMantissa
 
 ```solidity
-function redeemUnderlyingInternal(uint256 redeemAmount) internal returns (uint256)
+function protocolSeizeShareMantissa() external view returns (uint256)
 ```
 
-Sender redeems cTokens in exchange for a specified amount of underlying asset
+Share of seized collateral that is added to reserves
 
-_Accrues interest whether or not the operation succeeds, unless reverted_
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| redeemAmount | uint256 | The amount of underlying to receive from redeeming cTokens |
+|---|---|---|
+| _0 | uint256 | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### RedeemLocalVars
+### reserveFactorMantissa
 
 ```solidity
-struct RedeemLocalVars {
-  enum TokenErrorReporter.Error err;
-  enum CarefulMath.MathError mathErr;
-  uint256 exchangeRateMantissa;
-  uint256 redeemTokens;
-  uint256 redeemAmount;
-  uint256 totalSupplyNew;
-  uint256 accountTokensNew;
-}
+function reserveFactorMantissa() external view returns (uint256)
 ```
 
-### redeemFresh
+Fraction of interest currently set aside for reserves
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### supplyRatePerBlock
 
 ```solidity
-function redeemFresh(address payable redeemer, uint256 redeemTokensIn, uint256 redeemAmountIn) internal returns (uint256)
+function supplyRatePerBlock() external view returns (uint256)
 ```
 
-User redeems cTokens in exchange for the underlying asset
+Returns the current per-block supply interest rate for this cToken
 
-_Assumes interest has already been accrued up to the current block_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| redeemer | address payable | The address of the account which is redeeming the tokens |
-| redeemTokensIn | uint256 | The number of cTokens to redeem into underlying (only one of redeemTokensIn or redeemAmountIn may be non-zero) |
-| redeemAmountIn | uint256 | The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero) |
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
+|---|---|---|
+| _0 | uint256 | The supply interest rate per block, scaled by 1e18 |
 
-### borrowInternal
+### symbol
 
 ```solidity
-function borrowInternal(uint256 borrowAmount) internal returns (uint256)
+function symbol() external view returns (string)
 ```
 
-Sender borrows assets from the protocol to their own address
+EIP-20 token symbol for this token
+
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrowAmount | uint256 | The amount of the underlying asset to borrow |
+|---|---|---|
+| _0 | string | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### BorrowLocalVars
+### totalBorrows
 
 ```solidity
-struct BorrowLocalVars {
-  enum CarefulMath.MathError mathErr;
-  uint256 accountBorrows;
-  uint256 accountBorrowsNew;
-  uint256 totalBorrowsNew;
-}
+function totalBorrows() external view returns (uint256)
 ```
 
-### borrowFresh
+Total amount of outstanding borrows of the underlying in this market
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### totalBorrowsCurrent
 
 ```solidity
-function borrowFresh(address payable borrower, uint256 borrowAmount) internal returns (uint256)
+function totalBorrowsCurrent() external nonpayable returns (uint256)
 ```
 
-Users borrow assets from the protocol to their own address
+Returns the current total borrows plus accrued interest
+
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrower | address payable |  |
-| borrowAmount | uint256 | The amount of the underlying asset to borrow |
+|---|---|---|
+| _0 | uint256 | The total borrows with interest |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### repayBorrowInternal
+### totalReserves
 
 ```solidity
-function repayBorrowInternal(uint256 repayAmount) internal returns (uint256, uint256)
+function totalReserves() external view returns (uint256)
 ```
 
-Sender repays their own borrow
+Total amount of reserves of the underlying held in this market
+
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| repayAmount | uint256 | The amount to repay |
+|---|---|---|
+| _0 | uint256 | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount. |
-| [1] | uint256 |  |
-
-### repayBorrowBehalfInternal
+### totalSupply
 
 ```solidity
-function repayBorrowBehalfInternal(address borrower, uint256 repayAmount) internal returns (uint256, uint256)
+function totalSupply() external view returns (uint256)
 ```
 
-Sender repays a borrow belonging to borrower
+Total number of tokens in circulation
+
+
+
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrower | address | the account with the debt being payed off |
-| repayAmount | uint256 | The amount to repay |
+|---|---|---|
+| _0 | uint256 | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount. |
-| [1] | uint256 |  |
-
-### RepayBorrowLocalVars
+### transfer
 
 ```solidity
-struct RepayBorrowLocalVars {
-  enum TokenErrorReporter.Error err;
-  enum CarefulMath.MathError mathErr;
-  uint256 repayAmount;
-  uint256 borrowerIndex;
-  uint256 accountBorrows;
-  uint256 accountBorrowsNew;
-  uint256 totalBorrowsNew;
-  uint256 actualRepayAmount;
-}
+function transfer(address dst, uint256 amount) external nonpayable returns (bool)
 ```
 
-### repayBorrowFresh
+Transfer `amount` tokens from `msg.sender` to `dst`
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| dst | address | The address of the destination account |
+| amount | uint256 | The number of tokens to transfer |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | Whether or not the transfer succeeded |
+
+### transferFrom
 
 ```solidity
-function repayBorrowFresh(address payer, address borrower, uint256 repayAmount) internal returns (uint256, uint256)
+function transferFrom(address src, address dst, uint256 amount) external nonpayable returns (bool)
 ```
 
-Borrows are repaid by another user (possibly the borrower).
+Transfer `amount` tokens from `src` to `dst`
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| payer | address | the account paying off the borrow |
-| borrower | address | the account with the debt being payed off |
-| repayAmount | uint256 | the amount of undelrying tokens being returned |
+|---|---|---|
+| src | address | The address of the source account |
+| dst | address | The address of the destination account |
+| amount | uint256 | The number of tokens to transfer |
+
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount. |
-| [1] | uint256 |  |
+|---|---|---|
+| _0 | bool | Whether or not the transfer succeeded |
 
-### _setPendingAdmin
+
+
+## Events
+
+### AccrueInterest
 
 ```solidity
-function _setPendingAdmin(address payable newPendingAdmin) external returns (uint256)
+event AccrueInterest(uint256 cashPrior, uint256 interestAccumulated, uint256 borrowIndex, uint256 totalBorrows)
 ```
 
-Begins transfer of admin rights. The newPendingAdmin must call &#x60;_acceptAdmin&#x60; to finalize the transfer.
+Event emitted when interest is accrued
 
-_Admin function to begin change of admin. The newPendingAdmin must call &#x60;_acceptAdmin&#x60; to finalize the transfer._
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| newPendingAdmin | address payable | New pending admin. |
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
+|---|---|---|
+| cashPrior  | uint256 | undefined |
+| interestAccumulated  | uint256 | undefined |
+| borrowIndex  | uint256 | undefined |
+| totalBorrows  | uint256 | undefined |
 
-### _acceptAdmin
+### Approval
 
 ```solidity
-function _acceptAdmin() external returns (uint256)
+event Approval(address indexed owner, address indexed spender, uint256 amount)
 ```
 
-Accepts transfer of admin rights. msg.sender must be pendingAdmin
+EIP20 Approval event
 
-_Admin function for pending admin to accept role and update admin_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
+|---|---|---|
+| owner `indexed` | address | undefined |
+| spender `indexed` | address | undefined |
+| amount  | uint256 | undefined |
 
-### _setBondtroller
+### Borrow
 
 ```solidity
-function _setBondtroller(contract Bondtroller newBondtroller) public returns (uint256)
+event Borrow(address borrower, uint256 borrowAmount, uint256 accountBorrows, uint256 totalBorrows)
 ```
 
-Sets a new bondtroller for the market
+Event emitted when underlying is borrowed
 
-_Admin function to set a new bondtroller_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
+|---|---|---|
+| borrower  | address | undefined |
+| borrowAmount  | uint256 | undefined |
+| accountBorrows  | uint256 | undefined |
+| totalBorrows  | uint256 | undefined |
 
-### _setReserveFactor
+### Failure
 
 ```solidity
-function _setReserveFactor(uint256 newReserveFactorMantissa) external returns (uint256)
+event Failure(uint256 error, uint256 info, uint256 detail)
 ```
 
-accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
 
-_Admin function to accrue interest and set a new reserve factor_
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
+|---|---|---|
+| error  | uint256 | undefined |
+| info  | uint256 | undefined |
+| detail  | uint256 | undefined |
 
-### _setReserveFactorFresh
+### LiquidateBorrow
 
 ```solidity
-function _setReserveFactorFresh(uint256 newReserveFactorMantissa) internal returns (uint256)
+event LiquidateBorrow(address liquidator, address borrower, uint256 repayAmount, address cTokenCollateral, uint256 seizeTokens)
 ```
 
-Sets a new reserve factor for the protocol (*requires fresh interest accrual)
+Event emitted when a borrow is liquidated
 
-_Admin function to set a new reserve factor_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
+|---|---|---|
+| liquidator  | address | undefined |
+| borrower  | address | undefined |
+| repayAmount  | uint256 | undefined |
+| cTokenCollateral  | address | undefined |
+| seizeTokens  | uint256 | undefined |
 
-### _addReservesInternal
+### Mint
 
 ```solidity
-function _addReservesInternal(uint256 addAmount) internal returns (uint256)
+event Mint(address minter, uint256 mintAmount, uint256 mintTokens)
 ```
 
-Accrues interest and reduces reserves by transferring from msg.sender
+Event emitted when tokens are minted
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| addAmount | uint256 | Amount of addition to reserves |
+|---|---|---|
+| minter  | address | undefined |
+| mintAmount  | uint256 | undefined |
+| mintTokens  | uint256 | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
-
-### _addReservesFresh
+### NewAdmin
 
 ```solidity
-function _addReservesFresh(uint256 addAmount) internal returns (uint256, uint256)
+event NewAdmin(address oldAdmin, address newAdmin)
 ```
 
-Add reserves by transferring from caller
+Event emitted when pendingAdmin is accepted, which means admin is updated
 
-_Requires fresh interest accrual_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| addAmount | uint256 | Amount of addition to reserves |
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | (uint, uint) An error code (0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details)) and the actual amount added, net token fees / |
-| [1] | uint256 |  |
+|---|---|---|
+| oldAdmin  | address | undefined |
+| newAdmin  | address | undefined |
 
-### _reduceReserves
+### NewBondtroller
 
 ```solidity
-function _reduceReserves(uint256 reduceAmount) external returns (uint256)
+event NewBondtroller(contract Bondtroller oldBondtroller, contract Bondtroller newBondtroller)
 ```
 
-Accrues interest and reduces reserves by transferring to admin
+Event emitted when bondtroller is changed
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| reduceAmount | uint256 | Amount of reduction to reserves |
+|---|---|---|
+| oldBondtroller  | contract Bondtroller | undefined |
+| newBondtroller  | contract Bondtroller | undefined |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
-
-### _reduceReservesFresh
+### NewMarketInterestRateModel
 
 ```solidity
-function _reduceReservesFresh(uint256 reduceAmount) internal returns (uint256)
+event NewMarketInterestRateModel(contract InterestRateModel oldInterestRateModel, contract InterestRateModel newInterestRateModel)
 ```
 
-Reduces reserves by transferring to admin
+Event emitted when interestRateModel is changed
 
-_Requires fresh interest accrual_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| reduceAmount | uint256 | Amount of reduction to reserves |
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) / |
+|---|---|---|
+| oldInterestRateModel  | contract InterestRateModel | undefined |
+| newInterestRateModel  | contract InterestRateModel | undefined |
 
-### _setInterestRateModel
+### NewPendingAdmin
 
 ```solidity
-function _setInterestRateModel(contract InterestRateModel newInterestRateModel) public returns (uint256)
+event NewPendingAdmin(address oldPendingAdmin, address newPendingAdmin)
 ```
 
-accrues interest and updates the interest rate model using _setInterestRateModelFresh
+Event emitted when pendingAdmin is changed
 
-_Admin function to accrue interest and update the interest rate model_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| newInterestRateModel | contract InterestRateModel | the new interest rate model to use |
+|---|---|---|
+| oldPendingAdmin  | address | undefined |
+| newPendingAdmin  | address | undefined |
+
+### NewReserveFactor
+
+```solidity
+event NewReserveFactor(uint256 oldReserveFactorMantissa, uint256 newReserveFactorMantissa)
+```
+
+Event emitted when the reserve factor is changed
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) /     f |
+|---|---|---|
+| oldReserveFactorMantissa  | uint256 | undefined |
+| newReserveFactorMantissa  | uint256 | undefined |
 
-### _setInterestRateModelFresh
+### Redeem
 
 ```solidity
-function _setInterestRateModelFresh(contract InterestRateModel newInterestRateModel) internal returns (uint256)
+event Redeem(address redeemer, uint256 redeemAmount, uint256 redeemTokens)
 ```
 
-updates the interest rate model (*requires fresh interest accrual)
+Event emitted when tokens are redeemed
 
-_Admin function to update the interest rate model_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| newInterestRateModel | contract InterestRateModel | the new interest rate model to use |
+|---|---|---|
+| redeemer  | address | undefined |
+| redeemAmount  | uint256 | undefined |
+| redeemTokens  | uint256 | undefined |
+
+### RepayBorrow
+
+```solidity
+event RepayBorrow(address payer, address borrower, uint256 repayAmount, uint256 accountBorrows, uint256 totalBorrows)
+```
+
+Event emitted when a borrow is repaid
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) /     f |
+|---|---|---|
+| payer  | address | undefined |
+| borrower  | address | undefined |
+| repayAmount  | uint256 | undefined |
+| accountBorrows  | uint256 | undefined |
+| totalBorrows  | uint256 | undefined |
 
-### getCashPrior
+### ReservesAdded
 
 ```solidity
-function getCashPrior() internal view virtual returns (uint256)
+event ReservesAdded(address benefactor, uint256 addAmount, uint256 newTotalReserves)
 ```
 
-Gets balance of this contract in terms of the underlying
+Event emitted when the reserves are added
 
-_This excludes the value of the current message, if any_
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The quantity of underlying owned by this contract /     f |
+|---|---|---|
+| benefactor  | address | undefined |
+| addAmount  | uint256 | undefined |
+| newTotalReserves  | uint256 | undefined |
 
-### doTransferIn
-
-```solidity
-function doTransferIn(address from, uint256 amount) internal virtual returns (uint256)
-```
-
-_Performs a transfer in, reverting upon failure. Returns the amount actually transferred to the protocol, in case of a fee.
- This may revert due to insufficient balance or insufficient allowance.
-/
-    f_
-
-### doTransferOut
+### ReservesReduced
 
 ```solidity
-function doTransferOut(address payable to, uint256 amount) internal virtual
+event ReservesReduced(address admin, uint256 reduceAmount, uint256 newTotalReserves)
 ```
 
-_Performs a transfer out, ideally returning an explanatory error code upon failure tather than reverting.
- If caller has not called checked protocol&#x27;s balance, may revert due to insufficient cash held in the contract.
- If caller has checked protocol&#x27;s balance, and verified it is &gt;&#x3D; amount, this should not revert in normal conditions.
-/
-    f_
+Event emitted when the reserves are reduced
 
-### nonReentrant
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| admin  | address | undefined |
+| reduceAmount  | uint256 | undefined |
+| newTotalReserves  | uint256 | undefined |
+
+### Transfer
 
 ```solidity
-modifier nonReentrant()
+event Transfer(address indexed from, address indexed to, uint256 amount)
 ```
 
-_Prevents a contract from calling itself, directly or indirectly.
-/
-    m_
+EIP20 Transfer event
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
+| amount  | uint256 | undefined |
+
+
 

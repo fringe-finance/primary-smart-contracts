@@ -1,43 +1,37 @@
-# Solidity API
+# ERC165Upgradeable
 
-## ERC165Upgradeable
 
-_Implementation of the {IERC165} interface.
 
-Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check
-for the additional interface id that will be supported. For example:
 
-&#x60;&#x60;&#x60;solidity
-function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-    return interfaceId &#x3D;&#x3D; type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
-}
-&#x60;&#x60;&#x60;
 
-Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation._
 
-### __ERC165_init
 
-```solidity
-function __ERC165_init() internal
-```
+*Implementation of the {IERC165} interface. Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check for the additional interface id that will be supported. For example: ```solidity function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId); } ``` Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.*
 
-### __ERC165_init_unchained
-
-```solidity
-function __ERC165_init_unchained() internal
-```
+## Methods
 
 ### supportsInterface
 
 ```solidity
-function supportsInterface(bytes4 interfaceId) public view virtual returns (bool)
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
 ```
 
-_See {IERC165-supportsInterface}._
 
-### __gap
 
-```solidity
-uint256[50] __gap
-```
+*See {IERC165-supportsInterface}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
 

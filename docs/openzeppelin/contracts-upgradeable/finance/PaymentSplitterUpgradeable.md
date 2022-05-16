@@ -1,17 +1,134 @@
-# Solidity API
+# PaymentSplitterUpgradeable
 
-## PaymentSplitterUpgradeable
 
-_This contract allows to split Ether payments among a group of accounts. The sender does not need to be aware
-that the Ether will be split in this way, since it is handled transparently by the contract.
 
-The split can be in equal parts or in any other arbitrary proportion. The way this is specified is by assigning each
-account to a number of shares. Of all the Ether that this contract receives, each account will then be able to claim
-an amount proportional to the percentage of total shares they were assigned.
+> PaymentSplitter
 
-&#x60;PaymentSplitter&#x60; follows a _pull payment_ model. This means that payments are not automatically forwarded to the
-accounts but kept in this contract, and the actual transfer is triggered as a separate step by calling the {release}
-function._
+
+
+*This contract allows to split Ether payments among a group of accounts. The sender does not need to be aware that the Ether will be split in this way, since it is handled transparently by the contract. The split can be in equal parts or in any other arbitrary proportion. The way this is specified is by assigning each account to a number of shares. Of all the Ether that this contract receives, each account will then be able to claim an amount proportional to the percentage of total shares they were assigned. `PaymentSplitter` follows a _pull payment_ model. This means that payments are not automatically forwarded to the accounts but kept in this contract, and the actual transfer is triggered as a separate step by calling the {release} function.*
+
+## Methods
+
+### payee
+
+```solidity
+function payee(uint256 index) external view returns (address)
+```
+
+
+
+*Getter for the address of the payee number `index`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| index | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | address | undefined |
+
+### release
+
+```solidity
+function release(address payable account) external nonpayable
+```
+
+
+
+*Triggers a transfer to `account` of the amount of Ether they are owed, according to their percentage of the total shares and their previous withdrawals.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address payable | undefined |
+
+### released
+
+```solidity
+function released(address account) external view returns (uint256)
+```
+
+
+
+*Getter for the amount of Ether already released to a payee.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### shares
+
+```solidity
+function shares(address account) external view returns (uint256)
+```
+
+
+
+*Getter for the amount of shares held by an account.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### totalReleased
+
+```solidity
+function totalReleased() external view returns (uint256)
+```
+
+
+
+*Getter for the total amount of Ether already released.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### totalShares
+
+```solidity
+function totalShares() external view returns (uint256)
+```
+
+
+
+*Getter for the total shares held by payees.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+
+
+## Events
 
 ### PayeeAdded
 
@@ -19,11 +136,16 @@ function._
 event PayeeAdded(address account, uint256 shares)
 ```
 
-### PaymentReleased
 
-```solidity
-event PaymentReleased(address to, uint256 amount)
-```
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account  | address | undefined |
+| shares  | uint256 | undefined |
 
 ### PaymentReceived
 
@@ -31,133 +153,33 @@ event PaymentReleased(address to, uint256 amount)
 event PaymentReceived(address from, uint256 amount)
 ```
 
-### _totalShares
 
-```solidity
-uint256 _totalShares
-```
 
-### _totalReleased
 
-```solidity
-uint256 _totalReleased
-```
 
-### _shares
-
-```solidity
-mapping(address &#x3D;&gt; uint256) _shares
-```
-
-### _released
-
-```solidity
-mapping(address &#x3D;&gt; uint256) _released
-```
-
-### _payees
-
-```solidity
-address[] _payees
-```
-
-### __PaymentSplitter_init
-
-```solidity
-function __PaymentSplitter_init(address[] payees, uint256[] shares_) internal
-```
-
-_Creates an instance of &#x60;PaymentSplitter&#x60; where each account in &#x60;payees&#x60; is assigned the number of shares at
-the matching position in the &#x60;shares&#x60; array.
-
-All addresses in &#x60;payees&#x60; must be non-zero. Both arrays must have the same non-zero length, and there must be no
-duplicates in &#x60;payees&#x60;._
-
-### __PaymentSplitter_init_unchained
-
-```solidity
-function __PaymentSplitter_init_unchained(address[] payees, uint256[] shares_) internal
-```
-
-### receive
-
-```solidity
-receive() external payable virtual
-```
-
-_The Ether received will be logged with {PaymentReceived} events. Note that these events are not fully
-reliable: it&#x27;s possible for a contract to receive Ether without triggering this function. This only affects the
-reliability of the events, and not the actual splitting of Ether.
-
-To learn more about this see the Solidity documentation for
-https://solidity.readthedocs.io/en/latest/contracts.html#fallback-function[fallback
-functions]._
-
-### totalShares
-
-```solidity
-function totalShares() public view returns (uint256)
-```
-
-_Getter for the total shares held by payees._
-
-### totalReleased
-
-```solidity
-function totalReleased() public view returns (uint256)
-```
-
-_Getter for the total amount of Ether already released._
-
-### shares
-
-```solidity
-function shares(address account) public view returns (uint256)
-```
-
-_Getter for the amount of shares held by an account._
-
-### released
-
-```solidity
-function released(address account) public view returns (uint256)
-```
-
-_Getter for the amount of Ether already released to a payee._
-
-### payee
-
-```solidity
-function payee(uint256 index) public view returns (address)
-```
-
-_Getter for the address of the payee number &#x60;index&#x60;._
-
-### release
-
-```solidity
-function release(address payable account) public virtual
-```
-
-_Triggers a transfer to &#x60;account&#x60; of the amount of Ether they are owed, according to their percentage of the
-total shares and their previous withdrawals._
-
-### _addPayee
-
-```solidity
-function _addPayee(address account, uint256 shares_) private
-```
-
-_Add a new payee to the contract._
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| account | address | The address of the payee to add. |
-| shares_ | uint256 | The number of shares owned by the payee. |
+|---|---|---|
+| from  | address | undefined |
+| amount  | uint256 | undefined |
 
-### __gap
+### PaymentReleased
 
 ```solidity
-uint256[45] __gap
+event PaymentReleased(address to, uint256 amount)
 ```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| to  | address | undefined |
+| amount  | uint256 | undefined |
+
+
 

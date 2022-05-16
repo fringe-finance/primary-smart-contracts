@@ -1,29 +1,41 @@
-# Solidity API
+# IERC3156FlashBorrower
 
-## IERC3156FlashBorrower
 
-_Interface of the ERC3156 FlashBorrower, as defined in
-https://eips.ethereum.org/EIPS/eip-3156[ERC-3156].
 
-_Available since v4.1.__
+
+
+
+
+*Interface of the ERC3156 FlashBorrower, as defined in https://eips.ethereum.org/EIPS/eip-3156[ERC-3156]. _Available since v4.1._*
+
+## Methods
 
 ### onFlashLoan
 
 ```solidity
-function onFlashLoan(address initiator, address token, uint256 amount, uint256 fee, bytes data) external returns (bytes32)
+function onFlashLoan(address initiator, address token, uint256 amount, uint256 fee, bytes data) external nonpayable returns (bytes32)
 ```
 
-_Receive a flash loan._
+
+
+*Receive a flash loan.*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | initiator | address | The initiator of the loan. |
 | token | address | The loan currency. |
 | amount | uint256 | The amount of tokens lent. |
 | fee | uint256 | The additional amount of tokens to repay. |
 | data | bytes | Arbitrary data structure, intended to contain user-defined parameters. |
 
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bytes32 | The keccak256 hash of &quot;ERC3156FlashBorrower.onFlashLoan&quot; |
+|---|---|---|
+| _0 | bytes32 | The keccak256 hash of &quot;ERC3156FlashBorrower.onFlashLoan&quot; |
+
+
+
 

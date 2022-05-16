@@ -1,63 +1,310 @@
-# Solidity API
+# ERC20Snapshot
 
-## ERC20Snapshot
 
-_This contract extends an ERC20 token with a snapshot mechanism. When a snapshot is created, the balances and
-total supply at the time are recorded for later access.
 
-This can be used to safely create mechanisms based on token balances such as trustless dividends or weighted voting.
-In naive implementations it&#x27;s possible to perform a &quot;double spend&quot; attack by reusing the same balance from different
-accounts. By using snapshots to calculate dividends or voting power, those attacks no longer apply. It can also be
-used to create an efficient ERC20 forking mechanism.
 
-Snapshots are created by the internal {_snapshot} function, which will emit the {Snapshot} event and return a
-snapshot id. To get the total supply at the time of a snapshot, call the function {totalSupplyAt} with the snapshot
-id. To get the balance of an account at the time of a snapshot, call the {balanceOfAt} function with the snapshot id
-and the account address.
 
-NOTE: Snapshot policy can be customized by overriding the {_getCurrentSnapshotId} method. For example, having it
-return &#x60;block.number&#x60; will trigger the creation of snapshot at the begining of each new block. When overridding this
-function, be careful about the monotonicity of its result. Non-monotonic snapshot ids will break the contract.
 
-Implementing snapshots for every block using this method will incur significant gas costs. For a gas-efficient
-alternative consider {ERC20Votes}.
 
-&#x3D;&#x3D;&#x3D;&#x3D; Gas Costs
+*This contract extends an ERC20 token with a snapshot mechanism. When a snapshot is created, the balances and total supply at the time are recorded for later access. This can be used to safely create mechanisms based on token balances such as trustless dividends or weighted voting. In naive implementations it&#39;s possible to perform a &quot;double spend&quot; attack by reusing the same balance from different accounts. By using snapshots to calculate dividends or voting power, those attacks no longer apply. It can also be used to create an efficient ERC20 forking mechanism. Snapshots are created by the internal {_snapshot} function, which will emit the {Snapshot} event and return a snapshot id. To get the total supply at the time of a snapshot, call the function {totalSupplyAt} with the snapshot id. To get the balance of an account at the time of a snapshot, call the {balanceOfAt} function with the snapshot id and the account address. NOTE: Snapshot policy can be customized by overriding the {_getCurrentSnapshotId} method. For example, having it return `block.number` will trigger the creation of snapshot at the begining of each new block. When overridding this function, be careful about the monotonicity of its result. Non-monotonic snapshot ids will break the contract. Implementing snapshots for every block using this method will incur significant gas costs. For a gas-efficient alternative consider {ERC20Votes}. ==== Gas Costs Snapshots are efficient. Snapshot creation is _O(1)_. Retrieval of balances or total supply from a snapshot is _O(log n)_ in the number of snapshots that have been created, although _n_ for a specific account will generally be much smaller since identical balances in subsequent snapshots are stored as a single entry. There is a constant overhead for normal ERC20 transfers due to the additional snapshot bookkeeping. This overhead is only significant for the first transfer that immediately follows a snapshot for a particular account. Subsequent transfers will have normal cost until the next snapshot, and so on.*
 
-Snapshots are efficient. Snapshot creation is _O(1)_. Retrieval of balances or total supply from a snapshot is _O(log
-n)_ in the number of snapshots that have been created, although _n_ for a specific account will generally be much
-smaller since identical balances in subsequent snapshots are stored as a single entry.
+## Methods
 
-There is a constant overhead for normal ERC20 transfers due to the additional snapshot bookkeeping. This overhead is
-only significant for the first transfer that immediately follows a snapshot for a particular account. Subsequent
-transfers will have normal cost until the next snapshot, and so on._
-
-### Snapshots
+### allowance
 
 ```solidity
-struct Snapshots {
-  uint256[] ids;
-  uint256[] values;
-}
+function allowance(address owner, address spender) external view returns (uint256)
 ```
 
-### _accountBalanceSnapshots
+
+
+*See {IERC20-allowance}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### approve
 
 ```solidity
-mapping(address &#x3D;&gt; struct ERC20Snapshot.Snapshots) _accountBalanceSnapshots
+function approve(address spender, uint256 amount) external nonpayable returns (bool)
 ```
 
-### _totalSupplySnapshots
+
+
+*See {IERC20-approve}. Requirements: - `spender` cannot be the zero address.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### balanceOf
 
 ```solidity
-struct ERC20Snapshot.Snapshots _totalSupplySnapshots
+function balanceOf(address account) external view returns (uint256)
 ```
 
-### _currentSnapshotId
+
+
+*See {IERC20-balanceOf}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### balanceOfAt
 
 ```solidity
-struct Counters.Counter _currentSnapshotId
+function balanceOfAt(address account, uint256 snapshotId) external view returns (uint256)
 ```
+
+
+
+*Retrieves the balance of `account` at the time `snapshotId` was created.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| snapshotId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### decimals
+
+```solidity
+function decimals() external view returns (uint8)
+```
+
+
+
+*Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint8 | undefined |
+
+### decreaseAllowance
+
+```solidity
+function decreaseAllowance(address spender, uint256 subtractedValue) external nonpayable returns (bool)
+```
+
+
+
+*Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| subtractedValue | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### increaseAllowance
+
+```solidity
+function increaseAllowance(address spender, uint256 addedValue) external nonpayable returns (bool)
+```
+
+
+
+*Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| addedValue | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### name
+
+```solidity
+function name() external view returns (string)
+```
+
+
+
+*Returns the name of the token.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### symbol
+
+```solidity
+function symbol() external view returns (string)
+```
+
+
+
+*Returns the symbol of the token, usually a shorter version of the name.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### totalSupply
+
+```solidity
+function totalSupply() external view returns (uint256)
+```
+
+
+
+*See {IERC20-totalSupply}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### totalSupplyAt
+
+```solidity
+function totalSupplyAt(uint256 snapshotId) external view returns (uint256)
+```
+
+
+
+*Retrieves the total supply at the time `snapshotId` was created.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| snapshotId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### transfer
+
+```solidity
+function transfer(address recipient, uint256 amount) external nonpayable returns (bool)
+```
+
+
+
+*See {IERC20-transfer}. Requirements: - `recipient` cannot be the zero address. - the caller must have a balance of at least `amount`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### transferFrom
+
+```solidity
+function transferFrom(address sender, address recipient, uint256 amount) external nonpayable returns (bool)
+```
+
+
+
+*See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for ``sender``&#39;s tokens of at least `amount`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| sender | address | undefined |
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
+## Events
+
+### Approval
+
+```solidity
+event Approval(address indexed owner, address indexed spender, uint256 value)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner `indexed` | address | undefined |
+| spender `indexed` | address | undefined |
+| value  | uint256 | undefined |
 
 ### Snapshot
 
@@ -65,104 +312,33 @@ struct Counters.Counter _currentSnapshotId
 event Snapshot(uint256 id)
 ```
 
-_Emitted by {_snapshot} when a snapshot identified by &#x60;id&#x60; is created._
 
-### _snapshot
 
-```solidity
-function _snapshot() internal virtual returns (uint256)
-```
+*Emitted by {_snapshot} when a snapshot identified by `id` is created.*
 
-_Creates a new snapshot and returns its snapshot id.
+#### Parameters
 
-Emits a {Snapshot} event that contains the same id.
+| Name | Type | Description |
+|---|---|---|
+| id  | uint256 | undefined |
 
-{_snapshot} is &#x60;internal&#x60; and you have to decide how to expose it externally. Its usage may be restricted to a
-set of accounts, for example using {AccessControl}, or it may be open to the public.
-
-[WARNING]
-&#x3D;&#x3D;&#x3D;&#x3D;
-While an open way of calling {_snapshot} is required for certain trust minimization mechanisms such as forking,
-you must consider that it can potentially be used by attackers in two ways.
-
-First, it can be used to increase the cost of retrieval of values from snapshots, although it will grow
-logarithmically thus rendering this attack ineffective in the long term. Second, it can be used to target
-specific accounts and increase the cost of ERC20 transfers for them, in the ways specified in the Gas Costs
-section above.
-
-We haven&#x27;t measured the actual numbers; if this is something you&#x27;re interested in please reach out to us.
-&#x3D;&#x3D;&#x3D;&#x3D;_
-
-### _getCurrentSnapshotId
+### Transfer
 
 ```solidity
-function _getCurrentSnapshotId() internal view virtual returns (uint256)
+event Transfer(address indexed from, address indexed to, uint256 value)
 ```
 
-_Get the current snapshotId_
 
-### balanceOfAt
 
-```solidity
-function balanceOfAt(address account, uint256 snapshotId) public view virtual returns (uint256)
-```
 
-_Retrieves the balance of &#x60;account&#x60; at the time &#x60;snapshotId&#x60; was created._
 
-### totalSupplyAt
+#### Parameters
 
-```solidity
-function totalSupplyAt(uint256 snapshotId) public view virtual returns (uint256)
-```
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
+| value  | uint256 | undefined |
 
-_Retrieves the total supply at the time &#x60;snapshotId&#x60; was created._
 
-### _beforeTokenTransfer
-
-```solidity
-function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
-```
-
-_Hook that is called before any transfer of tokens. This includes
-minting and burning.
-
-Calling conditions:
-
-- when &#x60;from&#x60; and &#x60;to&#x60; are both non-zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens
-will be transferred to &#x60;to&#x60;.
-- when &#x60;from&#x60; is zero, &#x60;amount&#x60; tokens will be minted for &#x60;to&#x60;.
-- when &#x60;to&#x60; is zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens will be burned.
-- &#x60;from&#x60; and &#x60;to&#x60; are never both zero.
-
-To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks]._
-
-### _valueAt
-
-```solidity
-function _valueAt(uint256 snapshotId, struct ERC20Snapshot.Snapshots snapshots) private view returns (bool, uint256)
-```
-
-### _updateAccountSnapshot
-
-```solidity
-function _updateAccountSnapshot(address account) private
-```
-
-### _updateTotalSupplySnapshot
-
-```solidity
-function _updateTotalSupplySnapshot() private
-```
-
-### _updateSnapshot
-
-```solidity
-function _updateSnapshot(struct ERC20Snapshot.Snapshots snapshots, uint256 currentValue) private
-```
-
-### _lastSnapshotId
-
-```solidity
-function _lastSnapshotId(uint256[] ids) private view returns (uint256)
-```
 

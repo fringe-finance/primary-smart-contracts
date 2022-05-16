@@ -1,328 +1,283 @@
-# Solidity API
+# ERC20Upgradeable
 
-## ERC20Upgradeable
 
-_Implementation of the {IERC20} interface.
 
-This implementation is agnostic to the way tokens are created. This means
-that a supply mechanism has to be added in a derived contract using {_mint}.
-For a generic mechanism see {ERC20PresetMinterPauser}.
 
-TIP: For a detailed writeup see our guide
-https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
-to implement supply mechanisms].
 
-We have followed general OpenZeppelin Contracts guidelines: functions revert
-instead returning &#x60;false&#x60; on failure. This behavior is nonetheless
-conventional and does not conflict with the expectations of ERC20
-applications.
 
-Additionally, an {Approval} event is emitted on calls to {transferFrom}.
-This allows applications to reconstruct the allowance for all accounts just
-by listening to said events. Other implementations of the EIP may not emit
-these events, as it isn&#x27;t required by the specification.
 
-Finally, the non-standard {decreaseAllowance} and {increaseAllowance}
-functions have been added to mitigate the well-known issues around setting
-allowances. See {IERC20-approve}._
+*Implementation of the {IERC20} interface. This implementation is agnostic to the way tokens are created. This means that a supply mechanism has to be added in a derived contract using {_mint}. For a generic mechanism see {ERC20PresetMinterPauser}. TIP: For a detailed writeup see our guide https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How to implement supply mechanisms]. We have followed general OpenZeppelin Contracts guidelines: functions revert instead returning `false` on failure. This behavior is nonetheless conventional and does not conflict with the expectations of ERC20 applications. Additionally, an {Approval} event is emitted on calls to {transferFrom}. This allows applications to reconstruct the allowance for all accounts just by listening to said events. Other implementations of the EIP may not emit these events, as it isn&#39;t required by the specification. Finally, the non-standard {decreaseAllowance} and {increaseAllowance} functions have been added to mitigate the well-known issues around setting allowances. See {IERC20-approve}.*
 
-### _balances
-
-```solidity
-mapping(address &#x3D;&gt; uint256) _balances
-```
-
-### _allowances
-
-```solidity
-mapping(address &#x3D;&gt; mapping(address &#x3D;&gt; uint256)) _allowances
-```
-
-### _totalSupply
-
-```solidity
-uint256 _totalSupply
-```
-
-### _name
-
-```solidity
-string _name
-```
-
-### _symbol
-
-```solidity
-string _symbol
-```
-
-### __ERC20_init
-
-```solidity
-function __ERC20_init(string name_, string symbol_) internal
-```
-
-_Sets the values for {name} and {symbol}.
-
-The default value of {decimals} is 18. To select a different value for
-{decimals} you should overload it.
-
-All two of these values are immutable: they can only be set once during
-construction._
-
-### __ERC20_init_unchained
-
-```solidity
-function __ERC20_init_unchained(string name_, string symbol_) internal
-```
-
-### name
-
-```solidity
-function name() public view virtual returns (string)
-```
-
-_Returns the name of the token._
-
-### symbol
-
-```solidity
-function symbol() public view virtual returns (string)
-```
-
-_Returns the symbol of the token, usually a shorter version of the
-name._
-
-### decimals
-
-```solidity
-function decimals() public view virtual returns (uint8)
-```
-
-_Returns the number of decimals used to get its user representation.
-For example, if &#x60;decimals&#x60; equals &#x60;2&#x60;, a balance of &#x60;505&#x60; tokens should
-be displayed to a user as &#x60;5.05&#x60; (&#x60;505 / 10 ** 2&#x60;).
-
-Tokens usually opt for a value of 18, imitating the relationship between
-Ether and Wei. This is the value {ERC20} uses, unless this function is
-overridden;
-
-NOTE: This information is only used for _display_ purposes: it in
-no way affects any of the arithmetic of the contract, including
-{IERC20-balanceOf} and {IERC20-transfer}._
-
-### totalSupply
-
-```solidity
-function totalSupply() public view virtual returns (uint256)
-```
-
-_See {IERC20-totalSupply}._
-
-### balanceOf
-
-```solidity
-function balanceOf(address account) public view virtual returns (uint256)
-```
-
-_See {IERC20-balanceOf}._
-
-### transfer
-
-```solidity
-function transfer(address recipient, uint256 amount) public virtual returns (bool)
-```
-
-_See {IERC20-transfer}.
-
-Requirements:
-
-- &#x60;recipient&#x60; cannot be the zero address.
-- the caller must have a balance of at least &#x60;amount&#x60;._
+## Methods
 
 ### allowance
 
 ```solidity
-function allowance(address owner, address spender) public view virtual returns (uint256)
+function allowance(address owner, address spender) external view returns (uint256)
 ```
 
-_See {IERC20-allowance}._
+
+
+*See {IERC20-allowance}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner | address | undefined |
+| spender | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### approve
 
 ```solidity
-function approve(address spender, uint256 amount) public virtual returns (bool)
+function approve(address spender, uint256 amount) external nonpayable returns (bool)
 ```
 
-_See {IERC20-approve}.
 
-Requirements:
 
-- &#x60;spender&#x60; cannot be the zero address._
+*See {IERC20-approve}. Requirements: - `spender` cannot be the zero address.*
 
-### transferFrom
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### balanceOf
 
 ```solidity
-function transferFrom(address sender, address recipient, uint256 amount) public virtual returns (bool)
+function balanceOf(address account) external view returns (uint256)
 ```
 
-_See {IERC20-transferFrom}.
 
-Emits an {Approval} event indicating the updated allowance. This is not
-required by the EIP. See the note at the beginning of {ERC20}.
 
-Requirements:
+*See {IERC20-balanceOf}.*
 
-- &#x60;sender&#x60; and &#x60;recipient&#x60; cannot be the zero address.
-- &#x60;sender&#x60; must have a balance of at least &#x60;amount&#x60;.
-- the caller must have allowance for &#x60;&#x60;sender&#x60;&#x60;&#x27;s tokens of at least
-&#x60;amount&#x60;._
+#### Parameters
 
-### increaseAllowance
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### decimals
 
 ```solidity
-function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool)
+function decimals() external view returns (uint8)
 ```
 
-_Atomically increases the allowance granted to &#x60;spender&#x60; by the caller.
 
-This is an alternative to {approve} that can be used as a mitigation for
-problems described in {IERC20-approve}.
 
-Emits an {Approval} event indicating the updated allowance.
+*Returns the number of decimals used to get its user representation. For example, if `decimals` equals `2`, a balance of `505` tokens should be displayed to a user as `5.05` (`505 / 10 ** 2`). Tokens usually opt for a value of 18, imitating the relationship between Ether and Wei. This is the value {ERC20} uses, unless this function is overridden; NOTE: This information is only used for _display_ purposes: it in no way affects any of the arithmetic of the contract, including {IERC20-balanceOf} and {IERC20-transfer}.*
 
-Requirements:
 
-- &#x60;spender&#x60; cannot be the zero address._
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint8 | undefined |
 
 ### decreaseAllowance
 
 ```solidity
-function decreaseAllowance(address spender, uint256 subtractedValue) public virtual returns (bool)
+function decreaseAllowance(address spender, uint256 subtractedValue) external nonpayable returns (bool)
 ```
 
-_Atomically decreases the allowance granted to &#x60;spender&#x60; by the caller.
 
-This is an alternative to {approve} that can be used as a mitigation for
-problems described in {IERC20-approve}.
 
-Emits an {Approval} event indicating the updated allowance.
+*Atomically decreases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address. - `spender` must have allowance for the caller of at least `subtractedValue`.*
 
-Requirements:
+#### Parameters
 
-- &#x60;spender&#x60; cannot be the zero address.
-- &#x60;spender&#x60; must have allowance for the caller of at least
-&#x60;subtractedValue&#x60;._
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| subtractedValue | uint256 | undefined |
 
-### _transfer
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### increaseAllowance
 
 ```solidity
-function _transfer(address sender, address recipient, uint256 amount) internal virtual
+function increaseAllowance(address spender, uint256 addedValue) external nonpayable returns (bool)
 ```
 
-_Moves &#x60;amount&#x60; of tokens from &#x60;sender&#x60; to &#x60;recipient&#x60;.
 
-This internal function is equivalent to {transfer}, and can be used to
-e.g. implement automatic token fees, slashing mechanisms, etc.
 
-Emits a {Transfer} event.
+*Atomically increases the allowance granted to `spender` by the caller. This is an alternative to {approve} that can be used as a mitigation for problems described in {IERC20-approve}. Emits an {Approval} event indicating the updated allowance. Requirements: - `spender` cannot be the zero address.*
 
-Requirements:
+#### Parameters
 
-- &#x60;sender&#x60; cannot be the zero address.
-- &#x60;recipient&#x60; cannot be the zero address.
-- &#x60;sender&#x60; must have a balance of at least &#x60;amount&#x60;._
+| Name | Type | Description |
+|---|---|---|
+| spender | address | undefined |
+| addedValue | uint256 | undefined |
 
-### _mint
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### name
 
 ```solidity
-function _mint(address account, uint256 amount) internal virtual
+function name() external view returns (string)
 ```
 
-_Creates &#x60;amount&#x60; tokens and assigns them to &#x60;account&#x60;, increasing
-the total supply.
 
-Emits a {Transfer} event with &#x60;from&#x60; set to the zero address.
 
-Requirements:
+*Returns the name of the token.*
 
-- &#x60;account&#x60; cannot be the zero address._
 
-### _burn
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### symbol
 
 ```solidity
-function _burn(address account, uint256 amount) internal virtual
+function symbol() external view returns (string)
 ```
 
-_Destroys &#x60;amount&#x60; tokens from &#x60;account&#x60;, reducing the
-total supply.
 
-Emits a {Transfer} event with &#x60;to&#x60; set to the zero address.
 
-Requirements:
+*Returns the symbol of the token, usually a shorter version of the name.*
 
-- &#x60;account&#x60; cannot be the zero address.
-- &#x60;account&#x60; must have at least &#x60;amount&#x60; tokens._
 
-### _approve
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### totalSupply
 
 ```solidity
-function _approve(address owner, address spender, uint256 amount) internal virtual
+function totalSupply() external view returns (uint256)
 ```
 
-_Sets &#x60;amount&#x60; as the allowance of &#x60;spender&#x60; over the &#x60;owner&#x60; s tokens.
 
-This internal function is equivalent to &#x60;approve&#x60;, and can be used to
-e.g. set automatic allowances for certain subsystems, etc.
 
-Emits an {Approval} event.
+*See {IERC20-totalSupply}.*
 
-Requirements:
 
-- &#x60;owner&#x60; cannot be the zero address.
-- &#x60;spender&#x60; cannot be the zero address._
+#### Returns
 
-### _beforeTokenTransfer
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### transfer
 
 ```solidity
-function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
+function transfer(address recipient, uint256 amount) external nonpayable returns (bool)
 ```
 
-_Hook that is called before any transfer of tokens. This includes
-minting and burning.
 
-Calling conditions:
 
-- when &#x60;from&#x60; and &#x60;to&#x60; are both non-zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens
-will be transferred to &#x60;to&#x60;.
-- when &#x60;from&#x60; is zero, &#x60;amount&#x60; tokens will be minted for &#x60;to&#x60;.
-- when &#x60;to&#x60; is zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens will be burned.
-- &#x60;from&#x60; and &#x60;to&#x60; are never both zero.
+*See {IERC20-transfer}. Requirements: - `recipient` cannot be the zero address. - the caller must have a balance of at least `amount`.*
 
-To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks]._
+#### Parameters
 
-### _afterTokenTransfer
+| Name | Type | Description |
+|---|---|---|
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### transferFrom
 
 ```solidity
-function _afterTokenTransfer(address from, address to, uint256 amount) internal virtual
+function transferFrom(address sender, address recipient, uint256 amount) external nonpayable returns (bool)
 ```
 
-_Hook that is called after any transfer of tokens. This includes
-minting and burning.
 
-Calling conditions:
 
-- when &#x60;from&#x60; and &#x60;to&#x60; are both non-zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens
-has been transferred to &#x60;to&#x60;.
-- when &#x60;from&#x60; is zero, &#x60;amount&#x60; tokens have been minted for &#x60;to&#x60;.
-- when &#x60;to&#x60; is zero, &#x60;amount&#x60; of &#x60;&#x60;from&#x60;&#x60;&#x27;s tokens have been burned.
-- &#x60;from&#x60; and &#x60;to&#x60; are never both zero.
+*See {IERC20-transferFrom}. Emits an {Approval} event indicating the updated allowance. This is not required by the EIP. See the note at the beginning of {ERC20}. Requirements: - `sender` and `recipient` cannot be the zero address. - `sender` must have a balance of at least `amount`. - the caller must have allowance for ``sender``&#39;s tokens of at least `amount`.*
 
-To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks]._
+#### Parameters
 
-### __gap
+| Name | Type | Description |
+|---|---|---|
+| sender | address | undefined |
+| recipient | address | undefined |
+| amount | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
+## Events
+
+### Approval
 
 ```solidity
-uint256[45] __gap
+event Approval(address indexed owner, address indexed spender, uint256 value)
 ```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| owner `indexed` | address | undefined |
+| spender `indexed` | address | undefined |
+| value  | uint256 | undefined |
+
+### Transfer
+
+```solidity
+event Transfer(address indexed from, address indexed to, uint256 value)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| from `indexed` | address | undefined |
+| to `indexed` | address | undefined |
+| value  | uint256 | undefined |
+
+
 

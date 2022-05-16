@@ -1,128 +1,36 @@
-# Solidity API
+# IBErc20Token
 
-## IBErc20Token
 
-### mint
 
-```solidity
-function mint(uint256 mintAmount) external returns (uint256)
-```
 
-Sender supplies assets into the market and receives cTokens in exchange
 
-_Accrues interest whether or not the operation succeeds, unless reverted_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| mintAmount | uint256 | The amount of the underlying asset to supply |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
 
-### redeem
+
+## Methods
+
+### accountTokens
 
 ```solidity
-function redeem(uint256 redeemTokens) external returns (uint256)
+function accountTokens(address owner) external nonpayable returns (uint256)
 ```
 
-Sender redeems cTokens in exchange for the underlying asset
+Get the underlying balance of the `owner`
 
-_Accrues interest whether or not the operation succeeds, unless reverted_
+*This also accrues interest in a transaction*
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| redeemTokens | uint256 | The number of cTokens to redeem into underlying |
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
+|---|---|---|
+| owner | address | The address of the account to query |
 
-### redeemUnderlying
-
-```solidity
-function redeemUnderlying(uint256 redeemAmount) external returns (uint256)
-```
-
-Sender redeems cTokens in exchange for a specified amount of underlying asset
-
-_Accrues interest whether or not the operation succeeds, unless reverted_
+#### Returns
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| redeemAmount | uint256 | The amount of underlying to redeem |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### borrow
-
-```solidity
-function borrow(uint256 borrowAmount) external returns (uint256)
-```
-
-Sender borrows assets from the protocol to their own address
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrowAmount | uint256 | The amount of the underlying asset to borrow |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### repayBorrow
-
-```solidity
-function repayBorrow(uint256 repayAmount) external returns (uint256)
-```
-
-Sender repays their own borrow
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| repayAmount | uint256 | The amount to repay |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### repayBorrowBehalf
-
-```solidity
-function repayBorrowBehalf(address borrower, uint256 repayAmount) external returns (uint256)
-```
-
-Sender repays a borrow belonging to borrower
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrower | address | the account with the debt being payed off |
-| repayAmount | uint256 | The amount to repay |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
-
-### liquidateBorrow
-
-```solidity
-function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral) external returns (uint256)
-```
-
-The sender liquidates the borrowers collateral.
- The collateral seized is transferred to the liquidator.
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| borrower | address | The borrower of this cToken to be liquidated |
-| repayAmount | uint256 | The amount of the underlying borrowed asset to repay |
-| cTokenCollateral | address | The market in which to seize collateral from the borrower |
-
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | uint 0&#x3D;success, otherwise a failure (see ErrorReporter.sol for details) |
+|---|---|---|
+| _0 | uint256 | The amount of underlying owned by `owner` |
 
 ### balanceOf
 
@@ -130,31 +38,179 @@ The sender liquidates the borrowers collateral.
 function balanceOf(address owner) external view returns (uint256)
 ```
 
-Get the token balance of the &#x60;owner&#x60;
+Get the token balance of the `owner`
+
+
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | owner | address | The address of the account to query |
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The number of tokens owned by &#x60;owner&#x60; |
+#### Returns
 
-### accountTokens
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | The number of tokens owned by `owner` |
+
+### borrow
 
 ```solidity
-function accountTokens(address owner) external returns (uint256)
+function borrow(uint256 borrowAmount) external nonpayable returns (uint256)
 ```
 
-Get the underlying balance of the &#x60;owner&#x60;
+Sender borrows assets from the protocol to their own address
 
-_This also accrues interest in a transaction_
 
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-| owner | address | The address of the account to query |
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | uint256 | The amount of underlying owned by &#x60;owner&#x60; |
+|---|---|---|
+| borrowAmount | uint256 | The amount of the underlying asset to borrow |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### liquidateBorrow
+
+```solidity
+function liquidateBorrow(address borrower, uint256 repayAmount, address cTokenCollateral) external nonpayable returns (uint256)
+```
+
+The sender liquidates the borrowers collateral.  The collateral seized is transferred to the liquidator.
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| borrower | address | The borrower of this cToken to be liquidated |
+| repayAmount | uint256 | The amount of the underlying borrowed asset to repay |
+| cTokenCollateral | address | The market in which to seize collateral from the borrower |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### mint
+
+```solidity
+function mint(uint256 mintAmount) external nonpayable returns (uint256)
+```
+
+Sender supplies assets into the market and receives cTokens in exchange
+
+*Accrues interest whether or not the operation succeeds, unless reverted*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| mintAmount | uint256 | The amount of the underlying asset to supply |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### redeem
+
+```solidity
+function redeem(uint256 redeemTokens) external nonpayable returns (uint256)
+```
+
+Sender redeems cTokens in exchange for the underlying asset
+
+*Accrues interest whether or not the operation succeeds, unless reverted*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| redeemTokens | uint256 | The number of cTokens to redeem into underlying |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### redeemUnderlying
+
+```solidity
+function redeemUnderlying(uint256 redeemAmount) external nonpayable returns (uint256)
+```
+
+Sender redeems cTokens in exchange for a specified amount of underlying asset
+
+*Accrues interest whether or not the operation succeeds, unless reverted*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| redeemAmount | uint256 | The amount of underlying to redeem |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### repayBorrow
+
+```solidity
+function repayBorrow(uint256 repayAmount) external nonpayable returns (uint256)
+```
+
+Sender repays their own borrow
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| repayAmount | uint256 | The amount to repay |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+### repayBorrowBehalf
+
+```solidity
+function repayBorrowBehalf(address borrower, uint256 repayAmount) external nonpayable returns (uint256)
+```
+
+Sender repays a borrow belonging to borrower
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| borrower | address | the account with the debt being payed off |
+| repayAmount | uint256 | The amount to repay |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | uint 0=success, otherwise a failure (see ErrorReporter.sol for details) |
+
+
+
 

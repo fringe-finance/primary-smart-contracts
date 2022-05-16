@@ -1,29 +1,40 @@
-# Solidity API
+# IERC1363ReceiverUpgradeable
 
-## IERC1363ReceiverUpgradeable
+
+
+
+
+
+
+
+
+## Methods
 
 ### onTransferReceived
 
 ```solidity
-function onTransferReceived(address operator, address from, uint256 value, bytes data) external returns (bytes4)
+function onTransferReceived(address operator, address from, uint256 value, bytes data) external nonpayable returns (bytes4)
 ```
 
 Handle the receipt of ERC1363 tokens
 
-_Any ERC1363 smart contract calls this function on the recipient
-after a &#x60;transfer&#x60; or a &#x60;transferFrom&#x60;. This function MAY throw to revert and reject the
-transfer. Return of other than the magic value MUST result in the
-transaction being reverted.
-Note: the token contract address is always the message sender._
+*Any ERC1363 smart contract calls this function on the recipient after a `transfer` or a `transferFrom`. This function MAY throw to revert and reject the transfer. Return of other than the magic value MUST result in the transaction being reverted. Note: the token contract address is always the message sender.*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| operator | address | address The address which called &#x60;transferAndCall&#x60; or &#x60;transferFromAndCall&#x60; function |
+|---|---|---|
+| operator | address | address The address which called `transferAndCall` or `transferFromAndCall` function |
 | from | address | address The address which are token transferred from |
 | value | uint256 | uint256 The amount of tokens transferred |
 | data | bytes | bytes Additional data with no specified format |
 
+#### Returns
+
 | Name | Type | Description |
-| ---- | ---- | ----------- |
-| [0] | bytes4 | &#x60;bytes4(keccak256(&quot;onTransferReceived(address,address,uint256,bytes)&quot;))&#x60;  unless throwing |
+|---|---|---|
+| _0 | bytes4 | `bytes4(keccak256(&quot;onTransferReceived(address,address,uint256,bytes)&quot;))`  unless throwing |
+
+
+
 

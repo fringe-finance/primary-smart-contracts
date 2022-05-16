@@ -1,52 +1,14 @@
-# Solidity API
+# IAccessControl
 
-## IAccessControl
 
-_External interface of AccessControl declared to support ERC165 detection._
 
-### RoleAdminChanged
 
-```solidity
-event RoleAdminChanged(bytes32 role, bytes32 previousAdminRole, bytes32 newAdminRole)
-```
 
-_Emitted when &#x60;newAdminRole&#x60; is set as &#x60;&#x60;role&#x60;&#x60;&#x27;s admin role, replacing &#x60;previousAdminRole&#x60;
 
-&#x60;DEFAULT_ADMIN_ROLE&#x60; is the starting admin for all roles, despite
-{RoleAdminChanged} not being emitted signaling this.
 
-_Available since v3.1.__
+*External interface of AccessControl declared to support ERC165 detection.*
 
-### RoleGranted
-
-```solidity
-event RoleGranted(bytes32 role, address account, address sender)
-```
-
-_Emitted when &#x60;account&#x60; is granted &#x60;role&#x60;.
-
-&#x60;sender&#x60; is the account that originated the contract call, an admin role
-bearer except when using {AccessControl-_setupRole}._
-
-### RoleRevoked
-
-```solidity
-event RoleRevoked(bytes32 role, address account, address sender)
-```
-
-_Emitted when &#x60;account&#x60; is revoked &#x60;role&#x60;.
-
-&#x60;sender&#x60; is the account that originated the contract call:
-  - if using &#x60;revokeRole&#x60;, it is the admin role bearer
-  - if using &#x60;renounceRole&#x60;, it is the role bearer (i.e. &#x60;account&#x60;)_
-
-### hasRole
-
-```solidity
-function hasRole(bytes32 role, address account) external view returns (bool)
-```
-
-_Returns &#x60;true&#x60; if &#x60;account&#x60; has been granted &#x60;role&#x60;._
+## Methods
 
 ### getRoleAdmin
 
@@ -54,56 +16,153 @@ _Returns &#x60;true&#x60; if &#x60;account&#x60; has been granted &#x60;role&#x6
 function getRoleAdmin(bytes32 role) external view returns (bytes32)
 ```
 
-_Returns the admin role that controls &#x60;role&#x60;. See {grantRole} and
-{revokeRole}.
 
-To change a role&#x27;s admin, use {AccessControl-_setRoleAdmin}._
+
+*Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role&#39;s admin, use {AccessControl-_setRoleAdmin}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
 
 ### grantRole
 
 ```solidity
-function grantRole(bytes32 role, address account) external
+function grantRole(bytes32 role, address account) external nonpayable
 ```
 
-_Grants &#x60;role&#x60; to &#x60;account&#x60;.
 
-If &#x60;account&#x60; had not been already granted &#x60;role&#x60;, emits a {RoleGranted}
-event.
 
-Requirements:
+*Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``&#39;s admin role.*
 
-- the caller must have &#x60;&#x60;role&#x60;&#x60;&#x27;s admin role._
+#### Parameters
 
-### revokeRole
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+### hasRole
 
 ```solidity
-function revokeRole(bytes32 role, address account) external
+function hasRole(bytes32 role, address account) external view returns (bool)
 ```
 
-_Revokes &#x60;role&#x60; from &#x60;account&#x60;.
 
-If &#x60;account&#x60; had been granted &#x60;role&#x60;, emits a {RoleRevoked} event.
 
-Requirements:
+*Returns `true` if `account` has been granted `role`.*
 
-- the caller must have &#x60;&#x60;role&#x60;&#x60;&#x27;s admin role._
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
 
 ### renounceRole
 
 ```solidity
-function renounceRole(bytes32 role, address account) external
+function renounceRole(bytes32 role, address account) external nonpayable
 ```
 
-_Revokes &#x60;role&#x60; from the calling account.
 
-Roles are often managed via {grantRole} and {revokeRole}: this function&#x27;s
-purpose is to provide a mechanism for accounts to lose their privileges
-if they are compromised (such as when a trusted device is misplaced).
 
-If the calling account had been granted &#x60;role&#x60;, emits a {RoleRevoked}
-event.
+*Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function&#39;s purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `account`.*
 
-Requirements:
+#### Parameters
 
-- the caller must be &#x60;account&#x60;._
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+### revokeRole
+
+```solidity
+function revokeRole(bytes32 role, address account) external nonpayable
+```
+
+
+
+*Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``&#39;s admin role.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role | bytes32 | undefined |
+| account | address | undefined |
+
+
+
+## Events
+
+### RoleAdminChanged
+
+```solidity
+event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
+```
+
+
+
+*Emitted when `newAdminRole` is set as ``role``&#39;s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this. _Available since v3.1._*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| previousAdminRole `indexed` | bytes32 | undefined |
+| newAdminRole `indexed` | bytes32 | undefined |
+
+### RoleGranted
+
+```solidity
+event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
+```
+
+
+
+*Emitted when `account` is granted `role`. `sender` is the account that originated the contract call, an admin role bearer except when using {AccessControl-_setupRole}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+
+### RoleRevoked
+
+```solidity
+event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
+```
+
+
+
+*Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| role `indexed` | bytes32 | undefined |
+| account `indexed` | address | undefined |
+| sender `indexed` | address | undefined |
+
+
 

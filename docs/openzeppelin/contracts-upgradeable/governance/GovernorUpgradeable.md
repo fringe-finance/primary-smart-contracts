@@ -1,243 +1,500 @@
-# Solidity API
+# GovernorUpgradeable
 
-## GovernorUpgradeable
 
-_Core of the governance system, designed to be extended though various modules.
 
-This contract is abstract and requires several function to be implemented in various modules:
 
-- A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote}
-- A voting module must implement {getVotes}
-- Additionanly, the {votingPeriod} must also be implemented
 
-_Available since v4.3.__
+
+
+*Core of the governance system, designed to be extended though various modules. This contract is abstract and requires several function to be implemented in various modules: - A counting module must implement {quorum}, {_quorumReached}, {_voteSucceeded} and {_countVote} - A voting module must implement {getVotes} - Additionanly, the {votingPeriod} must also be implemented _Available since v4.3._*
+
+## Methods
 
 ### BALLOT_TYPEHASH
 
 ```solidity
-bytes32 BALLOT_TYPEHASH
+function BALLOT_TYPEHASH() external view returns (bytes32)
 ```
 
-### ProposalCore
+
+
+
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bytes32 | undefined |
+
+### COUNTING_MODE
 
 ```solidity
-struct ProposalCore {
-  struct TimersUpgradeable.BlockNumber voteStart;
-  struct TimersUpgradeable.BlockNumber voteEnd;
-  bool executed;
-  bool canceled;
-}
+function COUNTING_MODE() external pure returns (string)
 ```
 
-### _name
+module:voting
 
-```solidity
-string _name
-```
+*A description of the possible `support` values for {castVote} and the way these votes are counted, meant to be consumed by UIs to show correct vote options and interpret the results. The string is a URL-encoded sequence of key-value pairs that each describe one aspect, for example `support=bravo&amp;quorum=for,abstain`. There are 2 standard keys: `support` and `quorum`. - `support=bravo` refers to the vote options 0 = For, 1 = Against, 2 = Abstain, as in `GovernorBravo`. - `quorum=bravo` means that only For votes are counted towards quorum. - `quorum=for,abstain` means that both For and Abstain votes are counted towards quorum. NOTE: The string can be decoded by the standard https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams[`URLSearchParams`] JavaScript class.*
 
-### _proposals
 
-```solidity
-mapping(uint256 &#x3D;&gt; struct GovernorUpgradeable.ProposalCore) _proposals
-```
+#### Returns
 
-### onlyGovernance
-
-```solidity
-modifier onlyGovernance()
-```
-
-_Restrict access to governor executing address. Some module might override the _executor function to make
-sure this modifier is consistant with the execution model._
-
-### __Governor_init
-
-```solidity
-function __Governor_init(string name_) internal
-```
-
-_Sets the value for {name} and {version}_
-
-### __Governor_init_unchained
-
-```solidity
-function __Governor_init_unchained(string name_) internal
-```
-
-### supportsInterface
-
-```solidity
-function supportsInterface(bytes4 interfaceId) public view virtual returns (bool)
-```
-
-_See {IERC165-supportsInterface}._
-
-### name
-
-```solidity
-function name() public view virtual returns (string)
-```
-
-_See {IGovernor-name}._
-
-### version
-
-```solidity
-function version() public view virtual returns (string)
-```
-
-_See {IGovernor-version}._
-
-### hashProposal
-
-```solidity
-function hashProposal(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) public pure virtual returns (uint256)
-```
-
-_See {IGovernor-hashProposal}.
-
-The proposal id is produced by hashing the RLC encoded &#x60;targets&#x60; array, the &#x60;values&#x60; array, the &#x60;calldatas&#x60; array
-and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id
-can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in
-advance, before the proposal is submitted.
-
-Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the
-same proposal (with same operation and same description) will have the same id if submitted on multiple governors
-accross multiple networks. This also means that in order to execute the same operation twice (on the same
-governor) the proposer will have to change the description in order to avoid proposal id conflicts._
-
-### state
-
-```solidity
-function state(uint256 proposalId) public view virtual returns (enum IGovernorUpgradeable.ProposalState)
-```
-
-_See {IGovernor-state}._
-
-### proposalSnapshot
-
-```solidity
-function proposalSnapshot(uint256 proposalId) public view virtual returns (uint256)
-```
-
-_See {IGovernor-proposalSnapshot}._
-
-### proposalDeadline
-
-```solidity
-function proposalDeadline(uint256 proposalId) public view virtual returns (uint256)
-```
-
-_See {IGovernor-proposalDeadline}._
-
-### _quorumReached
-
-```solidity
-function _quorumReached(uint256 proposalId) internal view virtual returns (bool)
-```
-
-_Amount of votes already cast passes the threshold limit._
-
-### _voteSucceeded
-
-```solidity
-function _voteSucceeded(uint256 proposalId) internal view virtual returns (bool)
-```
-
-_Is the proposal successful or not._
-
-### _countVote
-
-```solidity
-function _countVote(uint256 proposalId, address account, uint8 support, uint256 weight) internal virtual
-```
-
-_Register a vote with a given support and voting weight.
-
-Note: Support is generic and can represent various things depending on the voting system used._
-
-### propose
-
-```solidity
-function propose(address[] targets, uint256[] values, bytes[] calldatas, string description) public virtual returns (uint256)
-```
-
-_See {IGovernor-propose}._
-
-### execute
-
-```solidity
-function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) public payable virtual returns (uint256)
-```
-
-_See {IGovernor-execute}._
-
-### _execute
-
-```solidity
-function _execute(uint256, address[] targets, uint256[] values, bytes[] calldatas, bytes32) internal virtual
-```
-
-_Internal execution mechanism. Can be overriden to implement different execution mechanism_
-
-### _cancel
-
-```solidity
-function _cancel(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) internal virtual returns (uint256)
-```
-
-_Internal cancel mechanism: locks up the proposal timer, preventing it from being re-submitted. Marks it as
-canceled to allow distinguishing it from executed proposals.
-
-Emits a {IGovernor-ProposalCanceled} event._
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
 
 ### castVote
 
 ```solidity
-function castVote(uint256 proposalId, uint8 support) public virtual returns (uint256)
+function castVote(uint256 proposalId, uint8 support) external nonpayable returns (uint256)
 ```
 
-_See {IGovernor-castVote}._
 
-### castVoteWithReason
 
-```solidity
-function castVoteWithReason(uint256 proposalId, uint8 support, string reason) public virtual returns (uint256)
-```
+*See {IGovernor-castVote}.*
 
-_See {IGovernor-castVoteWithReason}._
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
 
 ### castVoteBySig
 
 ```solidity
-function castVoteBySig(uint256 proposalId, uint8 support, uint8 v, bytes32 r, bytes32 s) public virtual returns (uint256)
+function castVoteBySig(uint256 proposalId, uint8 support, uint8 v, bytes32 r, bytes32 s) external nonpayable returns (uint256)
 ```
 
-_See {IGovernor-castVoteBySig}._
 
-### _castVote
+
+*See {IGovernor-castVoteBySig}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+| v | uint8 | undefined |
+| r | bytes32 | undefined |
+| s | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### castVoteWithReason
 
 ```solidity
-function _castVote(uint256 proposalId, address account, uint8 support, string reason) internal virtual returns (uint256)
+function castVoteWithReason(uint256 proposalId, uint8 support, string reason) external nonpayable returns (uint256)
 ```
 
-_Internal vote casting mechanism: Check that the vote is pending, that it has not been cast yet, retrieve
-voting weight using {IGovernor-getVotes} and call the {_countVote} internal function.
 
-Emits a {IGovernor-VoteCast} event._
 
-### _executor
+*See {IGovernor-castVoteWithReason}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| support | uint8 | undefined |
+| reason | string | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### execute
 
 ```solidity
-function _executor() internal view virtual returns (address)
+function execute(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) external payable returns (uint256)
 ```
 
-_Address through which the governor executes action. Will be overloaded by module that execute actions
-through another contract such as a timelock._
 
-### __gap
+
+*See {IGovernor-execute}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| descriptionHash | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### getVotes
 
 ```solidity
-uint256[48] __gap
+function getVotes(address account, uint256 blockNumber) external view returns (uint256)
 ```
+
+module:reputation
+
+*Voting power of an `account` at a specific `blockNumber`. Note: this can be implemented in a number of ways, for example by reading the delegated balance from one (or multiple), {ERC20Votes} tokens.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| account | address | undefined |
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### hasVoted
+
+```solidity
+function hasVoted(uint256 proposalId, address account) external view returns (bool)
+```
+
+module:voting
+
+*Returns weither `account` has cast a vote on `proposalId`.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+| account | address | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### hashProposal
+
+```solidity
+function hashProposal(address[] targets, uint256[] values, bytes[] calldatas, bytes32 descriptionHash) external pure returns (uint256)
+```
+
+
+
+*See {IGovernor-hashProposal}. The proposal id is produced by hashing the RLC encoded `targets` array, the `values` array, the `calldatas` array and the descriptionHash (bytes32 which itself is the keccak256 hash of the description string). This proposal id can be produced from the proposal data which is part of the {ProposalCreated} event. It can even be computed in advance, before the proposal is submitted. Note that the chainId and the governor address are not part of the proposal id computation. Consequently, the same proposal (with same operation and same description) will have the same id if submitted on multiple governors accross multiple networks. This also means that in order to execute the same operation twice (on the same governor) the proposer will have to change the description in order to avoid proposal id conflicts.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| descriptionHash | bytes32 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### name
+
+```solidity
+function name() external view returns (string)
+```
+
+
+
+*See {IGovernor-name}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### proposalDeadline
+
+```solidity
+function proposalDeadline(uint256 proposalId) external view returns (uint256)
+```
+
+
+
+*See {IGovernor-proposalDeadline}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### proposalSnapshot
+
+```solidity
+function proposalSnapshot(uint256 proposalId) external view returns (uint256)
+```
+
+
+
+*See {IGovernor-proposalSnapshot}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### propose
+
+```solidity
+function propose(address[] targets, uint256[] values, bytes[] calldatas, string description) external nonpayable returns (uint256)
+```
+
+
+
+*See {IGovernor-propose}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| targets | address[] | undefined |
+| values | uint256[] | undefined |
+| calldatas | bytes[] | undefined |
+| description | string | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### quorum
+
+```solidity
+function quorum(uint256 blockNumber) external view returns (uint256)
+```
+
+module:user-config
+
+*Minimum number of cast voted required for a proposal to be successful. Note: The `blockNumber` parameter corresponds to the snaphot used for counting vote. This allows to scale the quroum depending on values such as the totalSupply of a token at this block (see {ERC20Votes}).*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| blockNumber | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### state
+
+```solidity
+function state(uint256 proposalId) external view returns (enum IGovernorUpgradeable.ProposalState)
+```
+
+
+
+*See {IGovernor-state}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId | uint256 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | enum IGovernorUpgradeable.ProposalState | undefined |
+
+### supportsInterface
+
+```solidity
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
+```
+
+
+
+*See {IERC165-supportsInterface}.*
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+### version
+
+```solidity
+function version() external view returns (string)
+```
+
+
+
+*See {IGovernor-version}.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | string | undefined |
+
+### votingDelay
+
+```solidity
+function votingDelay() external view returns (uint256)
+```
+
+module:user-config
+
+*delay, in number of block, between the proposal is created and the vote starts. This can be increassed to leave time for users to buy voting power, of delegate it, before the voting of a proposal starts.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+### votingPeriod
+
+```solidity
+function votingPeriod() external view returns (uint256)
+```
+
+module:user-config
+
+*delay, in number of blocks, between the vote start and vote ends. Note: the {votingDelay} can delay the start of the vote. This must be considered when setting the voting duration compared to the voting delay.*
+
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| _0 | uint256 | undefined |
+
+
+
+## Events
+
+### ProposalCanceled
+
+```solidity
+event ProposalCanceled(uint256 proposalId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+
+### ProposalCreated
+
+```solidity
+event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 startBlock, uint256 endBlock, string description)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+| proposer  | address | undefined |
+| targets  | address[] | undefined |
+| values  | uint256[] | undefined |
+| signatures  | string[] | undefined |
+| calldatas  | bytes[] | undefined |
+| startBlock  | uint256 | undefined |
+| endBlock  | uint256 | undefined |
+| description  | string | undefined |
+
+### ProposalExecuted
+
+```solidity
+event ProposalExecuted(uint256 proposalId)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| proposalId  | uint256 | undefined |
+
+### VoteCast
+
+```solidity
+event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)
+```
+
+
+
+
+
+#### Parameters
+
+| Name | Type | Description |
+|---|---|---|
+| voter `indexed` | address | undefined |
+| proposalId  | uint256 | undefined |
+| support  | uint8 | undefined |
+| weight  | uint256 | undefined |
+| reason  | string | undefined |
+
+
 

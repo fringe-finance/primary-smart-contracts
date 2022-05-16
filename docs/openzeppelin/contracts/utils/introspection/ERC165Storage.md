@@ -1,41 +1,37 @@
-# Solidity API
+# ERC165Storage
 
-## ERC165Storage
 
-_Storage based implementation of the {IERC165} interface.
 
-Contracts may inherit from this and call {_registerInterface} to declare
-their support of an interface._
 
-### _supportedInterfaces
 
-```solidity
-mapping(bytes4 &#x3D;&gt; bool) _supportedInterfaces
-```
 
-_Mapping of interface ids to whether or not it&#x27;s supported._
+
+*Storage based implementation of the {IERC165} interface. Contracts may inherit from this and call {_registerInterface} to declare their support of an interface.*
+
+## Methods
 
 ### supportsInterface
 
 ```solidity
-function supportsInterface(bytes4 interfaceId) public view virtual returns (bool)
+function supportsInterface(bytes4 interfaceId) external view returns (bool)
 ```
 
-_See {IERC165-supportsInterface}._
 
-### _registerInterface
 
-```solidity
-function _registerInterface(bytes4 interfaceId) internal virtual
-```
+*See {IERC165-supportsInterface}.*
 
-_Registers the contract as an implementer of the interface defined by
-&#x60;interfaceId&#x60;. Support of the actual ERC165 interface is automatic and
-registering its interface id is not required.
+#### Parameters
 
-See {IERC165-supportsInterface}.
+| Name | Type | Description |
+|---|---|---|
+| interfaceId | bytes4 | undefined |
 
-Requirements:
+#### Returns
 
-- &#x60;interfaceId&#x60; cannot be the ERC165 invalid interface (&#x60;0xffffffff&#x60;)._
+| Name | Type | Description |
+|---|---|---|
+| _0 | bool | undefined |
+
+
+
 

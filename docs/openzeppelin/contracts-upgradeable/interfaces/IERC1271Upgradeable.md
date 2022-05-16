@@ -1,11 +1,14 @@
-# Solidity API
+# IERC1271Upgradeable
 
-## IERC1271Upgradeable
 
-_Interface of the ERC1271 standard signature validation method for
-contracts as defined in https://eips.ethereum.org/EIPS/eip-1271[ERC-1271].
 
-_Available since v4.1.__
+
+
+
+
+*Interface of the ERC1271 standard signature validation method for contracts as defined in https://eips.ethereum.org/EIPS/eip-1271[ERC-1271]. _Available since v4.1._*
+
+## Methods
 
 ### isValidSignature
 
@@ -13,10 +16,23 @@ _Available since v4.1.__
 function isValidSignature(bytes32 hash, bytes signature) external view returns (bytes4 magicValue)
 ```
 
-_Should return whether the signature provided is valid for the provided data_
+
+
+*Should return whether the signature provided is valid for the provided data*
+
+#### Parameters
 
 | Name | Type | Description |
-| ---- | ---- | ----------- |
+|---|---|---|
 | hash | bytes32 | Hash of the data to be signed |
 | signature | bytes | Signature byte array associated with _data |
+
+#### Returns
+
+| Name | Type | Description |
+|---|---|---|
+| magicValue | bytes4 | undefined |
+
+
+
 
