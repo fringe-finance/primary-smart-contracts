@@ -6,6 +6,7 @@ require("hardhat-gas-reporter");
 require("solidity-coverage");
 require('hardhat-contract-sizer');
 require('solidity-docgen');
+require('@primitivefi/hardhat-dodoc');
 
 const {
     INFURA_KEY, 
@@ -90,5 +91,9 @@ module.exports = {
     clear: true,
     runOnCompile: true,
     pages: 'files',
-  }
+  },
+  dodoc: {
+    runOnCompile: false,
+    debugMode: false,
+  },
 };

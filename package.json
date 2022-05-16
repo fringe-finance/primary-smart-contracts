@@ -10,7 +10,8 @@
     "forkrinkeby": "hardhat node --fork https://rinkeby.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
     "localDeploy": "hardhat run --network hardhat scripts/deployment/deployToRinkeby.js",
     "localDeployPriceOracle": "hardhat run --network hardhat scripts/deployment/rinkeby/priceOracleDeployment/deployPriceOracle.js",
-    "docgen": "npx hardhat docgen"
+    "docgen": "npx hardhat docgen",
+    "dodoc": "npx hardhat dodoc"
   },
   "author": "",
   "license": "ISC",
@@ -18,6 +19,7 @@
     "@chainlink/contracts": "^0.2.2",
     "@openzeppelin/contracts": "^4.4.0",
     "@openzeppelin/contracts-upgradeable": "^4.4.0",
+    "@primitivefi/hardhat-dodoc": "^0.2.3",
     "hardhat": "^2.7.0",
     "hardhat-contract-sizer": "^2.4.0",
     "js-big-decimal": "^1.3.4",
