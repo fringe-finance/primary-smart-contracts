@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "hardhat/console.sol";
-
 import "../bondtroller/Bondtroller.sol";
 import "./BTokenInterfaces.sol";
 import "../util/ErrorReporter.sol";
@@ -913,9 +911,6 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
          */
         (vars.mathErr, vars.accountBorrowsNew) = subUInt(vars.accountBorrows, vars.actualRepayAmount);
         require(vars.mathErr == MathError.NO_ERROR, "REPAY_BORROW_NEW_ACCOUNT_BORROW_BALANCE_CALCULATION_FAILED");
-
-        console.log("totalBorrows:           %s", totalBorrows);
-        console.log("vars.actualRepayAmount: %s", vars.actualRepayAmount);
 
         (vars.mathErr, vars.totalBorrowsNew) = subUInt(totalBorrows, vars.actualRepayAmount);
         if(vars.mathErr == MathError.INTEGER_UNDERFLOW) {

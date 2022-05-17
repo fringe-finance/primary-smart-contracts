@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-import "hardhat/console.sol";
-
 import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "./openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -391,31 +389,17 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         bool isPositionFullyRepaid;
         uint256 _totalOutstanding = totalOutstanding(borrower, projectToken, lendingToken);        
         if (borrowPositionsAmount == 1) {
-            console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
-            console.log("PIT_totalOutstanding: %s",_totalOutstanding);
-            console.log("PIT__borrowPosition.loanBodyBefore1: %s", _borrowPosition.loanBody);
-            console.log("PIT__borrowPosition.accrualBefore1: %s",_borrowPosition.accrual);
             if (lendingTokenAmount > info.bLendingToken.borrowBalanceStored(borrower) || 
                 lendingTokenAmount >= _totalOutstanding || 
                 lendingTokenAmount == type(uint256).max) {
-                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
-                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, type(uint256).max);
-                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
-                // console.log("PIT_amountRepaid: %s", amountRepaid);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower,  lendingTokenAmountToRepay);
-                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
-                // console.log("PIT_amountRepaid0: %s", amountRepaid);
-                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 if (lendingTokenAmountToRepay > _borrowPosition.accrual) {
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -424,36 +408,18 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
-                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = false;
             }
         } else {
-            console.log("PIT_lendingTokenAmount: %s",lendingTokenAmount);
-            console.log("PIT_totalOutstanding: %s",_totalOutstanding);
-            console.log("PIT__borrowPosition.loanBodyBefore2: %s", _borrowPosition.loanBody);
-            console.log("PIT__borrowPosition.accrualBefore2: %s",_borrowPosition.accrual);
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
-                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, _totalOutstanding);
-                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
-                // console.log("PIT_amountRepaid1: %s", amountRepaid);
-                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
-                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                // console.log("BalanceStoredBefore: %s", info.bLendingToken.borrowBalanceStored(borrower));
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, lendingTokenAmountToRepay);
-                // console.log("BalanceStoredAfter: %s", info.bLendingToken.borrowBalanceStored(borrower));
-                // console.log("PIT_amountRepaid2: %s", amountRepaid);
-                // console.log("PIT__borrowPosition.loanBodyBefore: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualBefore: %s",_borrowPosition.accrual);
                 if(lendingTokenAmountToRepay > _borrowPosition.accrual){
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
@@ -462,8 +428,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
                 }
-                // console.log("PIT__borrowPosition.loanBodyAfter: %s", _borrowPosition.loanBody);
-                // console.log("PIT__borrowPosition.accrualAfter: %s",_borrowPosition.accrual);
                 isPositionFullyRepaid = false;
             }
         }
