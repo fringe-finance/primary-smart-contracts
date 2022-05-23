@@ -46,8 +46,8 @@ module.exports = {
 
     initialExchangeRateMantissa : toBN(10).pow(toBN(18)),
     reserveFactorMantissa : toBN(25).mul(toBN(10).pow(toBN(16))),
-    name : "BUSDC Token",
-    symbol : "BUSDC",
+    name : "fUSDC Token",
+    symbol : "fUSDC",
     decimals : toBN(6),
 
     //===== END BUSDC PARAMS =====//
@@ -144,7 +144,7 @@ module.exports = {
     chainlinkAggregatorV3_MATIC_USD : '0x7bac85a8a13a4bcd8abb3eb7d6b4d632c5a57676', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair MATIC/USD
     chainlinkAggregatorV3_OGN_ETH : '0x2c881B6f3f6B5ff6C975813F87A4dad0b241C15b', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair OGN/ETH
     chainlinkAggregatorV3_ETH_USD : '0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair ETH/USD
-
-
+    chainlinkAggregatorV3_USDC_USD : '0x8fffffd4afb6115b954bd326cbe7b4ba576818f6', // https://docs.chain.link/docs/ethereum-addresses/#Ethereum%20Mainnet pair USDC/USD
+                                        
     //===== END CHAINLINK PRICE FEED =====//
 }

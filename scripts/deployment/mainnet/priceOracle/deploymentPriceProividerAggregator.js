@@ -5,7 +5,7 @@ const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentPriceProividerAggregator : async function (input_proxyAdminAddress) {
+    deploymentPriceProividerAggregator : async function (input_primaryLendingPlatformProxyAdminAddress) {
 
     //====================================================
     //declare parametrs
@@ -51,6 +51,9 @@ module.exports = {
         PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
       
         const {
+
+            USDC,
+            
             BOND,
             LINK,
             REN,
@@ -74,6 +77,7 @@ module.exports = {
             chainlinkAggregatorV3_MATIC_USD,
             chainlinkAggregatorV3_OGN_ETH,
             chainlinkAggregatorV3_ETH_USD,
+            chainlinkAggregatorV3_USDC_USD,
         
         } = require('../config.js');
 
@@ -96,7 +100,7 @@ module.exports = {
         // }
 
     //====================================================
-    //deploy proxy admin
+    //deploy primary lending platform proxy admin
 
         console.log();
         console.log("***** PRIMARY LENDING PLATFORM PROXY ADMIN DEPLOYMENT *****");
@@ -214,6 +218,14 @@ module.exports = {
         });
 
         await chainlinkPriceProvider.setTokenAndAggregator(
+            USDC,
+            [chainlinkAggregatorV3_USDC_USD]
+        ).then(function(instance){
+            console.log("\nTransaction hash: " + instance.hash)
+            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token "+ USDC +" and aggregator " + [chainlinkAggregatorV3_USDC_USD]);
+        });
+
+        await chainlinkPriceProvider.setTokenAndAggregator(
             LINK, 
             [chainlinkAggregatorV3_LINK_USD]
         ).then(function(instance){
@@ -324,6 +336,15 @@ module.exports = {
         await priceProviderAggregator.grandModerator(deployMasterAddress).then(function(instance){
             console.log("\nTransaction hash: " + instance.hash)
             console.log("PriceProviderAggregator granded moderator " + deployMasterAddress);
+        });
+
+        await priceProviderAggregator.setTokenAndPriceProvider(
+            USDC, 
+            chainlinkPriceProviderAddress, 
+            false
+        ).then(function(instance){
+            console.log("\nTransaction hash: " + instance.hash)
+            console.log("PriceProviderAggregator set token "+ USDC + " with priceOracle " + chainlinkPriceProviderAddress);
         });
 
         await priceProviderAggregator.setTokenAndPriceProvider(

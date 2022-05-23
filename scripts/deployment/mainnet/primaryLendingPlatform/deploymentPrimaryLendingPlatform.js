@@ -47,11 +47,11 @@ module.exports = {
             USDC,
             USDCmultiplier,
 
-            // initialExchangeRateMantissa,
-            // reserveFactorMantissa,
-            // name,
-            // symbol,
-            // decimals,
+            initialExchangeRateMantissa,
+            reserveFactorMantissa,
+            name,
+            symbol,
+            decimals,
 
             MATIC,
             REN,
@@ -226,30 +226,30 @@ module.exports = {
         busdc = await BLendingToken.attach(busdcAddress).connect(deployMaster);
         
         let underlying = USDC
-        let initialExchangeRateMantissa = toBN(10).pow(toBN(18));
-        let reserveFactorMantissa = toBN(25).mul(toBN(10).pow(toBN(16)));//same as cAAVE
-        let name = "fUSDC";
-        let symbol = "fUSDC";
-        let decimals = toBN(6);
-        let admin = deployMasterAddress;
+        let _initialExchangeRateMantissa = initialExchangeRateMantissa;
+        let _reserveFactorMantissa = reserveFactorMantissa;//same as cAAVE
+        let _name = name;
+        let _symbol = symbol;
+        let _decimals = decimals;
+        let _admin = deployMasterAddress;
 
         await busdc.init(
             underlying,
             bondtrollerAddress,
             jumpRateModelV2Address,
-            initialExchangeRateMantissa,
-            name,
-            symbol,
-            decimals,
-            admin
+            _initialExchangeRateMantissa,
+            _name,
+            _symbol,
+            _decimals,
+            _admin
         ).then(function(instance){
             console.log("\nTransaction hash: " + instance.hash);
             console.log("BUSDC call init at " + busdc.address);
         });
 
-        await busdc.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(instance){
+        await busdc.connect(deployMaster).setReserveFactor(_reserveFactorMantissa).then(function(instance){
             console.log("\nTransaction hash: " + instance.hash);
-            console.log("BUSDC set reserve factor " + reserveFactorMantissa);
+            console.log("BUSDC set reserve factor " + _reserveFactorMantissa);
         });
 
         await bondtroller.supportMarket(busdcAddress).then(function(instance){
@@ -424,6 +424,8 @@ module.exports = {
         });
 
         let addresses = {
+            primaryLendingPlatformProxyAdminAddress: proxyAdminAddress,
+            priceOracleAddress: priceOracleAddress,
             bondtrollerAddress: bondtrollerAddress,
             busdcAddress: busdcAddress,
             primaryIndexTokenAddress: primaryIndexTokenAddress,
