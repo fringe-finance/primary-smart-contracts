@@ -238,8 +238,6 @@ abstract contract BTokenInterface is BTokenStorage {
 
     /*** Admin Functions ***/
 
-    function _setPendingAdmin(address payable newPendingAdmin) external virtual  returns (uint);
-    function _acceptAdmin() external virtual  returns (uint);
     function _setBondtroller(Bondtroller newBondtroller) public virtual  returns (uint);
     function _setReserveFactor(uint newReserveFactorMantissa) external virtual  returns (uint);
     function _reduceReserves(uint reduceAmount) external virtual  returns (uint);
