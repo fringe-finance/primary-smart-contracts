@@ -65,6 +65,13 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         revokeRole(MODERATOR_ROLE, moderator);
     }
 
+    function transferAdminship(address payable newAdmin) public onlyAdmin {
+        require(newAdmin != address(0), "BLendingToken: newAdmin==0");
+        grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+        revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        admin = newAdmin;
+    }
+
     /********************** END ADMIN FUNCTIONS ********************** */
 
     /********************** MODERATOR FUNCTIONS ********************** */
