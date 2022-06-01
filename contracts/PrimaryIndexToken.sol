@@ -202,6 +202,12 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         priceOracle = IPriceProviderAggregator(_priceOracle);
     }
 
+    function transferAdminship(address newAdmin) public onlyAdmin {
+        require(newAdmin != address(0), "PIT: invalid newAdmin");
+        grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
+        revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
     function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
@@ -494,7 +500,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
         uint256 _pit = pit(account, projectToken, lendingToken);
-        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken);
+        uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
+        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken) / (10 ** (lendingTokenDecimals - decimals()));
         if (_pit >= _totalOutstanding) {
             return _pit - _totalOutstanding;
         } else {
