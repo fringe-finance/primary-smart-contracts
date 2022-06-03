@@ -18,7 +18,7 @@ module.exports = {
         // Contracts ABI
         let PrimaryLendingPlatformProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
-        let JumpRateModelV2 = await hre.ethers.getContractFactory("JumpRateModelV2");
+        let JumpRateModelV2Upgradeable = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
         let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
         let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
@@ -141,30 +141,38 @@ module.exports = {
         let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
         let owner = deployMasterAddress;
 
-        jumpRateModelV2 = await JumpRateModelV2.connect(deployMaster).deploy(
-            baseRatePerYear,
-            multiplierPerYear,
-            jumpMultiplierPerYear,
-            kink,
-            owner,
-        );
+
+        jumpRateModelV2 = await JumpRateModelV2Upgradeable.connect(deployMaster).deploy();
         await jumpRateModelV2.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
-            console.log("JumpRateModelV2 masterCopy address: " + instance.address);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+            console.log("JumpRateModelV2Upgradeable masterCopy address: " + instance.address);
         });
         let jumpRateModelV2MasterCopyAddress = jumpRateModelV2.address;
-
+    
         let jumpRateModelV2Proxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             jumpRateModelV2MasterCopyAddress,
             proxyAdminAddress,
             "0x"
         );
         await jumpRateModelV2Proxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
-            console.log("JumpRateModelV2 proxy address: " + instance.address);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+            console.log("JumpRateModelV2Upgradeable proxy address: " + instance.address);
         });
         let jumpRateModelV2ProxyAddress = jumpRateModelV2Proxy.address;
         jumpRateModelV2Address = jumpRateModelV2ProxyAddress;
+    
+        jumpRateModelV2 = await JumpRateModelV2Upgradeable.attach(jumpRateModelV2Address).connect(deployMaster);
+        await jumpRateModelV2.initialize(
+            baseRatePerYear,
+            multiplierPerYear,
+            jumpMultiplierPerYear,
+            kink,
+            owner,
+        ).then(function(instance){
+            console.log("\nTransaction hash: " + instance.hash);
+            console.log("JumpRateModelV2Upgradeable call initialize at " + jumpRateModelV2Address);
+        })
+    
 
     //====================================================
     //deploy Bondtroller
@@ -174,7 +182,7 @@ module.exports = {
 
         bondtroller = await Bondtroller.connect(deployMaster).deploy();
         await bondtroller.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("Bondtroller masterCopy address: " + instance.address);
         });
         let bondtrollerMasterCopyAddress = bondtroller.address;
@@ -185,7 +193,7 @@ module.exports = {
             "0x"
         );
         await bondtrollerProxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("Bondtroller proxy address: " + instance.address);
         });
         let bondtrollerProxyAddress = bondtrollerProxy.address;
@@ -206,7 +214,7 @@ module.exports = {
 
         busdc = await BLendingToken.connect(deployMaster).deploy();
         await busdc.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("BLendingToken masterCopy address: " + instance.address);
         });
         let busdcMasterCopyAddress = busdc.address;
@@ -217,7 +225,7 @@ module.exports = {
             "0x"
         );
         await busdcProxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("BLendingToken proxy address: " + instance.address);
         });
         let busdcProxyAddress = busdcProxy.address;
@@ -265,7 +273,7 @@ module.exports = {
 
         primaryIndexToken = await PrimaryIndexToken.connect(deployMaster).deploy();
         await primaryIndexToken.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("PrimaryIndexToken masterCopy address: " + instance.address);
         });
         let pitMasterCopyAddress = primaryIndexToken.address;
@@ -276,7 +284,7 @@ module.exports = {
             "0x"
         );
         await pitProxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.hash);
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("PrimaryIndexToken proxy address: " + instance.address);
         });
         let pitProxyAddress = pitProxy.address;
