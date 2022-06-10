@@ -15,6 +15,7 @@ contract JumpRateModelV2Upgradeable is Initializable, InterestRateModel {
     using SafeMath for uint;
 
     event NewInterestParams(uint baseRatePerBlock, uint multiplierPerBlock, uint jumpMultiplierPerBlock, uint kink);
+    event NewOwner(address newOner);
 
     /**
      * @notice The address of the owner, i.e. the Timelock contract, which can update parameters directly
@@ -63,6 +64,15 @@ contract JumpRateModelV2Upgradeable is Initializable, InterestRateModel {
         owner = owner_;
 
         updateJumpRateModelInternal(baseRatePerYear,  multiplierPerYear, jumpMultiplierPerYear, kink_);
+    }
+    /**
+     * @notice Change the owner address (only callable by previous owner)
+     * @param _newOwner new owner address
+     */
+    function chageOwner(address _newOwner) external {
+        require(msg.sender == owner && _newOwner != address(0), "invalid sender or new owner");
+        owner =  _newOwner;
+        emit NewOwner(_newOwner);
     }
 
     /**
