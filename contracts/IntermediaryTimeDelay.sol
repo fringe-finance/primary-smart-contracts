@@ -28,7 +28,7 @@ contract IntermediaryTimeDelay is PermissionGroup{
 
     function queueTransaction(address _target, bytes memory _data) public onlyOperator returns (bytes32) {
         bytes32 txHash = keccak256(abi.encode(_target, _data));
-        require(queuedTransactions[txHash] == 0, "IntermediaryTimeDelay: Call first lockTransaction");
+        require(queuedTransactions[txHash] == 0, "IntermediaryTimeDelay: already in the queue");
         queuedTransactions[txHash] = block.timestamp;
 
         emit QueueTransaction(msg.sender, txHash, _target, block.timestamp, _data);
@@ -48,7 +48,7 @@ contract IntermediaryTimeDelay is PermissionGroup{
         require(_target != address(0), "IntermediaryTimeDelay: invalid address");
         bytes32 txHash = keccak256(abi.encode(_target, _data));
         require(queuedTransactions[txHash] != 0, "IntermediaryTimeDelay: Call first lockTransaction");
-        require(queuedTransactions[txHash]+ delayPeriod >= block.timestamp, "IntermediaryTimeDelay: Call first lockTransaction");
+        require(block.timestamp >= queuedTransactions[txHash]+ delayPeriod, "IntermediaryTimeDelay: not time yet ");
 
         // solium-disable-next-line security/no-call-value
         (bool success, bytes memory returnData) = _target.call(_data);
