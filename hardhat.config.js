@@ -11,7 +11,8 @@ require('@primitivefi/hardhat-dodoc');
 const {
     INFURA_KEY, 
     MNEMONIC,
-    ETHERSCAN_API_KEY
+    ETHERSCAN_API_KEY,
+    POLYGONSCAN_KEY
     } = process.env;
 
 
@@ -67,6 +68,23 @@ module.exports = {
       timeout: 99999999,
       accounts: {mnemonic: MNEMONIC}
     },
+    polygon_main: {
+      url: `https://polygon-rpc.com/`,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    polygon_test: {
+      url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    optimism_test: {
+      url: `https://kovan.optimism.io`,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    arbitrum_rinkeby: {
+      url: 'https://rinkeby.arbitrum.io/rpc',
+      accounts: {mnemonic: MNEMONIC}
+    },
+
     
   },
   gasReporter: {
