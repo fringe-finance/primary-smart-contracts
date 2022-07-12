@@ -66,7 +66,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 accrual;   // [accrual] = lendingToken
     }
 
-    event AddPrjToken(address indexed tokenPrj);
+    event AddPrjToken(address indexed tokenPrj, string name, string symbol);
+    event RemoveProjectToken(address indexed tokenPrj);
+    event AddLendingToken(address indexed tokenPrj, string name, string symbol);
 
     event LoanToValueRatioSet(address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
 
@@ -148,8 +150,10 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         );
 
         setPausedProjectToken(_projectToken, false, false);
+        string memory projectTokenName = ERC20Upgradeable(_projectToken).name();
+        string memory projectTokenSymbol = ERC20Upgradeable(_projectToken).symbol();
 
-        emit AddPrjToken(_projectToken);
+        emit AddPrjToken(_projectToken, projectTokenName, projectTokenSymbol);
     }
 
     function removeProjectToken(

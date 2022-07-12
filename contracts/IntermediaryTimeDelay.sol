@@ -16,8 +16,8 @@ contract IntermediaryTimeDelay is PermissionGroup{
     event ExecuteTransaction(bytes32 indexed txHash, address indexed target, bytes data, address sender);
     event CancelTransaction(bytes32 indexed txHash, address indexed target, bytes data, address sender);
 
-    constructor() {
-        delayPeriod = 300;
+    constructor(uint _delayPeriod) {
+        delayPeriod = _delayPeriod;
     }
 
     function setDelayPeriod(uint256 _delayPeriod) public onlyOperator {
@@ -27,6 +27,7 @@ contract IntermediaryTimeDelay is PermissionGroup{
     }
 
     function queueTransaction(address _target, bytes memory _data) public onlyOperator returns (bytes32) {
+        require(_target != address(0), "IntermediaryTimeDelay: invalid address");
         bytes32 txHash = keccak256(abi.encode(_target, _data));
         require(queuedTransactions[txHash] == 0, "IntermediaryTimeDelay: already in the queue");
         queuedTransactions[txHash] = block.timestamp;
