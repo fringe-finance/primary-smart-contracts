@@ -11,7 +11,14 @@
     "localDeploy": "hardhat run --network hardhat scripts/deployment/deployToRinkeby.js",
     "localDeployPriceOracle": "hardhat run --network hardhat scripts/deployment/rinkeby/priceOracleDeployment/deployPriceOracle.js",
     "docgen": "npx hardhat docgen",
-    "dodoc": "npx hardhat dodoc"
+    "dodoc": "npx hardhat dodoc",
+    "upgradeBlendingToken_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/bLendingToken/upgradeBUSDC.js",
+    "upgradeBondtroller_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/bondtroller/upgradeBondtroller.js",
+    "upgradeJumpRateModel_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/jumpRateModel/upgradeJumpRateModel.js",
+    "upgradePrimaryIndexToken_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/primaryIndexToken/upgradePrimaryIndexToken.js",
+    "upgradeChainlinkProvider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/priceOracle/chainlinkProvider/upgradeChainlinkProvider.js",
+    "upgradeUniswapV2Provider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/priceOracle/uniswapV2Provider/upgradeUniV2Provider.js",
+    "upgradePriceProvider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/upgrade/priceOracle/upgradePriceProviderAggregator.js"
   },
   "author": "",
   "license": "ISC",
