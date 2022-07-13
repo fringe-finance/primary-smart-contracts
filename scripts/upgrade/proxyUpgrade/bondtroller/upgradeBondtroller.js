@@ -2,7 +2,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../../config/config_rinkeby.json';
+const configFile = '../../../config/config.json';
 const config = require(configFile);
 
 let {PRIMARY_PROXY_ADMIN, BondtrollerLogic, BondtrollerProxy} = config;

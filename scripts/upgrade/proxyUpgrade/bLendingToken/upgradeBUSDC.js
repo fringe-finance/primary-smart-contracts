@@ -2,7 +2,7 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../../config/config_rinkeby.json';
+const configFile = '../../../config/config.json';
 const config = require(configFile);
 let {PRIMARY_PROXY_ADMIN, BLendingTokenLogic, BLendingTokenProxy} = config;
 
@@ -21,17 +21,17 @@ async function main() {
     if(!busdcLogicAdress){
       let busdc = await BUSDC.connect(deployMaster).deploy();
       await busdc.deployed();
-      bondtrollerLogicAddress = busdc.address;
-      config.BLendingTokenLogic = bondtrollerLogicAddress;
+      busdcLogicAdress = busdc.address;
+      config.BLendingTokenLogic = busdcLogicAdress;
       fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
     }
-    console.log("BUSDC masterCopy address: " + bondtrollerLogicAddress);
+    console.log("BUSDC masterCopy address: " + busdcLogicAdress);
   
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
 
-    await proxyAdmin.upgrade(busdcProxyAddress, bondtrollerLogicAddress)
+    await proxyAdmin.upgrade(busdcProxyAddress, busdcLogicAdress)
     .then(function(instance){
-        console.log("ProxyAdmin upgraded " + busdcProxyAddress + " to " + bondtrollerLogicAddress);
+        console.log("ProxyAdmin upgraded " + busdcProxyAddress + " to " + busdcLogicAdress);
         return instance;
     });
 }
