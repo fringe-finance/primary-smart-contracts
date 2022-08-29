@@ -12,7 +12,7 @@ contract IntermediaryTimeDelay is PermissionGroup{
 
     event SetDelayPeriod(uint256 oldDelayPeriod, uint256 newDelayPeriod);
 
-    event QueueTransaction(address sender, bytes32 indexed txHash, address indexed target, uint256 lockTime, bytes data);
+    event QueueTransaction(address sender, bytes32 indexed txHash, address indexed target, uint256 lockTime, uint256 endLock, bytes data);
     event ExecuteTransaction(bytes32 indexed txHash, address indexed target, bytes data, address sender);
     event CancelTransaction(bytes32 indexed txHash, address indexed target, bytes data, address sender);
 
@@ -20,7 +20,8 @@ contract IntermediaryTimeDelay is PermissionGroup{
         delayPeriod = _delayPeriod;
     }
 
-    function setDelayPeriod(uint256 _delayPeriod) public onlyOperator {
+    function setDelayPeriod(uint256 _delayPeriod) public {
+        require(msg.sender == address(this), "IntermediaryTimeDelay: only using executeTransaction function to call");
         require(minimumDelayPeriod <= _delayPeriod, "IntermediaryTimeDelay: too low delayPeriod");
         emit SetDelayPeriod(delayPeriod, _delayPeriod);
         delayPeriod = _delayPeriod;
@@ -32,7 +33,7 @@ contract IntermediaryTimeDelay is PermissionGroup{
         require(queuedTransactions[txHash] == 0, "IntermediaryTimeDelay: already in the queue");
         queuedTransactions[txHash] = block.timestamp;
 
-        emit QueueTransaction(msg.sender, txHash, _target, block.timestamp, _data);
+        emit QueueTransaction(msg.sender, txHash, _target, block.timestamp, block.timestamp + delayPeriod,  _data);
         return txHash;
     }
 
