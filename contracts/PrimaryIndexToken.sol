@@ -38,6 +38,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
     mapping(address => uint256) public totalBorrowPerCollateral; //project token address => total borrow by project token []
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
+    mapping(address => mapping(address => Ratio)) public loanToValueRatio;
 
     struct Ratio {
         uint8 numerator;
@@ -48,7 +49,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         bool isListed;
         bool isDepositPaused; // true - paused, false - not paused
         bool isWithdrawPaused; // true - paused, false - not paused
-        Ratio loanToValueRatio;
+        Ratio loanToValueRatio; // ignore
         Ratio liquidationThresholdFactor;
         Ratio liquidationIncentive;
     }
@@ -71,7 +72,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     event AddPrjToken(address indexed tokenPrj);
 
-    event LoanToValueRatioSet(address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
+    event LoanToValueRatioSet(address indexed tokenPrj, address lendingToken, uint8 lvrNumerator, uint8 lvrDenominator);
 
     event LiquidationThresholdFactorSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
@@ -126,8 +127,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function addProjectToken(
         address _projectToken,
-        uint8 _loanToValueRatioNumerator,
-        uint8 _loanToValueRatioDenominator,
         uint8 _liquidationThresholdFactorNumerator,
         uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
@@ -141,9 +140,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         
         setProjectTokenInfo(
-            _projectToken, 
-            _loanToValueRatioNumerator, 
-            _loanToValueRatioDenominator, 
+            _projectToken,  
             _liquidationThresholdFactorNumerator,
             _liquidationThresholdFactorDenominator,
             _liquidationIncentiveNumerator, 
@@ -219,6 +216,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         revokeRole(MODERATOR_ROLE, moderator);
     }
 
+    function setLVRPerPair(address projectToken, address lendingToken, uint8 lvrNumerator, uint8 lvrDenominator) public onlyAdmin isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
+        require(lvrNumerator <= lvrDenominator && lvrDenominator > 0, "PIT: invalid loanToValueRatio");
+        Ratio storage lvr = loanToValueRatio[projectToken][lendingToken];
+        lvr.numerator = lvrNumerator;
+        lvr.denominator = lvrDenominator;
+        emit LoanToValueRatioSet(projectToken, lendingToken, lvrNumerator, lvrDenominator);
+    }
+
     //************* MODERATOR FUNCTIONS ********************************
 
     function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
@@ -229,23 +234,18 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function setProjectTokenInfo(
         address _projectToken,
-        uint8 _loanToValueRatioNumerator,
-        uint8 _loanToValueRatioDenominator,
         uint8 _liquidationThresholdFactorNumerator,
         uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) public onlyModerator isProjectTokenListed(_projectToken) {
-        require(_loanToValueRatioNumerator <= _loanToValueRatioDenominator, "invalid loanToValueRatio");
         require(_liquidationThresholdFactorNumerator >= _liquidationThresholdFactorDenominator, "invalid liquidationTresholdFactor");
         require(_liquidationIncentiveNumerator >= _liquidationIncentiveDenominator, "invalid liquidationIncentive");
         
         ProjectTokenInfo storage info = projectTokenInfo[_projectToken];
-        info.loanToValueRatio = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
         info.liquidationThresholdFactor = Ratio(_liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         info.liquidationIncentive = Ratio(_liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     
-        emit LoanToValueRatioSet(_projectToken, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
         emit LiquidationThresholdFactorSet(_projectToken, _liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         emit LiquidationIncentiveSet(_projectToken, _liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     }
@@ -276,10 +276,10 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         lendingTokenInfo[_lendingToken].isPaused = _isPaused;
     }
 
-    function setTotalBorrowPerColateral(address _projectToken, address[] memory _lendingTokens) public onlyModerator {
-        require(_lendingTokens.length > 0, "PIT: lis lendingTokens is empty");
-        for(uint i = 0; i < _lendingTokens.length; i++) {
-            totalBorrowPerCollateral[_projectToken] += totalBorrow[_projectToken][_lendingTokens[i]];
+    function setTotalBorrowPerColateral(address projectToken, address[] memory _lendingTokens) public onlyModerator isProjectTokenListed(projectToken) {
+        require(lendingTokens.length > 0, "PIT: lis lendingTokens is empty");
+        for(uint i = 0; i < lendingTokens.length; i++) {
+            totalBorrowPerCollateral[projectToken] += totalBorrow[projectToken][_lendingTokens[i]];
         }
     }
 
@@ -304,7 +304,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 updateInterestInBorrowPositions(msg.sender, lendingToken);
                 uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
                 uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
-                Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
+                Ratio memory lvr = loanToValueRatio[projectToken][lendingToken];
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
                 uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);
                 if (lendingTokenDecimals > decimals()) {
@@ -362,7 +362,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         emit RedeemUnderlying(msg.sender, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), lendingTokenAmount);
     }
 
-    function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {        
+    function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {   
         updateInterestInBorrowPositions(msg.sender, lendingToken);
         if (lendingTokenAmount == type(uint256).max) {
             lendingTokenAmount = pitRemaining(msg.sender, projectToken, lendingToken);
@@ -504,8 +504,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     //************* VIEW FUNCTIONS ********************************
 
     function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
-        uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
-        uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
+        uint8 lvrNumerator = loanToValueRatio[projectToken][lendingToken].numerator;
+        uint8 lvrDenominator = loanToValueRatio[projectToken][lendingToken].denominator;
         uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount);
         return evaluation * lvrNumerator / lvrDenominator;
     }
