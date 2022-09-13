@@ -7,6 +7,8 @@ typechain
 #Hardhat files
 cache
 artifacts
+artifacts-zk
+.deps
 package-lock.json
 yarn.lock
 deployments

@@ -36,6 +36,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token []
     mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
+    mapping(address => uint256) public totalBorrowPerCollateral; //project token address => total borrow by project token []
+    mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
 
     struct Ratio {
         uint8 numerator;
@@ -65,6 +67,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 loanBody;   // [loanBody] = lendingToken
         uint256 accrual;   // [accrual] = lendingToken
     }
+
 
     event AddPrjToken(address indexed tokenPrj);
 
@@ -218,9 +221,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     //************* MODERATOR FUNCTIONS ********************************
 
-    function setBorrowLimit(address projectToken, address lendingToken, uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
+    function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
-        borrowLimit[projectToken][lendingToken] = _borrowLimit;
+        borrowLimitPerCollateral[projectToken] = _borrowLimit;
         //emit set borrow limit
     }
 
@@ -271,6 +274,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function setPausedLendingToken(address _lendingToken, bool _isPaused) public onlyModerator isLendingTokenListed(_lendingToken) {
         lendingTokenInfo[_lendingToken].isPaused = _isPaused;
+    }
+
+    function setTotalBorrowPerColateral(address _projectToken, address[] memory _lendingTokens) public onlyModerator {
+        require(_lendingTokens.length > 0, "PIT: lis lendingTokens is empty");
+        for(uint i = 0; i < _lendingTokens.length; i++) {
+            totalBorrowPerCollateral[_projectToken] += totalBorrow[_projectToken][_lendingTokens[i]];
+        }
     }
 
     //************* PUBLIC FUNCTIONS ********************************
@@ -358,17 +368,19 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             lendingTokenAmount = pitRemaining(msg.sender, projectToken, lendingToken);
         }
         require(lendingTokenAmount <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
-        require(totalBorrow[projectToken][lendingToken] + lendingTokenAmount <= borrowLimit[projectToken][lendingToken], "PIT: totalBorrow exceeded borrowLimit");
+        require(totalBorrowPerCollateral[projectToken] + lendingTokenAmount <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit");
         BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         if (_borrowPosition.loanBody == 0) {
             info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
             _borrowPosition.loanBody += lendingTokenAmount;
             totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
+            totalBorrowPerCollateral[projectToken] += lendingTokenAmount;
         } else {
             info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
             _borrowPosition.loanBody += lendingTokenAmount;
             totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
+            totalBorrowPerCollateral[projectToken] += lendingTokenAmount;
         }
         emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][lendingToken].depositedProjectTokenAmount);
     }
