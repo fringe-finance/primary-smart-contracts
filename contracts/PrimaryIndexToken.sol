@@ -38,7 +38,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
     mapping(address => uint256) public totalBorrowPerCollateral; //project token address => total borrow by project token []
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
-    mapping(address => mapping(address => Ratio)) public loanToValueRatio; //project token address => lending token address => LVR
     mapping(address => mapping(address => address)) public lendingTokenPerCollateral; // user address => project token address => lending token address 
     address public usdcToken;
 
@@ -51,7 +50,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         bool isListed;
         bool isDepositPaused; // true - paused, false - not paused
         bool isWithdrawPaused; // true - paused, false - not paused
-        Ratio loanToValueRatio; // ignore
+        Ratio loanToValueRatio; 
         Ratio liquidationThresholdFactor;
         Ratio liquidationIncentive;
     }
@@ -73,7 +72,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     event AddPrjToken(address indexed tokenPrj);
 
-    event LoanToValueRatioSet(address indexed tokenPrj, address lendingToken, uint8 lvrNumerator, uint8 lvrDenominator);
+    event LoanToValueRatioSet(address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
 
     event LiquidationThresholdFactorSet(address indexed tokenPrj, uint8 ltfNumerator, uint8 ltfDenominator);
 
@@ -128,6 +127,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function addProjectToken(
         address _projectToken,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator,
         uint8 _liquidationThresholdFactorNumerator,
         uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
@@ -141,7 +142,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         
         setProjectTokenInfo(
-            _projectToken,  
+            _projectToken,
+            _loanToValueRatioNumerator, 
+            _loanToValueRatioDenominator,   
             _liquidationThresholdFactorNumerator,
             _liquidationThresholdFactorDenominator,
             _liquidationIncentiveNumerator, 
@@ -217,14 +220,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         revokeRole(MODERATOR_ROLE, moderator);
     }
 
-    function setLVRPerPair(address projectToken, address lendingToken, uint8 lvrNumerator, uint8 lvrDenominator) public onlyAdmin isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
-        require(lvrNumerator <= lvrDenominator && lvrDenominator > 0, "PIT: invalid loanToValueRatio");
-        Ratio storage lvr = loanToValueRatio[projectToken][lendingToken];
-        lvr.numerator = lvrNumerator;
-        lvr.denominator = lvrDenominator;
-        emit LoanToValueRatioSet(projectToken, lendingToken, lvrNumerator, lvrDenominator);
-    }
-
     //************* MODERATOR FUNCTIONS ********************************
 
     function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
@@ -235,18 +230,23 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function setProjectTokenInfo(
         address _projectToken,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator,
         uint8 _liquidationThresholdFactorNumerator,
         uint8 _liquidationThresholdFactorDenominator,
         uint8 _liquidationIncentiveNumerator,
         uint8 _liquidationIncentiveDenominator
     ) public onlyModerator isProjectTokenListed(_projectToken) {
+        require(_loanToValueRatioNumerator <= _loanToValueRatioDenominator, "invalid loanToValueRatio");
         require(_liquidationThresholdFactorNumerator >= _liquidationThresholdFactorDenominator, "invalid liquidationTresholdFactor");
         require(_liquidationIncentiveNumerator >= _liquidationIncentiveDenominator, "invalid liquidationIncentive");
         
         ProjectTokenInfo storage info = projectTokenInfo[_projectToken];
+        info.loanToValueRatio = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
         info.liquidationThresholdFactor = Ratio(_liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         info.liquidationIncentive = Ratio(_liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     
+        emit LoanToValueRatioSet(_projectToken, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
         emit LiquidationThresholdFactorSet(_projectToken, _liquidationThresholdFactorNumerator, _liquidationThresholdFactorDenominator);
         emit LiquidationIncentiveSet(_projectToken, _liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     }
@@ -292,7 +292,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     //************* PUBLIC FUNCTIONS ********************************
 
     function deposit(address projectToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) nonReentrant() {
-        // require(borrowInfo[msg.sender][projectToken].canBorrow, "PIT: "); 
         require(!projectTokenInfo[projectToken].isDepositPaused, "PIT: projectToken is paused");
         require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
         DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][usdcToken];
@@ -320,7 +319,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 updateInterestInBorrowPositions(msg.sender, actualLendingToken);
                 uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
                 uint8 lendingTokenDecimals = ERC20Upgradeable(actualLendingToken).decimals();
-                Ratio memory lvr = loanToValueRatio[projectToken][actualLendingToken];
+                Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
                 _totalOutstanding = totalOutstanding(msg.sender, projectToken, actualLendingToken);
                 if (lendingTokenDecimals > decimals()) {
@@ -532,8 +531,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     //************* VIEW FUNCTIONS ********************************
 
     function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
-        uint8 lvrNumerator = loanToValueRatio[projectToken][lendingToken].numerator;
-        uint8 lvrDenominator = loanToValueRatio[projectToken][lendingToken].denominator;
+        uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
+        uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
         uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount);
         return evaluation * lvrNumerator / lvrDenominator;
     }
