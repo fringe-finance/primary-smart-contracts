@@ -31,14 +31,16 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => LendingTokenInfo) public lendingTokenInfo; // lending token address => LendingTokenInfo
 
     mapping(address => uint256) public totalDepositedProjectToken; // tokenAddress => PRJ token staked
-    mapping(address => mapping(address => mapping(address => DepositPosition))) public depositPosition; // user address => PRJ token address => lendingToken address => DepositPosition
+    mapping(address => mapping(address => mapping(address => DepositPosition))) depositPosition; // user address => PRJ token address => lendingToken address => DepositPosition
     mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
     mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token []
     mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
     mapping(address => uint256) public totalBorrowPerCollateral; //project token address => total borrow by project token []
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
-    mapping(address => mapping(address => Ratio)) public loanToValueRatio;
+    mapping(address => mapping(address => Ratio)) public loanToValueRatio; //project token address => lending token address => LVR
+    mapping(address => mapping(address => address)) public lendingTokenPerCollateral; // user address => project token address => lending token address 
+    address public usdcToken;
 
     struct Ratio {
         uint8 numerator;
@@ -68,7 +70,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 loanBody;   // [loanBody] = lendingToken
         uint256 accrual;   // [accrual] = lendingToken
     }
-
 
     event AddPrjToken(address indexed tokenPrj);
 
@@ -283,30 +284,45 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
     }
 
+    function setUSDCToken(address usdc) public onlyModerator {
+        require(usdc != address(0), "PIT: invalid address");
+        usdcToken = usdcToken;
+    }
+
     //************* PUBLIC FUNCTIONS ********************************
 
-    function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant() {
+    function deposit(address projectToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) nonReentrant() {
+        // require(borrowInfo[msg.sender][projectToken].canBorrow, "PIT: "); 
         require(!projectTokenInfo[projectToken].isDepositPaused, "PIT: projectToken is paused");
         require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
-        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
+        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][usdcToken];
         ERC20Upgradeable(projectToken).safeTransferFrom(msg.sender, address(this), projectTokenAmount);
         _depositPosition.depositedProjectTokenAmount += projectTokenAmount;
         totalDepositedProjectToken[projectToken] += projectTokenAmount;
-        emit Deposit(msg.sender,  projectToken, lendingToken, projectTokenAmount, msg.sender);
+        emit Deposit(msg.sender,  projectToken, usdcToken, projectTokenAmount, msg.sender);
     }
 
-    function withdraw(address projectToken, address lendingToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant {
+    function withdraw(address projectToken, uint256 projectTokenAmount) public isProjectTokenListed(projectToken) nonReentrant {
         require(!projectTokenInfo[projectToken].isWithdrawPaused, "PIT: projectToken is paused");
-        require(projectTokenAmount > 0, "PIT: projectTokenAmount==0");
-        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][lendingToken];
+        DepositPosition storage _depositPosition = depositPosition[msg.sender][projectToken][usdcToken];
+        require(projectTokenAmount > 0 && _depositPosition.depositedProjectTokenAmount > 0, "PIT: invalid PRJ token amount or depositPosition doesn't exist");
+        uint borrowedUSD = totalOutstanding(msg.sender, projectToken, usdcToken);
+        address currentLendingToken = lendingTokenPerCollateral[msg.sender][projectToken];
+        address actualLendingToken;
+        if (currentLendingToken != address(0)) {
+            actualLendingToken = currentLendingToken;
+        } else if(borrowedUSD > 0 || currentLendingToken == address(0)) {
+            actualLendingToken = usdcToken;
+        }
+        uint256 _totalOutstanding;
         if (projectTokenAmount == type(uint256).max) {
-            if (borrowPosition[msg.sender][projectToken][lendingToken].loanBody > 0) {
-                updateInterestInBorrowPositions(msg.sender, lendingToken);
+            if (borrowPosition[msg.sender][projectToken][actualLendingToken].loanBody > 0) {
+                updateInterestInBorrowPositions(msg.sender, actualLendingToken);
                 uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
-                uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
-                Ratio memory lvr = loanToValueRatio[projectToken][lendingToken];
+                uint8 lendingTokenDecimals = ERC20Upgradeable(actualLendingToken).decimals();
+                Ratio memory lvr = loanToValueRatio[projectToken][actualLendingToken];
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
-                uint256 _totalOutstanding = totalOutstanding(msg.sender, projectToken, lendingToken);
+                _totalOutstanding = totalOutstanding(msg.sender, projectToken, actualLendingToken);
                 if (lendingTokenDecimals > decimals()) {
                     _totalOutstanding = _totalOutstanding / 10 ** (lendingTokenDecimals - decimals());
                 }
@@ -322,13 +338,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         require(projectTokenAmount <= _depositPosition.depositedProjectTokenAmount, "PIT: try to withdraw more than available");
         _depositPosition.depositedProjectTokenAmount -= projectTokenAmount;
-        (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(msg.sender, projectToken, lendingToken);
-        if (healthFactorNumerator < healthFactorDenominator) {
-            revert("PIT: withdrawable amount makes healthFactor<1");
+        if (_totalOutstanding >  0) {
+            (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(msg.sender, projectToken, actualLendingToken);
+            if (healthFactorNumerator < healthFactorDenominator) {
+                revert("PIT: withdrawable amount makes healthFactor<1");
+            }
         }
         totalDepositedProjectToken[projectToken] -= projectTokenAmount;
         ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenAmount);
-        emit Withdraw(msg.sender, projectToken, lendingToken, projectTokenAmount, msg.sender);
+        emit Withdraw(msg.sender, projectToken, actualLendingToken, projectTokenAmount, msg.sender);
     }
 
     function supply(address lendingToken, uint256 lendingTokenAmount) public isLendingTokenListed(lendingToken) {
@@ -362,14 +380,21 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         emit RedeemUnderlying(msg.sender, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), lendingTokenAmount);
     }
 
-    function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {   
+    function borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) {
+        address _lendingToken = lendingTokenPerCollateral[msg.sender][projectToken];
+        BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
+        uint borrowedUSD = totalOutstanding(msg.sender, projectToken, usdcToken);
+        if (borrowedUSD > 0) {
+            require(lendingToken == usdcToken, "PIT: invalid lending token");
+        } else if(_lendingToken != address(0)) {
+            require(lendingToken == _lendingToken, "PIT: invalide lending token");  
+        }
         updateInterestInBorrowPositions(msg.sender, lendingToken);
         if (lendingTokenAmount == type(uint256).max) {
             lendingTokenAmount = pitRemaining(msg.sender, projectToken, lendingToken);
         }
         require(lendingTokenAmount <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
         require(totalBorrowPerCollateral[projectToken] + lendingTokenAmount <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit");
-        BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         if (_borrowPosition.loanBody == 0) {
             info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
@@ -381,6 +406,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             _borrowPosition.loanBody += lendingTokenAmount;
             totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
             totalBorrowPerCollateral[projectToken] += lendingTokenAmount;
+        }
+        if(_lendingToken == address(0)) {
+            _lendingToken = lendingToken;
         }
         emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][lendingToken].depositedProjectTokenAmount);
     }
@@ -473,7 +501,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             projectTokenToSendToLiquidator = depositedProjectTokenAmount;
         }
 
-        depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
+        depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount -= projectTokenToSendToLiquidator;
         totalDepositedProjectToken[projectToken] -= projectTokenToSendToLiquidator;
         ERC20Upgradeable(projectToken).safeTransfer(msg.sender, projectTokenToSendToLiquidator);
         emit Liquidate(msg.sender, account, lendingToken, projectToken, projectTokenToSendToLiquidator);
@@ -573,5 +601,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function decimals() public pure returns (uint8) {
         return 6;
+    }
+
+    function getDepositedAmount(address projectToken, address user) public view returns (uint) {
+        return depositPosition[user][projectToken][usdcToken].depositedProjectTokenAmount;
     }
 }
