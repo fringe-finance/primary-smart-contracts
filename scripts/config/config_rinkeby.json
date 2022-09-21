@@ -1,0 +1,19 @@
+{
+  "PRIMARY_PROXY_ADMIN": "",
+  "ChainlinkPriceProviderLogic": "",
+  "ChainlinkPriceProviderProxy": "",
+  "BackendPriceProviderLogic": "",
+  "BackendPriceProviderProxy": "",
+  "UniswapV2PriceProviderLogic": "",
+  "UniswapV2PriceProviderProxy": "",
+  "PriceProviderAggregatorLogic": "",
+  "PriceProviderAggregatorProxy": "",
+  "BondtrollerLogic": "0xb5aaD0ED0BC215cc30e58a2628D41EEe67423557",
+  "BondtrollerProxy": "",
+  "BLendingTokenLogic": "",
+  "BLendingTokenProxy": "",
+  "PrimaryIndexTokenLogic": "",
+  "PrimaryIndexTokenProxy": "",
+  "BackenProviderLogic": "",
+  "BackenProviderProxy": ""
+}

@@ -1,6 +1,9 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
-
+const fs = require("fs");
+const path = require("path");
+const configFile = '../../config/config.json';
+const config = require(configFile);
 const toBN = (num) => BN.from(num);
 
 module.exports = {
@@ -38,22 +41,22 @@ module.exports = {
         let busdcAddress;
         let pitAddress;
 
+        let {
+            ChainlinkPriceProviderLogic, 
+            ChainlinkPriceProviderProxy, 
+            BackendPriceProviderLogic, 
+            BackendPriceProviderProxy, 
+            UniswapV2PriceProviderLogic, 
+            UniswapV2PriceProviderProxy, 
+            PriceProviderAggregatorLogic
+        } = config;
+
 
     //====================================================
     //initialize deploy parametrs
 
    
 
-    //====================================================
-    //deploy proxy admin
-        
-        console.log();
-        console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-        await proxyAdmin.deployed().then(function(instance){
-            console.log("ProxyAdmin deployed at: "+proxyAdminAddress);
-        });
-        proxyAdminAddress = proxyAdmin.address;
 
     //====================================================================
     //deploy all system of PriceProviderAggregator

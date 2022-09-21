@@ -6,7 +6,7 @@ import "./BTokenInterfaces.sol";
 import "../util/ErrorReporter.sol";
 import "../util/Exponential.sol";
 import "../interfaces/EIP20Interface.sol";
-import "../interestRateModel/InterestRateModel.sol";
+import "../interestRateModel/InterestRateModelV2.sol";
 
 /**
  * @title Compound's CToken Contract
@@ -24,7 +24,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @param decimals_ EIP-20 decimal precision of this token
      */
     function initialize(Bondtroller bondtroller_,
-                        InterestRateModel interestRateModel_,
+                        InterestRateModelV2 interestRateModel_,
                         uint initialExchangeRateMantissa_,
                         string memory name_,
                         string memory symbol_,
@@ -242,7 +242,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @return The borrow interest rate per block, scaled by 1e18
      */
     function borrowRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves);
+        return interestRateModel.getBorrowRate();
     }
 
     /**
@@ -250,7 +250,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @return The supply interest rate per block, scaled by 1e18
      */
     function supplyRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+        return interestRateModel.getSupplyRate();
     }
 
     /**
@@ -407,7 +407,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         uint borrowIndexPrior = borrowIndex;
 
         /* Calculate the current borrow interest rate */
-        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
+        uint borrowRateMantissa = interestRateModel.calcBorrowRate(cashPrior, borrowsPrior, reservesPrior);
         require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
         /* Calculate the number of blocks elapsed since the last accrual */
@@ -1136,7 +1136,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public override  returns (uint) {
+    function _setInterestRateModel(InterestRateModelV2 newInterestRateModel) public override  returns (uint) {
         uint error = accrueInterest();
         if (error != uint(Error.NO_ERROR)) {
             // accrueInterest emits logs on errors, but on top of that we want to log the fact that an attempted change of interest rate model failed
@@ -1152,10 +1152,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @param newInterestRateModel the new interest rate model to use
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
-    function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) internal returns (uint) {
+    function _setInterestRateModelFresh(InterestRateModelV2 newInterestRateModel) internal returns (uint) {
 
         // Used to store old model for use in the event that is emitted on success
-        InterestRateModel oldInterestRateModel;
+        InterestRateModelV2 oldInterestRateModel;
 
         // Check caller is admin
         if (msg.sender != admin) {

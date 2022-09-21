@@ -69,7 +69,7 @@ contract JumpRateModelV2Upgradeable is Initializable, InterestRateModel {
      * @notice Change the owner address (only callable by previous owner)
      * @param _newOwner new owner address
      */
-    function chageOwner(address _newOwner) external {
+    function changeOwner(address _newOwner) external {
         require(msg.sender == owner && _newOwner != address(0), "invalid sender or new owner");
         owner =  _newOwner;
         emit NewOwner(_newOwner);
@@ -121,6 +121,14 @@ contract JumpRateModelV2Upgradeable is Initializable, InterestRateModel {
             uint excessUtil = util.sub(kink);
             return excessUtil.mul(jumpMultiplierPerBlock).div(1e18).add(normalRate);
         }
+    }
+
+    function getUtil(uint cash, uint borrows, uint reserves) public pure returns(uint) {
+        return utilizationRate(cash, borrows, reserves);
+    }
+
+    function getResult(uint util) public view returns(uint) {
+        return util.mul(multiplierPerBlock).div(1e18).add(baseRatePerBlock);
     }
 
     /**

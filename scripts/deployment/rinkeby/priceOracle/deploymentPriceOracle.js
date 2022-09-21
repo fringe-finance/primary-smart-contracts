@@ -1,6 +1,9 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
-
+const fs = require("fs");
+const path = require("path");
+const configFile = '../../config/config_rinkeby.json';
+const config = require(configFile);
 const toBN = (num) => BN.from(num);
 
 module.exports = {
@@ -36,24 +39,15 @@ module.exports = {
         let uniswapV2PriceProvider;
         let priceProviderAggregator;
 
-        //contracts addresses
-        let proxyAdminAddress;
-        let chainlinkPriceProviderAddress;
-        let uniswapV2PriceProviderAddress;
-        let priceProviderAggregatorAddress;
+        let {
+            ChainlinkPriceProviderLogic, 
+            ChainlinkPriceProviderProxy, 
+            BackendPriceProviderLogic, 
+            BackendPriceProviderProxy, 
+            UniswapV2PriceProviderLogic, 
+            UniswapV2PriceProviderProxy, 
+            PriceProviderAggregatorLogic,
 
-
-    //====================================================
-    //initialize deploy parametrs
-
-        ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
-        TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
-        ChainlinkPriceProvider = await hre.ethers.getContractFactory("ChainlinkPriceProvider");
-        BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
-        UniswapV2PriceProvider = await hre.ethers.getContractFactory("UniswapV2PriceProvider");
-        PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
-      
-        const {
             prj1Address,
             prj2Address,
             prj3Address,
@@ -79,31 +73,36 @@ module.exports = {
 
             WBTC,
             chainlinkAggregatorV3_WBTC_WETH
-        
-        } = require('../config.js');
+        } = config;
 
 
     //====================================================
-    //deploy proxy admin
+    //initialize deploy parametrs
 
-        console.log();
-        console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        if(input_proxyAdminAddress == undefined){
-            proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-            await proxyAdmin.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
-                console.log("ProxyAdmin deployed at: " + instance.address);
-            });
-            proxyAdminAddress = proxyAdmin.address;
-        }else{
-            console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
-            proxyAdminAddress = input_proxyAdminAddress;
-        }
+        ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
+        TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
+        ChainlinkPriceProvider = await hre.ethers.getContractFactory("ChainlinkPriceProvider");
+        BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
+        UniswapV2PriceProvider = await hre.ethers.getContractFactory("UniswapV2PriceProvider");
+        PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
 
     //====================================================
     //deploy chainlinkPriceProvider
         console.log();
         console.log("***** CHAINLINK PRICE PROVIDER DEPLOYMENT *****");
+
+        if(!ChainlinkPriceProviderLogic) {
+            ChainlinkProviderLogicInstances = await ChainlinkProviderLogicAbi.connect(deployMaster).deploy();
+            await ChainlinkProviderLogicInstances.deployed().then(async function(instance){
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+                ChainlinkProviderLogicAddress = instance.address
+                config.ChainlinkPriceProviderLogic = ChainlinkProviderLogicAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
+        if(!ChainlinkPriceProviderProxy) {
+            
+        }
 
         chainlinkPriceProvider = await ChainlinkPriceProvider.connect(deployMaster).deploy();
         await chainlinkPriceProvider.deployed().then(function(instance){

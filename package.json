@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compile": "hardhat compile",
+    "compile_hardhat": "hardhat compile",
     "size-contracts": "hardhat size-contracts",
     "forkmainnet": "hardhat node --fork https://mainnet.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
     "forkrinkeby": "hardhat node --fork https://rinkeby.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
@@ -12,6 +12,7 @@
     "localDeployPriceOracle": "hardhat run --network hardhat scripts/deployment/rinkeby/priceOracleDeployment/deployPriceOracle.js",
     "docgen": "npx hardhat docgen",
     "dodoc": "npx hardhat dodoc",
+    "deployPrimaryIndexPlatfomAdmin": "npx hardhat run --network zksyn_test  ./scripts/deployment/rinkeby/proxyAdmin/deployProxyAdmin.js",
     "upgradeBlendingToken_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/bLendingToken/upgradeBUSDC.js",
     "upgradeBondtroller_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/bondtroller/upgradeBondtroller.js",
     "upgradeJumpRateModel_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/jumpRateModel/upgradeJumpRateModel.js",
@@ -20,7 +21,6 @@
     "upgradeUniswapV2Provider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/priceOracle/uniswapV2Provider/upgradeUniV2Provider.js",
     "upgradePriceProvider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/priceOracle/upgradePriceProviderAggregator.js",
     "upgradeBackendPriceProvider_rinkeby": "hardhat run --network rinkeby scripts/upgrade/proxyUpgrade/priceOracle/backendProvider/upgradeBackendProvider.js",
-
     "upgradeBlendingToken": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/bLendingToken/upgradeBUSDC.js",
     "upgradeBondtroller": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/bondtroller/upgradeBondtroller.js",
     "upgradeJumpRateModel": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/jumpRateModel/upgradeJumpRateModel.js",
@@ -28,7 +28,29 @@
     "upgradeChainlinkProvider": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/priceOracle/chainlinkProvider/upgradeChainlinkProvider.js",
     "upgradeUniswapV2Provider": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/priceOracle/uniswapV2Provider/upgradeUniV2Provider.js",
     "upgradePriceProvider": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/priceOracle/upgradePriceProviderAggregator.js",
-    "upgradeBackendPriceProvider": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/priceOracle/backendProvider/upgradeBackendProvider.js"
+    "upgradeBackendPriceProvider": "hardhat run --network mainnet scripts/upgrade/proxyUpgrade/priceOracle/backendProvider/upgradeBackendProvider.js",
+
+    "deployProxyAdmin": "npx hardhat run --network goerli  ./scripts/deployment/goerli/proxyAdmin/deployProxyAdmin.js",
+    "deployMockToken": "npx hardhat run --network goerli  ./scripts/deployment/goerli/mockToken/deployMockToken.js",
+    "deployProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/new/deployPriceProvider.js",
+    "setProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/new/setTokenAndProvider.js",
+    "deployBtroller": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployBondtroler.js",
+    "deployJumRateModel": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deploymentJumpRateModelV2.js",
+    "deployJumRateModel_testnet": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployJumRateModelV3.js",
+    "deployBUSD": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployBUSD.js",
+    "deployPIT": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployPrimaryIndexToken.js",
+    "deployTimeDelay_testnet": "npx hardhat run --network goerli  ./scripts/deployment/goerli/TimeDelay/deployIntermediaryTimeDelay.js",
+
+    "grantRoleToTimeDelay": "npx hardhat run --network goerli  ./scripts/deployment/polygon/TimeDelay/setTimeDelayContract.js",
+
+    "deployProxyAdmin_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/proxyAdmin/deployProxyAdmin.js",
+    "deployMockToken_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/mockToken/deployToken.js",
+    "deployProvider_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/priceOracle/new/deployPriceProvider.js",
+    "setProvider_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/priceOracle/new/setTokenAndProvider.js",
+    "deployBtroller_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/primaryLendingPlatform/deployBondtroler.js",
+    "deployBUSD_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/primaryLendingPlatform/deployBUSD.js",
+    "deployPIT_rinkeby": "npx hardhat run --network rinkeby  ./scripts/deployment/polygon/primaryLendingPlatform/deployPrimaryIndexToken.js"
+
   },
   "author": "",
   "license": "ISC",
@@ -37,12 +59,14 @@
     "@openzeppelin/contracts": "^4.4.0",
     "@openzeppelin/contracts-upgradeable": "^4.4.0",
     "@primitivefi/hardhat-dodoc": "^0.2.3",
-    "hardhat": "^2.7.0",
+    "hardhat": "^2.10.1",
     "hardhat-contract-sizer": "^2.4.0",
     "js-big-decimal": "^1.3.4",
     "solidity-docgen": "^0.6.0-beta.10"
   },
   "devDependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^0.3.6",
+    "@matterlabs/hardhat-zksync-solc": "^0.3.6",
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^2.1.3",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
@@ -56,11 +80,14 @@
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-promise": "^5.1.0",
     "ethereum-waffle": "^3.0.0",
-    "ethers": "^5.0.0",
+    "ethers": "^5.6.9",
     "hardhat-gas-reporter": "^1.0.4",
     "prettier": "^2.3.2",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6",
-    "solidity-coverage": "^0.7.16"
+    "solidity-coverage": "^0.7.16",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4",
+    "zksync-web3": "^0.7.9"
   }
 }

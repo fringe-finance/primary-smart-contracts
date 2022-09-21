@@ -10,30 +10,21 @@ const toBN = (num) => BN.from(num);
 
 let {
     PRIMARY_PROXY_ADMIN, 
-    BondtrollerLogic, 
-    BondtrollerProxy,
-    PriceProviderAggregatorLogic,
-    PriceProviderAggregatorProxy,
-    BLendingTokenLogic,
-    BLendingTokenProxy,
-    PrimaryIndexTokenLogic,
-    PrimaryIndexTokenProxy,
     JumpRateModelV2UpgradeableLogic,
     JumpRateModelV2UpgradeableProxy
 } = config;
 
-let {
-    multiplier,
-    baseRatePerBlock,
-    blocksPerYear,
-    jumpMultiplierPerBlock,
-    multiplierPerBlock,
-    kink
-} = require("../config.js");
-
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let jumpRateModelV2UpgradeableLogicAddress = JumpRateModelV2UpgradeableLogic;
 let jumpRateModelV2ProxyAddress = JumpRateModelV2UpgradeableProxy;
+
+async function verify(contractAddress, constructor) {
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: constructor,
+    }).catch((err) => console.log(err.message));
+    console.log("Contract verified at: ", contractAddress);
+}
 
 async function main() {
    
@@ -42,7 +33,6 @@ async function main() {
     let deployMasterAddress = deployMaster.address;
     console.log("DeployMaster: " + deployMaster.address);
 
-    let ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
     let JumpRateModelV2Upgradeable = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
     let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
 
@@ -57,11 +47,6 @@ async function main() {
     let multiplierPerYear = multiplierPerBlock.mul(blocksPerYear.mul(kink)).div(multiplier);
     let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
     let owner = deployMasterAddress;
-
-    // let baseRatePerYear = baseRatePerBlock.mul(blocksPerYear);
-    // let multiplierPerYear = multiplierPerBlock.mul(blocksPerYear.mul(kink)).div(multiplier);
-    // let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
-    // let owner = deployMasterAddress;
 
     if(!jumpRateModelV2UpgradeableLogicAddress) {
       let jumpRateModelV2 = await JumpRateModelV2Upgradeable.connect(deployMaster).deploy();
@@ -86,6 +71,8 @@ async function main() {
     }
     console.log("JumpRateModelV2Upgradeable proxy address: " + jumpRateModelV2ProxyAddress);
 
+     
+    
     let jumpRateModelV2 = await JumpRateModelV2Upgradeable.attach(jumpRateModelV2ProxyAddress).connect(deployMaster);
     await jumpRateModelV2.initialize(
         baseRatePerYear,
@@ -97,6 +84,9 @@ async function main() {
         console.log("\nTransaction hash: " + instance.hash);
         console.log("JumpRateModelV2Upgradeable call initialize at " + jumpRateModelV2ProxyAddress);
     })
+
+    await verify(jumpRateModelV2UpgradeableLogicAddress, []);
+    await verify(jumpRateModelV2ProxyAddress, [jumpRateModelV2UpgradeableLogicAddress, proxyAdmingAddress, "0x"]);
 }
 
 main().catch((error) => {

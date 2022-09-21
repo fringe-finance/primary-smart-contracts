@@ -18,7 +18,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
     function init(  
         address underlying_,
         Bondtroller bondtroller_,
-        InterestRateModel interestRateModel_,
+        InterestRateModelV2 interestRateModel_,
         uint initialExchangeRateMantissa_,
         string memory name_, 
         string memory symbol_,
@@ -149,13 +149,13 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         }
 
         /* Read the previous values out of storage */
-        uint cashPrior = getCashPrior();
-        uint borrowsPrior = totalBorrows;
-        uint reservesPrior = totalReserves;
+        // uint cashPrior = getCashPrior();
+        // uint borrowsPrior = totalBorrows;
+        // uint reservesPrior = totalReserves;
         uint borrowIndexPrior = borrowIndex;
 
         /* Calculate the current borrow interest rate */
-        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
+        uint borrowRateMantissa = interestRateModel.getBorrowRate();
         require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
         /* Calculate the number of blocks elapsed since the last accrual */

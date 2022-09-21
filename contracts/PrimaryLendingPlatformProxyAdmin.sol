@@ -5,7 +5,7 @@ import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
     
-    uint256 public constant minimumDelayPeriod = 1 days;
+    uint256 public constant minimumDelayPeriod = 60;
 
     uint256 public delayPeriod;
 
@@ -25,7 +25,7 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
     event Upgrade(address indexed proxy, uint256 upgradeTimestamp, address oldImplementation, address newImplementation);
 
     constructor() {
-        delayPeriod = 7 days;
+        delayPeriod = 300;
     }
 
     function setDelayPeriod(uint256 _delayPeriod) public onlyOwner {

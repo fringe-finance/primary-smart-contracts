@@ -1,0 +1,9 @@
+{
+    "MockERC20": {
+        "contract": "MockToken",
+        "address": "0x9259d1B5EA07CBB0a24A5CB486006d58062D8193",
+        "params": "[\"USD Coin\",\"USDC\",6]",
+        "isDeployed": "true",
+        "isVerified": "false"
+    }
+}

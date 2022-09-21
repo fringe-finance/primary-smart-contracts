@@ -1,11 +1,13 @@
 
 const hre = require("hardhat");
-const BN = hre.ethers.BigNumber;
+const fs = require("fs");
+const path = require("path");
+const configFile = '../../../config/config.json';
+const config = require(configFile);
+let {PrimaryIndexTokenProxy, ModeratorAddress} = config;
 
-const toBN = (num) => BN.from(num);
-
-let primaryIndexTokenProxyAddress = '0xD83125995B2D8d04556894C528e10e99473751cc';
-let moderatorAddress = '0x0978C0a76Ea13C318875Df7e87Bc3959d3Ad2816';
+let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
+let moderatorAddress = ModeratorAddress;
 
 async function main() {
    

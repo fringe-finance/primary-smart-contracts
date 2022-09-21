@@ -2,7 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "../bondtroller/Bondtroller.sol";
-import "../interestRateModel/InterestRateModel.sol";
+import "../interestRateModel/InterestRateModelV2.sol";
 import "../interfaces/EIP20NonStandardInterface.sol";
 
 contract BTokenStorage {
@@ -55,7 +55,7 @@ contract BTokenStorage {
     /**
      * @notice Model which tells what the current interest rate should be
      */
-    InterestRateModel public interestRateModel;
+    InterestRateModelV2 public interestRateModel;
 
     /**
      * @notice Initial exchange rate used when minting the first CTokens (used when totalSupply = 0)
@@ -184,7 +184,7 @@ abstract contract BTokenInterface is BTokenStorage {
     /**
      * @notice Event emitted when interestRateModel is changed
      */
-    event NewMarketInterestRateModel(InterestRateModel oldInterestRateModel, InterestRateModel newInterestRateModel);
+    event NewMarketInterestRateModel(InterestRateModelV2 oldInterestRateModel, InterestRateModelV2 newInterestRateModel);
 
     /**
      * @notice Event emitted when the reserve factor is changed
@@ -241,7 +241,7 @@ abstract contract BTokenInterface is BTokenStorage {
     function _setBondtroller(Bondtroller newBondtroller) public virtual  returns (uint);
     function _setReserveFactor(uint newReserveFactorMantissa) external virtual  returns (uint);
     function _reduceReserves(uint reduceAmount) external virtual  returns (uint);
-    function _setInterestRateModel(InterestRateModel newInterestRateModel) public virtual  returns (uint);
+    function _setInterestRateModel(InterestRateModelV2 newInterestRateModel) public virtual  returns (uint);
 }
 
 contract BErc20Storage {

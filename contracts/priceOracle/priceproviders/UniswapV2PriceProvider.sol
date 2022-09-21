@@ -2,10 +2,7 @@
 pragma solidity >=0.8.0;
 
 import "./PriceProvider.sol";
-
 import "./uniswapV2/IUniswapV2Pair.sol";
-import "./uniswapV2/UniswapV2OracleLibrary.sol";
-
 import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -20,17 +17,14 @@ contract UniswapV2PriceProvider is PriceProvider,
                                    Initializable,
                                    AccessControlUpgradeable 
 {
-    using FixedPoint for *;
     
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     string public constant DESCRIPTION = "Price provider that uses uniswapV2";
 
-    uint8 internal usdDecimals;
+    uint8 public usdDecimals;
 
     mapping(address => UniswapV2Metadata) public uniswapV2Metadata; // address of token => metadata for uniswapV2
- 
-    mapping(address => OraclesUniV2Metadata) public oraclesUniV2Metadata; // address of pair => metadata for Oracles uinv2
 
     struct UniswapV2Metadata {
         bool isActive;
@@ -40,22 +34,10 @@ contract UniswapV2PriceProvider is PriceProvider,
         uint8 pairAssetDecimals; // decimals of second token in pair with token
     }
 
-    struct OraclesUniV2Metadata {
-        address token0;
-        address token1;
-        uint price0CumulativeLast;
-        uint price1CumulativeLast;
-        uint32 blockTimestampLast;
-        FixedPoint.uq112x112 price0Average;
-        FixedPoint.uq112x112 price1Average;
-        uint PERIOD;
-    }
-
     event GrandModeratorRole(address indexed who, address indexed newModerator);
     event RevokeModeratorRole(address indexed who, address indexed moderator);
-    event SetTokenAndPair(address indexed who, address indexed token, address indexed pair, uint period);
+    event SetTokenAndPair(address indexed who, address indexed token, address indexed pair);
     event ChangeActive(address indexed who, address indexed token, bool active);
-    event ChangePeriod(uint newPreriod);
 
     function initialize() public initializer {
         __AccessControl_init();
@@ -84,21 +66,10 @@ contract UniswapV2PriceProvider is PriceProvider,
         revokeRole(MODERATOR_ROLE,moderator);
     }
 
-    /****************** Internal functions ****************** */
+    /****************** Moderator functions ****************** */
 
-    function initOracles(address _pair, uint period) internal {
-        OraclesUniV2Metadata storage oracle_metadata = oraclesUniV2Metadata[_pair];
-        oracle_metadata.token0 = IUniswapV2Pair(_pair).token0();
-        oracle_metadata.token1 = IUniswapV2Pair(_pair).token1();
-        oracle_metadata.price0CumulativeLast = IUniswapV2Pair(_pair).price0CumulativeLast();
-        oracle_metadata.price1CumulativeLast = IUniswapV2Pair(_pair).price1CumulativeLast();
-        uint32 _blockTimestampLast;
-        ( , , _blockTimestampLast) = IUniswapV2Pair(_pair).getReserves();
-        oracle_metadata.blockTimestampLast = _blockTimestampLast;
-        oracle_metadata.PERIOD = period;
-    }
-
-    function initUniswapV2Metadata(address token, address pair) internal {
+    function setTokenAndPair(address token, address pair) public onlyModerator {
+        require(token != address(0) && pair != address(0),"UniswapV2PriceProvider: Invalid token or pair!");
         UniswapV2Metadata storage metadata = uniswapV2Metadata[token];
         metadata.isActive = true;
         metadata.pair = pair;
@@ -109,66 +80,13 @@ contract UniswapV2PriceProvider is PriceProvider,
         metadata.pairAsset = pairAsset;
         metadata.tokenDecimals = ERC20Upgradeable(token).decimals();
         metadata.pairAssetDecimals = ERC20Upgradeable(pairAsset).decimals();
-    }
-
-    /****************** External functions ****************** */
-    function update(address pair) external {
-        OraclesUniV2Metadata storage oracle_metadata = oraclesUniV2Metadata[pair];
-        // require(oracle_metadata.blockTimestampLast != 0, "UniswapV2PriceProvider: Invalid pair!");
-        (
-            uint price0Cumulative,
-            uint price1Cumulative,
-            uint32 blockTimestamp
-        ) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
-
-        uint32 timeElapsed = blockTimestamp - oracle_metadata.blockTimestampLast;
-
-        require(timeElapsed >= oracle_metadata.PERIOD, "time elapsed < min period");
-
-        oracle_metadata.price0Average = FixedPoint.uq112x112(
-            uint224((price0Cumulative - oracle_metadata.price0CumulativeLast) / timeElapsed)
-        );
-
-        oracle_metadata.price1Average = FixedPoint.uq112x112(
-            uint224((price1Cumulative - oracle_metadata.price1CumulativeLast) / timeElapsed)
-        );
-
-        oracle_metadata.price0CumulativeLast = price0Cumulative;
-        oracle_metadata.price1CumulativeLast = price1Cumulative;
-        oracle_metadata.blockTimestampLast = blockTimestamp;
-    }
-
-    function updateable(address pair) public view returns (bool) {
-        OraclesUniV2Metadata memory oracle_metadata = oraclesUniV2Metadata[pair];
-        ( , , uint32 blockTimestamp) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
-        return (blockTimestamp - oracle_metadata.blockTimestampLast) > oracle_metadata.PERIOD;
-    }
-
-    /****************** Moderator functions ****************** */
-
-    function setTokenAndPair(address token, address pair, uint period) public onlyModerator {
-        require(token != address(0) && pair != address(0),"UniswapV2PriceProvider: Invalid token or pair!");
-        require(IUniswapV2Pair(pair).token0() == token || IUniswapV2Pair(pair).token1() == token, "UniswapV2PriceProvider: Invalid pair!");
-        uint112 reserve0;
-        uint112 reserve1;
-        (reserve0, reserve1, ) = IUniswapV2Pair(pair).getReserves();
-        require(reserve0 != 0 && reserve1 != 0, "UniswapV2PriceProvider: NO_RESERVES"); // ensure that there's liquidity in the pair
-        initUniswapV2Metadata(token, pair);
-        initOracles(pair, period);
-        emit SetTokenAndPair(msg.sender, token, pair, period);
+        emit SetTokenAndPair(msg.sender, token, pair);
     }
 
     function changeActive(address token, bool active) public override onlyModerator {
         require(uniswapV2Metadata[token].pair != address(0), "UniswapV2PriceProvider: token is not listed!");
         uniswapV2Metadata[token].isActive = active;
         emit ChangeActive(msg.sender, token, active);
-    }
-
-    function changePeriod(address token, uint newPreriod) public onlyModerator {
-        address pair = uniswapV2Metadata[token].pair;
-        require(newPreriod > 0, "UniswapV2PriceProvider: invalid period!");
-        oraclesUniV2Metadata[pair].PERIOD = newPreriod;
-        emit ChangePeriod(newPreriod);
     }
 
     /****************** view functions ****************** */
@@ -189,11 +107,12 @@ contract UniswapV2PriceProvider is PriceProvider,
         UniswapV2Metadata memory uniswapV2metadata = uniswapV2Metadata[token];
         require(uniswapV2metadata.isActive, "UniswapV2PriceProvider: token is not active");
         address uniswapPair = uniswapV2metadata.pair;
+        address pairAsset = uniswapV2metadata.pairAsset;
+        (uint256 tokenReserve, uint256 pairAssetReserve) = getReserves(uniswapPair, token, pairAsset);
         uint8 tokenDecimals = uniswapV2metadata.tokenDecimals;
         uint8 pairAssetDecimals = uniswapV2metadata.pairAssetDecimals;
-        priceDecimals = pairAssetDecimals;
-        uint256 tokenUniswapPrice = consult(uniswapPair, token, 10**uint256(tokenDecimals));
-        price = tokenUniswapPrice;
+        priceDecimals = 18;
+        price = (10 ** priceDecimals) * (pairAssetReserve / (10 ** pairAssetDecimals)) / (tokenReserve / (10 ** tokenDecimals));
     }
 
     function getEvaluation(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
@@ -215,19 +134,5 @@ contract UniswapV2PriceProvider is PriceProvider,
 
     function getPriceDecimals() public override view returns (uint8) {
         return usdDecimals;
-    }
-
-    function consult(address pair, address token, uint amountIn)
-        public
-        view
-        returns (uint amountOut)
-    {
-        OraclesUniV2Metadata memory oracle_metadata = oraclesUniV2Metadata[pair];
-        if (token == oracle_metadata.token0) {
-            amountOut = oracle_metadata.price0Average.mul(amountIn).decode144();
-        } else {
-            require(token == oracle_metadata.token1, "UniswapV2PriceProvider: INVALID_TOKEN");
-            amountOut = oracle_metadata.price1Average.mul(amountIn).decode144();
-        }
     }
 }

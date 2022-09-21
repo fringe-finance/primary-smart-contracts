@@ -21,7 +21,7 @@ abstract contract BErc20 is BToken, BErc20Interface {
      */
     function initialize(address underlying_,
                         Bondtroller comptroller_,
-                        InterestRateModel interestRateModel_,
+                        InterestRateModelV2 interestRateModel_,
                         uint initialExchangeRateMantissa_,
                         string memory name_,
                         string memory symbol_,

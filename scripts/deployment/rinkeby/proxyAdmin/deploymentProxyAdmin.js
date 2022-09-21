@@ -2,9 +2,17 @@
 const hre = require("hardhat");
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../config/config_rinkeby.json';
+const configFile = '../../../config/config.json';
 const config = require(configFile);
 const BN = hre.ethers.BigNumber;
+
+async function verify(contractAddress, constructor) {
+    await run("verify:verify", {
+        address: contractAddress,
+        constructorArguments: constructor,
+    }).catch((err) => console.log(err.message));
+    console.log("Contract verified at: ", contractAddress);
+}
 
 module.exports = {
     deploymentProxyAdmin : async function () {
@@ -36,9 +44,9 @@ module.exports = {
         //deploy delay contract
 
         console.log();
-        console.log("***** Intermediary Time Delay Contract Deployment *****");
+        console.log("***** Proxy Admin Contract Deployment *****");
         if(!proxyAdminAddress){
-            proxyAdminInstances = await proxyAdminAbi.connect(deployMaster).deploy(DELAY_PERIOD);
+            proxyAdminInstances = await proxyAdminAbi.connect(deployMaster).deploy();
             await proxyAdminInstances.deployed().then(function(instance){
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 proxyAdminAddress = instance.address
@@ -46,6 +54,6 @@ module.exports = {
                 fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
             });
         }
-        console.log("Intermediary Time Delay Contract deployed at: ", proxyAdminAddress);
+        console.log("Proxy Admin contract deployed at: ", proxyAdminAddress);
     }
 };

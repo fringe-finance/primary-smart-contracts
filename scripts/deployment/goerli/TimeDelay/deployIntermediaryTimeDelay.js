@@ -8,6 +8,14 @@ const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
 const { ethers, run} = require('hardhat');
 
+async function verify(contractAddress, constructor) {
+    await run("verify:verify", {
+      address: contractAddress,
+      constructorArguments: constructor,
+    }).catch((err) => console.log(err.message));
+    console.log("Contract verified at: ", contractAddress);
+}
+
 async function main() {
     let {DELAY_CONTRACT, DELAY_PERIOD} = config;
     console.log(config[Object.keys(config)[1]]);
@@ -48,12 +56,7 @@ async function main() {
             console.log("Verified Intermediary Time Delay");
         });
     }
-    // await sleep(30000);
-    await run("verify:verify", {
-        address: delayContractAddress,
-        constructorArguments: [DELAY_PERIOD],
-    }).catch((err) => console.log(err.message));
-    console.log("Intermediary Time Delay Contract deployed at: ", delayContractAddress);
+    await verify(delayContractAddress, [DELAY_PERIOD]);
 }
 
 main().catch((error) => {

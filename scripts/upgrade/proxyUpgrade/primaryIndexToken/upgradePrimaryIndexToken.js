@@ -8,7 +8,7 @@ const config = require(configFile);
 
 let {PRIMARY_PROXY_ADMIN, PrimaryIndexTokenLogic, PrimaryIndexTokenProxy} = config;
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
-let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
+let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;PrimaryIndexTokenLogic
 let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
 
 async function main() {

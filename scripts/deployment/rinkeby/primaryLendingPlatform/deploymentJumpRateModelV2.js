@@ -10,26 +10,9 @@ const toBN = (num) => BN.from(num);
 
 let {
     PRIMARY_PROXY_ADMIN, 
-    BondtrollerLogic, 
-    BondtrollerProxy,
-    PriceProviderAggregatorLogic,
-    PriceProviderAggregatorProxy,
-    BLendingTokenLogic,
-    BLendingTokenProxy,
-    PrimaryIndexTokenLogic,
-    PrimaryIndexTokenProxy,
     JumpRateModelV2UpgradeableLogic,
     JumpRateModelV2UpgradeableProxy
 } = config;
-
-let {
-    multiplier,
-    baseRatePerBlock,
-    blocksPerYear,
-    jumpMultiplierPerBlock,
-    multiplierPerBlock,
-    kink
-} = require("../config.js");
 
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let jumpRateModelV2UpgradeableLogicAddress = JumpRateModelV2UpgradeableLogic;
@@ -42,7 +25,6 @@ async function main() {
     let deployMasterAddress = deployMaster.address;
     console.log("DeployMaster: " + deployMaster.address);
 
-    let ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
     let JumpRateModelV2Upgradeable = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
     let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
 
@@ -57,11 +39,6 @@ async function main() {
     let multiplierPerYear = multiplierPerBlock.mul(blocksPerYear.mul(kink)).div(multiplier);
     let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
     let owner = deployMasterAddress;
-
-    // let baseRatePerYear = baseRatePerBlock.mul(blocksPerYear);
-    // let multiplierPerYear = multiplierPerBlock.mul(blocksPerYear.mul(kink)).div(multiplier);
-    // let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
-    // let owner = deployMasterAddress;
 
     if(!jumpRateModelV2UpgradeableLogicAddress) {
       let jumpRateModelV2 = await JumpRateModelV2Upgradeable.connect(deployMaster).deploy();
