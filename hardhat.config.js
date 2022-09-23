@@ -9,9 +9,12 @@ require('solidity-docgen');
 require('@primitivefi/hardhat-dodoc');
 
 const {
-    INFURA_KEY, 
-    MNEMONIC,
-    ETHERSCAN_API_KEY
+  INFURA_KEY, 
+  MNEMONIC,
+  ETHERSCAN_API_KEY,
+  POLYGONSCAN_KEY,
+  OPTIMISM_API,
+  ARBISCAN_API
     } = process.env;
 
 
@@ -67,6 +70,39 @@ module.exports = {
       timeout: 99999999,
       accounts: {mnemonic: MNEMONIC}
     },
+    polygon_main: {
+      url: `https://polygon-rpc.com/`,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    polygon_test: {
+      url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    optimism_test: {
+      url: `https://goerli.optimism.io`,
+      network_id:420,
+      accounts: {mnemonic: MNEMONIC}
+    },
+    arbitrum_rinkeby: {
+      url: 'https://rinkeby.arbitrum.io/rpc',
+      accounts: {mnemonic: MNEMONIC}
+    },
+    zksyn_test: {
+      url: 'https://zksync2-testnet.zksync.dev',
+      accounts: {mnemonic: MNEMONIC},
+    },
+    zksync: {
+      url: 'https://zksync2-testnet.zksync.dev',
+      accounts: {mnemonic: MNEMONIC}
+    },
+    goerli: {
+      url: "https://goerli.infura.io/v3/3848cfba853a40f4910a45e1d18caca3",
+      gas: 10_000_000,
+      gasMultiplier: 50,
+      gasPrice: 2_000_000_000,
+      timeout: 99999999,
+      accounts: {mnemonic: MNEMONIC}
+    }
     
   },
   gasReporter: {

@@ -11,7 +11,35 @@
     "localDeploy": "hardhat run --network hardhat scripts/deployment/deployToRinkeby.js",
     "localDeployPriceOracle": "hardhat run --network hardhat scripts/deployment/rinkeby/priceOracleDeployment/deployPriceOracle.js",
     "docgen": "npx hardhat docgen",
-    "dodoc": "npx hardhat dodoc"
+    "dodoc": "npx hardhat dodoc",
+    "upgradeBlendingToken_goerli": "hardhat run --network goerli scripts/upgradeProxy/bLendingToken/upgradeBUSDC.js",
+    "upgradeBondtroller_goerli": "hardhat run --network goerli scripts/upgradeProxy/bondtroller/upgradeBondtroller.js",
+    "upgradeJumpRateModel_goerli": "hardhat run --network goerli scripts/upgradeProxy/jumpRateModel/upgradeJumpRateModel.js",
+    "upgradePrimaryIndexToken_goerli": "hardhat run --network goerli scripts/upgradeProxy/primaryIndexToken/upgradePrimaryIndexToken.js",
+    "upgradeChainlinkProvider_goerli": "hardhat run --network goerli scripts/upgradeProxy/priceOracle/chainlinkProvider/upgradeChainlinkProvider.js",
+    "upgradeUniswapV2Provider_goerli": "hardhat run --network goerli scripts/upgradeProxy/priceOracle/uniswapV2Provider/upgradeUniV2Provider.js",
+    "upgradePriceProvider_goerli": "hardhat run --network goerli scripts/upgradeProxy/priceOracle/upgradePriceProviderAggregator.js",
+    "upgradeBackendPriceProvider_goerli": "hardhat run --network goerli scripts/upgradeProxy/priceOracle/backendProvider/upgradeBackendProvider.js",
+
+    "upgradeBlendingToken": "hardhat run --network mainnet scripts/upgradeProxy/bLendingToken/upgradeBUSDC.js",
+    "upgradeBondtroller": "hardhat run --network mainnet scripts/upgradeProxy/bondtroller/upgradeBondtroller.js",
+    "upgradeJumpRateModel": "hardhat run --network mainnet scripts/upgradeProxy/jumpRateModel/upgradeJumpRateModel.js",
+    "upgradePrimaryIndexToken": "hardhat run --network mainnet scripts/upgradeProxy/primaryIndexToken/upgradePrimaryIndexToken.js",
+    "upgradeChainlinkProvider": "hardhat run --network mainnet scripts/upgradeProxy/priceOracle/chainlinkProvider/upgradeChainlinkProvider.js",
+    "upgradeUniswapV2Provider": "hardhat run --network mainnet scripts/upgradeProxy/priceOracle/uniswapV2Provider/upgradeUniV2Provider.js",
+    "upgradePriceProvider": "hardhat run --network mainnet scripts/upgradeProxy/priceOracle/upgradePriceProviderAggregator.js",
+    "upgradeBackendPriceProvider": "hardhat run --network mainnet scripts/upgradeProxy/priceOracle/backendProvider/upgradeBackendProvider.js",
+
+    "deployProxyAdmin": "npx hardhat run --network goerli  ./scripts/deployment/goerli/proxyAdmin/deployProxyAdmin.js",
+    "deployMockToken": "npx hardhat run --network goerli  ./scripts/deployment/goerli/mockToken/deployMockToken.js",
+    "deployProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/deployPriceProvider.js",
+    "setProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/setTokenAndProvider.js",
+
+    "deployPrimaryLendingPlatform": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "setPrimaryLendingPlatform": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/setPrimaryLendingPlatform.js",
+
+    "deployTimeDelay_testnet": "npx hardhat run --network goerli  ./scripts/deployment/goerli/TimeDelay/deployIntermediaryTimeDelay.js",
+    "grantRoleToTimeDelay": "npx hardhat run --network goerli  ./scripts/deployment/polygon/TimeDelay/setTimeDelayContract.js"
   },
   "author": "",
   "license": "ISC",

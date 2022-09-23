@@ -1,0 +1,7 @@
+{
+    "initialExchangeRateMantissa": "10000000000000000000",
+    "reserveFactorMantissa": "2500000000000000000",
+    "symbol": "fUSDC",
+    "decimals": "6",
+    "name": "fUSDC"
+}

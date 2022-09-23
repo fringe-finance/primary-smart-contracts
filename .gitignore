@@ -5,10 +5,10 @@ coverage.json
 typechain
 
 #Hardhat files
+.deps
 cache
 artifacts
 artifacts-zk
-.deps
 package-lock.json
 yarn.lock
 deployments
