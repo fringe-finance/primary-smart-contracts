@@ -1,0 +1,17 @@
+{
+    "PRJsAddresses": "",
+    "uniswapPairAddresses": "",
+
+    "WETH": "",
+    "chainlinkAggregatorV3_WETH_USD": "",
+
+    "LINK": "",
+    "chainlinkAggregatorV3_LINK_USD": "",
+
+    "MATIC": "",
+    "chainlinkAggregatorV3_MATIC_USD": "",
+
+    "WBTC": "",
+    "chainlinkAggregatorV3_WBTC_WETH": "",
+    "TWAPPeriods": ""
+}
