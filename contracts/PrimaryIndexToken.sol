@@ -286,7 +286,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function setUSDCToken(address usdc) public onlyModerator {
         require(usdc != address(0), "PIT: invalid address");
-        usdcToken = usdcToken;
+        usdcToken = usdc;
     }
 
     //************* PUBLIC FUNCTIONS ********************************
@@ -409,7 +409,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if(_lendingToken == address(0)) {
             _lendingToken = lendingToken;
         }
-        emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][lendingToken].depositedProjectTokenAmount);
+        emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][usdcToken].depositedProjectTokenAmount);
     }
     
     function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) public isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) returns (uint256) {
@@ -495,7 +495,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / getProjectTokenEvaluation(projectToken, projectTokenMultiplier);
         uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationIncentive.numerator / info.liquidationIncentive.denominator;
         
-        uint256 depositedProjectTokenAmount = depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount;
+        uint256 depositedProjectTokenAmount = depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount;
         if(projectTokenToSendToLiquidator > depositedProjectTokenAmount){
             projectTokenToSendToLiquidator = depositedProjectTokenAmount;
         }
@@ -530,15 +530,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     //************* VIEW FUNCTIONS ********************************
 
-    function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
+    function pit(address account, address projectToken) public view returns (uint256) {
         uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
         uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
-        uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount);
+        uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount);
         return evaluation * lvrNumerator / lvrDenominator;
     }
 
     function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
-        uint256 _pit = pit(account, projectToken, lendingToken);
+        uint256 _pit = pit(account, projectToken);
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken) / (10 ** (lendingTokenDecimals - decimals()));
         if (_pit >= _totalOutstanding) {
@@ -562,7 +562,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function healthFactor(address account, address projectToken, address lendingToken) public view returns (uint256 numerator, uint256 denominator) {
-        numerator = pit(account, projectToken, lendingToken);
+        numerator = pit(account, projectToken);
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         denominator = totalOutstanding(account, projectToken, lendingToken) / (10 ** (lendingTokenDecimals - decimals()));
     }
@@ -580,7 +580,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     function getPosition(address account, address projectToken, address lendingToken) public view returns (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, uint256 healthFactorNumerator, uint256 healthFactorDenominator) {
-        depositedProjectTokenAmount = depositPosition[account][projectToken][lendingToken].depositedProjectTokenAmount;
+        depositedProjectTokenAmount = getDepositedAmount(projectToken, account);
         loanBody = borrowPosition[account][projectToken][lendingToken].loanBody;
         uint256 cumulativeTotalOutstanding = 0;
         uint256 cumulativeLoanBody = 0;
@@ -594,7 +594,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (estimatedBorrowBalance >= cumulativeTotalOutstanding && cumulativeLoanBody > 0) {
             accrual += loanBody * (estimatedBorrowBalance - cumulativeTotalOutstanding) / cumulativeLoanBody;
         }
-        healthFactorNumerator = pit(account, projectToken, lendingToken);
+        healthFactorNumerator = pit(account, projectToken);
         healthFactorDenominator = loanBody + accrual;
     }
 
