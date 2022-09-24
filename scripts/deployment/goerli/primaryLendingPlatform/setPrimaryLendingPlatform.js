@@ -8,7 +8,7 @@ const configPITFile = '../../../config/config_PIT.json';
 const config = require(configFile);
 const configJumRateModel = require(configJumRateModelFile);
 const configBLendingToken = require(configBLendingTokenFile);
-const configPIT = '../../../config/config_PIT.json';
+const configPIT = require(configPITFile);
 
 let {
     BondtrollerProxy,
@@ -34,13 +34,23 @@ let {
 } = configBLendingToken;
 
 let {
+    PRJsAddresses,
+    lendingAddresses,
+    blendingAddress,
     loanToValueRatioNumerator,
     loanToValueRatioDenominator,
     liquidationTresholdFactorNumerator,
     liquidationTresholdFactorDenominator,
     liquidationIncentiveNumerator,
     liquidationIncentiveDenominator,
-} = configBLendingToken;
+    USDCTest,
+    LINK,
+    MATIC,
+    WBTC,
+    isPaused,
+    borrowLimit,
+    USB
+} = configPIT;
 
 async function main() {
 
@@ -81,7 +91,7 @@ async function main() {
     //instances of contracts
     let bondtroller = await Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
     let jumRateModel = await JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
-    let blendingToken = await JumpRateModel.attach(blendingTokenProxyAddress).connect(deployMaster);
+    let blendingToken = await BLendingToken.attach(blendingTokenProxyAddress).connect(deployMaster);
     let primaryIndexToken = await PrimaryIndexToken.attach(primaryIndexTokenProxyAddress).connect(deployMaster);
 
 
@@ -94,9 +104,11 @@ async function main() {
         await bondtroller.init().then(function(instance){
             console.log("Bondtroller " + bondtroller.address + "call init at tx hash: " + instance.hash);
         });
-
         await bondtroller.supportMarket(blendingTokenProxyAddress).then(function(){
             console.log("Bondtroller support market " + blendingTokenProxyAddress);
+        });
+        await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress).then(function(){
+            console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ primaryIndexTokenProxyAddress);
         });
     }
 
@@ -111,17 +123,17 @@ async function main() {
             kink,
             owner
         ).then(function(instance){
-            console.log("Bondtroller " + bondtroller.address + "call init at tx hash: " + instance.hash);
+            console.log("JumRateModel " + bondtroller.address + "call init at tx hash: " + instance.hash);
         });
     }
 
     console.log();
-    console.log("***** 3. Seting BLending token *****");
-    let adminBlendingToken = await bondtroller.admin();
+    console.log("***** 3. Seting BLending  token *****");
+    let adminBlendingToken = await blendingToken.admin();
     if (adminBlendingToken == ZERO_ADDRESS) {
         let admin = deployMaster.address;
         await blendingToken.init(
-            usdctestAddress,
+            USB,
             bondtrollerProxyAddress,
             jumpRateModelProxyAddress,
             initialExchangeRateMantissa,
@@ -129,17 +141,19 @@ async function main() {
             symbol,
             decimals,
             admin
-        ).then(function(){
-            console.log("BUSDC" + blendingToken.address + " call init at tx hash: " + instance.hash);
-        });
-    
-        await blendingToken.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(){
-            console.log("BUSDC set reserve factor " + reserveFactorMantissa);
+        ).then(function(instance){
+            console.log("BLending" + blendingToken.address + " call init at tx hash: " + instance.hash);
         });
     }
+    await blendingToken.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(){
+        console.log("BUSDC set reserve factor " + reserveFactorMantissa);
+    });
+    await blendingToken.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
+        console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
+    });
 
     console.log();
-    console.log("***** 3. Seting BLending token *****");
+    console.log("***** 4. Seting PIT token *****");
     let decimal = await primaryIndexToken.decimals();
     if (!decimal) {
         await primaryIndexToken.initialize().then(function(instance){
@@ -172,19 +186,19 @@ async function main() {
             });
             
         }
-    
-        await primaryIndexToken.addLendingToken(
-            usdcAddress, 
-            busdcAddress, 
-            isPaused
-        ).then(function(){
-            console.log("Added lending token: "+usdcAddress);
-        });
+        for(var i = 0; i < lendingAddresses.length; i++){
+            await primaryIndexToken.addLendingToken(
+                lendingAddresses[i], 
+                blendingAddress[i], 
+                isPaused
+            ).then(function(){
+                console.log("Added lending token: " + lendingAddresses[i]);
+            });
+        }
     
         for(var i = 0; i < PRJsAddresses.length; i++){
-            await primaryIndexToken.setBorrowLimit(
+            await primaryIndexToken.setBorrowLimitPerCollateral(
                 PRJsAddresses[i], 
-                usdcAddress, 
                 borrowLimit
             ).then(function(){
                 console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);

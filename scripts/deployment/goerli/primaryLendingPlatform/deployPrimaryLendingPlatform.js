@@ -59,8 +59,9 @@ async function main() {
     let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
     let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
     let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
+    let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
 
-    console.log("----------------------------------1. Deploy Bondtroller contract -------------------------------------")
+    // console.log("----------------------------------1. Deploy Bondtroller contract -------------------------------------")
 
     if(!bondtrollerLogicAddress) {
         let bondtroller = await Bondtroller.connect(deployMaster).deploy();
@@ -177,7 +178,7 @@ async function main() {
         });
     }
     console.log("primaryIndexToken proxy address: " + primaryIndexTokenProxyAddress);
-    
+
     console.log("Verify BlendingToken masterCopy")
     await verify(primaryIndexTokenLogicAddress, []);
 
