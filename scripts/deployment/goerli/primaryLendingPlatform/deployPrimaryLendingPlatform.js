@@ -12,24 +12,21 @@ let {
     PRIMARY_PROXY_ADMIN, 
     BLendingTokenLogic, 
     BLendingTokenProxy,
+    USBBLendingTokenLogic,
+    USBBLendingTokenProxy,
     BondtrollerLogic,
     BondtrollerProxy,
     JumpRateModelLogic,
     JumpRateModelProxy,
     PrimaryIndexTokenLogic, 
     PrimaryIndexTokenProxy,
-    PriceProviderAggregatorProxy,
-    USDCTest,
-    LINK,
-    MATIC,
-    WBTC,
-    PRJsAddresses
 } = config;
 
 //Address
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let blendingTokenLogicAddress = BLendingTokenLogic;
 let blendingTokenProxyAddress = BLendingTokenProxy;
+let usbBlendingTokenProxyAddress = USBBLendingTokenProxy;
 
 let bondtrollerLogicAddress = BondtrollerLogic;
 let bondtrollerProxyAddress = BondtrollerProxy;
@@ -60,6 +57,7 @@ async function main() {
     let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
     let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
     let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
+    let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
 
     // console.log("----------------------------------1. Deploy Bondtroller contract -------------------------------------")
 
@@ -86,11 +84,11 @@ async function main() {
     }
     console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
 
-    console.log("Verify Bondtroller masterCopy")
-    await verify(bondtrollerLogicAddress, []);
+    // console.log("Verify Bondtroller masterCopy")
+    // await verify(bondtrollerLogicAddress, []);
 
-    console.log("Verify Bondtroller proxy")
-    await verify(bondtrollerProxyAddress, [bondtrollerLogicAddress, proxyAdmingAddress, "0x"]);
+    // console.log("Verify Bondtroller proxy")
+    // await verify(bondtrollerProxyAddress, [bondtrollerLogicAddress, proxyAdmingAddress, "0x"]);
 
     console.log("----------------------------------2. Deploy JumRate Model -------------------------------------")
 
@@ -117,13 +115,13 @@ async function main() {
     }
     console.log("JumpRateModel proxy address: " + jumpRateModelProxyAddress);
 
-    console.log("Verify JumpRateModel masterCopy")
-    await verify(jumpRateModelLogicAddress, []);
+    // console.log("Verify JumpRateModel masterCopy")
+    // await verify(jumpRateModelLogicAddress, []);
 
-    console.log("Verify JumpRateModel proxy")
-    await verify(jumpRateModelProxyAddress, [jumpRateModelLogicAddress, proxyAdmingAddress, "0x"]);
+    // console.log("Verify JumpRateModel proxy")
+    // await verify(jumpRateModelProxyAddress, [jumpRateModelLogicAddress, proxyAdmingAddress, "0x"]);
   
-    console.log("----------------------------------3. Deploy Bondtroller contract -------------------------------------")
+    console.log("----------------------------------3. Deploy BleningToken contract -------------------------------------")
 
     if(!blendingTokenLogicAddress) {
         let blendingToken = await BLendingToken.connect(deployMaster).deploy();
@@ -148,11 +146,28 @@ async function main() {
     }
     console.log("blendingToken proxy address: " + blendingTokenProxyAddress);
 
-    console.log("Verify BlendingToken masterCopy")
-    await verify(blendingTokenLogicAddress, []);
+    // if(!usbBlendingTokenProxyAddress) {
+    //     let BLendingTokenProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+    //         blendingTokenLogicAddress,
+    //         proxyAdmingAddress,
+    //         "0x"
+    //     );
+    //     await BLendingTokenProxy.deployed().then(function(instance){
+    //         usbBlendingTokenProxyAddress = instance.address;
+    //         config.USBBLendingTokenLogic = usbBlendingTokenProxyAddress;
+    //         fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+    //     });
+    // }
+    // console.log("blendingToken proxy address: " + blendingTokenProxyAddress);
+
+    // console.log("Verify BlendingToken masterCopy")
+    // await verify(blendingTokenLogicAddress, []);
 
     console.log("Verify BlendingToken proxy")
     await verify(blendingTokenProxyAddress, [blendingTokenLogicAddress, proxyAdmingAddress, "0x"]);
+
+    // console.log("Verify BlendingToken proxy")
+    // await verify(usbBlendingTokenProxyAddress, [blendingTokenLogicAddress, proxyAdmingAddress, "0x"]);
 
     console.log("----------------------------------4. Deploy PrimaryIndexToken contract -------------------------------------")
 
@@ -179,11 +194,11 @@ async function main() {
     }
     console.log("primaryIndexToken proxy address: " + primaryIndexTokenProxyAddress);
 
-    console.log("Verify BlendingToken masterCopy")
-    await verify(primaryIndexTokenLogicAddress, []);
+    // console.log("Verify BlendingToken masterCopy")
+    // await verify(primaryIndexTokenLogicAddress, []);
 
-    console.log("Verify PrimaryIndexToken proxy")
-    await verify(primaryIndexTokenProxyAddress, [primaryIndexTokenLogicAddress, proxyAdmingAddress, "0x"]);
+    // console.log("Verify PrimaryIndexToken proxy")
+    // await verify(primaryIndexTokenProxyAddress, [primaryIndexTokenLogicAddress, proxyAdmingAddress, "0x"]);
 }
 
 main().catch((error) => {

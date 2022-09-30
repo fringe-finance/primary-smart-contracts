@@ -14,7 +14,9 @@ let {
     BondtrollerProxy,
     JumpRateModelProxy,
     BLendingTokenProxy,
+    USBBLendingTokenProxy,
     PrimaryIndexTokenProxy,
+    PriceProviderAggregatorProxy,
     ZERO_ADDRESS
 } = config;
 
@@ -26,11 +28,8 @@ let {
 } = configJumRateModel;
 
 let {
-    initialExchangeRateMantissa,
-    reserveFactorMantissa,
-    symbol,
-    decimals,
-    name
+    fUSB,
+    fUSD
 } = configBLendingToken;
 
 let {
@@ -53,6 +52,11 @@ let {
 } = configPIT;
 
 async function main() {
+
+    console.log(fUSB.initialExchangeRateMantissa,
+        fUSB.name,
+        fUSB.symbol,
+        fUSB.decimals,);
 
     //====================================================
     //declare parametrs
@@ -77,6 +81,7 @@ async function main() {
     let bondtrollerProxyAddress = BondtrollerProxy;
     let jumpRateModelProxyAddress = JumpRateModelProxy;
     let blendingTokenProxyAddress = BLendingTokenProxy;
+    let usbBlendingTokenProxyAddress = USBBLendingTokenProxy;
     let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
 
 
@@ -92,6 +97,7 @@ async function main() {
     let bondtroller = await Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
     let jumRateModel = await JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
     let blendingToken = await BLendingToken.attach(blendingTokenProxyAddress).connect(deployMaster);
+    let usbBlendingToken = await BLendingToken.attach(usbBlendingTokenProxyAddress).connect(deployMaster);
     let primaryIndexToken = await PrimaryIndexToken.attach(primaryIndexTokenProxyAddress).connect(deployMaster);
 
 
@@ -104,13 +110,16 @@ async function main() {
         await bondtroller.init().then(function(instance){
             console.log("Bondtroller " + bondtroller.address + "call init at tx hash: " + instance.hash);
         });
-        await bondtroller.supportMarket(blendingTokenProxyAddress).then(function(){
-            console.log("Bondtroller support market " + blendingTokenProxyAddress);
-        });
         await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress).then(function(){
-            console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ primaryIndexTokenProxyAddress);
+            console.log("Bondtroller set PIT " + primaryIndexTokenProxyAddress);
+        });
+        await bondtroller.supportMarket(usbBlendingTokenProxyAddress).then(function(){
+            console.log("Bondtroller support market " + usbBlendingTokenProxyAddress);
         });
     }
+    await bondtroller.supportMarket(blendingTokenProxyAddress).then(function(){
+        console.log("Bondtroller support market " + blendingTokenProxyAddress);
+    });
 
     console.log("***** 2. Seting JumRateModel *****");
     let ownerJumRateModel = await jumRateModel.owner();
@@ -128,29 +137,53 @@ async function main() {
     }
 
     console.log();
+    // console.log("***** 3. Seting BLending  token *****");
+    // let adminUsbBlendingToken = await usbBlendingToken.admin();
+    // if (adminUsbBlendingToken == ZERO_ADDRESS) {
+    //     let admin = deployMaster.address;
+    //     await usbBlendingToken.init(
+    //         USB,
+    //         bondtrollerProxyAddress,
+    //         jumpRateModelProxyAddress,
+    //         fUSB.initialExchangeRateMantissa,
+    //         fUSB.name,
+    //         fUSB.symbol,
+    //         fUSB.decimals,
+    //         admin
+    //     ).then(function(instance){
+    //         console.log("BLending" + usbBlendingToken.address + " call init at tx hash: " + instance.hash);
+    //     });
+    //     await usbBlendingToken.connect(deployMaster).setReserveFactor(fUSB.reserveFactorMantissa).then(function(){
+    //         console.log("BUSDC set reserve factor " + fUSB.reserveFactorMantissa);
+    //     });
+    //     await usbBlendingToken.connect(deployMaster).setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
+    //         console.log("BUSDC set PIT " + primaryIndexTokenProxyAddress);
+    //     });
+    // }
+
     console.log("***** 3. Seting BLending  token *****");
     let adminBlendingToken = await blendingToken.admin();
     if (adminBlendingToken == ZERO_ADDRESS) {
         let admin = deployMaster.address;
         await blendingToken.init(
-            USB,
+            USDCTest,
             bondtrollerProxyAddress,
             jumpRateModelProxyAddress,
-            initialExchangeRateMantissa,
-            name,
-            symbol,
-            decimals,
+            fUSD.initialExchangeRateMantissa,
+            fUSD.name,
+            fUSD.symbol,
+            fUSD.decimals,
             admin
         ).then(function(instance){
             console.log("BLending" + blendingToken.address + " call init at tx hash: " + instance.hash);
         });
+        await blendingToken.connect(deployMaster).setReserveFactor(fUSD.reserveFactorMantissa).then(function(){
+            console.log("BUSDC set reserve factor " + fUSD.reserveFactorMantissa);
+        });
+        await blendingToken.connect(deployMaster).setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
+            console.log("BUSDC set PIT " + primaryIndexTokenProxyAddress);
+        });
     }
-    await blendingToken.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(){
-        console.log("BUSDC set reserve factor " + reserveFactorMantissa);
-    });
-    await blendingToken.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
-        console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
-    });
 
     console.log();
     console.log("***** 4. Seting PIT token *****");
@@ -186,25 +219,73 @@ async function main() {
             });
             
         }
-        for(var i = 0; i < lendingAddresses.length; i++){
-            await primaryIndexToken.addLendingToken(
-                lendingAddresses[i], 
-                blendingAddress[i], 
-                isPaused
-            ).then(function(){
-                console.log("Added lending token: " + lendingAddresses[i]);
-            });
-        }
-    
-        for(var i = 0; i < PRJsAddresses.length; i++){
-            await primaryIndexToken.setBorrowLimitPerCollateral(
-                PRJsAddresses[i], 
-                borrowLimit
-            ).then(function(){
-                console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
-            });
-        }
     }
+
+    await primaryIndexToken.initialize().then(function(instance){
+        console.log("PrimaryIndexToken" + primaryIndexToken.address + " call initialize at tx hash:" + instance.hash);
+    });
+    await primaryIndexToken.setPriceOracle(PriceProviderAggregatorProxy).then(function(instance){
+        console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy + " at tx hash: " + instance.hash);
+    });
+
+    for(var i = 0; i < PRJsAddresses.length; i++){
+        await primaryIndexToken.addProjectToken( 
+            PRJsAddresses[i],
+            loanToValueRatioNumerator,
+            loanToValueRatioDenominator,
+            liquidationTresholdFactorNumerator,
+            liquidationTresholdFactorDenominator,
+            liquidationIncentiveNumerator,
+            liquidationIncentiveDenominator,
+        ).then(function(){
+            console.log("Added prj token: "+PRJsAddresses[i]+" with:");
+            console.log("LoanToValueRatio: ")
+            console.log("   Numerator:   "+loanToValueRatioNumerator);
+            console.log("   Denominator: "+loanToValueRatioDenominator);
+            console.log("LiquidationTresholdFactor: ")
+            console.log("   Numerator:   "+liquidationTresholdFactorNumerator);
+            console.log("   Denominator: "+liquidationTresholdFactorDenominator);
+            console.log("LiquidationIncentive: ");
+            console.log("   Numerator:   "+liquidationIncentiveNumerator);
+            console.log("   Denominator: "+liquidationIncentiveDenominator);
+        });
+        
+    }
+
+    for(var i = 0; i < lendingAddresses.length; i++){
+        await primaryIndexToken.addLendingToken(
+            lendingAddresses[i], 
+            blendingAddress[i], 
+            isPaused
+        ).then(function(){
+            console.log("Added lending token: " + lendingAddresses[i]);
+        });
+    }
+
+    for(var i = 0; i < PRJsAddresses.length; i++){
+        await primaryIndexToken.setBorrowLimitPerCollateral(
+            PRJsAddresses[i], 
+            borrowLimit
+        ).then(function(){
+            console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
+        });
+    }
+
+    for(var i = 0; i < lendingAddresses.length; i++){
+        await primaryIndexToken.setBorrowLimitPerLendingAsset(
+            lendingAddresses[i], 
+            borrowLimit
+        ).then(function(){
+            console.log("PrimaryIndexToken set " + lendingAddresses[i] + " borrow limit " + borrowLimit);
+        });
+    }
+
+    // await primaryIndexToken.setUSDCToken(
+    //     USDCTest
+    // ).then(function(){
+    //     console.log("done");
+    // });
+
  
 };
 

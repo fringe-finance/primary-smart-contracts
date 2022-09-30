@@ -1,5 +1,10 @@
 {
-    "PRJsAddresses": "",
+    "PRJsAddresses": [
+    ],
+    "lendingAddresses": [
+    ],
+    "blendingAddress": [
+    ],
     "loanToValueRatioNumerator": "",
     "loanToValueRatioDenominator": "",
     "liquidationTresholdFactorNumerator": "",
@@ -11,5 +16,6 @@
     "MATIC": "",
     "WBTC": "",
     "isPaused": "",
-    "borrowLimit": ""  
+    "borrowLimit": "",
+    "USB": ""  
 }
