@@ -34,10 +34,12 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     mapping(address => mapping(address => mapping(address => DepositPosition))) depositPosition; // user address => PRJ token address => lendingToken address => DepositPosition
     mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
-    mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token []
+    mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token [] = prjToken
     mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
-    mapping(address => uint256) public totalBorrowPerCollateral; //project token address => total borrow by project token []
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
+
+    mapping(address => uint256) public totalBorrowPerLendingToken; //lending token address => total borrow by lending token [] - irrespective of the collateral assets used
+    mapping(address => uint256) public borrowLimitPerLendingToken; //lending token address => limit of borrowing; [borrowLimit]=$
     mapping(address => mapping(address => address)) public lendingTokenPerCollateral; // user address => project token address => lending token address 
     address public usdcToken;
 
@@ -60,11 +62,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         bool isPaused;
         BLendingToken bLendingToken;
     }
-    
+
+    // prjToken
     struct DepositPosition {
         uint256 depositedProjectTokenAmount;
     }
 
+    // lendingToken
     struct BorrowPosition {
         uint256 loanBody;   // [loanBody] = lendingToken
         uint256 accrual;   // [accrual] = lendingToken
@@ -220,12 +224,31 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         revokeRole(MODERATOR_ROLE, moderator);
     }
 
+    function setLendingTokenForColl(address projectToken, address user, address lendingToken) public onlyAdmin {
+        lendingTokenPerCollateral[user][projectToken]  = lendingToken;
+    }
+
     //************* MODERATOR FUNCTIONS ********************************
 
     function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
         borrowLimitPerCollateral[projectToken] = _borrowLimit;
         //emit set borrow limit
+    }
+
+    function setBorrowLimitPerLendingAsset(address lendingToken, uint256 _borrowLimit) public onlyModerator isLendingTokenListed(lendingToken) {
+        require(_borrowLimit > 0, "PIT: borrowLimit=0");
+        borrowLimitPerLendingToken[lendingToken] = _borrowLimit;
+        //emit set borrow limit
+    }
+
+    function setTotalBorrowPerLendingToken(address lendingToken) public onlyModerator {
+        require(lendingToken != address(0), "PIT: invalid address");
+        uint256 total;
+        for(uint i=0; i < projectTokensLength(); i++) {
+            total += totalBorrow[projectTokens[i]][lendingToken];
+        }
+        totalBorrowPerLendingToken[lendingToken] = total;
     }
 
     function setProjectTokenInfo(
@@ -277,13 +300,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         lendingTokenInfo[_lendingToken].isPaused = _isPaused;
     }
 
-    function setTotalBorrowPerColateral(address projectToken, address[] memory _lendingTokens) public onlyModerator isProjectTokenListed(projectToken) {
-        require(lendingTokens.length > 0, "PIT: lis lendingTokens is empty");
-        for(uint i = 0; i < lendingTokens.length; i++) {
-            totalBorrowPerCollateral[projectToken] += totalBorrow[projectToken][_lendingTokens[i]];
-        }
-    }
-
     function setUSDCToken(address usdc) public onlyModerator {
         require(usdc != address(0), "PIT: invalid address");
         usdcToken = usdc;
@@ -310,22 +326,22 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         address actualLendingToken;
         if (currentLendingToken != address(0)) {
             actualLendingToken = currentLendingToken;
-        } else if(borrowedUSD > 0 || currentLendingToken == address(0)) {
-            actualLendingToken = usdcToken;
+        } else {
+            actualLendingToken = borrowedUSD > 0 ? usdcToken : address(0);
         }
         uint256 _totalOutstanding;
         if (projectTokenAmount == type(uint256).max) {
             if (borrowPosition[msg.sender][projectToken][actualLendingToken].loanBody > 0) {
                 updateInterestInBorrowPositions(msg.sender, actualLendingToken);
+
                 uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
-                uint8 lendingTokenDecimals = ERC20Upgradeable(actualLendingToken).decimals();
+            
                 Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
-                _totalOutstanding = totalOutstanding(msg.sender, projectToken, actualLendingToken);
-                if (lendingTokenDecimals > decimals()) {
-                    _totalOutstanding = _totalOutstanding / 10 ** (lendingTokenDecimals - decimals());
-                }
-                uint256 collateralProjectTokenAmount = _totalOutstanding * lvr.denominator * (10 ** projectTokenDecimals) / getProjectTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
+                _totalOutstanding = totalOutstandingInUSD(msg.sender, projectToken, actualLendingToken);
+
+                uint256 collateralProjectTokenAmount = _totalOutstanding * lvr.denominator * (10 ** projectTokenDecimals) / getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
+                
                 if (depositedProjectTokenAmount >= collateralProjectTokenAmount){
                     projectTokenAmount = depositedProjectTokenAmount - collateralProjectTokenAmount;
                 } else {
@@ -386,28 +402,24 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (borrowedUSD > 0) {
             require(lendingToken == usdcToken, "PIT: invalid lending token");
         } else if(_lendingToken != address(0)) {
-            require(lendingToken == _lendingToken, "PIT: invalide lending token");  
+            require(lendingToken == _lendingToken, "PIT: invalid lending token");  
         }
         updateInterestInBorrowPositions(msg.sender, lendingToken);
         if (lendingTokenAmount == type(uint256).max) {
-            lendingTokenAmount = pitRemaining(msg.sender, projectToken, lendingToken);
+            lendingTokenAmount = convertPitRemaining(msg.sender, projectToken, lendingToken);
         }
-        require(lendingTokenAmount <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
-        require(totalBorrowPerCollateral[projectToken] + lendingTokenAmount <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit");
+        require(getPriceConvert(lendingToken, lendingTokenAmount) <= pitRemaining(msg.sender, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
+        require(getTotalBorrowPerCollateral(projectToken) + getPriceConvert(lendingToken, lendingTokenAmount) <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit per collateral asset");
+        require(getTotalBorrowPerLendingToken(lendingToken) + getPriceConvert(lendingToken, lendingTokenAmount) <= borrowLimitPerLendingToken[lendingToken], "PIT: totalBorrow exceeded borrowLimit per lending asset");
+
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
-        if (_borrowPosition.loanBody == 0) {
-            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
-            _borrowPosition.loanBody += lendingTokenAmount;
-            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
-            totalBorrowPerCollateral[projectToken] += lendingTokenAmount;
-        } else {
-            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
-            _borrowPosition.loanBody += lendingTokenAmount;
-            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
-            totalBorrowPerCollateral[projectToken] += lendingTokenAmount;
-        }
+        info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
+        _borrowPosition.loanBody += lendingTokenAmount;
+        totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
+        totalBorrowPerLendingToken[lendingToken] += lendingTokenAmount;
+
         if(_lendingToken == address(0)) {
-            _lendingToken = lendingToken;
+            lendingTokenPerCollateral[msg.sender][projectToken]  = lendingToken;
         }
         emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][usdcToken].depositedProjectTokenAmount);
     }
@@ -439,6 +451,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 lendingTokenAmount == type(uint256).max) {
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, type(uint256).max);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
+                totalBorrowPerLendingToken[lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
@@ -449,6 +462,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
                     totalBorrow[projectToken][lendingToken] -= lendingTokenAmountToRepay;
+                    totalBorrowPerLendingToken[lendingToken] -= lendingTokenAmountToRepay;
                     _borrowPosition.loanBody -= lendingTokenAmountToRepay;
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
@@ -459,6 +473,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             if (lendingTokenAmount >= _totalOutstanding || lendingTokenAmount == type(uint256).max) {
                 (, amountRepaid) = info.bLendingToken.repayTo(repairer, borrower, _totalOutstanding);
                 totalBorrow[projectToken][lendingToken] -= _borrowPosition.loanBody;
+                totalBorrowPerLendingToken[lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
                 isPositionFullyRepaid = true;
@@ -469,6 +484,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                     lendingTokenAmountToRepay -= _borrowPosition.accrual;
                     _borrowPosition.accrual = 0;
                     totalBorrow[projectToken][lendingToken] -= lendingTokenAmountToRepay;
+                    totalBorrowPerLendingToken[lendingToken] -= lendingTokenAmountToRepay;
                     _borrowPosition.loanBody -= lendingTokenAmountToRepay;
                 } else {
                     _borrowPosition.accrual -= lendingTokenAmountToRepay;
@@ -492,7 +508,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         ProjectTokenInfo memory info = projectTokenInfo[projectToken];
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(projectToken).decimals();
         uint256 repaid = repayInternal(msg.sender, account, projectToken, lendingToken, type(uint256).max);
-        uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / getProjectTokenEvaluation(projectToken, projectTokenMultiplier);
+        uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / getTokenEvaluation(projectToken, projectTokenMultiplier);
         uint256 projectTokenToSendToLiquidator = projectTokenEvaluation * info.liquidationIncentive.numerator / info.liquidationIncentive.denominator;
         
         uint256 depositedProjectTokenAmount = depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount;
@@ -529,20 +545,42 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     //************* VIEW FUNCTIONS ********************************
-
+    // pit = $ * LVR
     function pit(address account, address projectToken) public view returns (uint256) {
         uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
         uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
-        uint256 evaluation = getProjectTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount);
+        uint256 evaluation = getTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount);
         return evaluation * lvrNumerator / lvrDenominator;
     }
 
     function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        address _lendingToken = lendingTokenPerCollateral[account][projectToken];
         uint256 _pit = pit(account, projectToken);
-        uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
-        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken) / (10 ** (lendingTokenDecimals - decimals()));
-        if (_pit >= _totalOutstanding) {
-            return _pit - _totalOutstanding;
+        uint remaining;
+        if(_pit > 0) {
+            if(_lendingToken == address(0) && 
+                totalOutstanding(account, projectToken, usdcToken) == 0 || 
+                lendingToken == _lendingToken && 
+                totalOutstanding(account, projectToken, _lendingToken) == 0) 
+            {
+                remaining = _pit;
+            } else {
+                if(_lendingToken == address(0)) {
+                    remaining = lendingToken != usdcToken ? 0 : _pitRemainingInternal(account, projectToken, lendingToken, _pit);
+                } else {
+                    remaining = _lendingToken != lendingToken ? 0 : _pitRemainingInternal(account, projectToken, lendingToken, _pit);
+                }
+            }
+        } else {
+            return 0;
+        }
+        return remaining;
+    }
+
+    function _pitRemainingInternal(address account, address projectToken, address lendingToken, uint256 _pit) internal view returns (uint256) {
+        uint256 _totalOutstandingInUSD = totalOutstandingInUSD(account, projectToken, lendingToken);
+        if (_pit >= _totalOutstandingInUSD) {
+            return _pit - _totalOutstandingInUSD;
         } else {
             return 0;
         }
@@ -552,7 +590,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         ProjectTokenInfo memory info = projectTokenInfo[projectToken];   
         uint256 liquidationThresholdFactorNumerator = info.liquidationThresholdFactor.numerator;
         uint256 liquidationThresholdFactorDenominator = info.liquidationThresholdFactor.denominator;
-        uint256 _totalOutstanding = totalOutstanding(account, projectToken, lendingToken);
+        uint256 _totalOutstanding = totalOutstandingInUSD(account, projectToken, lendingToken);
         return _totalOutstanding * liquidationThresholdFactorNumerator / liquidationThresholdFactorDenominator;
     }
 
@@ -563,12 +601,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function healthFactor(address account, address projectToken, address lendingToken) public view returns (uint256 numerator, uint256 denominator) {
         numerator = pit(account, projectToken);
-        uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
-        denominator = totalOutstanding(account, projectToken, lendingToken) / (10 ** (lendingTokenDecimals - decimals()));
+        denominator = totalOutstandingInUSD(account, projectToken, lendingToken);
     }
 
-    function getProjectTokenEvaluation(address projectToken, uint256 projectTokenAmount) public view returns (uint256) {
-        return priceOracle.getEvaluation(projectToken, projectTokenAmount);
+    function getTokenEvaluation(address token, uint256 tokenAmount) public view returns (uint256) {
+        return priceOracle.getEvaluation(token, tokenAmount);
     }
 
     function lendingTokensLength() public view returns (uint256) {
@@ -595,7 +632,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             accrual += loanBody * (estimatedBorrowBalance - cumulativeTotalOutstanding) / cumulativeLoanBody;
         }
         healthFactorNumerator = pit(account, projectToken);
-        healthFactorDenominator = loanBody + accrual;
+        uint amount = loanBody + accrual;
+        healthFactorDenominator = getPriceConvert(lendingToken, amount);
     }
 
     function decimals() public pure returns (uint8) {
@@ -604,5 +642,38 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function getDepositedAmount(address projectToken, address user) public view returns (uint) {
         return depositPosition[user][projectToken][usdcToken].depositedProjectTokenAmount;
+    }
+
+    function getTotalBorrowPerCollateral(address projectToken) public view returns (uint) {
+        require(lendingTokensLength() > 0, "PIT: lis lendingTokens is empty");
+        uint totalBorrowInUSD;
+        for(uint i = 0; i < lendingTokensLength(); i++) {
+            uint amount = totalBorrow[projectToken][lendingTokens[i]];
+            totalBorrowInUSD += getPriceConvert(lendingTokens[i], amount);
+        }
+        return totalBorrowInUSD;
+    }
+
+    function getTotalBorrowPerLendingToken(address lendingToken) public view returns (uint) {
+        uint amount = totalBorrowPerLendingToken[lendingToken];
+        return getPriceConvert(lendingToken, amount);
+    }
+
+    // convert outstanding of each user to $ 
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        uint256 amount = totalOutstanding(account, projectToken, lendingToken);
+        return getPriceConvert(lendingToken, amount);
+    }
+
+    function getPriceConvert(address lendingToken, uint amount) public view returns(uint256) {
+        uint256 price = lendingToken == usdcToken ? amount : getTokenEvaluation(lendingToken, amount);
+        return price;
+    }
+
+    function convertPitRemaining(address account, address projectToken, address lendingToken) public view returns(uint256) {
+        uint256 _pitRemaining = pitRemaining(account, projectToken, lendingToken);
+        uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
+        uint256 lendingTokenAmount = lendingToken == usdcToken ? _pitRemaining : _pitRemaining * (10 ** lendingTokenDecimals) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals); 
+        return lendingTokenAmount;
     }
 }
