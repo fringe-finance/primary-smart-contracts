@@ -454,6 +454,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 totalBorrowPerLendingToken[lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
+                delete lendingTokenPerCollateral[borrower][projectToken];
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
@@ -476,6 +477,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
                 totalBorrowPerLendingToken[lendingToken] -= _borrowPosition.loanBody;
                 _borrowPosition.loanBody = 0;
                 _borrowPosition.accrual = 0;
+                delete lendingTokenPerCollateral[borrower][projectToken];
                 isPositionFullyRepaid = true;
             } else {
                 uint256 lendingTokenAmountToRepay = lendingTokenAmount;
