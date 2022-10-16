@@ -1,9 +1,11 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
-const configFile = '../../config/goerli/config_general.json';
+const fs = require("fs");
+const path = require("path");
+const configFile = '../../../config/arbitrum/config.json';
 const config = require(configFile);
-const configAddressFile = '../../config/goerli/config_general.json';
-const configAddress = require(configAddressFile);
+const configGeneralFile = '../../../config/arbitrum/config_general.json';
+const configGeneral = require(configGeneralFile);
 
 const toBN = (num) => BN.from(num);
 
@@ -21,7 +23,7 @@ module.exports = {
         // Contracts ABI
         let ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
-        let JumpRateModelV2 = await hre.ethers.getContractFactory("JumpRateModelV2");
+        let JumpRateModelV2 = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
         let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
         let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
@@ -35,7 +37,7 @@ module.exports = {
             pitToken,
             blendingToken,
             jumRateModel
-        } = config;
+        } = configGeneral;
 
         const {
             PRIMARY_PROXY_ADMIN,
@@ -43,24 +45,24 @@ module.exports = {
             BondtrollerLogic,
             BondtrollerProxy,
             BLendingTokenLogic,
-            BLendingTokenProxys,
+            BLendingTokenProxies,
             PrimaryIndexTokenLogic,
             PrimaryIndexTokenProxy,
-            JumpRateModelV2UpgradeableLogic,
-            JumpRateModelV2UpgradeableProxy,
+            JumpRateModelLogic,
+            JumpRateModelProxy,
             ZERO_ADDRESS
-        } = configAddress;
+        } = config;
 
         //Address
         let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
         let blendingTokenLogicAddress = BLendingTokenLogic;
-        let blendingTokenProxyAddresses = BLendingTokenProxys;
+        let blendingTokenProxyAddresses = BLendingTokenProxies;
 
         let bondtrollerLogicAddress = BondtrollerLogic;
         let bondtrollerProxyAddress = BondtrollerProxy;
 
-        let jumpRateModelLogicAddress = JumpRateModelV2UpgradeableLogic;
-        let jumpRateModelProxyAddress = JumpRateModelV2UpgradeableProxy;
+        let jumpRateModelLogicAddress = JumpRateModelLogic;
+        let jumpRateModelProxyAddress = JumpRateModelProxy;
 
         let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
         let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
@@ -83,6 +85,13 @@ module.exports = {
         let tokens = pitToken.tokens;
         let borrowLimitPerCollateral = pitToken.borrowLimitPerCollateral;
         let borrowLimitPerLendingToken = pitToken.borrowLimitPerLendingToken;
+        let loanToValueRatioNumerator = pitToken.loanToValueRatioNumerator;
+        let loanToValueRatioDenominator = pitToken.loanToValueRatioDenominator;
+        let liquidationTresholdFactorNumerator = pitToken.liquidationTresholdFactorNumerator;
+        let liquidationTresholdFactorDenominator = pitToken.liquidationTresholdFactorDenominator;
+        let liquidationIncentiveNumerator = pitToken.liquidationIncentiveNumerator;
+        let liquidationIncentiveDenominator = pitToken.liquidationIncentiveDenominator;
+        let isPaused = pitToken.isPaused;
 
     //====================================================
     //deploy proxy admin
@@ -122,7 +131,7 @@ module.exports = {
         // let jumpMultiplierPerBlock = toBN(1902587519025);
         // let multiplierPerBlock = toBN(107020547945);
         if(!jumpRateModelLogicAddress) {
-            let jumpRateModelV2 = await JumpRateModel.connect(deployMaster).deploy();
+            let jumpRateModelV2 = await JumpRateModelV2.connect(deployMaster).deploy();
             await jumpRateModelV2.deployed();
             jumpRateModelLogicAddress = jumpRateModelV2.address;
             config.JumpRateModelLogic = jumpRateModelLogicAddress;
@@ -162,7 +171,7 @@ module.exports = {
 
         if(!bondtrollerProxyAddress) {
             let bondtrollerProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                bondtrollerMasterCopyAddress,
+                bondtrollerLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
@@ -201,10 +210,10 @@ module.exports = {
                 });
             }
         }
-        config.BLendingTokenProxy = blendingTokenProxyAddress;
+        config.BLendingTokenProxies = blendingTokenProxyAddresses;
         fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
 
-        console.log("BLendingToken proxy address: " + blendingTokenProxyAddress);
+        console.log("BLendingToken proxy address: " + blendingTokenProxyAddresses);
         
         //====================================================
 
@@ -224,7 +233,7 @@ module.exports = {
 
         if(!primaryIndexTokenProxyAddress) {
             let pitProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                pitMasterCopyAddress,
+                primaryIndexTokenLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
@@ -242,7 +251,7 @@ module.exports = {
 
         //instances of contracts
         bondtroller = await Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
-        jumpRateModelV2 = await JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
+        jumpRateModelV2 = await JumpRateModelV2.attach(jumpRateModelProxyAddress).connect(deployMaster);
         pit = await PrimaryIndexToken.attach(primaryIndexTokenProxyAddress).connect(deployMaster);
 
         console.log();
@@ -299,12 +308,12 @@ module.exports = {
                     console.log("blending call init at " + blending.address);
                 });
         
-                await blending.setReserveFactor(reserveFactorMantissa).then(function(){
-                    console.log("blending set reserve factor " + reserveFactorMantissa);
+                await blending.setReserveFactor(reserveFactorMantissa[i]).then(function(){
+                    console.log("blending set reserve factor " + reserveFactorMantissa[i]);
                 });
-
+            
                 await blending.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
-                    console.log("blending " + blendingAddress +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
+                    console.log("blending " + blending.address +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
                 });
             }
         }
@@ -321,7 +330,7 @@ module.exports = {
             await pit.setPriceOracle(PriceProviderAggregatorProxy).then(function(){
                 console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy);
             });
-
+        
             for(var i = 0; i < tokens.length; i++){
                 await pit.addProjectToken( 
                     tokens[i],
@@ -345,7 +354,7 @@ module.exports = {
                 });
                 
             }
-
+        
             for(var i = 0; i < lendingTokens.length; i++){
                 await pit.addLendingToken(
                     lendingTokens[i], 
@@ -356,30 +365,30 @@ module.exports = {
                 });
     
             }
-
+        
             for(var i = 0; i < tokens.length; i++){
-                await primaryIndexToken.setBorrowLimitPerCollateral(
+                await pit.setBorrowLimitPerCollateral(
                     tokens[i], 
                     borrowLimitPerCollateral[i]
                 ).then(function(){
-                    console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimit);
+                    console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
                 });
             }
 
             for(var i = 0; i < lendingTokens.length; i++){
-                await primaryIndexToken.setBorrowLimitPerLendingAsset(
+                await pit.setBorrowLimitPerLendingAsset(
                     lendingTokens[i], 
                     borrowLimitPerLendingToken[i]
                 ).then(function(){
-                    console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimit);
+                    console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimitPerLendingToken[i]);
                 });
             }
         }
 
         let addresses = {
-            bondtrollerAddress: bondtrollerAddress,
-            blendingAddress: blendingAddress,
-            pitAddress: pitAddress,
+            bondtrollerAddress: bondtrollerProxyAddress,
+            blendingAddress: blendingTokenProxyAddresses,
+            pitAddress: primaryIndexTokenProxyAddress
         }
         console.log(addresses);
         return addresses;

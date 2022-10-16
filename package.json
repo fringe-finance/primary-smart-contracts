@@ -35,6 +35,22 @@
     "deployProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/deployPriceProvider.js",
     "setProvider": "npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/setTokenAndProvider.js",
 
+    "deployPriceOracle_goerli":"npx hardhat run --network goerli  ./scripts/deployment/goerli/priceOracle/deployPriceOracle.js",
+    "deployPrimaryLendingPlatform_goerli":"npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_goerli":"npx hardhat run --network goerli  ./scripts/deployment/goerli/deployPLP.js",
+
+    "deployPriceOracle_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/priceOracle/deployPriceOracle.js",
+    "deployPrimaryLendingPlatform_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/deployPLP.js",
+
+    "deployPriceOracle_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/priceOracle/deployPriceOracle.js",
+    "deployPrimaryLendingPlatform_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/deployPLP.js",
+
+    "deployPriceOracle_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/priceOracle/deployPriceOracle.js",
+    "deployPrimaryLendingPlatform_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/deployPLP.js",
+
     "deployPrimaryLendingPlatform": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
     "setPrimaryLendingPlatform": "npx hardhat run --network goerli  ./scripts/deployment/goerli/primaryLendingPlatform/setPrimaryLendingPlatform.js",
 

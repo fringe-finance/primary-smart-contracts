@@ -96,13 +96,17 @@ module.exports = {
       accounts: {mnemonic: MNEMONIC}
     },
     goerli: {
-      url: "https://goerli.infura.io/v3/3848cfba853a40f4910a45e1d18caca3",
+      url: "https://eth-goerli.g.alchemy.com/v2/aVZXR4iemAIypHv51Fsru4H9r9Q564PL",
       gas: 10_000_000,
       gasMultiplier: 50,
       gasPrice: 2_000_000_000,
       timeout: 99999999,
       accounts: {mnemonic: MNEMONIC}
-    }
+    },
+    arbitrum_goerli: {
+      url: 'https://goerli-rollup.arbitrum.io/rpc',
+      accounts: {mnemonic: MNEMONIC}
+    },
     
   },
   gasReporter: {
