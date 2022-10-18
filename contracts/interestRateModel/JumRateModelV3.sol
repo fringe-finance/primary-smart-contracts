@@ -4,6 +4,7 @@ pragma solidity >=0.8.0;
 import "../openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./InterestRateModel.sol";
+import "../bToken/BTokenInterfaces.sol";
 
 /**
   * @title Logic for Compound's JumpRateModel Contract V2.
@@ -43,14 +44,20 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      */
     uint public targetUtil;
 
-    address public bLendingToken;
+    mapping(address => bool) public isBlendingTokenSupport;
+    mapping(address => uint) public maxBorrowRate;
 
     uint public lastInterestRate;
 
     uint public lastAccrualBlockNumber;
 
     modifier onlyBlendingToken() {
-        require(msg.sender == bLendingToken, "Caller is not Blending token");
+        require(isBlendingTokenSupport[msg.sender] , "Caller is not Blending token");
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner , "Caller is not owner");
         _;
     }
 
@@ -71,13 +78,12 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
 
         updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_);
     }
-    
     /**
      * @notice Change the owner address (only callable by previous owner)
      * @param _newOwner new owner address
      */
-    function changeOwner(address _newOwner) external {
-        require(msg.sender == owner && _newOwner != address(0), "invalid sender or new owner");
+    function changeOwner(address _newOwner) external onlyOwner {
+        require(_newOwner != address(0), "invalid sender or new owner");
         owner =  _newOwner;
         emit NewOwner(_newOwner);
     }
@@ -88,15 +94,24 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
      * @param kink_ The utilization point at which the jump multiplier is applied
      */
-    function updateJumpRateModel(uint multiplierPerYear, uint jumpMultiplierPerYear, uint kink_) external {
-        require(msg.sender == owner, "only the owner may call this function.");
-
+    function updateJumpRateModel(uint multiplierPerYear, uint jumpMultiplierPerYear, uint kink_) external onlyOwner {
         updateJumpRateModelInternal(multiplierPerYear, jumpMultiplierPerYear, kink_);
     }
 
-    function setBLendingToken(address _blending) external {
-        require(msg.sender == owner, "only the owner may call this function.");
-        bLendingToken = _blending;
+    function addBLendingTokenSuport(address _blending) external onlyOwner {
+        require(_blending != address(0), "invalid address");
+        isBlendingTokenSupport[_blending] = true;
+    }
+
+    function removeBLendingTokenSuport(address _blending) external onlyOwner {
+        require(_blending != address(0), "invalid address");
+        require(isBlendingTokenSupport[_blending], "not found");
+        isBlendingTokenSupport[_blending] = false;
+    }
+
+    function setMaxBorrowRate(address blendingToken, uint newMaxBorrow) external onlyOwner {
+        require(blendingToken != address(0), "invalid address");
+        maxBorrowRate[blendingToken] = newMaxBorrow;
     }
 
     /**
@@ -124,7 +139,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      */
     function storeBorrowRate(uint cash, uint borrows, uint reserves) public onlyBlendingToken() override returns (uint) {
 
-        uint interestRate = getBorrowRateInternal(cash, borrows, reserves);
+        uint interestRate = getBorrowRateInternal(cash, borrows, reserves, msg.sender);
 
         lastInterestRate = interestRate;
 
@@ -140,7 +155,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      * @param reserves The amount of reserves in the market
      * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
      */
-    function getBorrowRateInternal(uint cash, uint borrows, uint reserves) internal view returns (uint) {
+    function getBorrowRateInternal(uint cash, uint borrows, uint reserves, address blendingToken) internal view returns (uint) {
+        require(isBlendingTokenSupport[blendingToken], "not found");
         uint currentUtil = utilizationRate(cash, borrows, reserves);
         int utilErr = int(currentUtil) - int(targetUtil);
         uint elapsedBlocks = getBlockNumber().sub(lastAccrualBlockNumber);
@@ -153,8 +169,11 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
             interestRateChange = utilErr * int(gainPerBlock) / 1e18; // utilErr, Dir : negative  
         }
         int normalRate = int(lastInterestRate) + (int(elapsedBlocks) * interestRateChange);
-
         uint interestRate = normalRate > 0 ? uint(normalRate) : 0;
+
+        if (interestRate > maxBorrowRate[blendingToken]) {
+            interestRate = maxBorrowRate[blendingToken];
+        } 
 
         return interestRate;
     }
@@ -177,7 +196,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      */
     function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view override returns (uint) {
         uint oneMinusReserveFactor = uint(1e18).sub(reserveFactorMantissa);
-        uint borrowRate = getBorrowRateInternal(cash, borrows, reserves);
+        uint borrowRate = getBorrowRateInternal(cash, borrows, reserves, msg.sender);
         uint rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);
         return utilizationRate(cash, borrows, reserves).mul(rateToPool).div(1e18);
     }
@@ -190,7 +209,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
      */
     function getBorrowRate(uint cash, uint borrows, uint reserves) external override view returns (uint) {
-        return getBorrowRateInternal(cash, borrows, reserves);
+        return getBorrowRateInternal(cash, borrows, reserves, msg.sender);
     }
 
     /**
