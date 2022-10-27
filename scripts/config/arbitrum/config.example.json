@@ -17,7 +17,9 @@
     "BondtrollerProxy": "",
 
     "BLendingTokenLogic": "",
-    "BLendingTokenProxy": "",
+    "BLendingTokenProxys": [
+
+    ],
     
     "PrimaryIndexTokenLogic": "",
     "PrimaryIndexTokenProxy": "",
@@ -25,5 +27,7 @@
     "JumpRateModelV2UpgradeableLogic": "",
     "JumpRateModelV2UpgradeableProxy": "",
 
-    "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000"
+    "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
+
+
   }
