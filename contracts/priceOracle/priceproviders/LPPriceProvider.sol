@@ -6,15 +6,13 @@ import "../../openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.
 import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../../util/HomoraMath.sol";
-import "../../interfaces/IBaseOracle.sol";
 import "./uniswapV2/IUniswapV2Pair.sol";
 import "./PriceProvider.sol";
 
 contract LPPriceProvider is
     PriceProvider,
     Initializable,
-    AccessControlUpgradeable,
-    IBaseOracle
+    AccessControlUpgradeable
 {
     using SafeMathUpgradeable for uint256;
     using HomoraMath for uint256;
@@ -123,15 +121,11 @@ contract LPPriceProvider is
 
     /// @dev Return the value of the given input as ETH per unit, multiplied by 2**112.
     /// @param lpToken The Uniswap pair to check the value.
-    function getUSDPx(address lpToken) public view override returns (uint256) {
-        LPMetadata memory metadata = lpMetadata[lpToken];
-        address token0 = IUniswapV2Pair(lpToken).token0();
-        address token1 = IUniswapV2Pair(lpToken).token1();
+    function getUSDPx(address lpToken) public view returns (uint256) {
         uint256 totalSupply = IUniswapV2Pair(lpToken).totalSupply();
         (uint256 r0, uint256 r1, ) = IUniswapV2Pair(lpToken).getReserves();
         uint256 sqrtK = HomoraMath.sqrt(r0.mul(r1)).fdiv(totalSupply); // in 2**112
-        uint256 px0 = token0 == usdcToken ? uint(2**112).mul(1e6) : IBaseOracle(metadata.base).getUSDPx(token0); // in 2**112
-        uint256 px1 = token1 == usdcToken ? uint(2**112).mul(1e6) : IBaseOracle(metadata.base).getUSDPx(token1); // in 2**112
+        (uint px0, uint px1) = calcUSDPx112(lpToken); // in 2**112
         // fair token0 amt: sqrtK * sqrt(px1/px0)
         // fair token1 amt: sqrtK * sqrt(px0/px1)
         // fair lp price = 2 * sqrt(px0 * px1)
@@ -145,15 +139,32 @@ contract LPPriceProvider is
                 .div(2**56);
     }
 
-    function getInfo(address lpToken) public view returns(address token0, address token1, uint total, uint256 r0, uint256 r1, uint256 sqrtK, uint256 px0, uint256 px1, uint price112, uint priceMantissa ) {
+    function calcUSDPx112(address lpToken) internal view returns(uint P0x112, uint P1x112) {
         LPMetadata memory metadata = lpMetadata[lpToken];
+        address token0 = IUniswapV2Pair(lpToken).token0();
+        address token1 = IUniswapV2Pair(lpToken).token1();
+        if(token0 == usdcToken) {
+            P0x112 = uint(2**112).mul(1e6);
+        } else {
+            (uint priceMantissa0, ) = PriceProvider(metadata.base).getPrice(token0);
+            P0x112 = priceMantissa0.mul(uint(2**112));
+        }
+
+        if(token1 == usdcToken) {
+            P1x112 = uint(2**112).mul(1e6);
+        } else {
+            (uint priceMantissa1, ) = PriceProvider(metadata.base).getPrice(token1);
+            P1x112 = priceMantissa1.mul(uint(2**112));
+        }
+    }
+
+    function getInfo(address lpToken) public view returns(address token0, address token1, uint total, uint256 r0, uint256 r1, uint256 sqrtK, uint256 px0, uint256 px1, uint price112, uint priceMantissa ) {
         token0 = IUniswapV2Pair(lpToken).token0();
         token1 = IUniswapV2Pair(lpToken).token1();
         total = IUniswapV2Pair(lpToken).totalSupply();
         (r0, r1, ) = IUniswapV2Pair(lpToken).getReserves();
         sqrtK = HomoraMath.sqrt(r0.mul(r1)).fdiv(total); // in 2**112
-        px0 = token0 == usdcToken ? uint(2**112).mul(1e6) : IBaseOracle(metadata.base).getUSDPx(token0); // in 2**112
-        px1 = token1 == usdcToken ? uint(2**112).mul(1e6) : IBaseOracle(metadata.base).getUSDPx(token1); // in 2**11
+        (px0, px1) = calcUSDPx112(lpToken);
         price112 = sqrtK
                 .mul(2)
                 .mul(HomoraMath.sqrt(px0))

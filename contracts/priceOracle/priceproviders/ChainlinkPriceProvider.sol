@@ -7,12 +7,10 @@ import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-import "../../interfaces/IBaseOracle.sol";
-
 /**
  * Chainlink price provider
  */
-contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable, IBaseOracle {
+contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
@@ -138,15 +136,4 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     function getPriceDecimals() public view override returns (uint8) {
         return usdDecimals;
     }
-
-    /**
-     * @notice Return token price in USD, multiplied by 2**112
-     * @param token Token address to get price of
-     */
-  function getUSDPx(address token) external view override returns (uint) {
-    (uint256 priceMantissa,) = getPrice(token);
-    return priceMantissa * (2**112);
-  }
-
-
 }
