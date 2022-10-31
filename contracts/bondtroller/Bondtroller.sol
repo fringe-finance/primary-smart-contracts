@@ -47,6 +47,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
 
     event NewPrimaryIndexToken(address oldPrimaryIndexToken, address newPrimaryIndexToken);
 
+    /// @notice Emitted when admin address is changed by previous admin
+    event NewAdmin(address newAdmin);
+
     /// @notice the address of primary index token
     address public primaryIndexToken;
 
@@ -85,6 +88,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      */
     function checkMembership(address account, BToken bToken) external view returns (bool) {
         return accountMembership[account][address(bToken)];
+    }
+
+    function changeAdmin(address newAdmin) external {
+        require( msg.sender == admin && newAdmin != address(0), "invalid address");
+        admin = newAdmin;
+        emit NewAdmin(newAdmin);
     }
 
     /**
@@ -562,7 +571,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
       * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
       */
     function setMarketBorrowCaps(BToken[] calldata bTokens, uint[] calldata newBorrowCaps) external {
-    	require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps"); 
+            require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps"); 
 
         uint numMarkets = bTokens.length;
         uint numBorrowCaps = newBorrowCaps.length;
