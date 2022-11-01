@@ -11,7 +11,7 @@ import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable
 /**
  * Chainlink price provider
  */
-contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
+contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
@@ -71,7 +71,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     /****************** View functions ****************** */
 
     function isListed(address token) public override view returns(bool){
-        require(token != wstETH, "ChainlinkPriceProvider: invalid token");
+        require(token == wstETH, "ChainlinkPriceProvider: invalid token");
         if(wstETH != address(0) && aggregatorPath[0] != address(0)){
             return true;
         }else{
@@ -80,7 +80,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     function isActive(address token) public override view returns(bool){
-        require(token != wstETH, "ChainlinkPriceProvider: invalid token");
+        require(token == wstETH, "ChainlinkPriceProvider: invalid token");
         if(wstETH != address(0) && aggregatorPath[0] != address(0)){
             return true;
         }else{
