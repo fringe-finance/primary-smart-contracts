@@ -329,7 +329,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         } else {
             actualLendingToken = borrowedUSD > 0 ? usdcToken : address(0);
         }
-        uint256 _totalOutstanding;
+        uint256 _totalOutstanding = actualLendingToken == address(0) ? 0 : totalOutstandingInUSD(msg.sender, projectToken, actualLendingToken) ;
         if (projectTokenAmount == type(uint256).max) {
             if (borrowPosition[msg.sender][projectToken][actualLendingToken].loanBody > 0) {
                 updateInterestInBorrowPositions(msg.sender, actualLendingToken);
@@ -338,7 +338,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             
                 Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
-                _totalOutstanding = totalOutstandingInUSD(msg.sender, projectToken, actualLendingToken);
 
                 uint256 collateralProjectTokenAmount = _totalOutstanding * lvr.denominator * (10 ** projectTokenDecimals) / getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
                 
