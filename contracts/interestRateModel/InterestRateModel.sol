@@ -28,4 +28,13 @@ abstract contract InterestRateModel {
       */
     function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) external virtual view returns (uint);
 
+    /**
+      * @notice Calculates the current borrow interest rate per block
+      * @param cash The total amount of cash the market has
+      * @param borrows The total amount of borrows the market has outstanding
+      * @param reserves The total amount of reserves the market has
+      * @return The borrow rate per block (as a percentage, and scaled by 1e18)
+      */
+    function storeBorrowRate(uint cash, uint borrows, uint reserves) external virtual returns (uint);
+
 }

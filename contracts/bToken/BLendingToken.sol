@@ -158,10 +158,6 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
         require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
-        /* Calculate the number of blocks elapsed since the last accrual */
-        (MathError mathErr, uint blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);
-        require(mathErr == MathError.NO_ERROR, "could not calculate block delta");
-
         /*
          * Calculate the interest accumulated into borrows and reserves and the new index:
          *  simpleInterestFactor = borrowRate * blockDelta
@@ -176,11 +172,9 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         // uint totalBorrowsNew;
         // uint totalReservesNew;
         uint borrowIndexNew;
+        MathError mathErr;
 
-        (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), blockDelta);
-        if (mathErr != MathError.NO_ERROR) {
-            return 0;
-        }
+        simpleInterestFactor = Exp({mantissa: borrowRateMantissa});
 
         // (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
         // if (mathErr != MathError.NO_ERROR) {
@@ -238,6 +232,4 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         return result;
     } 
     
-
-
 }
