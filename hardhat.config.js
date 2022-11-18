@@ -79,17 +79,17 @@ module.exports = {
       accounts: {mnemonic: MNEMONIC}
     },
 
-    polygon_test: {
+    polygon_mumbai: {
       url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
       accounts: {mnemonic: MNEMONIC}
     },
-    optimism_test: {
+    optimism_goerli: {
       url: `https://goerli.optimism.io`,
       network_id:420,
       accounts: {mnemonic: MNEMONIC}
     },
     
-    goerli: {
+    ethereum_goerli: {
       url: "https://goerli.infura.io/v3/4da55396843c4f4581209cf10076a551",
       gas: 10_000_000,
       gasMultiplier: 50,
