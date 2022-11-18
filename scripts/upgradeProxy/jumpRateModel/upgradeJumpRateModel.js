@@ -1,14 +1,15 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../config/polygon/config.json';
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
-let {PRIMARY_PROXY_ADMIN, PriceProviderAggregatorLogic, PriceProviderAggregatorProxy} = config;
+let {PRIMARY_PROXY_ADMIN, JumpRateModelLogic, JumpRateModelProxy} = config;
 
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
-let priceProviderProxyAddress = PriceProviderAggregatorProxy;
-let priceProviderLogicAddress = PriceProviderAggregatorLogic;
+let jumrateModelProxyAddress = JumpRateModelProxy;
+let jumrateModelLogicAddress = JumpRateModelLogic;
 
 async function main() {
    
@@ -17,35 +18,35 @@ async function main() {
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-    let PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
+    let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
 
-    if(!priceProviderLogicAddress) {
-      let priceProvider = await PriceProviderAggregator.connect(deployMaster).deploy();
-      await priceProvider.deployed();
-      priceProviderLogicAddress = priceProvider.address;
-      config.PriceProviderAggregatorLogic = priceProviderLogicAddress;
-      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+    if(!jumrateModelLogicAddress) {
+      let jumrateModel = await JumpRateModel.connect(deployMaster).deploy();
+      await jumrateModel.deployed();
+      jumrateModelLogicAddress = jumrateModel.address;
+      config.JumpRateModelLogic = jumrateModelLogicAddress;
+      fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
-    console.log("Price Provider masterCopy address: " + priceProviderLogicAddress);
+    console.log("JumpRateModel masterCopy address: " + jumrateModelLogicAddress);
   
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
-      priceProviderProxyAddress
+      jumrateModelProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
 
     if(appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
-          priceProviderProxyAddress,
-          priceProviderLogicAddress
+          jumrateModelProxyAddress,
+          jumrateModelLogicAddress
         )
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-              priceProviderProxyAddress +
+              jumrateModelProxyAddress +
               " to " +
-              priceProviderLogicAddress
+              jumrateModelLogicAddress
           );
           return instance;
         });
@@ -54,13 +55,13 @@ async function main() {
       let delayPeriod = Number(upgradeData.delayPeriod);
       if (appendTimestamp + delayPeriod <= timeStamp) {
         await proxyAdmin
-          .upgrade(priceProviderProxyAddress, priceProviderLogicAddress)
+          .upgrade(jumrateModelProxyAddress, jumrateModelLogicAddress)
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-                priceProviderProxyAddress +
+                jumrateModelProxyAddress +
                 " to " +
-                priceProviderLogicAddress
+                jumrateModelLogicAddress
             );
             return instance;
           });

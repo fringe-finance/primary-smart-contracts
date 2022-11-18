@@ -1,14 +1,15 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const fs = require("fs");
 const path = require("path");
-const configFile = "../../../config/optimism/config.json";
+const configFile = path.join(__dirname, `../../../config/${network}/config.json`);
 const config = require(configFile);
 
-let {PRIMARY_PROXY_ADMIN, BondtrollerLogic, BondtrollerProxy} = config;
+let {PRIMARY_PROXY_ADMIN, BackendPriceProviderLogic, BackendPriceProviderProxy} = config;
 
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
-let bondtrollerProxyAddress = BondtrollerProxy;
-let bondtrollerLogicAddress = BondtrollerLogic;
+let backendProviderProxyAddress = BackendPriceProviderProxy;
+let backendProviderLogicAddress = BackendPriceProviderLogic;
 
 async function main() {
    
@@ -17,35 +18,35 @@ async function main() {
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-    let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
+    let BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
 
-    if(!bondtrollerLogicAddress) {
-      let bondtroller = await Bondtroller.connect(deployMaster).deploy();
-      await bondtroller.deployed();
-      bondtrollerLogicAddress = bondtroller.address;
-      config.BondtrollerLogic = bondtrollerLogicAddress;
-      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+    if(!backendProviderLogicAddress) {
+      let backendProvider = await BackendPriceProvider.connect(deployMaster).deploy();
+      await backendProvider.deployed();
+      backendProviderLogicAddress = backendProvider.address;
+      config.ChainlinkPriceProviderLogic = backendProviderLogicAddress;
+      fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
-    console.log("Bondtroller masterCopy address: " + bondtrollerLogicAddress);
+    console.log("Chainlink provider masterCopy address: " + backendProviderLogicAddress);
   
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
-      bondtrollerProxyAddress
+      backendProviderProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
 
     if(appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
-          bondtrollerProxyAddress,
-          bondtrollerLogicAddress
+          backendProviderProxyAddress,
+          backendProviderLogicAddress
         )
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-              bondtrollerProxyAddress +
+              backendProviderProxyAddress +
               " to " +
-              bondtrollerLogicAddress
+              backendProviderLogicAddress
           );
           return instance;
         });
@@ -54,13 +55,13 @@ async function main() {
       let delayPeriod = Number(upgradeData.delayPeriod);
       if (appendTimestamp + delayPeriod <= timeStamp) {
         await proxyAdmin
-          .upgrade(bondtrollerProxyAddress, bondtrollerLogicAddress)
+          .upgrade(backendProviderProxyAddress, backendProviderLogicAddress)
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-                bondtrollerProxyAddress +
+                backendProviderProxyAddress +
                 " to " +
-                bondtrollerLogicAddress
+                backendProviderLogicAddress
             );
             return instance;
           });

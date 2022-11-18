@@ -1,9 +1,10 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
 const fs = require("fs");
 const path = require("path");
-const configFile = "../../../config/arbitrum/config.json";
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 let { PRIMARY_PROXY_ADMIN, BLendingTokenLogic, BLendingTokenProxies } = config;
 
@@ -26,7 +27,7 @@ async function main() {
     bLendingTokenLogicAddress = blendingToken.address;
     config.BLendingTokenLogic = bLendingTokenLogicAddress;
     fs.writeFileSync(
-      path.join(__dirname, configFile),
+      path.join(configFile),
       JSON.stringify(config, null, 2)
     );
   }

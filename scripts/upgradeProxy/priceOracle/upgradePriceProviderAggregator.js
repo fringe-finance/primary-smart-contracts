@@ -1,7 +1,8 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../config/arbitrum/config.json';
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
 let {PRIMARY_PROXY_ADMIN, PriceProviderAggregatorLogic, PriceProviderAggregatorProxy} = config;
@@ -24,7 +25,7 @@ async function main() {
       await priceProvider.deployed();
       priceProviderLogicAddress = priceProvider.address;
       config.PriceProviderAggregatorLogic = priceProviderLogicAddress;
-      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+      fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
     console.log("Price Provider masterCopy address: " + priceProviderLogicAddress);
   

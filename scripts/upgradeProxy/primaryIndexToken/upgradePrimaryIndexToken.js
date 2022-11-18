@@ -1,14 +1,14 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../config/optimism/config.json';
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
-let {PRIMARY_PROXY_ADMIN, JumpRateModelLogic, JumpRateModelProxy} = config;
-
+let {PRIMARY_PROXY_ADMIN, PrimaryIndexTokenLogic, PrimaryIndexTokenProxy} = config;
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
-let jumrateModelProxyAddress = JumpRateModelProxy;
-let jumrateModelLogicAddress = JumpRateModelLogic;
+let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
+let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
 
 async function main() {
    
@@ -17,35 +17,35 @@ async function main() {
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-    let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
+    let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
 
-    if(!jumrateModelLogicAddress) {
-      let jumrateModel = await JumpRateModel.connect(deployMaster).deploy();
-      await jumrateModel.deployed();
-      jumrateModelLogicAddress = jumrateModel.address;
-      config.JumpRateModelLogic = jumrateModelLogicAddress;
-      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+    if(!primaryIndexTokenLogicAddress) {
+      let primaryIndexToken = await PrimaryIndexToken.connect(deployMaster).deploy();
+      await primaryIndexToken.deployed();
+      primaryIndexTokenLogicAddress = primaryIndexToken.address;
+      config.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress;
+      fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
-    console.log("JumpRateModel masterCopy address: " + jumrateModelLogicAddress);
+    console.log("PrimaryIndexToken masterCopy address: " + primaryIndexTokenLogicAddress);
   
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
-      jumrateModelProxyAddress
+      primaryIndexTokenProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
 
     if(appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
-          jumrateModelProxyAddress,
-          jumrateModelLogicAddress
+          primaryIndexTokenProxyAddress,
+          primaryIndexTokenLogicAddress
         )
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-              jumrateModelProxyAddress +
+              primaryIndexTokenProxyAddress +
               " to " +
-              jumrateModelLogicAddress
+              primaryIndexTokenLogicAddress
           );
           return instance;
         });
@@ -54,13 +54,13 @@ async function main() {
       let delayPeriod = Number(upgradeData.delayPeriod);
       if (appendTimestamp + delayPeriod <= timeStamp) {
         await proxyAdmin
-          .upgrade(jumrateModelProxyAddress, jumrateModelLogicAddress)
+          .upgrade(primaryIndexTokenProxyAddress, primaryIndexTokenLogicAddress)
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-                jumrateModelProxyAddress +
+                primaryIndexTokenProxyAddress +
                 " to " +
-                jumrateModelLogicAddress
+                primaryIndexTokenLogicAddress
             );
             return instance;
           });
