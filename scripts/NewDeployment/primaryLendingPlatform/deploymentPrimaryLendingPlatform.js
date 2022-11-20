@@ -1,11 +1,12 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const BN = hre.ethers.BigNumber;
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../config/optimism/config.json';
-const config = require(configFile);
-const configGeneralFile = '../../../config/optimism/config_general.json';
+const configGeneralFile = path.join(__dirname, `../../config/${network}/config_general.json`);
 const configGeneral = require(configGeneralFile);
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
+const config = require(configFile);
 
 module.exports = {
    
@@ -105,7 +106,7 @@ module.exports = {
             await proxyAdmin.deployed().then(function(instance){
                 proxyAdminAddress = instance.address;
                 config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         
@@ -132,7 +133,7 @@ module.exports = {
         await bondtroller.deployed().then(function(instance){
             bondtrollerLogicAddress = instance.address;
             config.BondtrollerLogic = bondtrollerLogicAddress;
-            fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         });
     }
     console.log("Bondtroller logic address: " + bondtrollerLogicAddress);
@@ -146,7 +147,7 @@ module.exports = {
         await bondtrollerProxy.deployed().then(function(instance){
             bondtrollerProxyAddress = instance.address;
             config.BondtrollerProxy = bondtrollerProxyAddress;
-            fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         });
     }
     console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
@@ -160,7 +161,7 @@ module.exports = {
             await jumpRateModelV2.deployed();
             jumpRateModelLogicAddress = jumpRateModelV2.address;
             config.JumpRateModelLogic = jumpRateModelLogicAddress;
-            fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
         console.log("JumpRateModel masterCopy address: " + jumpRateModelLogicAddress);
         
@@ -173,7 +174,7 @@ module.exports = {
             await jumpRateModelProxy.deployed().then(function(instance){
                 jumpRateModelProxyAddress = instance.address;
                 config.JumpRateModelProxy = jumpRateModelProxyAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("JumpRateModel proxy address: " + jumpRateModelProxyAddress);
@@ -189,7 +190,7 @@ module.exports = {
             await bondtroller.deployed().then(function(instance){
                 bondtrollerLogicAddress = instance.address;
                 config.BondtrollerLogic = bondtrollerLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("Bondtroller logic address: " + bondtrollerLogicAddress);
@@ -203,7 +204,7 @@ module.exports = {
             await bondtrollerProxy.deployed().then(function(instance){
                 bondtrollerProxyAddress = instance.address;
                 config.BondtrollerProxy = bondtrollerProxyAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
@@ -218,7 +219,7 @@ module.exports = {
             await blending.deployed().then(function(instance){
                 blendingTokenLogicAddress = instance.address;
                 config.BLendingTokenLogic = blendingTokenLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     
             });
         }
@@ -236,7 +237,7 @@ module.exports = {
             }
         }
         config.BLendingTokenProxies = blendingTokenProxyAddresses;
-        fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+        fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
 
         console.log("BLendingToken proxy address: " + blendingTokenProxyAddresses);
         
@@ -250,7 +251,7 @@ module.exports = {
             await pit.deployed().then(function(instance){
                 primaryIndexTokenLogicAddress = instance.address;
                 config.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
 
@@ -265,7 +266,7 @@ module.exports = {
             await pitProxy.deployed().then(function(instance){
                 primaryIndexTokenProxyAddress = instance.address;
                 config.PrimaryIndexTokenProxy = primaryIndexTokenProxyAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
 

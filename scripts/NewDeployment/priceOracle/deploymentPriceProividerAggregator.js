@@ -1,10 +1,11 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const BN = hre.ethers.BigNumber;
 const fs = require("fs");
 const path = require("path");
-const configGeneralFile = '../../../config/polygon/config_general.json';
+const configGeneralFile = path.join(__dirname, `../../config/${network}/config_general.json`);
 const configGeneral = require(configGeneralFile);
-const configFile = '../../../config/polygon/config.json';
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
 const toBN = (num) => BN.from(num);
@@ -86,6 +87,7 @@ module.exports = {
         let tokensUseChainlink = priceOracle.tokensUseChainlink;
         let chainlinkAggregatorV3 = priceOracle.chainlinkAggregatorV3;
         let tokensUseBackendProvider = priceOracle.tokensUseBackendProvider;
+
     //====================================================
     //deploy proxy admin
 
@@ -97,7 +99,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 proxyAdminAddress = instance.address;
                 config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
@@ -113,7 +115,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 chainlinkPriceProviderLogicAddress = instance.address;
                 config.ChainlinkPriceProviderLogic = chainlinkPriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ChainlinkPriceProvider masterCopy address: " + chainlinkPriceProviderLogicAddress);
@@ -128,7 +130,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 chainlinkPriceProviderAddress = instance.address;
                 config.ChainlinkPriceProviderProxy = chainlinkPriceProviderAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ChainlinkPriceProvider proxy address: " + chainlinkPriceProviderAddress);
@@ -144,7 +146,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 backendPriceProviderLogicAddress = instance.address;
                 config.BackendPriceProviderLogic = backendPriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("BackendPriceProvider masterCopy address: " + backendPriceProviderLogicAddress);
@@ -159,7 +161,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 backendPriceProviderAddress = instance.address;
                 config.BackendPriceProviderProxy = backendPriceProviderAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("BackendPriceProvider proxy address: " + backendPriceProviderAddress);
@@ -174,7 +176,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 uniswapV2PriceProviderLogicAddress = instance.address;
                 config.UniswapV2PriceProviderLogic = uniswapV2PriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 3));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 3));
             });
         }
         console.log("UniswapV2PriceProvider masterCopy address: " + uniswapV2PriceProviderLogicAddress);
@@ -189,7 +191,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 uniswapV2PriceProviderAddress = instance.address;
                 config.UniswapV2PriceProviderProxy = uniswapV2PriceProviderAddress;
-                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("UniswapV2PriceProvider proxy address: " + uniswapV2PriceProviderAddress);
@@ -204,7 +206,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 priceProviderAggregatorLogicAddress = instance.address;
                 config.PriceProviderAggregatorLogic = priceProviderAggregatorLogicAddress;
-                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("PriceProviderAggregator masterCopy address: " + priceProviderAggregatorLogicAddress);
@@ -219,7 +221,7 @@ module.exports = {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 priceProviderAggregatorAddress = instance.address;
                 config.PriceProviderAggregatorProxy = priceProviderAggregatorAddress;
-                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
 

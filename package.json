@@ -13,21 +13,21 @@
     "docgen": "npx hardhat docgen",
     "dodoc": "npx hardhat dodoc",
 
-    "deployPriceOracle_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/deployment/ethereum/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/deployment/ethereum/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/deployment/ethereum/deployPLP.js",
+    "deployPriceOracle_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/deployment/polygon/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/deployment/polygon/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/deployment/polygon/deployPLP.js",
+    "deployPriceOracle_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_polygon_mainnet":"npx hardhat run --network polygon_mainnet  ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/deployment/arbitrum/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/deployment/arbitrum/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/deployment/arbitrum/deployPLP.js",
+    "deployPriceOracle_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_arbitrum_mainnet":"npx hardhat run --network arbitrum_mainnet  ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/deployment/optimism/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/deployment/optimism/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/deployment/optimism/deployPLP.js",
+    "deployPriceOracle_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_optimism_mainnet":"npx hardhat run --network optimism_mainnet  ./scripts/NewDeployment/deployPLP.js",
 
     "upgradeBlendingToken_ethereum_mainnet": "hardhat run --network ethereum_mainnet scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js",
     "upgradeBondtroller_ethereum_mainnet": "hardhat run --network ethereum_mainnet scripts/upgradeProxy/bondtroller/upgradeBondtroller.js",
@@ -69,21 +69,21 @@
     "upgradePriceProvider_optimism_goerli": "hardhat run --network optimism_goerli scripts/upgradeProxy/priceOracle/upgradePriceProviderAggregator.js",
     "upgradeBackendPriceProvider_optimism_goerli": "hardhat run --network optimism_goerli scripts/upgradeProxy/priceOracle/backendProvider/upgradeBackendProvider.js",
 
-    "deployPriceOracle_goerli":"npx hardhat run --network goerli  ./scripts/deployment/ethereum/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_goerli":"npx hardhat run --network goerli  ./scripts/deployment/ethereum/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_goerli":"npx hardhat run --network goerli  ./scripts/deployment/ethereum/deployPLP.js",
+    "deployPriceOracle_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_polygon":"npx hardhat run --network polygon_test  ./scripts/deployment/polygon/deployPLP.js",
+    "deployPriceOracle_polygon_mumbai":"npx hardhat run --network polygon_mumbai ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_polygon_mumbai":"npx hardhat run --network polygon_mumbai ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_polygon_mumbai":"npx hardhat run --network polygon_mumbai ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_arbitrum":"npx hardhat run --network arbitrum_goerli  ./scripts/deployment/arbitrum/deployPLP.js",
+    "deployPriceOracle_arbitrum_goerli":"npx hardhat run --network arbitrum_goerli  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_arbitrum_goerli":"npx hardhat run --network arbitrum_goerli  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_arbitrum_goerli":"npx hardhat run --network arbitrum_goerli  ./scripts/NewDeployment/deployPLP.js",
 
-    "deployPriceOracle_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/priceOracle/deployPriceProviderAggregator.js",
-    "deployPrimaryLendingPlatform_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
-    "deployPLP_optimism":"npx hardhat run --network optimism_test  ./scripts/deployment/optimism/deployPLP.js"
+    "deployPriceOracle_optimism_goerli":"npx hardhat run --network optimism_goerli  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_optimism_goerli":"npx hardhat run --network optimism_goerli  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_optimism_goerli":"npx hardhat run --network optimism_goerli ./scripts/NewDeployment/deployPLP.js"
   },
   "author": "",
   "license": "ISC",
