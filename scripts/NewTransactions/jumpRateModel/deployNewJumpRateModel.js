@@ -1,11 +1,12 @@
 const hre = require("hardhat");
+const network = hre.hardhatArguments.network;
 const BN = hre.ethers.BigNumber;
 const fs = require("fs");
 const path = require("path");
-const configFile = '../../../config/ethereum/config.json';
-const config = require(configFile);
-const configGeneralFile = '../../../config/ethereum/config_general.json';
+const configGeneralFile = path.join(__dirname, `../../config/${network}/config_general.json`);
 const configGeneral = require(configGeneralFile);
+const configFile = path.join(__dirname, `../../config/${network}/config.json`);
+const config = require(configFile);
 
 let {jumRateModel} = configGeneral;
 let {PRIMARY_PROXY_ADMIN, JumpRateModelLogic, JumpRateModelProxy, BLendingTokenProxies, ZERO_ADDRESS} = config;
@@ -38,14 +39,14 @@ async function main() {
     //deploy jump rate model v2 upgradeable admin
 
     console.log();
-    console.log("***** JUMP RATE MODEL UPGRADEABLE DEPLOYMENT *****");
+    console.log("***** NEW JUMP RATE MODEL DEPLOYMENT *****");
 
     if(!jumpRateModelLogicAddress) {
         let jumpRateModelLogic = await JumpRateModel.connect(deployMaster).deploy();
         await jumpRateModelLogic.deployed();
         jumpRateModelLogicAddress = jumpRateModelLogic.address;
         config.JumpRateModelLogic = jumpRateModelLogicAddress;
-        fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+        fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
     console.log("JumpRateModel masterCopy address: " + jumpRateModelLogicAddress);
     
@@ -58,7 +59,7 @@ async function main() {
         await jumpRateModelProxy.deployed().then(function(instance){
             jumpRateModelProxyAddress = instance.address;
             config.JumpRateModelProxy = jumpRateModelProxyAddress;
-            fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         });
     }
     console.log("JumpRateModel proxy address: " + jumpRateModelProxyAddress);

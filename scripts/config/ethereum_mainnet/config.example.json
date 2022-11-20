@@ -1,17 +1,7 @@
 {
   "PRIMARY_PROXY_ADMIN": "",
-  "ChainlinkPriceProviderLogic": "",
-  "ChainlinkPriceProviderProxy": "",
-  "BackendPriceProviderLogic": "",
-  "BackendPriceProviderProxy": "",
-  "PriceProviderAggregatorLogic": "",
-  "PriceProviderAggregatorProxy": "",
-  "BondtrollerLogic": "",
-  "BondtrollerProxy": "",
   "BLendingTokenLogic": "",
   "BLendingTokenProxies": [],
-  "PrimaryIndexTokenLogic": "",
-  "PrimaryIndexTokenProxy": "",
   "JumpRateModelLogic": "",
   "JumpRateModelProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000"

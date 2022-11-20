@@ -13,11 +13,11 @@
     "docgen": "npx hardhat docgen",
     "dodoc": "npx hardhat dodoc",
 
-    "deployNewJumpRateModel_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/NewTransactions/ethereum/jumpRateModel/deployNewJumpRateModel.js",
-    "upgradeBlendingToken_ethereum_mainnet": "hardhat run --network ethereum_mainnet scripts/upgradeProxy/ethereum/bLendingToken/upgradeBLendingToken.js",
+    "deployNewJumpRateModel_ethereum_mainnet":"npx hardhat run --network ethereum_mainnet  ./scripts/NewTransactions/jumpRateModel/deployNewJumpRateModel.js",
+    "upgradeBlendingToken_ethereum_mainnet": "hardhat run --network ethereum_mainnet scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js",
 
-    "deployNewJumpRateModel_goerli":"npx hardhat run --network goerli ./scripts/NewTransactions/ethereum/jumpRateModel/deployNewJumpRateModel.js",
-    "upgradeBlendingToken_goerli": "hardhat run --network goerli scripts/upgradeProxy/ethereum/bLendingToken/upgradeBLendingToken.js"
+    "deployNewJumpRateModel_ethereum_goerli":"npx hardhat run --network ethereum_goerli ./scripts/NewTransactions/jumpRateModel/deployNewJumpRateModel.js",
+    "upgradeBlendingToken_ethereum_goerli": "hardhat run --network ethereum_goerli scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js"
   },
   "author": "",
   "license": "ISC",
