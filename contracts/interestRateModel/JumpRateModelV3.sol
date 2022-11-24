@@ -3,6 +3,7 @@ pragma solidity >=0.8.0;
 
 import "../openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "./../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./InterestRateModel.sol";
 import "../bToken/BTokenInterfaces.sol";
 
@@ -11,18 +12,14 @@ import "../bToken/BTokenInterfaces.sol";
   * @author Compound (modified by Dharma Labs, refactored by Arr00)
   * @notice Version 2 modifies Version 1 by enabling updateable parameters.
   */
-contract JumpRateModelV3 is Initializable, InterestRateModel {
+contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgradeable {
     using SafeMath for uint;
+
+    bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     event NewInterestParams(uint multiplierPerBlock, uint jumpMultiplierPerBlock, uint kink);
     event NewOwner(address newOner);
     event NewInterest(uint appliedBlock, uint interestRate);
-
-
-    /**
-     * @notice The address of the owner, i.e. the Timelock contract, which can update parameters directly
-     */
-    address public owner;
 
     /**
      * @notice The approximate number of blocks per year that is assumed by the interest rate model
@@ -54,8 +51,13 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
         _;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner , "Caller is not owner");
+    modifier onlyAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
+        _;
+    }
+
+    modifier onlyModerator() {
+        require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
 
@@ -64,55 +66,56 @@ contract JumpRateModelV3 is Initializable, InterestRateModel {
      * @param gainPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
      * @param jumGainPerYear The multiplierPerBlock after hitting a specified utilization point
      * @param targetUtil_ The utilization point at which the jump multiplier is applied
-     * @param owner_ The address of the owner, i.e. the Timelock contract (which has the ability to update parameters directly)
      */
     function initialize(
         uint gainPerYear, 
         uint jumGainPerYear, 
-        uint targetUtil_, 
-        address owner_
+        uint targetUtil_
     ) public initializer {
-        owner = owner_;
-
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(MODERATOR_ROLE, msg.sender);
         updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_);
     }
-    /**
-     * @notice Change the owner address (only callable by previous owner)
-     * @param _newOwner new owner address
-     */
-    function changeOwner(address _newOwner) external onlyOwner {
-        require(_newOwner != address(0), "invalid sender or new owner");
-        owner =  _newOwner;
-        emit NewOwner(_newOwner);
+
+    //************* ADMIN FUNCTIONS ********************************
+
+    function grandModerator(address newModerator) public onlyAdmin {
+        grantRole(MODERATOR_ROLE, newModerator);
     }
+
+    function revokeModerator(address moderator) public onlyAdmin {
+        revokeRole(MODERATOR_ROLE, moderator);
+    }
+   //************* MODERATOR FUNCTIONS ********************************
 
     /**
      * @notice Update the parameters of the interest rate model (only callable by owner, i.e. Timelock)
-     * @param multiplierPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
-     * @param jumpMultiplierPerYear The multiplierPerBlock after hitting a specified utilization point
-     * @param kink_ The utilization point at which the jump multiplier is applied
+     * @param gainPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
+     * @param jumGainPerYear The jumGainPerBlock after hitting a specified utilization point
+     * @param targetUtil_ The utilization point at which the jump multiplier is applied
      */
-    function updateJumpRateModel(uint multiplierPerYear, uint jumpMultiplierPerYear, uint kink_) external onlyOwner {
-        updateJumpRateModelInternal(multiplierPerYear, jumpMultiplierPerYear, kink_);
+    function updateJumpRateModel(uint gainPerYear, uint jumGainPerYear, uint targetUtil_) external onlyModerator() {
+        updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_);
     }
 
-    function addBLendingTokenSuport(address _blending) external onlyOwner {
+    function addBLendingTokenSuport(address _blending) external onlyModerator() {
         require(_blending != address(0), "invalid address");
         isBlendingTokenSupport[_blending] = true;
     }
 
-    function removeBLendingTokenSuport(address _blending) external onlyOwner {
+    function removeBLendingTokenSuport(address _blending) external onlyModerator() {
         require(_blending != address(0), "invalid address");
         require(isBlendingTokenSupport[_blending], "not found");
         isBlendingTokenSupport[_blending] = false;
     }
 
-    function setMaxBorrowRate(address blendingToken, uint newMaxBorrow) external onlyOwner {
+    function setMaxBorrowRate(address blendingToken, uint newMaxBorrow) external onlyModerator() {
         require(isBlendingTokenSupport[blendingToken], "not found");
         maxBorrowRate[blendingToken] = newMaxBorrow;
     }
 
-    function setRate(address blendingToken, uint newBorrowRate, uint blockNumber) external onlyOwner {
+    function setRate(address blendingToken, uint newBorrowRate, uint blockNumber) external onlyModerator() {
         require(isBlendingTokenSupport[blendingToken], "not found");
         lastInterestRate[blendingToken] = newBorrowRate;
 
