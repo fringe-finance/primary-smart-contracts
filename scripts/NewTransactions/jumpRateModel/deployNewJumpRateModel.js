@@ -72,18 +72,16 @@ async function main() {
     let jumGainPerYear = jumRateModel.jumGainPerYear;
     let targetUtil = jumRateModel.targetUtil;
     let newMaxBorrow = jumRateModel.newMaxBorrow;
-    let owner = deployMasterAddress;
 
     console.log("gainPerYear", gainPerYear);
     console.log("jumGainPerYear", jumGainPerYear);
     console.log("targetUtil", targetUtil);
-    let ownerJumRateModel = await jumpRateModel.owner();
-    if (ownerJumRateModel == ZERO_ADDRESS) { 
+    let gainPerBlock = await jumpRateModel.gainPerBlock();
+    if (gainPerBlock == 0) { 
         await jumpRateModel.initialize(
             gainPerYear,
             jumGainPerYear,
-            targetUtil,
-            owner
+            targetUtil
         ).then(function(instance){ 
             console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
         })

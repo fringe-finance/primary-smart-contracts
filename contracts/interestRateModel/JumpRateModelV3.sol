@@ -115,10 +115,9 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
         maxBorrowRate[blendingToken] = newMaxBorrow;
     }
 
-    function setRate(address blendingToken, uint newBorrowRate, uint blockNumber) external onlyModerator() {
+    function updateBlockNumber(address blendingToken) external onlyModerator() {
         require(isBlendingTokenSupport[blendingToken], "not found");
-        lastInterestRate[blendingToken] = newBorrowRate;
-
+        uint blockNumber = BTokenInterface(blendingToken).accrualBlockNumber();
         lastAccrualBlockNumber[blendingToken] = blockNumber;
     }
 
@@ -157,25 +156,18 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the current borrow rate, with the error code expected by the market
+     * @notice Calculates the change in the interest rate per block per block
      * @param cash The amount of cash in the market
      * @param borrows The amount of borrows in the market
      * @param reserves The amount of reserves in the market
-     * @return The borrow rate percentage as a mantissa (scaled by 1e18)
+     * @return The change in the interest rate per block per block as a mantissa (scaled by 1e18)
      */
-    function getBorrowRateInternal(uint cash, uint borrows, uint reserves, address blendingToken) internal view returns (uint) {
-        /* E = Cu - Tu
-         * Dt = currentBlockNumber - lastAccrualBlockNumber[blendingToken]
-         * Cu > Tu => Dir = E * G * Jg
-         * Cu < Tu => Dir = E * G 
-         * Cu = Tu => Dir = 0
+    function getInterestRateChange(uint cash, uint borrows, uint reserves) public view returns(int) {
+        /* 
+         * E = Cu - Tu
          */
-        require(isBlendingTokenSupport[blendingToken], "not found");
         uint currentUtil = utilizationRate(cash, borrows, reserves);
         int utilErr = int(currentUtil) - int(targetUtil);
-
-        /* Calculate the number of blocks elapsed since the last accrual */
-        uint elapsedBlocks = getBlockNumber().sub(lastAccrualBlockNumber[blendingToken]);
 
         /* Calculate delta interest rate
          * Cu > Tu => Dir = E * G * Jg
@@ -189,6 +181,28 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
         } else if (currentUtil < targetUtil) {
             interestRateChange = utilErr * int(gainPerBlock) / 1e18; // utilErr, Dir : negative  
         }
+        return interestRateChange;
+    }
+
+    function getElapsedBlocks(address blendingToken) internal view returns(uint elapsedBlocks) {
+        /* Calculate the number of blocks elapsed since the last accrual */
+        elapsedBlocks = getBlockNumber().sub(lastAccrualBlockNumber[blendingToken]);
+    }
+
+    /**
+     * @notice Calculates the current borrow rate, with the error code expected by the market
+     * @param cash The amount of cash in the market
+     * @param borrows The amount of borrows in the market
+     * @param reserves The amount of reserves in the market
+     * @return The borrow rate percentage as a mantissa (scaled by 1e18)
+     */
+    function getBorrowRateInternal(uint cash, uint borrows, uint reserves, address blendingToken) internal view returns (uint) {
+        require(isBlendingTokenSupport[blendingToken], "not found");
+
+        int interestRateChange = getInterestRateChange(cash, borrows, reserves);
+
+        /* Calculate the number of blocks elapsed since the last accrual */
+        uint elapsedBlocks = getElapsedBlocks(blendingToken);
 
         /* Calculate interest rate
          * IR = Lir + (Dt * Dir)
@@ -224,14 +238,14 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * @param reserveFactorMantissa The current reserve factor for the market
      * @return The supply rate percentage per block as a mantissa (scaled by 1e18)
      */
-    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa) public view override returns (uint) {
+    function getSupplyRate(uint cash, uint borrows, uint reserves, uint reserveFactorMantissa, address blendingToken) public view override returns (uint) {
         /* Calculate suply rate
          * oneMinusReserveFactor: percentage remaining after subtracting ReserveFactor
          * rateToPool = IR * oneMinusReserveFactor 
          * supplyrate = Cu * rateToPool
          */
         uint oneMinusReserveFactor = uint(1e18).sub(reserveFactorMantissa);
-        uint borrowRate = getBorrowRateInternal(cash, borrows, reserves, msg.sender);
+        uint borrowRate = getBorrowRateInternal(cash, borrows, reserves, blendingToken);
         uint rateToPool = borrowRate.mul(oneMinusReserveFactor).div(1e18);
         return utilizationRate(cash, borrows, reserves).mul(rateToPool).div(1e18);
     }
@@ -243,8 +257,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * @param reserves The amount of reserves in the market
      * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
      */
-    function getBorrowRate(uint cash, uint borrows, uint reserves) external override view returns (uint) {
-        return getBorrowRateInternal(cash, borrows, reserves, msg.sender);
+    function getBorrowRate(uint cash, uint borrows, uint reserves, address blendingToken) external override view returns (uint) {
+        return getBorrowRateInternal(cash, borrows, reserves, blendingToken);
     }
 
     /**

@@ -238,19 +238,19 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Returns the current borrow interest rate for this cToken
-     * @return The current borrow interest rate, scaled by 1e18
+     * @notice Returns the current per-block borrow interest rate for this cToken
+     * @return The borrow interest rate per block, scaled by 1e18
      */
     function borrowRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves);
+        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves, address(this));
     }
 
     /**
-     * @notice Returns the current supply interest rate for this cToken
-     * @return The curent supply interest rate , scaled by 1e18
+     * @notice Returns the current per-block supply interest rate for this cToken
+     * @return The supply interest rate per block, scaled by 1e18
      */
     function supplyRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa, address(this));
     }
 
     /**
@@ -408,8 +408,12 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
         /* Calculate the current borrow interest rate */
         interestRateModel.storeBorrowRate(cashPrior, borrowsPrior, reservesPrior);
-        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
-        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior, address(this));
+        // require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+
+        /* Calculate the number of blocks elapsed since the last accrual */
+        (MathError mathErr, uint blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);
+        require(mathErr == MathError.NO_ERROR, "could not calculate block delta");
 
         /*
          * Calculate the interest accumulated into borrows and reserves and the new index:
@@ -425,9 +429,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         uint totalBorrowsNew;
         uint totalReservesNew;
         uint borrowIndexNew;
-        MathError mathErr;
-
-        simpleInterestFactor = Exp({mantissa: borrowRateMantissa});
+        (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), blockDelta);
+        if (mathErr != MathError.NO_ERROR) {
+            return failOpaque(Error.MATH_ERROR, FailureInfo.ACCRUE_INTEREST_SIMPLE_INTEREST_FACTOR_CALCULATION_FAILED, uint(mathErr));
+        }
 
         (mathErr, interestAccumulated) = mulScalarTruncate(simpleInterestFactor, borrowsPrior);
         if (mathErr != MathError.NO_ERROR) {
