@@ -72,23 +72,25 @@ async function main() {
     let jumGainPerYear = jumRateModel.jumGainPerYear;
     let targetUtil = jumRateModel.targetUtil;
     let newMaxBorrow = jumRateModel.newMaxBorrow;
+    let blocksPerYear = jumRateModel.blocksPerYear;
 
     console.log("gainPerYear", gainPerYear);
     console.log("jumGainPerYear", jumGainPerYear);
     console.log("targetUtil", targetUtil);
-    let gainPerBlock = await jumpRateModel.gainPerBlock();
-    if (gainPerBlock == 0) { 
-        await jumpRateModel.initialize(
-            gainPerYear,
-            jumGainPerYear,
-            targetUtil
-        ).then(function(instance){ 
+    let MODERATOR_ROLE = await jumpRateModel.MODERATOR_ROLE();
+    let isMODERATOR = await jumpRateModel.hasRole(MODERATOR_ROLE, deployMasterAddress);
+    if (!isMODERATOR) { 
+        await jumpRateModel.initialize(blocksPerYear).then(function(instance){ 
             console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
         })
     }
     for(var i=0; i < BLendingTokenProxies.length; i++) {
         await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i]).then(function(instance){
             console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
+        })
+
+        await jumpRateModel.updateJumpRateModel(gainPerYear[i], jumGainPerYear[i], targetUtil[i], BLendingTokenProxies[i]).then(function(instance){
+            console.log("JumpRateModel " + jumpRateModelProxyAddress + " set interest rate model params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " for blending token " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
         })
 
         await jumpRateModel.setMaxBorrowRate(BLendingTokenProxies[i], newMaxBorrow[i]).then(function(instance){

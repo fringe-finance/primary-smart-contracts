@@ -21,30 +21,25 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     event NewOwner(address newOner);
     event NewInterest(uint appliedBlock, uint interestRate);
 
+    struct BlendingTokenInfo {
+        uint gainPerBlock;
+        uint jumGainPerBlock;
+        uint targetUtil;
+    }
+
+    struct RateInfo {
+        uint lastInterestRate;
+        uint lastAccrualBlockNumber;
+        uint maxBorrowRate;
+    }
+
     /**
      * @notice The approximate number of blocks per year that is assumed by the interest rate model
      */
-    uint public constant blocksPerYear = 2102400;
-
-    /**
-     * @notice The gain factor of utilization rate that gives the slope of the interest rate
-     */
-    uint public gainPerBlock;
-
-    /**
-     * @notice The jump gain after hitting a specified utilization point
-     */
-    uint public jumGainPerBlock;
-
-    /**
-     * @notice The target utilisation rate at which the jump gain is applied
-     */
-    uint public targetUtil;
-
+    uint public blocksPerYear;
+    mapping(address => BlendingTokenInfo) public blendingTokenInfo;
+    mapping (address => RateInfo) public rateInfo;
     mapping(address => bool) public isBlendingTokenSupport;
-    mapping(address => uint) public maxBorrowRate;
-    mapping(address => uint) public lastInterestRate;
-    mapping(address => uint) public lastAccrualBlockNumber;
 
     modifier onlyBlendingToken() {
         require(isBlendingTokenSupport[msg.sender] , "Caller is not Blending token");
@@ -63,19 +58,12 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     /**
      * @notice Construct an interest rate model
-     * @param gainPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
-     * @param jumGainPerYear The multiplierPerBlock after hitting a specified utilization point
-     * @param targetUtil_ The utilization point at which the jump multiplier is applied
      */
-    function initialize(
-        uint gainPerYear, 
-        uint jumGainPerYear, 
-        uint targetUtil_
-    ) public initializer {
+    function initialize(uint blocksPerYear_) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_);
+        blocksPerYear = blocksPerYear_;
     }
 
     //************* ADMIN FUNCTIONS ********************************
@@ -95,8 +83,12 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * @param jumGainPerYear The jumGainPerBlock after hitting a specified utilization point
      * @param targetUtil_ The utilization point at which the jump multiplier is applied
      */
-    function updateJumpRateModel(uint gainPerYear, uint jumGainPerYear, uint targetUtil_) external onlyModerator() {
-        updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_);
+    function updateJumpRateModel(uint gainPerYear, uint jumGainPerYear, uint targetUtil_, address blendingToken) external onlyModerator() {
+        updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_, blendingToken);
+    }
+
+    function setBlockPerYear(uint blocksPerYear_) external onlyModerator() {
+        blocksPerYear = blocksPerYear_;
     }
 
     function addBLendingTokenSuport(address _blending) external onlyModerator() {
@@ -112,13 +104,13 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     function setMaxBorrowRate(address blendingToken, uint newMaxBorrow) external onlyModerator() {
         require(isBlendingTokenSupport[blendingToken], "not found");
-        maxBorrowRate[blendingToken] = newMaxBorrow;
+        rateInfo[blendingToken].maxBorrowRate = newMaxBorrow;
     }
 
     function updateBlockNumber(address blendingToken) external onlyModerator() {
         require(isBlendingTokenSupport[blendingToken], "not found");
         uint blockNumber = BTokenInterface(blendingToken).accrualBlockNumber();
-        lastAccrualBlockNumber[blendingToken] = blockNumber;
+        rateInfo[blendingToken].lastAccrualBlockNumber = blockNumber;
     }
 
     /**
@@ -138,36 +130,19 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the current borrow rate per block, with the error code expected by the market
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
-     */
-    function storeBorrowRate(uint cash, uint borrows, uint reserves) public onlyBlendingToken() override returns (uint) {
-
-        uint interestRate = getBorrowRateInternal(cash, borrows, reserves, msg.sender);
-
-        lastInterestRate[msg.sender] = interestRate;
-
-        lastAccrualBlockNumber[msg.sender] = block.number;
-
-        return interestRate;
-    }
-
-    /**
      * @notice Calculates the change in the interest rate per block per block
      * @param cash The amount of cash in the market
      * @param borrows The amount of borrows in the market
      * @param reserves The amount of reserves in the market
      * @return The change in the interest rate per block per block as a mantissa (scaled by 1e18)
      */
-    function getInterestRateChange(uint cash, uint borrows, uint reserves) public view returns(int) {
+    function getInterestRateChange(uint cash, uint borrows, uint reserves, address blendingToken) public view returns(int) {
+        BlendingTokenInfo memory info = blendingTokenInfo[blendingToken];
         /* 
          * E = Cu - Tu
          */
         uint currentUtil = utilizationRate(cash, borrows, reserves);
-        int utilErr = int(currentUtil) - int(targetUtil);
+        int utilErr = int(currentUtil) - int(info.targetUtil);
 
         /* Calculate delta interest rate
          * Cu > Tu => Dir = E * G * Jg
@@ -176,17 +151,17 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
          */
         int interestRateChange;
 
-        if (currentUtil > targetUtil) {
-            interestRateChange = utilErr * int(gainPerBlock.mul(jumGainPerBlock)) / 1e36; // utilErr, Dir : positive 
-        } else if (currentUtil < targetUtil) {
-            interestRateChange = utilErr * int(gainPerBlock) / 1e18; // utilErr, Dir : negative  
+        if (currentUtil > info.targetUtil) {
+            interestRateChange = utilErr * int(info.gainPerBlock.mul(info.jumGainPerBlock)) / 1e36; // utilErr, Dir : positive 
+        } else if (currentUtil < info.targetUtil) {
+            interestRateChange = utilErr * int(info.gainPerBlock) / 1e18; // utilErr, Dir : negative  
         }
         return interestRateChange;
     }
 
     function getElapsedBlocks(address blendingToken) internal view returns(uint elapsedBlocks) {
         /* Calculate the number of blocks elapsed since the last accrual */
-        elapsedBlocks = getBlockNumber().sub(lastAccrualBlockNumber[blendingToken]);
+        elapsedBlocks = getBlockNumber().sub(rateInfo[blendingToken].lastAccrualBlockNumber);
     }
 
     /**
@@ -197,9 +172,10 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * @return The borrow rate percentage as a mantissa (scaled by 1e18)
      */
     function getBorrowRateInternal(uint cash, uint borrows, uint reserves, address blendingToken) internal view returns (uint) {
-        require(isBlendingTokenSupport[blendingToken], "not found");
+        RateInfo memory borrowRateInfo = rateInfo[blendingToken];
 
-        int interestRateChange = getInterestRateChange(cash, borrows, reserves);
+
+        int interestRateChange = getInterestRateChange(cash, borrows, reserves, blendingToken);
 
         /* Calculate the number of blocks elapsed since the last accrual */
         uint elapsedBlocks = getElapsedBlocks(blendingToken);
@@ -212,12 +188,12 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
          * IR < 0 => IR = 0
          * IR > maxIR => IR = maxIR
          */
-        int normalRate = int(lastInterestRate[blendingToken]) + (int(elapsedBlocks) * interestRateChange);
+        int normalRate = int(borrowRateInfo.lastInterestRate) + (int(elapsedBlocks) * interestRateChange);
 
         uint interestRate = normalRate > 0 ? uint(normalRate) : 0;
 
-        if (interestRate > maxBorrowRate[blendingToken]) {
-            interestRate = maxBorrowRate[blendingToken];
+        if (interestRate > borrowRateInfo.maxBorrowRate) {
+            interestRate = borrowRateInfo.maxBorrowRate;
         } 
         return interestRate;
     }
@@ -228,6 +204,25 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      */
     function getBlockNumber() public view returns (uint) {
         return block.number;
+    }
+
+    /**
+     * @notice Calculates the current borrow rate per block, with the error code expected by the market
+     * @param cash The amount of cash in the market
+     * @param borrows The amount of borrows in the market
+     * @param reserves The amount of reserves in the market
+     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
+     */
+    function storeBorrowRate(uint cash, uint borrows, uint reserves) public onlyBlendingToken() override returns (uint) {
+        RateInfo storage borrowRateInfo = rateInfo[msg.sender];
+
+        uint interestRate = getBorrowRateInternal(cash, borrows, reserves, msg.sender);
+
+        borrowRateInfo.lastInterestRate = interestRate;
+
+        borrowRateInfo.lastAccrualBlockNumber = block.number;
+
+        return interestRate;
     }
 
     /**
@@ -267,12 +262,13 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * jumGainPerYear The jump gain that only applies if Cu > Tu
      * targetUtil_ The target utilisation rate
      */
-    function updateJumpRateModelInternal(uint gainPerYear, uint jumGainPerYear, uint targetUtil_) internal {
-        gainPerBlock = (gainPerYear).div(blocksPerYear); 
-        jumGainPerBlock = jumGainPerYear.div(blocksPerYear);
-        targetUtil = targetUtil_;
+    function updateJumpRateModelInternal(uint gainPerYear, uint jumGainPerYear, uint targetUtil_, address blendingToken) internal {
+        BlendingTokenInfo storage info = blendingTokenInfo[blendingToken];
+        info.gainPerBlock = (gainPerYear).div(blocksPerYear); 
+        info.jumGainPerBlock = jumGainPerYear.div(blocksPerYear);
+        info.targetUtil = targetUtil_;
 
-        emit NewInterestParams(gainPerBlock, jumGainPerBlock, targetUtil);
+        emit NewInterestParams(info.gainPerBlock, info.jumGainPerBlock, info.targetUtil);
     }
 
 }
