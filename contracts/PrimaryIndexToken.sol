@@ -78,6 +78,10 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     event RemoveProjectToken(address indexed tokenPrj);
     event AddLendingToken(address indexed lendingToken, string name, string symbol);
     event RemoveLendingToken(address indexed lendingToken);
+    event SetPausedProjectToken(address _projectToken, bool _isDepositPaused, bool _isWithdrawPaused);
+    event SetPausedLendingToken(address _lendingToken, bool _isPaused);
+    event SetBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit);
+    event SetBorrowLimitPerLendingAsset(address lendingToken, uint256 _borrowLimit);
 
     event LoanToValueRatioSet(address indexed tokenPrj, uint8 lvrNumerator, uint8 lvrDenominator);
 
@@ -243,13 +247,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
         borrowLimitPerCollateral[projectToken] = _borrowLimit;
-        //emit set borrow limit
+        emit SetBorrowLimitPerCollateral(projectToken, _borrowLimit);
     }
 
     function setBorrowLimitPerLendingAsset(address lendingToken, uint256 _borrowLimit) public onlyModerator isLendingTokenListed(lendingToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
         borrowLimitPerLendingToken[lendingToken] = _borrowLimit;
-        //emit set borrow limit
+        emit SetBorrowLimitPerLendingAsset(lendingToken, _borrowLimit);
     }
 
     function setTotalBorrowPerLendingToken(address lendingToken) public onlyModerator {
@@ -291,6 +295,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     ) public onlyModerator isProjectTokenListed(_projectToken) {
         projectTokenInfo[_projectToken].isDepositPaused = _isDepositPaused;
         projectTokenInfo[_projectToken].isWithdrawPaused = _isWithdrawPaused;
+        emit SetPausedProjectToken(_projectToken, _isDepositPaused, _isWithdrawPaused);
     }
 
     function setLendingTokenInfo(
@@ -308,6 +313,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     function setPausedLendingToken(address _lendingToken, bool _isPaused) public onlyModerator isLendingTokenListed(_lendingToken) {
         lendingTokenInfo[_lendingToken].isPaused = _isPaused;
+        emit SetPausedLendingToken(_lendingToken, _isPaused);
     }
 
     function setUSDCToken(address usdc) public onlyModerator {
