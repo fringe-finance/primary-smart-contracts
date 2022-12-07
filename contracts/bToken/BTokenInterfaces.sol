@@ -30,7 +30,7 @@ contract BTokenStorage {
      * @notice Maximum borrow rate that can ever be applied (.0005% / block)
      */
 
-    uint internal constant borrowRateMaxMantissa = 0.0005e16;
+    uint internal constant borrowRateMaxMantissa = 0.001e16;
 
     /**
      * @notice Maximum fraction of interest that can be set aside for reserves

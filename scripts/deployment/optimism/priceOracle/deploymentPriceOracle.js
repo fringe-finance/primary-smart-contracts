@@ -1,9 +1,11 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
-const configFile = '../../config/goerli/config_general.json';
+const fs = require("fs");
+const path = require("path");
+const configGeneralFile = '../../../config/optimism/config_general.json';
+const configGeneral = require(configGeneralFile);
+const configFile = '../../../config/optimism/config.json';
 const config = require(configFile);
-const configAddressFile = '../../config/goerli/config.json';
-const configAddress = require(configAddressFile);
 
 const toBN = (num) => BN.from(num);
 
@@ -53,9 +55,10 @@ module.exports = {
       
         const {
             priceOracle
-        } = config;
+        } = configGeneral;
 
         const {
+            PRIMARY_PROXY_ADMIN,
             ChainlinkPriceProviderLogic,
             ChainlinkPriceProviderProxy,
             BackendPriceProviderLogic,
@@ -64,7 +67,7 @@ module.exports = {
             UniswapV2PriceProviderProxy,
             PriceProviderAggregatorLogic,
             PriceProviderAggregatorProxy,
-        } = configAddress;
+        } = config;
 
         //contracts addresses
         let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
@@ -78,15 +81,11 @@ module.exports = {
         let priceProviderAggregatorLogicAddress = PriceProviderAggregatorLogic;
         let uniswapV2PriceProviderLogicAddress = UniswapV2PriceProviderLogic;
 
-        let tokenUseUniswap = priceOracle.tokenUseUniswap;
+        let tokensUseUniswap = priceOracle.tokensUseUniswap;
         let uniswapPairs = priceOracle.uniswapPairs;
         let tokensUseChainlink = priceOracle.tokensUseChainlink;
         let chainlinkAggregatorV3 = priceOracle.chainlinkAggregatorV3;
         let tokensUseBackendProvider = priceOracle.tokensUseBackendProvider;
-
-
-
-
     //====================================================
     //deploy proxy admin
 
@@ -152,7 +151,7 @@ module.exports = {
 
         if(!backendPriceProviderAddress){
             let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                backendPriceProviderMasterCopyAddress,
+                backendPriceProviderLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
@@ -164,19 +163,6 @@ module.exports = {
             });
         }
         console.log("BackendPriceProvider proxy address: " + backendPriceProviderAddress);
-       
-        let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-            backendPriceProviderMasterCopyAddress,
-            proxyAdminAddress,
-            "0x"
-        );
-        await backendPriceProviderProxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.deployTransaction.hash)
-            console.log("BackendPriceProvider proxy address: " + instance.address);
-        });
-        let backendPriceProviderProxyAddress = backendPriceProviderProxy.address;
-        backendPriceProviderAddress = backendPriceProviderProxyAddress;
-
     //=========================
     //deploy uniswapV2PriceProvider 
         console.log();
@@ -195,14 +181,14 @@ module.exports = {
 
         if(!uniswapV2PriceProviderAddress){
             let uniswapV2PriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                uniswapV2PriceProviderMasterCopyAddress,
+                uniswapV2PriceProviderLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
             await uniswapV2PriceProviderProxy.deployed().then(function(instance){
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash)
                 uniswapV2PriceProviderAddress = instance.address;
-                config.UniswapV3PriceProviderProxy = uniswapV2PriceProviderAddress;
+                config.UniswapV2PriceProviderProxy = uniswapV2PriceProviderAddress;
                 fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
@@ -225,7 +211,7 @@ module.exports = {
 
         if(!priceProviderAggregatorAddress){
             let usbPriceOracleProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                usbPriceOracleMasterCopyAddress,
+                priceProviderAggregatorLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
@@ -251,7 +237,7 @@ module.exports = {
         //set chainlinkPriceProvider
         console.log();
         console.log("***** SETTING CHAINLINK PRICE PROVIDER *****");
-        let usdDecimal = await priceProviderAggregator.usdDecimals();
+        let usdDecimal = await chainlinkPriceProvider.usdDecimals();
         if(usdDecimal == 0){
             await chainlinkPriceProvider.initialize()
             .then(function(instance){
@@ -290,12 +276,6 @@ module.exports = {
 
             await backendPriceProvider.grandTrustedBackendRole(deployMasterAddress)
             .then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash) 
-                console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend "+ deployMasterAddress);
-            });
-
-            await backendPriceProvider.grandTrustedBackendRole(deployMasterAddress)
-            .then(function(instance){
                 console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend "+ deployMasterAddress + " at tx hash: " + instance.hash);
             });
 
@@ -315,18 +295,16 @@ module.exports = {
 
         if(usdDecimal == 0){
             await uniswapV2PriceProvider.initialize().then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("UniswapV2PriceProvider initialized at "+ uniswapV2PriceProviderAddress);
+                console.log("UniswapV2PriceProvider initialized at "+ uniswapV2PriceProviderAddress + " at tx hash " + instance.hash);
             });
     
             await uniswapV2PriceProvider.grandModerator(priceProviderAggregatorAddress).then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("UniswapV2PriceProvider granded moderator "+priceProviderAggregatorAddress);
+                console.log("UniswapV2PriceProvider granded moderator "+ priceProviderAggregatorAddress + " at tx hash " + instance.hash);
             });
     
-            for (var i = 0; i < tokenUseUniswap.length; i++) {
-                await uniswapV2PriceProvider.setTokenAndPair(tokenUseUniswap[i], uniswapPairs[i]).then(function(instance){
-                    console.log("UniswapV3PriceProvider  set token " + tokenUseUniswap[i] + " and pair " + uniswapPairs[i] + " at tx hash: " + instance.hash);
+            for (var i = 0; i < tokensUseUniswap.length; i++) {
+                await uniswapV2PriceProvider.setTokenAndPair(tokensUseUniswap[i], uniswapPairs[i]).then(function(instance){
+                    console.log("UniswapV3PriceProvider  set token " + tokensUseUniswap[i] + " and pair " + uniswapPairs[i] + " at tx hash: " + instance.hash);
                 });
             }
         }
@@ -352,9 +330,9 @@ module.exports = {
             }
     
             for (var i = 0; i < tokensUseUniswap.length; i++) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokenUseUniswap[i], uniswapV2PriceProviderAddress, false).then(function(instance){
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswap[i], uniswapV2PriceProviderAddress, false).then(function(instance){
 
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token "+ tokenUseUniswap[i] + " with priceOracle " + uniswapV2PriceProviderAddress + " at tx hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token "+ tokensUseUniswap[i] + " with priceOracle " + uniswapV2PriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
         }
