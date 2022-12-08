@@ -309,6 +309,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         info.isPaused = _isPaused;
         info.bLendingToken = BLendingToken(_bLendingToken);
         require(info.bLendingToken.underlying() == _lendingToken, "PIT: underlyingOfbLendingToken!=lendingToken");
+        emit SetPausedLendingToken(_lendingToken, _isPaused);
     }
 
     function setPausedLendingToken(address _lendingToken, bool _isPaused) public onlyModerator isLendingTokenListed(_lendingToken) {
