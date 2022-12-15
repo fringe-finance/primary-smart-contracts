@@ -1,0 +1,39 @@
+{
+    "priceOracle": {
+        "tokensUseUniswap": [],
+        "uniswapPrices": [],
+        "tokensUseChainlink": [],
+        "chainlinkAggregatorV3": [],
+        "tokensUseBackendProvider": [],
+        "TWAPPeriods": ""
+    },
+    "pitToken": {
+        "tokens": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "liquidationTresholdFactorNumerator": [],
+        "liquidationTresholdFactorDenominator": [],
+        "liquidationIncentiveNumerator": [],
+        "liquidationIncentiveDenominator": [],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [],
+        "borrowLimitPerLendingToken": []
+    },
+    "blendingToken": {
+        "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
+        "lendingTokens": [],
+        "symbol": [],
+        "decimals": [],
+        "name": []
+    },
+    "jumRateModel": {
+        "gainPerYear": "6000000000000000000",
+        "jumGainPerYear": "4000000000000000000",
+        "targetUtil": "800000000000000000",
+        "baseRatePerYear": "20000000000000000",
+        "multiplierPerYear": "225000000000000000",
+        "jumpMultiplierPerYear": "4000000000000000000",
+        "kink": "800000000000000000"
+    }
+}
