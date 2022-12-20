@@ -2,6 +2,15 @@
 pragma solidity >=0.8.0;
 
 interface IPrimaryIndexToken {
+    function usdcToken() external view returns(address);
+
+    function lendingTokenPerCollateral(address projectToken, address lendingToken) external view returns(address);
+
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) external view returns (uint256);
+
+    function getDepositedAmount(address projectToken, address account) external view returns(uint);
+
+    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256);
     /**
      * @dev return keccak("MODERATOR_ROLE")
      */
