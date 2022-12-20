@@ -151,6 +151,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             projectTokens.push(_projectToken);
             projectTokenInfo[_projectToken].isListed = true;
         }
+        string memory projectTokenName = ERC20Upgradeable(_projectToken).name();
+        string memory projectTokenSymbol = ERC20Upgradeable(_projectToken).symbol();
+        emit AddPrjToken(_projectToken, projectTokenName, projectTokenSymbol);
         
         setProjectTokenInfo(
             _projectToken,
@@ -163,10 +166,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         );
 
         setPausedProjectToken(_projectToken, false, false);
-        string memory projectTokenName = ERC20Upgradeable(_projectToken).name();
-        string memory projectTokenSymbol = ERC20Upgradeable(_projectToken).symbol();
-
-       emit AddPrjToken(_projectToken, projectTokenName, projectTokenSymbol);
     }
 
     function removeProjectToken(
@@ -193,15 +192,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
             lendingTokens.push(_lendingToken);
             lendingTokenInfo[_lendingToken].isListed = true;
         }
+        string memory lendingTokenName = ERC20Upgradeable(_lendingToken).name();
+        string memory lendingTokenSymbol = ERC20Upgradeable(_lendingToken).symbol();
+        emit AddLendingToken(_lendingToken, lendingTokenName, lendingTokenSymbol);
 
         setLendingTokenInfo(
             _lendingToken, 
             _bLendingToken, 
             _isPaused
         );
-        string memory lendingTokenName = ERC20Upgradeable(_lendingToken).name();
-        string memory lendingTokenSymbol = ERC20Upgradeable(_lendingToken).symbol();
-        emit AddLendingToken(_lendingToken, lendingTokenName, lendingTokenSymbol);
     }
 
     function removeLendingToken(
