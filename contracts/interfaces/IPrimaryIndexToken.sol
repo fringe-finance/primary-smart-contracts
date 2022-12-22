@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 
 interface IPrimaryIndexToken {
+    function _depositPosition(address, address, address) external returns (uint);
     function usdcToken() external view returns(address);
 
     function lendingTokenPerCollateral(address projectToken, address lendingToken) external view returns(address);
@@ -245,10 +246,9 @@ interface IPrimaryIndexToken {
     /**
      * @dev deposit project token to PrimaryIndexToken
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      * @param projectTokenAmount - amount of project token to deposit
      */
-    function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) external;
+    function deposit(address projectToken, uint256 projectTokenAmount, address user) external;
 
     /**
      * @dev withdraw project token from PrimaryIndexToken
@@ -293,7 +293,7 @@ interface IPrimaryIndexToken {
      * @param lendingToken - address of lending token
      * @param lendingTokenAmount - amount of lending token
      */
-    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) external;
+    function repay(address repairer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount) external;
 
     /**
      * @dev liquidate borrow
@@ -381,4 +381,6 @@ interface IPrimaryIndexToken {
      * @dev return decimals of PrimaryIndexToken
      */
     function decimals() external view returns (uint8);
+
+    function calcDepositPositionWhenAtomicRepay(address projectToken, uint256 projectTokenAmount, address user) external;
 }

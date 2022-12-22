@@ -2,6 +2,7 @@
 pragma solidity >=0.8.0;
 import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 import "./openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "./openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "./openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 
 import "./openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
@@ -10,9 +11,10 @@ import "./openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable
 import "./interfaces/IPrimaryIndexToken.sol";
 
 contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
-    // using SafeERC20Upgradeable for ERC20Upgradeable;
+    using SafeERC20Upgradeable for ERC20Upgradeable;
     address public primaryIndexToken;
     mapping(address => bool) public isSupportedDex;
+    address augustusParaswap;
 
     event SetPrimaryIndexToken(address indexed oldPrimaryIndexToken, address indexed newPrimaryIndexToken);
 
@@ -58,41 +60,79 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         }
     }
 
-   function getRemainingDeposit(address user, address projectToken) public view returns(uint remainingDeposit) {
+    function getTotalOutstanding(address user, address projectToken, address lendingAsset) public view returns(uint outstanding) {
+        outstanding = IPrimaryIndexToken(primaryIndexToken).totalOutstanding(user, projectToken, lendingAsset);       
+    }
+
+    function getLendingToken(address user, address projectToken) public view returns(address actualLendingToken) {
         address usdcToken = IPrimaryIndexToken(primaryIndexToken).usdcToken();
+
         uint borrowedUSD = IPrimaryIndexToken(primaryIndexToken).totalOutstanding(user, projectToken, usdcToken);
+
         address currentLendingToken = IPrimaryIndexToken(primaryIndexToken).lendingTokenPerCollateral(user, projectToken);
-        address actualLendingToken;
+
         if (currentLendingToken != address(0)) {
             actualLendingToken = currentLendingToken;
         } else {
             actualLendingToken = borrowedUSD > 0 ? usdcToken : address(0);
         }
-        uint256 _totalOutstanding = actualLendingToken == address(0) ? 0 :  IPrimaryIndexToken(primaryIndexToken).totalOutstandingInUSD(user, projectToken, actualLendingToken) ;
-       if (IPrimaryIndexToken(primaryIndexToken).borrowPosition(user, projectToken, actualLendingToken).loanBody > 0) {
-            uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
+    }
 
-            IPrimaryIndexToken.Ratio memory lvr = IPrimaryIndexToken(primaryIndexToken).projectTokenInfo(projectToken).loanToValueRatio;
-            uint256 depositedProjectTokenAmount = IPrimaryIndexToken(primaryIndexToken).getDepositedAmount(projectToken, user);
-
-            uint256 collateralProjectTokenAmount = _totalOutstanding * lvr.denominator * (10 ** projectTokenDecimals) / IPrimaryIndexToken(primaryIndexToken).getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
-            remainingDeposit = depositedProjectTokenAmount > collateralProjectTokenAmount ? depositedProjectTokenAmount - collateralProjectTokenAmount : 0;
+    function getRemainingDeposit(address user, address projectToken, address lendingToken) public view returns(uint remainingDeposit) {
+        uint256 depositedProjectTokenAmount = IPrimaryIndexToken(primaryIndexToken).getDepositedAmount(projectToken, user);
+        if(lendingToken == address(0)) {
+            remainingDeposit = depositedProjectTokenAmount;
         } else {
-            remainingDeposit = IPrimaryIndexToken(primaryIndexToken).getDepositedAmount(projectToken, user);
+            uint256 _totalOutstanding = IPrimaryIndexToken(primaryIndexToken).totalOutstandingInUSD(user, projectToken, lendingToken);
+            uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
+            IPrimaryIndexToken.Ratio memory lvr = IPrimaryIndexToken(primaryIndexToken).projectTokenInfo(projectToken).loanToValueRatio;
+            uint256 collateralProjectTokenAmount = _totalOutstanding * lvr.denominator * (10 ** projectTokenDecimals) / IPrimaryIndexToken(primaryIndexToken).getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
+             if (depositedProjectTokenAmount >= collateralProjectTokenAmount){
+                    remainingDeposit = depositedProjectTokenAmount - collateralProjectTokenAmount;
+            } else {
+                    remainingDeposit = 0;
+            }
         }
    }
 
-    function repayAtomic(address prjToken, address lendingToken, address dex) public {
-        uint amount;
-        ERC20Upgradeable(prjToken).approve(dex, amount);
-
+    function repayAtomic(address prjToken, uint collateralAmount, bytes memory buyCalldata) public {
+        address lendingToken = getLendingToken(msg.sender, prjToken);
+        uint remainingDeposit = getRemainingDeposit(msg.sender, prjToken, lendingToken);
+        require(remainingDeposit <= collateralAmount, "PIT: invlid amount");
+        IPrimaryIndexToken(primaryIndexToken).calcDepositPositionWhenAtomicRepay(prjToken, collateralAmount, msg.sender);
+        (uint amountSold, uint amountRecive) = _buyOnParaSwap(prjToken, lendingToken, augustusParaswap, buyCalldata);
+        //deposit collateral back in the pool, if left after the swap(buy)
+        uint256 collateralBalanceLeft = collateralAmount - amountSold;
+        if (collateralBalanceLeft > 0) {
+            ERC20Upgradeable(prjToken).safeApprove(primaryIndexToken, collateralBalanceLeft);
+            IPrimaryIndexToken(primaryIndexToken).deposit(prjToken, collateralBalanceLeft, msg.sender);
+        }
+        uint totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
+        if(amountRecive > totalOutStanding) {
+            uint amountBackToUser = amountRecive - totalOutStanding;
+            ERC20Upgradeable(prjToken).safeTransferFrom(address(this), msg.sender, amountBackToUser);
+        }
+        address bLendingToken = address(IPrimaryIndexToken(primaryIndexToken).lendingTokenInfo(lendingToken).bLendingToken);
+        ERC20Upgradeable(lendingToken).safeApprove(bLendingToken, amountRecive);
+        IPrimaryIndexToken(primaryIndexToken).repay(address(this), msg.sender, prjToken, lendingToken, amountRecive);
     }
 
-    function swap(address _target, bytes memory _data) public returns (bytes memory response) {
+    function _buyOnParaSwap(address tokenFrom, address tokenTo, address _target, bytes memory buyCalldata) public returns (uint amountSold, uint amountRecive) {
+        uint beforeBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
+        uint beforeBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
         // solium-disable-next-line security/no-call-value
-        (bool success, bytes memory returnData) = _target.call(_data);
-        require(success, "Transaction execution reverted.");
-
+        (bool success,) = _target.call(buyCalldata);
+        if (!success) {
+        // Copy revert reason from call
+        assembly {
+            returndatacopy(0, 0, returndatasize())
+            revert(0, returndatasize())
+            }
+        }
+        uint afterBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
+        uint afterBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
+        amountSold = afterBalanceFrom - beforeBalanceFrom;
+        amountRecive = afterBalanceTo - beforeBalanceTo;
     }
 
 
