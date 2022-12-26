@@ -293,7 +293,7 @@ interface IPrimaryIndexToken {
      * @param lendingToken - address of lending token
      * @param lendingTokenAmount - amount of lending token
      */
-    function repay(address repairer, address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount) external;
+    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount, address repairer, address borrower)  external;
 
     /**
      * @dev liquidate borrow

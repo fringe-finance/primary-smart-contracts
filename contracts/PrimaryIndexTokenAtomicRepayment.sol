@@ -9,23 +9,29 @@ import "./openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "./openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IPrimaryIndexToken.sol";
+import "./AtomicRepayment/paraswap/interfaces/IParaSwapAugustus.sol";
+import "./AtomicRepayment/paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 
 contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
     address public primaryIndexToken;
     mapping(address => bool) public isSupportedDex;
-    address augustusParaswap;
+    address public augustusParaswap;
+    address public AUGUSTUS_REGISTRY;
 
     event SetPrimaryIndexToken(address indexed oldPrimaryIndexToken, address indexed newPrimaryIndexToken);
+    event AtomicRepayment(address indexed user, address collateral, address lendingAsset, uint amountSold, uint amountRecive);
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    function initialize(address pit) public initializer {
+    function initialize(address pit, address augustusParaswap_, address AUGUSTUS_REGISTRY_) public initializer {
         __AccessControl_init();
         __ReentrancyGuard_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
         primaryIndexToken = pit;
+        augustusParaswap =augustusParaswap_;
+        AUGUSTUS_REGISTRY = AUGUSTUS_REGISTRY_;
     }
 
     modifier onlyAdmin() {
@@ -48,16 +54,9 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         emit SetPrimaryIndexToken(primaryIndexToken, pit);
     }
 
-    function addListDexSupport(address[] memory exchanges) public onlyModerator() {
-        for(uint i = 0; i < exchanges.length; i++) {
-            isSupportedDex[exchanges[i]] = true;
-        }
-    }
-
-    function removeListDexSupport(address[] memory exchanges) public onlyModerator() {
-        for(uint i = 0; i < exchanges.length; i++) {
-            isSupportedDex[exchanges[i]] = false;
-        }
+    function setAugustusParaswap(address augustusParaswap_, address AUGUSTUS_REGISTRY_) public {
+        augustusParaswap = augustusParaswap_;
+        AUGUSTUS_REGISTRY = AUGUSTUS_REGISTRY_;
     }
 
     function getTotalOutstanding(address user, address projectToken, address lendingAsset) public view returns(uint outstanding) {
@@ -96,25 +95,30 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
    }
 
     function repayAtomic(address prjToken, uint collateralAmount, bytes memory buyCalldata) public {
+        require(IParaSwapAugustusRegistry(AUGUSTUS_REGISTRY).isValidAugustus(augustusParaswap), "AtomicRepayment: INVALID_AUGUSTUS");
         address lendingToken = getLendingToken(msg.sender, prjToken);
         uint remainingDeposit = getRemainingDeposit(msg.sender, prjToken, lendingToken);
-        require(remainingDeposit <= collateralAmount, "PIT: invlid amount");
+        require(collateralAmount <= remainingDeposit, "AtomicRepayment: invlid amount");
         IPrimaryIndexToken(primaryIndexToken).calcDepositPositionWhenAtomicRepay(prjToken, collateralAmount, msg.sender);
+        address tokenTransferProxy = IParaSwapAugustus(augustusParaswap).getTokenTransferProxy();
+        uint totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
+        if(ERC20Upgradeable(prjToken).allowance(address(this), tokenTransferProxy) <= collateralAmount) {
+            ERC20Upgradeable(prjToken).safeApprove(tokenTransferProxy, type(uint256).max);
+        }
         (uint amountSold, uint amountRecive) = _buyOnParaSwap(prjToken, lendingToken, augustusParaswap, buyCalldata);
+        require(amountRecive <= totalOutStanding, "AtomicRepayment: invalid amountRecive");
         //deposit collateral back in the pool, if left after the swap(buy)
+
         uint256 collateralBalanceLeft = collateralAmount - amountSold;
         if (collateralBalanceLeft > 0) {
             ERC20Upgradeable(prjToken).safeApprove(primaryIndexToken, collateralBalanceLeft);
             IPrimaryIndexToken(primaryIndexToken).deposit(prjToken, collateralBalanceLeft, msg.sender);
         }
-        uint totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
-        if(amountRecive > totalOutStanding) {
-            uint amountBackToUser = amountRecive - totalOutStanding;
-            ERC20Upgradeable(prjToken).safeTransferFrom(address(this), msg.sender, amountBackToUser);
-        }
+
         address bLendingToken = address(IPrimaryIndexToken(primaryIndexToken).lendingTokenInfo(lendingToken).bLendingToken);
-        ERC20Upgradeable(lendingToken).safeApprove(bLendingToken, amountRecive);
-        IPrimaryIndexToken(primaryIndexToken).repay(address(this), msg.sender, prjToken, lendingToken, amountRecive);
+        ERC20Upgradeable(lendingToken).approve(bLendingToken, amountRecive);
+        IPrimaryIndexToken(primaryIndexToken).repay(prjToken, lendingToken, amountRecive, address(this), msg.sender);
+        emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountRecive);
     }
 
     function _buyOnParaSwap(address tokenFrom, address tokenTo, address _target, bytes memory buyCalldata) public returns (uint amountSold, uint amountRecive) {
@@ -131,9 +135,8 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         }
         uint afterBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
         uint afterBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
-        amountSold = afterBalanceFrom - beforeBalanceFrom;
+        amountSold = beforeBalanceFrom - afterBalanceFrom;
         amountRecive = afterBalanceTo - beforeBalanceTo;
     }
-
 
 }
