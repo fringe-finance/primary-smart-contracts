@@ -2,6 +2,22 @@
 pragma solidity >=0.8.0;
 
 interface IPrimaryIndexToken {
+    function _depositPosition(address, address, address) external returns (uint);
+    function usdcToken() external view returns(address);
+
+    function lendingTokenPerCollateral(address projectToken, address lendingToken) external view returns(address);
+
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) external view returns (uint256);
+
+    function getDepositedAmount(address projectToken, address account) external view returns(uint);
+
+    /**
+     * @dev return evaluation in USD of `tokenAmount`
+     * @param token - address of token
+     * @param tokenAmount - amount of token
+     */
+    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256);
+
     /**
      * @dev return keccak("MODERATOR_ROLE")
      */
@@ -236,10 +252,9 @@ interface IPrimaryIndexToken {
     /**
      * @dev deposit project token to PrimaryIndexToken
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      * @param projectTokenAmount - amount of project token to deposit
      */
-    function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) external;
+    function deposit(address projectToken, uint256 projectTokenAmount, address user) external;
 
     /**
      * @dev withdraw project token from PrimaryIndexToken
@@ -283,8 +298,10 @@ interface IPrimaryIndexToken {
      * @param projectToken - address of project token
      * @param lendingToken - address of lending token
      * @param lendingTokenAmount - amount of lending token
+     * @param repairer - address of repairer
+     * @param borrower - address of borrower
      */
-    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) external;
+    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount, address repairer, address borrower) external returns (uint256);
 
     /**
      * @dev liquidate borrow
@@ -372,4 +389,36 @@ interface IPrimaryIndexToken {
      * @dev return decimals of PrimaryIndexToken
      */
     function decimals() external view returns (uint8);
+
+    function calcDepositPositionWhenAtomicRepay(address projectToken, uint256 projectTokenAmount, address user) external;
+    
+    /**
+     * @dev update borrow position
+     * @param account - address of borrower
+     * @param lendingToken - address of lending token
+     */
+    function updateInterestInBorrowPositions(address account, address lendingToken) external;
+
+    /**
+     * @dev set deposited position
+     * @param account - address of borrower
+     * @param projectToken - address of project token
+     * @param newDepositedAmount - new deposited amount
+     */
+    function setDepositedPosition(address account, address projectToken, uint newDepositedAmount) external;
+
+    /**
+     * @dev set total deposited project token
+     * @param projectToken - address of project token
+     * @param newTotalDepositedAmount - new total deposited amount
+     */
+    function setTotalDepositedProjectToken(address projectToken, uint newTotalDepositedAmount) external;
+
+    /**
+     * @dev distribute reward to liquidator
+     * @param account - address of borrower
+     * @param projectToken - address of project token
+     * @param amount - amount of reward
+     */
+    function distributeReward(address account, address projectToken, uint amount) external;
 }
