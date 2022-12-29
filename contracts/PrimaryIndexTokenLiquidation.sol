@@ -79,14 +79,13 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
     function liquidate(address _account, address _projectToken, address _lendingToken, uint256 _lendingTokenAmount) public isProjectTokenListed(_projectToken) isLendingTokenListed(_lendingToken) {
         uint minLA = getMinLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
         uint maxLA = getMaxLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
-        // uint collateralReduce = primaryIndexToken.getTokenEvaluation(_projectToken, _lendingTokenAmount) * lrfNumerator / lrfDenominator;
         require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PIT: invalid amount");
         
         primaryIndexToken.updateInterestInBorrowPositions(_account, _lendingToken);
 
         uint256 projectTokenToSendToLiquidator = getProjectTokenToSendToLiquidator(_account, _projectToken, _lendingToken,_lendingTokenAmount);
 
-        distributeReward(_account, _projectToken, projectTokenToSendToLiquidator);
+        distributeReward(_account, _projectToken, _lendingToken, projectTokenToSendToLiquidator);
 
         emit Liquidate(msg.sender, _account, _lendingToken, _projectToken, projectTokenToSendToLiquidator);
     }
@@ -98,21 +97,18 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         }
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
         uint256 repaid = primaryIndexToken.repay(_projectToken, _lendingToken, _lendingTokenAmount, msg.sender, _account);
-        uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / primaryIndexToken.getTokenEvaluation(_projectToken, projectTokenMultiplier);
+        uint256 projectTokenEvaluation = repaid * projectTokenMultiplier / primaryIndexToken.getProjectTokenEvaluation(_projectToken, projectTokenMultiplier);
 
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
         projectTokenToSendToLiquidator = projectTokenEvaluation * lrfNumerator / lrfDenominator;
     }
 
-    function distributeReward(address _account, address _projectToken, uint256 projectTokenToSendToLiquidator) internal {
+    function distributeReward(address _account, address _projectToken, address _lendingToken, uint256 projectTokenToSendToLiquidator) internal {
         uint256 depositedProjectTokenAmount = primaryIndexToken.getDepositedAmount(_projectToken, _account);
         if(projectTokenToSendToLiquidator > depositedProjectTokenAmount){
             projectTokenToSendToLiquidator = depositedProjectTokenAmount;
         }
-        uint256 totalDepositedProjectToken = primaryIndexToken.totalDepositedProjectToken(_projectToken);
-        primaryIndexToken.setDepositedPosition(_account, _projectToken, depositedProjectTokenAmount - projectTokenToSendToLiquidator);
-        primaryIndexToken.setTotalDepositedProjectToken(_projectToken, totalDepositedProjectToken - projectTokenToSendToLiquidator);
-        primaryIndexToken.distributeReward(msg.sender, _projectToken, projectTokenToSendToLiquidator);
+        primaryIndexToken.calculatePositionWhenLiquidate(_account, _projectToken, _lendingToken, projectTokenToSendToLiquidator, msg.sender);
     }
 
     function liquidatorRewardFactor(address _account, address _projectToken, address _lendingToken) public view returns(uint256 lrfNumerator, uint256 lrfDenominator) {
@@ -135,10 +131,11 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         uint256 lvrNumerator = primaryIndexToken.projectTokenInfo(_projectToken).liquidationIncentive.numerator;
         uint256 lvrDenominator = primaryIndexToken.projectTokenInfo(_projectToken).liquidationIncentive.denominator;
 
-        uint256 totalOutstandingInUSD = primaryIndexToken.totalOutstandingInUSD(_account, _projectToken, _lendingToken);
+        uint256 totalOutstanding = primaryIndexToken.totalOutstanding(_account, _projectToken, _lendingToken);
+        uint256 totalOutstandingInUSD = primaryIndexToken.getProjectTokenEvaluation(_lendingToken, totalOutstanding);
 
         uint256 depositedProjectTokenAmount = primaryIndexToken.getDepositedAmount(_projectToken, _account);
-        uint256 depositedProjectTokenAmountInUSD = primaryIndexToken.getTokenEvaluation(_projectToken, depositedProjectTokenAmount);
+        uint256 depositedProjectTokenAmountInUSD = primaryIndexToken.getProjectTokenEvaluation(_projectToken, depositedProjectTokenAmount);
 
         uint256 numeratorMaxLA = (lvrNumerator * depositedProjectTokenAmountInUSD * targetHf.denominator - lvrDenominator * targetHf.numerator * totalOutstandingInUSD) * lrfDenominator;
         uint256 denominatorMaxLA = lrfNumerator * lvrNumerator * targetHf.denominator - targetHf.numerator * lvrDenominator * lrfDenominator;
@@ -152,4 +149,6 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         uint256 maxLrf = getMaxLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
         return Math.min(maxLrf, minPartialLiquidationAmount * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL);
     }
+
+
 }

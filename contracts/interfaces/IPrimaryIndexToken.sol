@@ -11,12 +11,7 @@ interface IPrimaryIndexToken {
 
     function getDepositedAmount(address projectToken, address account) external view returns(uint);
 
-    /**
-     * @dev return evaluation in USD of `tokenAmount`
-     * @param token - address of token
-     * @param tokenAmount - amount of token
-     */
-    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256);
+
 
     /**
      * @dev return keccak("MODERATOR_ROLE")
@@ -311,13 +306,8 @@ interface IPrimaryIndexToken {
      */
     function liquidate(address account, address projectToken, address lendingToken) external;
 
-    /**
-     * @dev update borrow position
-     * @param account - address of borrower
-     * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
-     */
-    function updateInterestInBorrowPosition(address account, address projectToken, address lendingToken) external;
+    function calculatePositionWhenLiquidate(address account, address projectToken, address lendingToken, uint256 projectTokenToSendToLiquidator, address liquidator) external;
+
     //************* VIEW FUNCTIONS ********************************
 
      /**
@@ -398,27 +388,4 @@ interface IPrimaryIndexToken {
      * @param lendingToken - address of lending token
      */
     function updateInterestInBorrowPositions(address account, address lendingToken) external;
-
-    /**
-     * @dev set deposited position
-     * @param account - address of borrower
-     * @param projectToken - address of project token
-     * @param newDepositedAmount - new deposited amount
-     */
-    function setDepositedPosition(address account, address projectToken, uint newDepositedAmount) external;
-
-    /**
-     * @dev set total deposited project token
-     * @param projectToken - address of project token
-     * @param newTotalDepositedAmount - new total deposited amount
-     */
-    function setTotalDepositedProjectToken(address projectToken, uint newTotalDepositedAmount) external;
-
-    /**
-     * @dev distribute reward to liquidator
-     * @param account - address of borrower
-     * @param projectToken - address of project token
-     * @param amount - amount of reward
-     */
-    function distributeReward(address account, address projectToken, uint amount) external;
 }
