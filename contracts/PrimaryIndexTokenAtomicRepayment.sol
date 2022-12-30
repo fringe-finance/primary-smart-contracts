@@ -15,7 +15,6 @@ import "./AtomicRepayment/paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
     address public primaryIndexToken;
-    mapping(address => bool) public isSupportedDex;
     address public augustusParaswap;
     address public AUGUSTUS_REGISTRY;
 
@@ -35,17 +34,17 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
     }
 
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AtomicRepayment: Caller is not the Admin");
         _;
     }
 
     modifier onlyModerator() {
-        require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
+        require(hasRole(MODERATOR_ROLE, msg.sender), "AtomicRepayment: Caller is not the Moderator");
         _;
     }
 
     modifier isProjectTokenListed(address projectToken) {
-        require(IPrimaryIndexToken(primaryIndexToken).projectTokenInfo(projectToken).isListed, "PIT: project token is not listed");
+        require(IPrimaryIndexToken(primaryIndexToken).projectTokenInfo(projectToken).isListed, "AtomicRepayment: project token is not listed");
         _;
     }
 
@@ -98,7 +97,7 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         require(IParaSwapAugustusRegistry(AUGUSTUS_REGISTRY).isValidAugustus(augustusParaswap), "AtomicRepayment: INVALID_AUGUSTUS");
         address lendingToken = getLendingToken(msg.sender, prjToken);
         uint remainingDeposit = getRemainingDeposit(msg.sender, prjToken, lendingToken);
-        require(collateralAmount <= remainingDeposit, "AtomicRepayment: invlid amount");
+        require(collateralAmount <= remainingDeposit, "AtomicRepayment: invalid amount");
         IPrimaryIndexToken(primaryIndexToken).calcDepositPositionWhenAtomicRepay(prjToken, collateralAmount, msg.sender);
         address tokenTransferProxy = IParaSwapAugustus(augustusParaswap).getTokenTransferProxy();
         uint totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
