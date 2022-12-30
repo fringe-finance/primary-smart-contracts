@@ -25,7 +25,11 @@ contract UniswapV2PriceProviderMock is PriceProvider,
     uint8 public usdDecimals;
 
     mapping(address => UniswapV2Metadata) public uniswapV2Metadata; // address of token => metadata for uniswapV2
-    mapping(address => uint256) public tokenPrice;
+    mapping(address => PriceInfo) public tokenPrice;
+    struct PriceInfo {
+        uint price;
+        uint8 tokenDecimals;
+    }
     struct UniswapV2Metadata {
         bool isActive;
         address pair;       // address of uniswap liquidity pool token for pair 
@@ -70,7 +74,8 @@ contract UniswapV2PriceProviderMock is PriceProvider,
 
     function setTokenAndPrice(address token, uint256 price) public onlyModerator {
         require(token != address(0),"UniswapV2PriceProvider: Invalid token!");
-        tokenPrice[token] = price;
+        tokenPrice[token].price = price;
+        tokenPrice[token].tokenDecimals = ERC20Upgradeable(token).decimals();
     }
 
     function changeActive(address token, bool active) public override onlyModerator {
@@ -94,14 +99,14 @@ contract UniswapV2PriceProviderMock is PriceProvider,
     }
 
     function getPrice(address token) public override view returns (uint256 price, uint8 priceDecimals) {
-        priceDecimals = 18;
-        price = tokenPrice[token];
+        priceDecimals = 6;
+        price = tokenPrice[token].price;
     }
 
     function getEvaluation(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
         (uint256 price, uint8 priceDecimals) = getPrice(token);
         evaluation = tokenAmount * price / (10 ** priceDecimals);
-        uint8 tokenDecimals = uniswapV2Metadata[token].tokenDecimals;
+        uint8 tokenDecimals = tokenPrice[token].tokenDecimals;
         if(tokenDecimals >= usdDecimals){
             evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
         }else{

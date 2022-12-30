@@ -209,6 +209,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         priceOracle = IPriceProviderAggregator(_priceOracle);
     }
 
+    function setPrimaryIndexTokenLiquidation(address newPrimaryIndexTokenLiquidation)  public onlyAdmin {
+        require(newPrimaryIndexTokenLiquidation != address(0), "PIT: invalid address");
+        primaryIndexTokenLiquidation = newPrimaryIndexTokenLiquidation;
+    }
+
     function transferAdminship(address newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "PIT: invalid newAdmin");
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
