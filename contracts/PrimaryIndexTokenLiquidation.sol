@@ -79,7 +79,8 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
     function liquidate(address _account, address _projectToken, address _lendingToken, uint256 _lendingTokenAmount) public isProjectTokenListed(_projectToken) isLendingTokenListed(_lendingToken) {
         uint minLA = getMinLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
         uint maxLA = getMaxLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
-        require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PIT: invalid amount");
+        uint lendingTokenAmountMul = _lendingTokenAmount * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
+        require(lendingTokenAmountMul >= minLA && lendingTokenAmountMul <= maxLA, "PIT: invalid amount");
         
         primaryIndexToken.updateInterestInBorrowPositions(_account, _lendingToken);
 
@@ -122,14 +123,14 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
             (lrfNumerator, lrfDenominator) = (maxLRF.numerator, maxLRF.denominator);
         }  
     }
-    
+
     // MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
     function getMaxLiquidatorRewardAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA) {
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
         Ratio memory targetHf = targetHealthFactor;
 
-        uint256 lvrNumerator = primaryIndexToken.projectTokenInfo(_projectToken).liquidationIncentive.numerator;
-        uint256 lvrDenominator = primaryIndexToken.projectTokenInfo(_projectToken).liquidationIncentive.denominator;
+        uint256 lvrNumerator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.numerator;
+        uint256 lvrDenominator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.denominator;
 
         uint256 totalOutstanding = primaryIndexToken.totalOutstanding(_account, _projectToken, _lendingToken);
         uint256 totalOutstandingInUSD = primaryIndexToken.getProjectTokenEvaluation(_lendingToken, totalOutstanding);
@@ -137,11 +138,19 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         uint256 depositedProjectTokenAmount = primaryIndexToken.getDepositedAmount(_projectToken, _account);
         uint256 depositedProjectTokenAmountInUSD = primaryIndexToken.getProjectTokenEvaluation(_projectToken, depositedProjectTokenAmount);
 
-        uint256 numeratorMaxLA = (lvrNumerator * depositedProjectTokenAmountInUSD * targetHf.denominator - lvrDenominator * targetHf.numerator * totalOutstandingInUSD) * lrfDenominator;
-        uint256 denominatorMaxLA = lrfNumerator * lvrNumerator * targetHf.denominator - targetHf.numerator * lvrDenominator * lrfDenominator;
+
+
+        uint256 numeratorMaxLA = checkNegativeNumber(lvrNumerator * depositedProjectTokenAmountInUSD * targetHf.denominator, lvrDenominator * targetHf.numerator * totalOutstandingInUSD) * lrfDenominator;
+        uint256 denominatorMaxLA = checkNegativeNumber(lrfNumerator * lvrNumerator * targetHf.denominator, targetHf.numerator * lvrDenominator * lrfDenominator);
         uint256 calculatedMaxLA = numeratorMaxLA * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL / denominatorMaxLA;
         
-        maxLA = calculatedMaxLA > totalOutstandingInUSD ? totalOutstandingInUSD : calculatedMaxLA;
+        uint totalOutstandingInUSDMul = totalOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
+        
+        maxLA = calculatedMaxLA > totalOutstandingInUSDMul ? totalOutstandingInUSDMul : calculatedMaxLA;
+    }
+
+    function checkNegativeNumber(uint firstNumber, uint secondNumber) internal pure returns (uint256 result) {
+        result = secondNumber > firstNumber ? secondNumber - firstNumber : firstNumber - secondNumber;
     }
 
     //MinLA = min(MaxLA, MPA)
