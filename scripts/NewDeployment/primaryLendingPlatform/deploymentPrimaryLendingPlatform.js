@@ -22,12 +22,12 @@ module.exports = {
         // Contracts ABI
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
-        let JumpRateModelV2 = await hre.ethers.getContractFactory("JumpRateModelV2Upgradeable");
+        let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV3");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
         let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
         let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
 
-        let jumpRateModelV2;
+        let jumpRateModel;
         let bondtroller;
         let blending;
         let pit;
@@ -68,14 +68,11 @@ module.exports = {
 
         let priceProvider = PriceProviderAggregatorProxy;
 
-        let kink = jumRateModel.kink;
-        let baseRatePerYear = jumRateModel.baseRatePerYear;
-        let multiplierPerYear = jumRateModel.multiplierPerYear;
-        let jumpMultiplierPerYear = jumRateModel.jumpMultiplierPerYear;
-
         let gainPerYear = jumRateModel.gainPerYear;
         let jumGainPerYear = jumRateModel.jumGainPerYear;
         let targetUtil = jumRateModel.targetUtil;
+        let newMaxBorrow = jumRateModel.newMaxBorrow;
+        let blocksPerYear = jumRateModel.blocksPerYear;
 
         //config 
         let lendingTokens = blendingToken.lendingTokens;
@@ -94,7 +91,8 @@ module.exports = {
         let liquidationIncentiveDenominator = pitToken.liquidationIncentiveDenominator;
         let isPaused = pitToken.isPaused;
         let usdc = pitToken.usdc;
-        let borrowLimit = pitToken.borrowLimit;
+        let borrowLimitPerCollateral = pitToken.borrowLimitPerCollateral;
+        let borrowLimitPerLendingToken = pitToken.borrowLimitPerLendingToken;
 
     //====================================================
     //deploy proxy admin
@@ -155,11 +153,11 @@ module.exports = {
     //====================================================
 
         console.log();
-        console.log("***** JUMP RATE MODELV2 DEPLOYMENT *****");
+        console.log("***** JUMP RATE MODEL DEPLOYMENT *****");
         if(!jumpRateModelLogicAddress) {
-            let jumpRateModelV2 = await JumpRateModelV2.connect(deployMaster).deploy();
-            await jumpRateModelV2.deployed();
-            jumpRateModelLogicAddress = jumpRateModelV2.address;
+            let jumpRateModel = await JumpRateModel.connect(deployMaster).deploy();
+            await jumpRateModel.deployed();
+            jumpRateModelLogicAddress = jumpRateModel.address;
             config.JumpRateModelLogic = jumpRateModelLogicAddress;
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
@@ -277,7 +275,7 @@ module.exports = {
 
         //instances of contracts
         bondtroller = await Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
-        jumpRateModelV2 = await JumpRateModelV2.attach(jumpRateModelProxyAddress).connect(deployMaster);
+        jumpRateModel = await JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
         pit = await PrimaryIndexToken.attach(primaryIndexTokenProxyAddress).connect(deployMaster);
 
         console.log();
@@ -299,18 +297,26 @@ module.exports = {
 
         console.log("***** 2. Seting JumRateModel *****");
 
-        let ownerJumRateModel = await jumpRateModelV2.owner();
-        if (ownerJumRateModel == ZERO_ADDRESS) {
-            let owner = deployMaster.address;
-            await jumpRateModelV2.initialize(
-                baseRatePerYear,
-                multiplierPerYear,
-                jumpMultiplierPerYear,
-                kink,
-                owner
-            ).then(function(instance){
-                console.log("JumRateModel " + bondtroller.address + " call init at tx hash: " + instance.hash);
-            });
+        let MODERATOR_ROLE = await jumpRateModel.MODERATOR_ROLE();
+        let isMODERATOR = await jumpRateModel.hasRole(MODERATOR_ROLE, deployMasterAddress);
+        if (!isMODERATOR) { 
+            await jumpRateModel.initialize(blocksPerYear).then(function(instance){ 
+                console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
+            })
+        }
+
+        for(var i=0; i < BLendingTokenProxies.length; i++) {
+            await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i]).then(function(instance){
+                console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
+            })
+    
+            await jumpRateModel.updateJumpRateModel(gainPerYear[i], jumGainPerYear[i], targetUtil[i], BLendingTokenProxies[i]).then(function(instance){
+                console.log("JumpRateModel " + jumpRateModelProxyAddress + " set interest rate model params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " for blending token " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
+            })
+    
+            await jumpRateModel.setMaxBorrowRate(BLendingTokenProxies[i], newMaxBorrow[i]).then(function(instance){
+                console.log("JumpRateModel " + jumpRateModelProxyAddress + " set MaxBorrowRate " + newMaxBorrow[i] + " at tx hash " + instance.hash);
+            })
         }
 
         console.log();
@@ -356,6 +362,10 @@ module.exports = {
             await pit.setPriceOracle(PriceProviderAggregatorProxy).then(function(){
                 console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy);
             });
+
+            await pit.setUSDCToken(usdc).then(function(){
+                console.log("PrimaryIndexToken set usdc: " + usdc);
+            });
         
             for(var i = 0; i < tokens.length; i++){
                 await pit.addProjectToken( 
@@ -391,21 +401,48 @@ module.exports = {
                 });
     
             }
-        
+
             for(var i = 0; i < tokens.length; i++){
-                await pit.setBorrowLimit(
+                await pit.setBorrowLimitPerCollateral(
                     tokens[i], 
-                    usdc,
-                    borrowLimit[i]
+                    borrowLimitPerCollateral[i]
                 ).then(function(){
-                    console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimit[i]);
+                    console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
+                });
+            }
+
+            for(var i = 0; i < lendingTokens.length; i++){
+                await pit.setBorrowLimitPerLendingAsset(
+                    lendingTokens[i], 
+                    borrowLimitPerLendingToken[i]
+                ).then(function(){
+                    console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimitPerLendingToken[i]);
                 });
             }
 
         }
 
+        for(var i = 0; i < tokens.length; i++){
+            await pit.setBorrowLimitPerCollateral(
+                tokens[i], 
+                borrowLimitPerCollateral[i]
+            ).then(function(){
+                console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
+            });
+        }
+
+        for(var i = 0; i < lendingTokens.length; i++){
+            await pit.setBorrowLimitPerLendingAsset(
+                lendingTokens[i], 
+                borrowLimitPerLendingToken[i]
+            ).then(function(){
+                console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimitPerLendingToken[i]);
+            });
+        }
+
         let addresses = {
             bondtrollerAddress: bondtrollerProxyAddress,
+            jumpRateModelAddress: jumpRateModelProxyAddress,
             blendingAddress: blendingTokenProxyAddresses,
             pitAddress: primaryIndexTokenProxyAddress
         }

@@ -4,9 +4,9 @@ const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
 const ethers = require("ethers");
 const fs = require('fs');
 const path = require("path");
-const configGeneralFile = './configs/config_general.json';
+const configGeneralFile = './config/config_general.json';
 const configGeneral = require(configGeneralFile);
-const configFile = './configs/configs.json';
+const configFile = './config/config.json';
 let configs = require(configFile);
 let {
   PRIMARY_PROXY_ADMIN,
@@ -25,11 +25,14 @@ let {
 module.exports = async function () {
   try {
     const provider = new Provider('https://zksync2-testnet.zksync.dev');
-    const wallet = new Wallet(process.env.OPERATOR_PRIVATE_KEY).connect(provider);
+    const mnemonic = process.env.MNEMONIC;
+    let  walletOperator = ethers.Wallet.fromMnemonic(mnemonic);
+    let OPERATOR_PRIVATE_KEY = walletOperator.privateKey;
+    const wallet = new Wallet(OPERATOR_PRIVATE_KEY).connect(provider);
     const deployer = new Deployer(hre, wallet);
 
     //instances of contracts
-    let jumpRateModelV2;
+    let jumpRateModel;
     let bondtroller;
     let blending;
     let pit;
@@ -38,15 +41,16 @@ module.exports = async function () {
     //initialize deploy parametrs
     let ProxyAdmin = await deployer.loadArtifact("ProxyAdmin");
     let TransparentUpgradeableProxy = await deployer.loadArtifact("TransparentUpgradeableProxy");
-    let JumpRateModelV2 = await deployer.loadArtifact("JumpRateModelV2Upgradeable");
+    let JumpRateModel = await deployer.loadArtifact("JumpRateModelV3");
     let Bondtroller = await deployer.loadArtifact("Bondtroller");
     let BLendingToken = await deployer.loadArtifact("BLendingToken");
     let PrimaryIndexToken = await deployer.loadArtifact("PrimaryIndexToken");
 
     //interfaces of contracts
     let bondtrollerInterface = new ethers.utils.Interface(Bondtroller.abi);
-    let jumpRateModelV2Interface = new ethers.utils.Interface(JumpRateModelV2.abi);
+    let jumpRateModelInterface = new ethers.utils.Interface(JumpRateModel.abi);
     let pitInterface = new ethers.utils.Interface(PrimaryIndexToken.abi);
+    let blendingInterface = new ethers.utils.Interface(BLendingToken.abi);
 
 
     const {
@@ -69,10 +73,11 @@ module.exports = async function () {
     let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
     let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
 
-    let kink = jumRateModel.kink;
-    let baseRatePerYear = jumRateModel.baseRatePerYear;
-    let multiplierPerYear = jumRateModel.multiplierPerYear;
-    let jumpMultiplierPerYear = jumRateModel.jumpMultiplierPerYear;
+    let gainPerYear = jumRateModel.gainPerYear;
+    let jumGainPerYear = jumRateModel.jumGainPerYear;
+    let targetUtil = jumRateModel.targetUtil;
+    let newMaxBorrow = jumRateModel.newMaxBorrow;
+    let blocksPerYear = jumRateModel.blocksPerYear;
 
     //config 
     let lendingTokens = blendingToken.lendingTokens;
@@ -92,18 +97,21 @@ module.exports = async function () {
     let liquidationIncentiveNumerator = pitToken.liquidationIncentiveNumerator;
     let liquidationIncentiveDenominator = pitToken.liquidationIncentiveDenominator;
     let isPaused = pitToken.isPaused;
+    let usdc = pitToken.usdc;
 
     //====================== deploy proxy admin =============================
     if (!proxyAdminAddress) {
       const proxyAdmin = await deployer.deploy(ProxyAdmin, []);
       configs.PRIMARY_PROXY_ADMIN = proxyAdminAddress = proxyAdmin.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`${ProxyAdmin.contractName} was deployed at: ${proxyAdminAddress}`);
 
     //====================== deploy JumpRateModel =============================
     if (!jumpRateModelLogicAddress) {
-      jumpRateModelV2 = await deployer.deploy(JumpRateModelV2, []);
-      configs.JumpRateModelLogic = jumpRateModelLogicAddress = jumpRateModelV2.address;
+      jumpRateModel = await deployer.deploy(JumpRateModel, []);
+      configs.JumpRateModelLogic = jumpRateModelLogicAddress = jumpRateModel.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`JumpRateModel masterCopy was deployed at: ${jumpRateModelLogicAddress}`);
     if (!jumpRateModelProxyAddress) {
@@ -111,6 +119,7 @@ module.exports = async function () {
         [jumpRateModelLogicAddress, proxyAdminAddress, "0x"]
       );
       configs.JumpRateModelProxy = jumpRateModelProxyAddress = jumpRateModelProxy.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`JumpRateModel was deployed at: ${jumpRateModelProxyAddress}`);
 
@@ -125,6 +134,7 @@ module.exports = async function () {
         [bondtrollerLogicAddress, proxyAdminAddress, "0x"]
       );
       configs.BondtrollerProxy = bondtrollerProxyAddress = bondtrollerProxy.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`Bondtroller was deployed at: ${bondtrollerProxyAddress}`);
 
@@ -132,6 +142,7 @@ module.exports = async function () {
     if (!blendingTokenLogicAddress) {
       blending = await deployer.deploy(BLendingToken, []);
       configs.BLendingTokenLogic = blendingTokenLogicAddress = blending.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`BLendingToken masterCopy was deployed at: ${blendingTokenLogicAddress}`);
     for (var i = 0; i < lendingTokens.length; i++) {
@@ -143,12 +154,14 @@ module.exports = async function () {
       }
     }
     configs.BLendingTokenProxies = blendingTokenProxyAddresses;
+    fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     console.log("BLendingToken proxy address: " + blendingTokenProxyAddresses);
 
     // ====================== deploy PrimaryIndexToken =============================
     if (!primaryIndexTokenLogicAddress) {
       pit = await deployer.deploy(PrimaryIndexToken, []);
       configs.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress = pit.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`PrimaryIndexToken masterCopy was deployed at: ${primaryIndexTokenLogicAddress}`);
     if (!primaryIndexTokenProxyAddress) {
@@ -156,12 +169,13 @@ module.exports = async function () {
         [primaryIndexTokenLogicAddress, proxyAdminAddress, "0x"]
       );
       configs.PrimaryIndexTokenProxy = primaryIndexTokenProxyAddress = pitProxy.address;
+      fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(configs, null, 2));
     }
     console.log(`PrimaryIndexToken was deployed at: ${primaryIndexTokenProxyAddress}`);
 
     //====================== setting Params =============================
     bondtroller = new ethers.Contract(bondtrollerProxyAddress, bondtrollerInterface, wallet);
-    jumpRateModelV2 = new ethers.Contract(jumpRateModelProxyAddress, jumpRateModelV2Interface, wallet);
+    jumpRateModel = new ethers.Contract(jumpRateModelProxyAddress, jumpRateModelInterface, wallet);
     pit = new ethers.Contract(primaryIndexTokenProxyAddress, pitInterface, wallet);
 
     console.log();
@@ -184,24 +198,37 @@ module.exports = async function () {
     console.log();
     console.log("***** 2. Setting JumRateModel *****");
 
-    let ownerJumRateModel = await jumpRateModelV2.owner();
-    if (ownerJumRateModel == ZERO_ADDRESS) {
-      await jumpRateModelV2.initialize(
-        baseRatePerYear,
-        multiplierPerYear,
-        jumpMultiplierPerYear,
-        kink,
-        wallet.address
-      ).then(function (instance) {
-        console.log("JumRateModel " + bondtroller.address + " call init at tx hash: " + instance.hash);
-      });
+    let MODERATOR_ROLE = await jumpRateModel.MODERATOR_ROLE();
+    console.log(MODERATOR_ROLE);
+    let deployMasterAddress = deployer.zkWallet.address;
+    console.log(deployMasterAddress);
+    let isMODERATOR = await jumpRateModel.hasRole(MODERATOR_ROLE, deployMasterAddress);
+    console.log(isMODERATOR);
+    if (!isMODERATOR) { 
+        await jumpRateModel.initialize(blocksPerYear).then(function(instance){ 
+            console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
+        })
+    }
+
+    for(var i=0; i < BLendingTokenProxies.length; i++) {
+        await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i]).then(function(instance){
+            console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
+        })
+
+        await jumpRateModel.updateJumpRateModel(gainPerYear[i], jumGainPerYear[i], targetUtil[i], BLendingTokenProxies[i]).then(function(instance){
+            console.log("JumpRateModel " + jumpRateModelProxyAddress + " set interest rate model params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " for blending token " + BLendingTokenProxies[i] + " at tx hash " + instance.hash);
+        })
+
+        await jumpRateModel.setMaxBorrowRate(BLendingTokenProxies[i], newMaxBorrow[i]).then(function(instance){
+            console.log("JumpRateModel " + jumpRateModelProxyAddress + " set MaxBorrowRate " + newMaxBorrow[i] + " at tx hash " + instance.hash);
+        })
     }
 
     console.log();
     console.log("***** 3. Setting BLending token *****");
 
     for (var i = 0; i < lendingTokens.length; i++) {
-      blending = new ethers.Contract(blendingTokenProxyAddresses[i], blending.interface, wallet);
+      blending = new ethers.Contract(blendingTokenProxyAddresses[i], blendingInterface, wallet);
       let adminBlendingToken = await blending.admin();
       if (adminBlendingToken == ZERO_ADDRESS) {
         let admin = wallet.address;
@@ -295,15 +322,18 @@ module.exports = async function () {
       }
     }
 
+    await pit.setUSDCToken(usdc).then(function(){
+      console.log("PrimaryIndexToken set usdc: " + usdc);
+  });
+
     let addresses = {
       bondtrollerAddress: bondtrollerProxyAddress,
+      jumpRateModelAddress: jumpRateModelProxyAddress,
       blendingAddress: blendingTokenProxyAddresses,
       pitAddress: primaryIndexTokenProxyAddress
     }
     console.log(addresses);
   } catch (err) {
     console.log(err);
-  } finally {
-    fs.writeFileSync(path.resolve(__dirname, configFile), JSON.stringify(configs, null, 2));
   }
 };

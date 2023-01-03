@@ -1,11 +1,16 @@
 require('dotenv').config();
+const ethers = require('ethers');
 const { Wallet, Provider } = require("zksync-web3");
 const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
 
 module.exports = async function () {
   try {
     const provider = new Provider('https://zksync2-testnet.zksync.dev');
-    const wallet = new Wallet(process.env.OPERATOR_PRIVATE_KEY).connect(provider);
+    const mnemonic = process.env.MNEMONIC;
+    let  walletOperator = ethers.Wallet.fromMnemonic(mnemonic);
+    let OPERATOR_PRIVATE_KEY = walletOperator.privateKey;
+    console.log(OPERATOR_PRIVATE_KEY);
+    const wallet = new Wallet(OPERATOR_PRIVATE_KEY).connect(provider);
     const deployer = new Deployer(hre, wallet);
     const artifact = await deployer.loadArtifact("MockToken");
     const projectToken1 = await deployer.deploy(artifact, ["ProjectToken1", "PJ1", 18]);

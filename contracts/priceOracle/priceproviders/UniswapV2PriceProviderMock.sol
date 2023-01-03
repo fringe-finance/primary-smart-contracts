@@ -94,7 +94,7 @@ contract UniswapV2PriceProviderMock is PriceProvider,
     }
 
     function getPrice(address token) public override view returns (uint256 price, uint8 priceDecimals) {
-        priceDecimals = 18;
+        priceDecimals = 6;
         price = tokenPrice[token];
     }
 

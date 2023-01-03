@@ -19,7 +19,6 @@ contract LPPriceProvider is
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     uint8 public usdDecimals;
-    address public usdcToken;
 
     mapping(address => LPMetadata) public lpMetadata; // address of token => metadata of chainlink
 
@@ -37,12 +36,11 @@ contract LPPriceProvider is
     );
     event ChangeActive(address indexed who, address indexed token, bool active);
 
-    function initialize(address _usdcToken) public initializer {
+    function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
         usdDecimals = 6;
-        usdcToken = _usdcToken;
     }
 
     modifier onlyAdmin() {
@@ -143,19 +141,11 @@ contract LPPriceProvider is
         LPMetadata memory metadata = lpMetadata[lpToken];
         address token0 = IUniswapV2Pair(lpToken).token0();
         address token1 = IUniswapV2Pair(lpToken).token1();
-        if(token0 == usdcToken) {
-            P0x112 = uint(2**112).mul(1e6);
-        } else {
-            (uint priceMantissa0, ) = PriceProvider(metadata.base).getPrice(token0);
-            P0x112 = priceMantissa0.mul(uint(2**112));
-        }
+        (uint priceMantissa0, ) = PriceProvider(metadata.base).getPrice(token0);
+        P0x112 = priceMantissa0.mul(uint(2**112));
 
-        if(token1 == usdcToken) {
-            P1x112 = uint(2**112).mul(1e6);
-        } else {
-            (uint priceMantissa1, ) = PriceProvider(metadata.base).getPrice(token1);
-            P1x112 = priceMantissa1.mul(uint(2**112));
-        }
+        (uint priceMantissa1, ) = PriceProvider(metadata.base).getPrice(token1);
+        P1x112 = priceMantissa1.mul(uint(2**112));
     }
 
     function getInfo(address lpToken) public view returns(address token0, address token1, uint total, uint256 r0, uint256 r1, uint256 sqrtK, uint256 px0, uint256 px1, uint price112, uint priceMantissa ) {

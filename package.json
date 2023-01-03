@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "hardhat compile",
+    "compile:zksync": "ZKSYNC=true hardhat compile",
     "size-contracts": "hardhat size-contracts",
     "forkmainnet": "hardhat node --fork https://mainnet.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
     "forkrinkeby": "hardhat node --fork https://rinkeby.infura.io/v3/\"$(cat .env | grep -Eo 'INFURA_KEY=.*' | grep -Eo '\\w+' | tail -1)\"",
@@ -17,7 +18,16 @@
     "upgradeBlendingToken_ethereum_mainnet": "hardhat run --network ethereum_mainnet scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js",
 
     "deployNewJumpRateModel_ethereum_goerli":"npx hardhat run --network ethereum_goerli ./scripts/NewTransactions/jumpRateModel/deployNewJumpRateModel.js",
-    "upgradeBlendingToken_ethereum_goerli": "hardhat run --network ethereum_goerli scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js"
+    "upgradeBlendingToken_ethereum_goerli": "hardhat run --network ethereum_goerli scripts/upgradeProxy/bLendingToken/upgradeBLendingToken.js",
+
+    "deployPriceOracle_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/priceOracle/deployPriceProviderAggregator.js",
+    "deployPrimaryLendingPlatform_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/primaryLendingPlatform/deployPrimaryLendingPlatform.js",
+    "deployPLP_ethereum_goerli":"npx hardhat run --network ethereum_goerli  ./scripts/NewDeployment/deployPLP.js",
+
+    "deployMockToken:zksync": "ZKSYNC=true hardhat deploy-zksync --script deployMockToken.js",
+    "deployPriceOracle:zksync": "ZKSYNC=true hardhat deploy-zksync --script deployPriceOracle.js",
+    "deployPrimaryLendingPlatform:zksync": "ZKSYNC=true hardhat deploy-zksync --script deployPrimaryLendingPlatform.js",
+    "deploy:zksync": "ZKSYNC=true hardhat deploy-zksync"
   },
   "author": "",
   "license": "ISC",

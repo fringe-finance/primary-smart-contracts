@@ -1,8 +1,35 @@
 {
+    "priceOracle": {
+        "tokensUseChainlink": [],
+        "chainlinkAggregatorV3": [],
+        "tokensUseBackendProvider": [],
+        "tokensUseLPProvider": [],
+        "wstETH": "",
+        "wstETHAggregatorPath": []
+    },
+    "pitToken": {
+        "tokens": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "liquidationTresholdFactorNumerator": [],
+        "liquidationTresholdFactorDenominator": [],
+        "liquidationIncentiveNumerator": [],
+        "liquidationIncentiveDenominator": [],
+        "isPaused": "",
+        "borrowLimit": [],
+        "usdc": ""   
+    },
+    "blendingToken": {
+        "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
+        "lendingTokens": [],
+        "symbol": [],
+        "decimals": [],
+        "name": []
+    },
     "jumRateModel": {
         "gainPerYear": "",
         "jumGainPerYear": "",
-        "targetUtil": "",
-        "newMaxBorrow": []
+        "targetUtil": ""
     }
 }
