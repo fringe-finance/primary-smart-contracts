@@ -361,15 +361,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         require(totalBorrow[projectToken][lendingToken] + lendingTokenAmount <= borrowLimit[projectToken][lendingToken], "PIT: totalBorrow exceeded borrowLimit");
         BorrowPosition storage _borrowPosition = borrowPosition[msg.sender][projectToken][lendingToken];
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
-        if (_borrowPosition.loanBody == 0) {
-            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
-            _borrowPosition.loanBody += lendingTokenAmount;
-            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
-        } else {
-            info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
-            _borrowPosition.loanBody += lendingTokenAmount;
-            totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
-        }
+        
+        _borrowPosition.loanBody += lendingTokenAmount;
+        totalBorrow[projectToken][lendingToken] += lendingTokenAmount;
+        info.bLendingToken.borrowTo(msg.sender, lendingTokenAmount);
+
         emit Borrow(msg.sender, lendingToken, lendingTokenAmount, projectToken, depositPosition[msg.sender][projectToken][lendingToken].depositedProjectTokenAmount);
     }
     
