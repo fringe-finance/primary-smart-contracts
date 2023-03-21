@@ -2,9 +2,7 @@
 const { deploymentPrimaryLendingPlatform } = require("./deploymentPrimaryLendingPlatform.js");
 
 async function main() {
-    let proxyAdminAddress
-    let priceProviderAggregatorAddress
-    await deploymentPrimaryLendingPlatform(proxyAdminAddress, priceProviderAggregatorAddress);
+    await deploymentPrimaryLendingPlatform();
 }
 
 main().catch((error) => {

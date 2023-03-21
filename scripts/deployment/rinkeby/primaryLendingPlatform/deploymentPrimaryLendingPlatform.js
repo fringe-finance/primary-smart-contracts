@@ -1,11 +1,15 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
+const configFile = '../../config/goerli/config_general.json';
+const config = require(configFile);
+const configAddressFile = '../../config/goerli/config_general.json';
+const configAddress = require(configAddressFile);
 
 const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentPrimaryLendingPlatform : async function (input_proxyAdminAddress, input_priceOracleAddress) {
+    deploymentPrimaryLendingPlatform : async function () {
         let network = await hre.network;
         console.log("Network name: "+network.name);
        
@@ -24,274 +28,357 @@ module.exports = {
 
         let jumpRateModelV2;
         let bondtroller;
-        let busdc;
+        let blending;
         let pit;
 
-        let jumpRateModelV2Address
-        let bondtrollerAddress
-        let busdcAddress
-        let pitAddress
-        let priceOracleAddress
+        const {
+            pitToken,
+            blendingToken,
+            jumRateModel
+        } = config;
 
-        let {
-            borrowLimit
-        } = require("../config.js");
+        const {
+            PRIMARY_PROXY_ADMIN,
+            PriceProviderAggregatorProxy,
+            BondtrollerLogic,
+            BondtrollerProxy,
+            BLendingTokenLogic,
+            BLendingTokenProxys,
+            PrimaryIndexTokenLogic,
+            PrimaryIndexTokenProxy,
+            JumpRateModelV2UpgradeableLogic,
+            JumpRateModelV2UpgradeableProxy,
+            ZERO_ADDRESS
+        } = configAddress;
+
+        //Address
+        let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
+        let blendingTokenLogicAddress = BLendingTokenLogic;
+        let blendingTokenProxyAddresses = BLendingTokenProxys;
+
+        let bondtrollerLogicAddress = BondtrollerLogic;
+        let bondtrollerProxyAddress = BondtrollerProxy;
+
+        let jumpRateModelLogicAddress = JumpRateModelV2UpgradeableLogic;
+        let jumpRateModelProxyAddress = JumpRateModelV2UpgradeableProxy;
+
+        let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
+        let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
+
+        let priceProvider = PriceProviderAggregatorProxy;
+
+        let kink = jumRateModel.kink;
+        let baseRatePerYear = jumRateModel.baseRatePerYear;
+        let multiplierPerYear = jumRateModel.multiplierPerYear;
+        let jumpMultiplierPerYear = jumRateModel.jumpMultiplierPerYear;
+
+        //config 
+        let lendingTokens = blendingToken.lendingTokens;
+        let initialExchangeRateMantissa = blendingToken.initialExchangeRateMantissa;
+        let reserveFactorMantissa = blendingToken.reserveFactorMantissa;
+        let name = blendingToken.name;
+        let symbol = blendingToken.symbol;
+        let decimals = blendingToken.decimals;
+
+        let tokens = pitToken.tokens;
+        let borrowLimitPerCollateral = pitToken.borrowLimitPerCollateral;
+        let borrowLimitPerLendingToken = pitToken.borrowLimitPerLendingToken;
 
     //====================================================
     //deploy proxy admin
 
         console.log();
         console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        if(input_proxyAdminAddress == undefined){
-            proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
+        if(!proxyAdminAddress){
+            let proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
             await proxyAdmin.deployed().then(function(instance){
-                console.log("ProxyAdmin deployed at: " + instance.address);
+                proxyAdminAddress = instance.address;
+                config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
             });
-            proxyAdminAddress = proxyAdmin.address;
-           
-        }else{
-            proxyAdminAddress = input_proxyAdminAddress;
-            console.log("ProxyAdmin is deployed at: " + input_proxyAdminAddress);
         }
+        
+        console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
 
     //====================================================
     //deploy price oracle
 
         console.log();
         console.log("***** PRICE ORACLE DEPLOYMENT *****");
-        if (input_priceOracleAddress == undefined) {
+        if (!priceProvider) {
             const { deploymentPriceOracle } = require('../priceOracle/deploymentPriceOracle.js')
             let priceOracleAddresses = await deploymentPriceOracle(proxyAdminAddress)
-            priceOracleAddress = priceOracleAddresses.priceProviderAggregatorAddress
-        } else {
-            priceOracleAddress = input_priceOracleAddress;
-            console.log("PriceOracle is deployed at: " + input_priceOracleAddress);
-        }
+            priceProvider = priceOracleAddresses.priceProviderAggregatorAddress
+        } 
+        console.log("PriceOracle is deployed at: " + priceProvider);
 
     //====================================================
 
         console.log();
         console.log("***** JUMP RATE MODELV2 DEPLOYMENT *****");
-        let multiplier = toBN(10).pow(toBN(18));
-        let baseRatePerBlock = toBN(9512937595);
-        let blocksPerYear = toBN(2102400);
-        let jumpMultiplierPerBlock = toBN(1902587519025);
-        let multiplierPerBlock = toBN(107020547945);
-        let kink = toBN("800000000000000000");
+        // let multiplier = toBN(10).pow(toBN(18));
+        // let baseRatePerBlock = toBN(9512937595);
+        // let blocksPerYear = toBN(2102400);
+        // let jumpMultiplierPerBlock = toBN(1902587519025);
+        // let multiplierPerBlock = toBN(107020547945);
+        if(!jumpRateModelLogicAddress) {
+            let jumpRateModelV2 = await JumpRateModel.connect(deployMaster).deploy();
+            await jumpRateModelV2.deployed();
+            jumpRateModelLogicAddress = jumpRateModelV2.address;
+            config.JumpRateModelLogic = jumpRateModelLogicAddress;
+            fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+        }
+        console.log("JumpRateModel masterCopy address: " + jumpRateModelLogicAddress);
+        
+        if(!jumpRateModelProxyAddress) {
+            let jumpRateModelProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                jumpRateModelLogicAddress,
+                proxyAdminAddress,
+                "0x"
+            );
+            await jumpRateModelProxy.deployed().then(function(instance){
+                jumpRateModelProxyAddress = instance.address;
+                config.JumpRateModelProxy = jumpRateModelProxyAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
+        console.log("JumpRateModel proxy address: " + jumpRateModelProxyAddress);
 
-        let baseRatePerYear = baseRatePerBlock.mul(blocksPerYear);
-        let multiplierPerYear = multiplierPerBlock.mul(blocksPerYear.mul(kink)).div(multiplier);
-        let jumpMultiplierPerYear = jumpMultiplierPerBlock.mul(blocksPerYear);
         let owner = deployMasterAddress;
-
-        jumpRateModelV2 = await JumpRateModelV2.connect(deployMaster).deploy(
-            baseRatePerYear,
-            multiplierPerYear,
-            jumpMultiplierPerYear,
-            kink,
-            owner,
-        );
-        await jumpRateModelV2.deployed().then(function(instance){
-            console.log("JumpRateModelV2 masterCopy address: " + instance.address);
-        });
-        let jumpRateModelV2MasterCopyAddress = jumpRateModelV2.address;
-        jumpRateModelV2Address = jumpRateModelV2MasterCopyAddress;
-
-        // let jumpRateModelV2Proxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-        //     usbControllerMasterCopyAddress,
-        //     proxyAdminAddress,
-        //     "0x"
-        // );
-        // await jumpRateModelV2Proxy.deployed();
-        // let jumpRateModelV2ProxyAddress = jumpRateModelV2Proxy.address;
-        // console.log("JumpRateModelV2 proxy address: " + jumpRateModelV2ProxyAddress);
-        // jumpRateModelV2Address = jumpRateModelV2ProxyAddress;
 
     //====================================================
         console.log();
         console.log("***** BONDTROLLER DEPLOYMENT *****");
 
-        bondtroller = await Bondtroller.connect(deployMaster).deploy();
-        await bondtroller.deployed().then(function(instance){
-            console.log("Bondtroller masterCopy address: " + instance.address);
-        });
-        let bondtrollerMasterCopyAddress = bondtroller.address;
+        if(!bondtrollerLogicAddress) {
+            bondtroller = await Bondtroller.connect(deployMaster).deploy();
+            await bondtroller.deployed().then(function(instance){
+                bondtrollerLogicAddress = instance.address;
+                config.BondtrollerLogic = bondtrollerLogicAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
+        console.log("Bondtroller logic address: " + bondtrollerLogicAddress);
 
-        let bondtrollerProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-            bondtrollerMasterCopyAddress,
-            proxyAdminAddress,
-            "0x"
-        );
-        await bondtrollerProxy.deployed().then(function(instance){
-            console.log("Bondtroller proxy address: " + instance.address);
-        });
-        let bondtrollerProxyAddress = bondtrollerProxy.address;
-        bondtrollerAddress = bondtrollerProxyAddress;
-
-        bondtroller = await Bondtroller.attach(bondtrollerAddress).connect(deployMaster);
-        
-        await bondtroller.init().then(function(instance){
-            console.log("Bondtroller call init at " + bondtroller.address);
-        });
+        if(!bondtrollerProxyAddress) {
+            let bondtrollerProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                bondtrollerMasterCopyAddress,
+                proxyAdminAddress,
+                "0x"
+            );
+            await bondtrollerProxy.deployed().then(function(instance){
+                bondtrollerProxyAddress = instance.address;
+                config.BondtrollerProxy = bondtrollerProxyAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
+        console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
 
     //====================================================
 
         console.log();
-        console.log("***** BUSDC DEPLOYMENT *****");
+        console.log("***** BLENDING TOKEN DEPLOYMENT *****");
 
-        busdc = await BLendingToken.connect(deployMaster).deploy();
-        await busdc.deployed().then(function(instance){
-            console.log("BLendingToken masterCopy address: " + instance.address);
-        });
-        let busdcMasterCopyAddress = busdc.address;
+        if(!blendingTokenLogicAddress) {
+            blending = await BLendingToken.connect(deployMaster).deploy();
+            await blending.deployed().then(function(instance){
+                blendingTokenLogicAddress = instance.address;
+                config.BLendingTokenLogic = blendingTokenLogicAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+    
+            });
+        }
+        console.log("BLendingToken masterCopy address: " + blendingTokenLogicAddress);
+        for(var i = 0; i < lendingTokens.length; i++) {
+            if(blendingTokenProxyAddresses.length < lendingTokens.length) {
+                let blendingProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                    blendingTokenLogicAddress,
+                    proxyAdminAddress,
+                    "0x"
+                );
+                await blendingProxy.deployed().then(function(instance){
+                    blendingTokenProxyAddresses.push(instance.address);
+                });
+            }
+        }
+        config.BLendingTokenProxy = blendingTokenProxyAddress;
+        fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
 
-        let busdcProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-            busdcMasterCopyAddress,
-            proxyAdminAddress,
-            "0x"
-        );
-        await busdcProxy.deployed().then(function(instance){
-            console.log("BLendingToken proxy address: " + instance.address);
-        });
-        let busdcProxyAddress = busdcProxy.address;
-        busdcAddress = busdcProxyAddress;
-
-        busdc = await BLendingToken.attach(busdcAddress).connect(deployMaster);
+        console.log("BLendingToken proxy address: " + blendingTokenProxyAddress);
         
-        let usdctestAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        let initialExchangeRateMantissa = toBN(10).pow(toBN(18));
-        let reserveFactorMantissa = toBN(25).mul(toBN(10).pow(toBN(16)));//same as cAAVE
-        let name = "fUSDC";
-        let symbol = "fUSDC";
-        let decimals = toBN(6);
-        let admin = deployMasterAddress;
-
-        await busdc.init(
-            usdctestAddress,
-            bondtrollerAddress,
-            jumpRateModelV2Address,
-            initialExchangeRateMantissa,
-            name,
-            symbol,
-            decimals,
-            admin
-        ).then(function(){
-            console.log("BUSDC call init at " + busdc.address);
-        });
-
-        await busdc.connect(deployMaster).setReserveFactor(reserveFactorMantissa).then(function(){
-            console.log("BUSDC set reserve factor " + reserveFactorMantissa);
-        });
-
-        await bondtroller.supportMarket(busdcAddress).then(function(){
-            console.log("Bondtroller support market " + busdcAddress);
-        });
-
         //====================================================
 
         console.log();
         console.log("***** PRIMARY INDEX TOKEN DEPLOYMENT *****");
 
-        pit = await PrimaryIndexToken.connect(deployMaster).deploy();
-        await pit.deployed().then(function(instance){
-            console.log("PrimaryIndexToken masterCopy address: " + instance.address);
-        });
-        let pitMasterCopyAddress = pit.address;
+        if(!primaryIndexTokenLogicAddress) {
+            pit = await PrimaryIndexToken.connect(deployMaster).deploy();
+            await pit.deployed().then(function(instance){
+                primaryIndexTokenLogicAddress = instance.address;
+                config.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
 
-        let pitProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-            pitMasterCopyAddress,
-            proxyAdminAddress,
-            "0x"
-        );
-        await pitProxy.deployed().then(function(instance){
-            console.log("PrimaryIndexToken proxy address: " + instance.address);
-        });
-        let pitProxyAddress = pitProxy.address;
-        pitAddress = pitProxyAddress;
+        console.log("PrimaryIndexToken masterCopy address: " + primaryIndexTokenLogicAddress);
 
-        pit = await PrimaryIndexToken.attach(pitAddress).connect(deployMaster);
+        if(!primaryIndexTokenProxyAddress) {
+            let pitProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                pitMasterCopyAddress,
+                proxyAdminAddress,
+                "0x"
+            );
+            await pitProxy.deployed().then(function(instance){
+                primaryIndexTokenProxyAddress = instance.address;
+                config.PrimaryIndexTokenProxy = primaryIndexTokenProxyAddress;
+                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+            });
+        }
 
-        let isPaused = false;
-        let usdcAddress = '0x5236aAB9f4b49Bfd93a9500E427B042f65005E6A';
-        let loanToValueRatioNumerator = toBN(6);
-        let loanToValueRatioDenominator = toBN(10);
-        let liquidationTresholdFactorNumerator = toBN(1);
-        let liquidationTresholdFactorDenominator = toBN(1);
-        let liquidationIncentiveNumerator = toBN(115);
-        let liquidationIncentiveDenominator = toBN(100);
+        console.log("PrimaryIndexToken proxy address: " + primaryIndexTokenProxyAddress);
+
+        //====================================================
+        //setting params
+
+        //instances of contracts
+        bondtroller = await Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
+        jumpRateModelV2 = await JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
+        pit = await PrimaryIndexToken.attach(primaryIndexTokenProxyAddress).connect(deployMaster);
+
+        console.log();
+        console.log("***** 1. Seting Bondtroller *****");
+        let adminBondtroller = await bondtroller.admin();
+        if (adminBondtroller == ZERO_ADDRESS) {
+            await bondtroller.init().then(function(instance){
+                console.log("Bondtroller " + bondtroller.address + "call init at tx hash: " + instance.hash);
+            });
+            await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress).then(function(){
+                console.log("Bondtroller set PIT " + primaryIndexTokenProxyAddress);
+            });
+            for(var i = 0; i < blendingTokenProxyAddresses.length; i++) {
+                await bondtroller.supportMarket(blendingTokenProxyAddresses[i]).then(function(){
+                    console.log("Bondtroller support market " + blendingTokenProxyAddresses[i]);
+                });
+            }
+        }
+
+        console.log("***** 2. Seting JumRateModel *****");
+
+        let ownerJumRateModel = await jumpRateModelV2.owner();
+        if (ownerJumRateModel == ZERO_ADDRESS) {
+            let owner = deployMaster.address;
+            await jumpRateModelV2.initialize(
+                baseRatePerYear,
+                multiplierPerYear,
+                jumpMultiplierPerYear,
+                kink,
+                owner
+            ).then(function(instance){
+                console.log("JumRateModel " + bondtroller.address + " call init at tx hash: " + instance.hash);
+            });
+        }
+
+        console.log();
+        console.log("***** 3. Seting BLending  token *****");
+
+        for(var i = 0; i < lendingTokens.length; i++) { 
+            blending = await BLendingToken.attach(blendingTokenProxyAddresses[i]).connect(deployMaster);
+            let adminBlendingToken = await blending.admin();
+            if (adminBlendingToken == ZERO_ADDRESS) {
+                let admin = deployMaster.address;
+                await blending.init(
+                    lendingTokens[i],
+                    bondtrollerProxyAddress,
+                    jumpRateModelProxyAddress,
+                    initialExchangeRateMantissa[i],
+                    name[i],
+                    symbol[i],
+                    decimals[i],
+                    admin
+                ).then(function(){
+                    console.log("blending call init at " + blending.address);
+                });
         
-        let PRJsAddresses = [
-            '0x40EA2e5c5b2104124944282d8db39C5D13ac6770',//PRJ1
-            '0x69648Ef43B7496B1582E900569cd9dDEc49C045e',//PRJ2
-            '0xfA91A86700508806AD2A49Bebce34a08c6ad7a65',//PRJ3
-            '0xc6636b088AB0f794DDfc1204e7C58D8148f62203',//PRJ4
-            '0x37a7D483d2dfe97d0C00cEf6F257e25d321e6D4e',//PRJ5
-            '0x16E2f279A9BabD4CE133745DdA69C910CBe2e490' //PRJ6
-            ];
+                await blending.setReserveFactor(reserveFactorMantissa).then(function(){
+                    console.log("blending set reserve factor " + reserveFactorMantissa);
+                });
 
-        await pit.initialize()
-        .then(function(){
-            console.log("PrimaryIndexToken call initialize at " + pit.address)
-        });
-
-        await pit.setPriceOracle(priceOracleAddress).then(function(){
-            console.log("PrimaryIndexToken set priceOracle: " + priceOracleAddress);
-        });
-
-        for(var i = 0; i < PRJsAddresses.length; i++){
-            await pit.addProjectToken( 
-                PRJsAddresses[i],
-                loanToValueRatioNumerator,
-                loanToValueRatioDenominator,
-                liquidationTresholdFactorNumerator,
-                liquidationTresholdFactorDenominator,
-                liquidationIncentiveNumerator,
-                liquidationIncentiveDenominator,
-            ).then(function(){
-                console.log("Added prj token: "+PRJsAddresses[i]+" with:");
-                console.log("LoanToValueRatio: ")
-                console.log("   Numerator:   "+loanToValueRatioNumerator);
-                console.log("   Denominator: "+loanToValueRatioDenominator);
-                console.log("LiquidationTresholdFactor: ")
-                console.log("   Numerator:   "+liquidationTresholdFactorNumerator);
-                console.log("   Denominator: "+liquidationTresholdFactorDenominator);
-                console.log("LiquidationIncentive: ");
-                console.log("   Numerator:   "+liquidationIncentiveNumerator);
-                console.log("   Denominator: "+liquidationIncentiveDenominator);
-            });
-            
+                await blending.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
+                    console.log("blending " + blendingAddress +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
+                });
+            }
         }
 
-        await pit.addLendingToken(
-            usdcAddress, 
-            busdcAddress, 
-            isPaused
-        ).then(function(){
-            console.log("Added lending token: "+usdcAddress);
-        });
-
-
-        for(var i = 0; i < PRJsAddresses.length; i++){
-            await pit.setBorrowLimit(
-                PRJsAddresses[i], 
-                usdcAddress, 
-                borrowLimit
-            ).then(function(){
-                console.log("PrimaryIndexToken set " + PRJsAddresses[i] + " borrow limit " + borrowLimit);
+        console.log();
+        console.log("***** 4. Seting PIT token *****");
+        let namePit = await pit.name();
+        if(!namePit) {
+            await pit.initialize()
+            .then(function(){
+                console.log("PrimaryIndexToken call initialize at " + pit.address)
             });
+
+            await pit.setPriceOracle(PriceProviderAggregatorProxy).then(function(){
+                console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy);
+            });
+
+            for(var i = 0; i < tokens.length; i++){
+                await pit.addProjectToken( 
+                    tokens[i],
+                    loanToValueRatioNumerator[i],
+                    loanToValueRatioDenominator[i],
+                    liquidationTresholdFactorNumerator[i],
+                    liquidationTresholdFactorDenominator[i],
+                    liquidationIncentiveNumerator[i],
+                    liquidationIncentiveDenominator[i],
+                ).then(function(){
+                    console.log("Added prj token: "+tokens[i]+" with:");
+                    console.log("LoanToValueRatio: ")
+                    console.log("   Numerator:   "+loanToValueRatioNumerator[i]);
+                    console.log("   Denominator: "+loanToValueRatioDenominator[i]);
+                    console.log("LiquidationTresholdFactor: ")
+                    console.log("   Numerator:   "+liquidationTresholdFactorNumerator[i]);
+                    console.log("   Denominator: "+liquidationTresholdFactorDenominator[i]);
+                    console.log("LiquidationIncentive: ");
+                    console.log("   Numerator:   "+liquidationIncentiveNumerator[i]);
+                    console.log("   Denominator: "+liquidationIncentiveDenominator[i]);
+                });
+                
+            }
+
+            for(var i = 0; i < lendingTokens.length; i++){
+                await pit.addLendingToken(
+                    lendingTokens[i], 
+                    blendingTokenProxyAddresses[i], 
+                    isPaused
+                ).then(function(){
+                    console.log("Added lending token: " + lendingTokens[i]);
+                });
+    
+            }
+
+            for(var i = 0; i < tokens.length; i++){
+                await primaryIndexToken.setBorrowLimitPerCollateral(
+                    tokens[i], 
+                    borrowLimitPerCollateral[i]
+                ).then(function(){
+                    console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimit);
+                });
+            }
+
+            for(var i = 0; i < lendingTokens.length; i++){
+                await primaryIndexToken.setBorrowLimitPerLendingAsset(
+                    lendingTokens[i], 
+                    borrowLimitPerLendingToken[i]
+                ).then(function(){
+                    console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimit);
+                });
+            }
         }
-
-        await bondtroller.setPrimaryIndexTokenAddress(pitAddress).then(function(){
-            console.log("Bondtroller " + bondtrollerAddress + " set PrimaryIndexToken "+ pitAddress);
-        });
-
-        await busdc.setPrimaryIndexToken(pitAddress).then(function(){
-            console.log("BUSDC " + busdcAddress +" set primaryIndexToken " + pitAddress);
-        });
 
         let addresses = {
             bondtrollerAddress: bondtrollerAddress,
-            busdcAddress: busdcAddress,
+            blendingAddress: blendingAddress,
             pitAddress: pitAddress,
         }
         console.log(addresses);
