@@ -242,7 +242,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @return The borrow interest rate per block, scaled by 1e18
      */
     function borrowRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves);
+        return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves, address(this));
     }
 
     /**
@@ -250,7 +250,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      * @return The supply interest rate per block, scaled by 1e18
      */
     function supplyRatePerBlock() external override  view returns (uint) {
-        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa);
+        return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa, address(this));
     }
 
     /**
@@ -407,8 +407,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         uint borrowIndexPrior = borrowIndex;
 
         /* Calculate the current borrow interest rate */
-        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior);
-        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+        interestRateModel.storeBorrowRate(cashPrior, borrowsPrior, reservesPrior);
+        uint borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior, address(this));
+        // require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
         /* Calculate the number of blocks elapsed since the last accrual */
         (MathError mathErr, uint blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);
@@ -428,7 +429,6 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         uint totalBorrowsNew;
         uint totalReservesNew;
         uint borrowIndexNew;
-
         (mathErr, simpleInterestFactor) = mulScalar(Exp({mantissa: borrowRateMantissa}), blockDelta);
         if (mathErr != MathError.NO_ERROR) {
             return failOpaque(Error.MATH_ERROR, FailureInfo.ACCRUE_INTEREST_SIMPLE_INTEREST_FACTOR_CALCULATION_FAILED, uint(mathErr));
