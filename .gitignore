@@ -8,7 +8,9 @@ typechain
 .deps
 cache
 artifacts
+cache-zk
 artifacts-zk
+cache-zk
 package-lock.json
 yarn.lock
 deployments
