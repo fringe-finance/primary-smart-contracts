@@ -2,6 +2,49 @@
 pragma solidity >=0.8.0;
 
 interface IPrimaryIndexToken {
+
+    function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) external;
+    function setBorrowLimitPerLendingAsset(address lendingToken, uint256 _borrowLimit) external;
+    function grantRole(bytes32 role, address newModerator) external;
+    function revokeRole(bytes32 role, address moderator) external;
+    function setPrimaryIndexTokenLeverage(address newPrimaryIndexTokenLeverage) external;
+    function setRelatedContract(address relatedContract, bool isRelated) external;
+    function getRelatedContract(address relatedContract) external view returns(bool);
+    function setUSDCToken(address usdc) external;
+
+    function setTotalBorrowPerLendingToken(address lendingToken, uint totalBorrowAmount) external;
+    function _depositPosition(address, address, address) external returns (uint);
+    function usdcToken() external view returns(address);
+
+    function getLendingToken(address user, address projectToken) external view returns(address);
+
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) external view returns (uint256);
+
+    function getDepositedAmount(address projectToken, address account) external view returns(uint);
+
+    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256);
+    function getPriceConvert(address lendingToken, uint amount) external view returns(uint256);
+
+    function calcDepositPosition(address projectToken, uint256 projectTokenAmount, address user) external;
+    function calcAndTransferDepositPosition(address projectToken, uint256 projectTokenAmount, address user, address receiver) external returns(uint256);
+
+
+    function calcBorrowPosition(address borrower, address projectToken, address lendingToken, uint256 lendingTokenAmount, address currentLendingToken) external;
+ 
+    function getTotalBorrowPerLendingToken(address lendingToken) external view returns(uint);
+    function borrowLimitPerLendingToken(address) external view returns(uint);
+
+    function getTotalBorrowPerCollateral(address projectToken) external view returns(uint);
+    function borrowLimitPerCollateral(address) external view returns(uint);
+
+    function depositFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) external;
+    function withdrawFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiar) external returns(uint256);
+    function supplyFromRelatedContract(address lendingToken, uint256 lendingTokenAmount, address user) external;
+    function redeemFromRelatedContract(address lendingToken, uint256 bLendingTokenAmount, address user) external;
+    function redeemUnderlyingFromRelatedContract(address lendingToken, uint256 lendingTokenAmount, address user) external;
+    function borrowFromRelatedContract(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) external;
+    function repayFromRelatedContract(address projectToken, address lendingToken, uint256 lendingTokenAmount, address repairer, address borrower) external returns (uint256);
+
     /**
      * @dev return keccak("MODERATOR_ROLE")
      */
@@ -138,7 +181,8 @@ interface IPrimaryIndexToken {
     )  external;
 
     function removeProjectToken(
-        uint256 _projectTokenId
+        uint256 _projectTokenId,
+        address projectToken
     ) external;
 
     function addLendingToken(
@@ -148,7 +192,8 @@ interface IPrimaryIndexToken {
     ) external;
 
     function removeLendingToken(
-        uint256 _lendingTokenId
+        uint256 _lendingTokenId,
+        address lendingToken
     ) external;
 
     function setPriceOracle(
@@ -236,18 +281,16 @@ interface IPrimaryIndexToken {
     /**
      * @dev deposit project token to PrimaryIndexToken
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      * @param projectTokenAmount - amount of project token to deposit
      */
-    function deposit(address projectToken, address lendingToken, uint256 projectTokenAmount) external;
+    function deposit(address projectToken, uint256 projectTokenAmount) external;
 
     /**
      * @dev withdraw project token from PrimaryIndexToken
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      * @param projectTokenAmount - amount of project token to deposit
      */
-    function withdraw(address projectToken, address lendingToken, uint256 projectTokenAmount) external;
+    function withdraw(address projectToken, uint256 projectTokenAmount) external;
 
     /**
      * @dev supply lending token
@@ -284,40 +327,30 @@ interface IPrimaryIndexToken {
      * @param lendingToken - address of lending token
      * @param lendingTokenAmount - amount of lending token
      */
-    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) external;
-
-    /**
-     * @dev liquidate borrow
-     * @param account - address of borrower
-     * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
-     */
-    function liquidate(address account, address projectToken, address lendingToken) external;
+    function repay(address projectToken, address lendingToken, uint256 lendingTokenAmount) external returns (uint256);
 
     /**
      * @dev update borrow position
      * @param account - address of borrower
-     * @param projectToken - address of project token
      * @param lendingToken - address of lending token
      */
-    function updateInterestInBorrowPosition(address account, address projectToken, address lendingToken) external;
+    function updateInterestInBorrowPositions(address account, address lendingToken) external;
+
     //************* VIEW FUNCTIONS ********************************
 
      /**
      * @dev return pit amount of borrow position
      * @param account - address of borrower
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      */
-    function pit(address account, address projectToken, address lendingToken) external view returns (uint256);
+    function pit(address account, address projectToken) external view returns (uint256);
 
     /**
      * @dev return pit remaining amount of borrow position
      * @param account - address of borrower
      * @param projectToken - address of project token
-     * @param lendingToken - address of lending token
      */
-    function pitRemaining(address account, address projectToken, address lendingToken) external view returns (uint256);
+    function pitRemaining(address account, address projectToken) external view returns (uint256);
 
     /**
      * @dev return liquidationThreshold of borrow position
@@ -342,13 +375,6 @@ interface IPrimaryIndexToken {
      * @param lendingToken - address of lending token
      */
     function healthFactor(address account, address projectToken, address lendingToken) external view returns (uint256 numerator, uint256 denominator);
-
-    /**
-     * @dev return evaluation in USD of `projectTokenAmount`
-     * @param projectToken - address of project token
-     * @param projectTokenAmount - amount of project token
-     */
-    function getProjectTokenEvaluation(address projectToken, uint256 projectTokenAmount) external view returns (uint256);
 
     /**
      * @dev return length of array `lendingTokens`
