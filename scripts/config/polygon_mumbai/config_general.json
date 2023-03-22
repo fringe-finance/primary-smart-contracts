@@ -1,0 +1,185 @@
+{
+    "priceOracle": {
+        "tokensUseUniswap": [
+            "0x359d51f1164478C776dC8A71458c7570fC8b6D9D",
+            "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E",
+            "0x802B13F8A025357E5560D0FbEAbF7960114b36be"
+        ],
+        "uniswapPairs": [
+            "0x557c9280DF3f06D9EBD09985207326c520eaB421",
+            "0xaD55e1FE0C1c2caF835d8A88aB75442Cec4d4f29",
+            "0xB209b56F0DF053205dF20061044F38A07837cEE7"
+        ],
+        "tokensUseChainlink": [
+            "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
+            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB",
+            "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+        ],
+        "chainlinkAggregatorV3": [
+            "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7",
+            "0x0d79df66BE487753B02D015Fb622DED7f0E9798d",
+            "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+        ],
+        "tokensUseBackendProvider": [],
+        "tokensUseLPProvider": [
+            "0xB3596108EcbEAfC0c48692701Ba7100944504231",
+            "0x543f08E7108CF023dee9F6290a383a8D1B3Db092"
+        ],
+        "wstETHAggregatorPath": [
+            "",
+            ""
+        ],
+        "wstETH": "",
+        "usdc": "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
+        "WETH": "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+    },
+    "pitModeratorParams": {
+        "tokens": [
+            "0x359d51f1164478C776dC8A71458c7570fC8b6D9D",
+            "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E",
+            "0x802B13F8A025357E5560D0FbEAbF7960114b36be",
+            "0xB3596108EcbEAfC0c48692701Ba7100944504231",
+            "0x543f08E7108CF023dee9F6290a383a8D1B3Db092",
+            "0x60f7eE4835269d08d8E3Dd42EeD551688f18b8F7",
+            "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+        ],
+        "loanToValueRatioNumerator": [
+            "6",
+            "6",
+            "6",
+            "9",
+            "9",
+            "6",
+            "6"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10"
+        ],
+        "liquidationTresholdFactorNumerator": [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1"
+        ], 
+        "liquidationTresholdFactorDenominator": [
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1",
+            "1"
+        ],
+        "liquidationIncentiveNumerator": [
+            "115",
+            "115",
+            "115",
+            "115",
+            "115",
+            "115",
+            "115"
+        ],
+        "liquidationIncentiveDenominator": [
+            "100",
+            "100",
+            "100",
+            "100",
+            "100",
+            "100",
+            "100"
+        ],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000"
+        ],
+        "borrowLimitPerLendingToken": [
+            "1000000000000",
+            "1000000000000",
+            "1000000000000"
+        ],
+        "usdc": "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da"
+    },
+    "blendingToken": {
+        "initialExchangeRateMantissa": [
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000"
+        ],
+        "reserveFactorMantissa": [
+            "2500000000000000000",
+            "2500000000000000000",
+            "2500000000000000000"
+        ],
+        "lendingTokens": [
+            "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
+            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB",
+            "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+        ],
+        "symbol": [
+            "fUSDC",
+            "fUSB",
+            "fWETH"
+        ],
+        "decimals": [
+            "6",
+            "18",
+            "18"
+        ],
+        "name": [
+            "fUSDC",
+            "fUSB",
+            "fWETH"
+        ]
+    },
+    "jumRateModel": {
+        "gainPerYear": [
+            "47564697600",
+            "47564697600",
+            "47564697600"
+        ],
+        "jumGainPerYear": [
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000"
+        ],
+        "targetUtil": [
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000"
+        ],
+        "newMaxBorrow": [
+            "10000000000000",
+            "10000000000000",
+            "10000000000000"
+        ],
+        "blocksPerYear": "2102400"
+    },
+    "pitAtomicRepaymentParams": {
+        "augustusParaswap": "0xFFA9325eaa84a092e90cFeff398b98cC39FB0f51",
+        "AUGUSTUS_REGISTRY": "0x251B20B47808A430FeD010C33CCaBBa224E7c4A9"
+    },
+    "pitLiquidationParams": {
+        "minPA": "1000000",
+        "maxLRFNumerator": "115",
+        "maxLRFDenominator": "100",
+        "rewardCalcFactorNumerator": "1",
+        "rewardCalcFactorDenominator": "1",
+        "targetHFNumerator": "1",
+        "targetHFDenominator": "1"
+    }
+}
