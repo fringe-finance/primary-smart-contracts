@@ -112,7 +112,7 @@ contract UniswapV2PriceProvider is PriceProvider,
         uint8 tokenDecimals = uniswapV2metadata.tokenDecimals;
         uint8 pairAssetDecimals = uniswapV2metadata.pairAssetDecimals;
         priceDecimals = 18;
-        price = (10 ** priceDecimals) * (pairAssetReserve / (10 ** pairAssetDecimals)) / (tokenReserve / (10 ** tokenDecimals));
+        price = (10 ** priceDecimals) * (pairAssetReserve * 1e12 / (10 ** pairAssetDecimals)) / (tokenReserve * 1e12 / (10 ** tokenDecimals));
     }
 
     function getEvaluation(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
