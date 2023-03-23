@@ -32,9 +32,9 @@ interface IBLendingToken{
      */
     function redeemUnderlyingTo(address redeemer, uint redeemAmount) external returns (uint);
 
-    function borrowTo(address projectToken, address borrower, uint borrowAmount) external returns (uint borrowError);
+    function borrowTo(address borrower, uint borrowAmount) external returns (uint borrowError);
 
-    function repayBorrowTo(address projectToken, address payer, uint repayAmount) external returns (uint repayBorrowError, uint amountRepayed);
+    function repayTo(address payer, address borrower, uint256 repayAmount) external returns (uint repayBorrowError, uint amountRepayed);
 
     function repayBorrowToBorrower(address projectToken, address payer,address borrower, uint repayAmount) external returns (uint repayBorrowError, uint amountRepayed);
 
@@ -54,6 +54,10 @@ interface IBLendingToken{
     function totalBorrows() external view returns(uint256);
 
     function exchangeRateStored() external view returns (uint256);
+
+    function underlying() external view returns (address);
+
+    function getEstimatedBorrowBalanceStored(address account) external view returns(uint accrual);
 
 
 }
