@@ -30,7 +30,9 @@
     "deployMockToken:zksync": "hardhat deploy-zksync --script deployMockToken.js",
     "deployPriceOracle:zksync": "ZKSYNC=true hardhat deploy-zksync --script deployPriceOracle.js",
     "deployPrimaryLendingPlatform:zksync": "ZKSYNC=true hardhat deploy-zksync --script deployPrimaryLendingPlatform.js",
-    "deploy:zksync": "ZKSYNC=true hardhat deploy-zksync"
+    "deploy:zksync": "ZKSYNC=true hardhat deploy-zksync",
+    "appendUpgradePrimaryIndexToken_goerli": "APPEND_UPGRADE=true npx hardhat run --network ethereum_goerli  ./scripts/upgradeProxy/primaryIndexToken/upgradePrimaryIndexToken.js",
+    "upgradePrimaryIndexToken_goerli": "APPEND_UPGRADE=false npx hardhat run --network ethereum_goerli  ./scripts/upgradeProxy/primaryIndexToken/upgradePrimaryIndexToken.js"
   },
   "author": "",
   "license": "ISC",
@@ -50,7 +52,7 @@
     "@matterlabs/hardhat-zksync-deploy": "^0.6.1",
     "@matterlabs/hardhat-zksync-solc": "^0.3.14",
     "@nomiclabs/hardhat-ethers": "^2.2.1",
-    "@nomiclabs/hardhat-etherscan": "^2.1.3",
+    "@nomiclabs/hardhat-etherscan": "^3.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
     "@types/node": "^18.13.0",
     "chai": "^4.2.0",

@@ -941,8 +941,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
     function _setBondtroller(Bondtroller newBondtroller) public override  returns (uint) {
-        // Check caller is admin
-        if (msg.sender != admin) {
+        // Check caller has moderator role
+        if (!hasRoleModerator(msg.sender)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_COMPTROLLER_OWNER_CHECK);
         }
 
@@ -980,8 +980,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
       * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
       */
     function _setReserveFactorFresh(uint newReserveFactorMantissa) internal returns (uint) {
-        // Check caller is admin
-        if (msg.sender != admin) {
+        // Check caller has moderator role
+        if (!hasRoleModerator(msg.sender)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_RESERVE_FACTOR_ADMIN_CHECK);
         }
 
@@ -1058,7 +1058,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         // Store reserves[n+1] = reserves[n] + actualAddAmount
         totalReserves = totalReservesNew;
 
-        /* Emit NewReserves(admin, actualAddAmount, reserves[n+1]) */
+        /* Emit NewReserves(moderator, actualAddAmount, reserves[n+1]) */
         emit ReservesAdded(msg.sender, actualAddAmount, totalReservesNew);
 
         /* Return (NO_ERROR, actualAddAmount) */
@@ -1067,7 +1067,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
 
 
     /**
-     * @notice Accrues interest and reduces reserves by transferring to admin
+     * @notice Accrues interest and reduces reserves by transferring to moderator
      * @param reduceAmount Amount of reduction to reserves
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
      */
@@ -1082,7 +1082,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Reduces reserves by transferring to admin
+     * @notice Reduces reserves by transferring to moderator
      * @dev Requires fresh interest accrual
      * @param reduceAmount Amount of reduction to reserves
      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
@@ -1091,8 +1091,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         // totalReserves - reduceAmount
         uint totalReservesNew;
 
-        // Check caller is admin
-        if (msg.sender != admin) {
+        // Check caller has moderator role
+        if (!hasRoleModerator(msg.sender)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.REDUCE_RESERVES_ADMIN_CHECK);
         }
 
@@ -1123,9 +1123,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         totalReserves = totalReservesNew;
 
         // doTransferOut reverts if anything goes wrong, since we can't be sure if side effects occurred.
-        doTransferOut(admin, reduceAmount);
+        doTransferOut(payable(msg.sender), reduceAmount);
 
-        emit ReservesReduced(admin, reduceAmount, totalReservesNew);
+        emit ReservesReduced(msg.sender, reduceAmount, totalReservesNew);
 
         return uint(Error.NO_ERROR);
     }
@@ -1157,8 +1157,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         // Used to store old model for use in the event that is emitted on success
         InterestRateModel oldInterestRateModel;
 
-        // Check caller is admin
-        if (msg.sender != admin) {
+        // Check caller has moderator role
+        if (!hasRoleModerator(msg.sender)) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_INTEREST_RATE_MODEL_OWNER_CHECK);
         }
 
@@ -1204,6 +1204,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function doTransferOut(address payable to, uint amount) internal virtual{}
 
+    function hasRoleModerator(address account) public view virtual returns(bool){}
 
     /*** Reentrancy Guard ***/
 
