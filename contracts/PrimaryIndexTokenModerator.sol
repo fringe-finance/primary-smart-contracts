@@ -37,8 +37,12 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
     event SetPriceOracle(address newOracle);
     event AddRelatedContracts(address newRelatedContract);
     event RemoveRelatedContracts(address relatedContract);
+    event SetTotalBorrowPerLendingToken(address lendingToken, uint256 totalAmount);
 
-
+    /** 
+     * @dev Initializes the contract by setting up the default admin role, the moderator role, and the primary index token. 
+     * @param pit The address of the primary index token.
+     */
     function initialize(address pit) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -68,30 +72,57 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
 
     //************* ADMIN FUNCTIONS ********************************
 
+    /**
+     * @dev Grants the moderator role to a new address. 
+     * @param newModerator The address of the new moderator.
+     */
     function grandModerator(address newModerator) public onlyAdmin {
         require(newModerator != address(0), "PIT: invalid address");
         grantRole(MODERATOR_ROLE, newModerator);
         emit GrandModerator(newModerator);
     }
 
+    /** 
+     * @dev Revokes the moderator role from an address. 
+     * @param moderator The address of the moderator to be revoked.
+     */
     function revokeModerator(address moderator) public onlyAdmin {
         require(moderator != address(0), "PIT: invalid address");
         revokeRole(MODERATOR_ROLE, moderator);
         emit RevokeModerator(moderator);
     }
 
+    /** 
+     * @dev Transfers the admin role to a new address. 
+     * @param newAdmin The address of the new admin.
+     */
     function transferAdminship(address newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "PIT: invalid newAdmin");
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         revokeRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
 
+    /** 
+     * @dev Transfers the admin role for the primary index token to a new address. 
+     * @param currentAdmin The address of the current admin. 
+     * @param newAdmin The address of the new admin.
+     */
     function transferAdminshipForPIT(address currentAdmin, address newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "PIT: invalid newAdmin");
         primaryIndexToken.grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         primaryIndexToken.revokeRole(DEFAULT_ADMIN_ROLE, currentAdmin);
     }
 
+    /** 
+     * @dev Adds a new project token to the primary index token. 
+     * @param _projectToken The address of the project token. 
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio. 
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio. 
+     * @param _liquidationThresholdFactorNumerator The numerator of the liquidation threshold factor. 
+     * @param _liquidationThresholdFactorDenominator The denominator of the liquidation threshold factor. 
+     * @param _liquidationIncentiveNumerator The numerator of the liquidation incentive. 
+     * @param _liquidationIncentiveDenominator The denominator of the liquidation incentive.
+     */
     function addProjectToken(
         address _projectToken,
         uint8 _loanToValueRatioNumerator,
@@ -120,6 +151,10 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         primaryIndexToken.setPausedProjectToken(_projectToken, false, false);
     }
 
+    /** 
+     * @dev Removes a project token from the primary index token. 
+     * @param _projectTokenId The ID of the project token to be removed.
+     */
     function removeProjectToken(
         uint256 _projectTokenId
     ) public onlyAdmin isProjectTokenListed(primaryIndexToken.projectTokens(_projectTokenId)) {
@@ -129,12 +164,18 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         emit RemoveProjectToken(projectToken);
     }
 
+    /** 
+     * @dev Adds a new lending token to the primary index token. 
+     * @param _lendingToken The address of the lending token. 
+     * @param _bLendingToken The address of the corresponding bLending token. 
+     * @param _isPaused The initial pause status for the lending token
+     */
     function addLendingToken(
         address _lendingToken, 
         address _bLendingToken,
         bool _isPaused
     ) public onlyAdmin {
-        require(_lendingToken != address(0), "invalid _lendingToken");
+        require(_lendingToken != address(0) && _bLendingToken != address(0), "PIT: invalid address");
 
         string memory lendingTokenName = ERC20Upgradeable(_lendingToken).name();
         string memory lendingTokenSymbol = ERC20Upgradeable(_lendingToken).symbol();
@@ -147,6 +188,10 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         );
     }
 
+    /** 
+     * @dev Removes a lending token from the primary index token. 
+     * @param _lendingTokenId The ID of the lending token to be removed.
+     */
     function removeLendingToken(
         uint256 _lendingTokenId
     ) public onlyAdmin isLendingTokenListed(primaryIndexToken.lendingTokens(_lendingTokenId)) {
@@ -159,24 +204,40 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         emit RemoveLendingToken(lendingToken);
     }
 
+    /** 
+     * @dev Sets the leverage of the primary index token. 
+     * @param newPrimaryIndexTokenLeverage The new leverage value.
+     */
     function setPrimaryIndexTokenLeverage(address newPrimaryIndexTokenLeverage) public onlyAdmin {
         require(newPrimaryIndexTokenLeverage != address(0), "PIT: invalid address");
         primaryIndexToken.setPrimaryIndexTokenLeverage(newPrimaryIndexTokenLeverage);
         emit SetPrimaryIndexTokenLeverage(newPrimaryIndexTokenLeverage);
     }
 
+    /** 
+     * @dev Sets the price oracle for the primary index token. 
+     * @param newOracle The address of the new price oracle.
+     */
     function setPriceOracle(address newOracle) public onlyAdmin {
         require(newOracle != address(0), "PIT: invalid address");
         primaryIndexToken.setPriceOracle(newOracle);
         emit SetPriceOracle(newOracle);
     }
 
+    /** 
+     * @dev Adds an address to the list of related contracts.
+     * @param newRelatedContract The address of the new related contract to be added.
+     */
     function addRelatedContracts(address newRelatedContract) public onlyAdmin {
         require(newRelatedContract != address(0), "PIT: invalid address");
         primaryIndexToken.setRelatedContract(newRelatedContract, true);
         emit AddRelatedContracts(newRelatedContract);
     }
 
+    /** 
+     * @dev Removes an address from the list of related contracts. 
+     * @param relatedContract The address of the related contract to be removed.
+     */
     function removeRelatedContracts(address relatedContract) public onlyAdmin {
         require(relatedContract != address(0), "PIT: invalid address");
         primaryIndexToken.setRelatedContract(relatedContract, false);
@@ -185,6 +246,16 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
 
     //************* MODERATOR FUNCTIONS ********************************
 
+    /** 
+     * @dev Sets the parameters for a project token 
+     * @param _projectToken The address of the project token 
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio for the project token 
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio for the project token 
+     * @param _liquidationThresholdFactorNumerator The numerator of the liquidation threshold factor for the project token 
+     * @param _liquidationThresholdFactorDenominator The denominator of the liquidation threshold factor for the project token 
+     * @param _liquidationIncentiveNumerator The numerator of the liquidation incentive for the project token 
+     * @param _liquidationIncentiveDenominator The denominator of the liquidation incentive for the project token
+     */
     function setProjectTokenInfo(
         address _projectToken,
         uint8 _loanToValueRatioNumerator,
@@ -213,6 +284,12 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         emit LiquidationIncentiveSet(_projectToken, _liquidationIncentiveNumerator, _liquidationIncentiveDenominator);
     }
 
+    /** 
+     * @dev Sets the pause status for deposit and withdrawal of a project token 
+     * @param _projectToken The address of the project token 
+     * @param _isDepositPaused The new pause status for deposit 
+     * @param _isWithdrawPaused The new pause status for withdrawal
+     */
     function setPausedProjectToken(
         address _projectToken, 
         bool _isDepositPaused, 
@@ -222,22 +299,36 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         emit SetPausedProjectToken(_projectToken, _isDepositPaused, _isWithdrawPaused);
     } 
 
+    /** 
+     * @dev Sets the parameters for a lending token 
+     * @param _lendingToken The address of the lending token 
+     * @param _bLendingToken The address of the corresponding bLending token 
+     * @param _isPaused The new pause status for the lending token
+     */
     function setLendingTokenInfo(
         address _lendingToken, 
         address _bLendingToken,
         bool _isPaused
     ) public onlyModerator {
-        require(_bLendingToken != address(0), "invalid _bLendingToken");
         primaryIndexToken.setLendingTokenInfo(_lendingToken, _bLendingToken, _isPaused);
         require(IBLendingToken(_bLendingToken).underlying() == _lendingToken, "PIT: underlyingOfbLendingToken!=lendingToken");
         emit SetPausedLendingToken(_lendingToken, _isPaused);
     }
 
+    /** 
+     * @dev Sets the pause status for a lending token 
+     * @param _lendingToken The address of the lending token 
+     * @param _isPaused The new pause status for the lending token
+     */
     function setPausedLendingToken(address _lendingToken, bool _isPaused) public onlyModerator isLendingTokenListed(_lendingToken) {
         primaryIndexToken.setPausedLendingToken(_lendingToken, _isPaused);
         emit SetPausedLendingToken(_lendingToken, _isPaused);
     }
 
+    /** 
+     * @dev Sets the total amount borrowed for a lending token 
+     * @param lendingToken The address of the lending token
+     */
     function setTotalBorrowPerLendingToken(address lendingToken) public onlyModerator {
         require(lendingToken != address(0), "PIT: invalid address");
         uint256 total;
@@ -246,22 +337,39 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
             total += primaryIndexToken.totalBorrow(projectToken, lendingToken);
         }
         primaryIndexToken.setTotalBorrowPerLendingToken(lendingToken, total);
+        emit SetTotalBorrowPerLendingToken(lendingToken, total);
     }
 
+    /**
+     * @dev Sets the borrow limit per collateral for a given project token.
+     * @param projectToken The project token for which to set the borrow limit.
+     * @param _borrowLimit The new borrow limit.
+     */
     function setBorrowLimitPerCollateral(address projectToken,uint256 _borrowLimit) public onlyModerator isProjectTokenListed(projectToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
+        require(projectToken != address(0), "PIT: invalid address");
         primaryIndexToken.setBorrowLimitPerCollateral(projectToken,_borrowLimit);
         emit SetBorrowLimitPerCollateral(projectToken, _borrowLimit);
     }
 
+    /**
+     * @dev Sets the borrow limit per lending asset for a given lending token.
+     * @param lendingToken The lending token for which to set the borrow limit.
+     * @param _borrowLimit The new borrow limit.
+     */
     function setBorrowLimitPerLendingAsset(address lendingToken, uint256 _borrowLimit) public onlyModerator isLendingTokenListed(lendingToken) {
         require(_borrowLimit > 0, "PIT: borrowLimit=0");
+        require(lendingToken != address(0), "PIT: invalid address");
         primaryIndexToken.setBorrowLimitPerLendingAsset(lendingToken, _borrowLimit);
         emit SetBorrowLimitPerLendingAsset(lendingToken, _borrowLimit);
     }
 
+    /**
+     * @dev Contract function that sets the USDC token address.
+     * @param usdc The new USDC token address.
+     */
     function setUSDCToken(address usdc) public onlyModerator {
-        require(usdc != address(0), "PIT: borrowLimit=0");
+        require(usdc != address(0), "PIT: Invalid address");
         primaryIndexToken.setUSDCToken(usdc);
         emit SetUSDCToken(usdc);
     }

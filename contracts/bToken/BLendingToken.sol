@@ -76,8 +76,12 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
     /********************** MODERATOR FUNCTIONS ********************** */
 
-    function setReserveFactor(uint256 reserveFactorMantissa) public onlyModerator{
-        _setReserveFactorFresh(reserveFactorMantissa);
+    // function setReserveFactor(uint256 reserveFactorMantissa) public onlyModerator{
+    //     _setReserveFactorFresh(reserveFactorMantissa);
+    // }
+
+    function hasRoleModerator(address account) public view override returns(bool) {
+        return hasRole(MODERATOR_ROLE, account);
     }
 
     /********************** END MODERATOR FUNCTIONS ********************** */

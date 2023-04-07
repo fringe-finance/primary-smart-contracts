@@ -23,6 +23,15 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
+    event SetAugustusParaswap(address indexed augustusParaswap, address indexed augustusRegistry);
+
+    /** 
+     * @dev Sets up initial roles, initializes AccessControl, and sets the provided PIT address,
+     * Augustus Paraswap and Augustus Paraswap registry address. 
+     * @param pit The address of the PrimaryIndexToken contract. 
+     * @param augustusParaswap_ The new address of the Augustus Paraswap contract.
+     * @param AUGUSTUS_REGISTRY_ The new address of the Augustus Paraswap registry.
+     */ 
     function initialize(address pit, address augustusParaswap_, address AUGUSTUS_REGISTRY_) public initializer {
         __AccessControl_init();
         __ReentrancyGuard_init_unchained();
@@ -48,6 +57,10 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         _;
     }
 
+    /**
+     * @dev Sets the primary index token to a new value.
+     * @param pit The new primary index token address.
+     */
     function setPrimaryIndexToken(address pit) public onlyModerator() {
         require(pit != address(0), "AtomicRepayment: invalid address");
         address oldPit = address(primaryIndexToken);
@@ -55,26 +68,59 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         emit SetPrimaryIndexToken(oldPit, pit);
     }
 
+    /**
+     * @dev Sets the address of the Augustus Paraswap contract and its registry.
+     * @param augustusParaswap_ The new address of the Augustus Paraswap contract.
+     * @param AUGUSTUS_REGISTRY_ The new address of the Augustus Paraswap registry.
+     */
     function setAugustusParaswap(address augustusParaswap_, address AUGUSTUS_REGISTRY_) public onlyModerator(){
+        require(augustusParaswap_ != address(0) && AUGUSTUS_REGISTRY_ !=address(0), "AtomicRepayment: invalid address");
         augustusParaswap = augustusParaswap_;
         AUGUSTUS_REGISTRY = AUGUSTUS_REGISTRY_;
+        emit SetAugustusParaswap(augustusParaswap_, AUGUSTUS_REGISTRY_);
     }
 
+    /**
+     * @dev Computes the outstanding amount (i.e., loanBody + accrual) for a given user, project token, and lending token.
+     * @param user The user for which to compute the outstanding amount.
+     * @param projectToken The project token for which to compute the outstanding amount.
+     * @param lendingAsset The lending token for which to compute the outstanding amount.
+     * @return outstanding The outstanding amount for the user, project token, and lending token.
+     */
     function getTotalOutstanding(address user, address projectToken, address lendingAsset) public view returns(uint outstanding) {
         (, uint256 loanBody, uint256 accrual, , ) = primaryIndexToken.getPosition(user, projectToken, lendingAsset);
         outstanding = loanBody + accrual;       
     }
 
+    /**
+     * @dev Computes the remaining amount of PIT that a user has after taking into account their outstanding loan amount.
+     * @param account The user for which to compute the remaining PIT amount.
+     * @param projectToken The project token for which to compute the remaining PIT amount.
+     * @param lendingToken The lending token for which to compute the remaining PIT amount.
+     * @return pitRemaining The remaining PIT amount for the user.
+     */
     function getCurrentPitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256 pitRemaining) {
         uint pit = primaryIndexToken.pit(account, projectToken);
         uint outstandingInUSD = primaryIndexToken.getTokenEvaluation(lendingToken, getTotalOutstanding(account, projectToken, lendingToken));
         pitRemaining = pit > outstandingInUSD ? pit - outstandingInUSD : 0;
     }
 
+    /**
+     * @dev Computes the lending token for a given user and project token.
+     * @param user The user for which to compute the lending token.
+     * @param projectToken The project token for which to compute the lending token.
+     * @return actualLendingToken The lending token for the user and project token.
+     */
     function getLendingToken(address user, address projectToken) public view returns(address actualLendingToken) {
         actualLendingToken = primaryIndexToken.getLendingToken(user, projectToken);
     }
 
+    /**
+     * @dev Computes the remaining deposit that a user can withdraw for a given project token.
+     * @param user The user for which to compute the remaining deposit.
+     * @param projectToken The project token for which to compute the remaining deposit.
+     * @return remainingDeposit The remaining deposit that the user can withdraw.
+     */
     function getRemainingDeposit(address user, address projectToken) public view returns(uint remainingDeposit) {
         uint256 depositedProjectTokenAmount = primaryIndexToken.getDepositedAmount(projectToken, user);
         address lendingToken = getLendingToken(user, projectToken);
@@ -93,11 +139,20 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         }
    }
 
-    function repayAtomic(address prjToken, uint collateralAmount, bytes memory buyCalldata) public nonReentrant{
+    /**
+     * @dev Repays a loan atomically using the given project token as collateral.
+     * @param prjToken The project token to use as collateral.
+     * @param collateralAmount The amount of collateral to use.
+     * @param buyCalldata The calldata for the swap operation.
+     * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     */
+    function repayAtomic(address prjToken, uint collateralAmount, bytes memory buyCalldata, bool isRepayFully) public nonReentrant{
         require(IParaSwapAugustusRegistry(AUGUSTUS_REGISTRY).isValidAugustus(augustusParaswap), "AtomicRepayment: INVALID_AUGUSTUS");
         address lendingToken = getLendingToken(msg.sender, prjToken);
         uint remainingDeposit = getRemainingDeposit(msg.sender, prjToken);
-        require(collateralAmount <= remainingDeposit, "AtomicRepayment: invalid amount");
+        if (collateralAmount > remainingDeposit) {
+            collateralAmount = remainingDeposit;
+        }
         primaryIndexToken.calcAndTransferDepositPosition(prjToken, collateralAmount, msg.sender, address(this));
         address tokenTransferProxy = IParaSwapAugustus(augustusParaswap).getTokenTransferProxy();
         uint totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
@@ -105,21 +160,36 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
             ERC20Upgradeable(prjToken).approve(tokenTransferProxy, type(uint256).max);
         }
         (uint amountSold, uint amountRecive) = _buyOnParaSwap(prjToken, lendingToken, augustusParaswap, buyCalldata);
-        require(amountRecive <= totalOutStanding, "AtomicRepayment: invalid amountRecive");
-        //deposit collateral back in the pool, if left after the swap(buy)
+        if (isRepayFully) require(amountRecive >= totalOutStanding, "AtomicRepayment: amount receive not enough to repay fully");
 
-        uint256 collateralBalanceLeft = collateralAmount - amountSold;
-        if (collateralBalanceLeft > 0) {
+        //deposit collateral back in the pool, if left after the swap(buy)
+        if (collateralAmount > amountSold) {
+            uint256 collateralBalanceLeft = collateralAmount - amountSold;
             ERC20Upgradeable(prjToken).approve(address(primaryIndexToken), collateralBalanceLeft);
             primaryIndexToken.depositFromRelatedContracts(prjToken, collateralBalanceLeft, address(this), msg.sender);
         }
 
         address bLendingToken = primaryIndexToken.lendingTokenInfo(lendingToken).bLendingToken;
         ERC20Upgradeable(lendingToken).approve(bLendingToken, amountRecive);
+
         primaryIndexToken.repayFromRelatedContract(prjToken, lendingToken, amountRecive, address(this), msg.sender);
+        
+        uint256 afterLendingBalance = ERC20Upgradeable(lendingToken).balanceOf(address(this));
+        if (afterLendingBalance > 0) {
+            ERC20Upgradeable(lendingToken).transfer(msg.sender, afterLendingBalance);
+        }
+
         emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountRecive);
     }
-
+    /**
+     * @dev Buys tokens on ParaSwap using the given project token and lending token.
+     * @param tokenFrom The token to sell on ParaSwap.
+     * @param tokenTo The token to buy on ParaSwap.
+     * @param _target The address of the Augustus Paraswap contract.
+     * @param buyCalldata The calldata for the buy operation.
+     * @return amountSold The amount of tokens sold on ParaSwap.
+     * @return amountRecive The amount of tokens received from ParaSwap.
+     */
     function _buyOnParaSwap(address tokenFrom, address tokenTo, address _target, bytes memory buyCalldata) public returns (uint amountSold, uint amountRecive) {
         uint beforeBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
         uint beforeBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));

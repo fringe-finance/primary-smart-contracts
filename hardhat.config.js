@@ -108,7 +108,7 @@ if (isZksync) {
       },
 
       polygon_mumbai: {
-        url: `https://rpc.ankr.com/polygon_mumbai`,
+        url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
         accounts: { mnemonic: MNEMONIC },
       },
       optimism_goerli: {
@@ -130,7 +130,7 @@ if (isZksync) {
     },
     gasReporter: {
       enabled: process.env.REPORT_GAS !== undefined,
-      outputFile: "gas-report.txt"
+      currency: "USD",
     },
     mocha: {
       timeout: 60000,
