@@ -110,17 +110,6 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     }
 
     /** 
-     * @notice Retrieves the Loan-to-Value (LTV) ratio for the given project token. 
-     * @param _projectToken The address of the project token. 
-     * @return lvrNumerator The numerator of the LTV ratio. 
-     * @return lvrDenominator The denominator of the LTV ratio. 
-     */
-    function getLVR(address _projectToken) public view returns(uint8 lvrNumerator, uint8 lvrDenominator) {
-        lvrNumerator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.numerator;
-        lvrDenominator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.denominator;
-    }
-
-    /** 
      * @notice Retrieves the price of the given token in USD. 
      * @param token The address of the token to retrieve the price for. 
      * @return price The price of the token in USD. 
@@ -138,20 +127,10 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
      * @param lvrDenominator The denominator of the loan-to-value ratio. 
      * @return isValid True if the collateralization is valid, false otherwise. 
      */
-    function isValidCollateralisation(uint margin, uint exp, uint lvrNumerator, uint lvrDenominator) public pure returns(bool isValid){
+    function isValidCollateralization(uint margin, uint exp, uint lvrNumerator, uint lvrDenominator) public pure returns(bool isValid){
         uint ratioNumerator = (margin + exp) * lvrNumerator;
         uint ratioDenominator = exp * lvrDenominator;
         isValid = ratioNumerator > ratioDenominator ? true : false;
-    }
-
-    /** 
-     * @notice Calculates the collateral token count for a given notional value. 
-     * @param _projectToken The address of the project token. 
-     * @param notionalValue The notional value for which the collateral token count is to be calculated. 
-     * @return collateralTokenCount The calculated collateral token count. 
-     */
-    function calculateCollateralTokenCount(address _projectToken, uint notionalValue) public view returns(uint collateralTokenCount) {
-        collateralTokenCount = notionalValue * 10 ** ERC20Upgradeable(_projectToken).decimals() / getTokenPrice(_projectToken);
     }
 
     /** 
@@ -163,7 +142,6 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     function calculateLendingTokenCount(address _lendingToken, uint notionalValue) public view returns(uint lendingTokenCount) {
         lendingTokenCount = notionalValue * 10 ** ERC20Upgradeable(_lendingToken).decimals() / getTokenPrice(_lendingToken);
     }
-
 
     /** 
      * @notice Calculates the health factor numerator and denominator based on the given parameters. 
@@ -181,16 +159,17 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     }
 
     /** 
-     * @notice Calculates the margin amount for a given project token and safety margin.
+     * @notice Calculates the margin amount for a given position and safety margin.
      * Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
      * @param projectToken The address of the project token. 
+     * @param lendingToken The address of the lending token.
      * @param safetyMarginNumerator The numerator of the safety margin ratio. 
      * @param safetyMarginDenominator The denominator of the safety margin ratio. 
      * @param expAmount The exposure amount. 
      * @return marginAmount The calculated margin amount. 
      */
-    function calculateMargin(address projectToken, uint safetyMarginNumerator, uint safetyMarginDenominator, uint expAmount) public view returns(uint marginAmount) {
-        (uint8 lvrNumerator, uint8 lvrDenominator) = getLVR(projectToken);
+    function calculateMargin(address projectToken, address lendingToken, uint safetyMarginNumerator, uint safetyMarginDenominator, uint expAmount) public view returns(uint marginAmount) {
+        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(projectToken, lendingToken);
         uint margin = (expAmount * (lvrDenominator * (safetyMarginDenominator + safetyMarginNumerator) - lvrNumerator * safetyMarginDenominator) / (lvrNumerator * safetyMarginDenominator));
         marginAmount = margin * 10 ** ERC20Upgradeable(projectToken).decimals() / getTokenPrice(projectToken);
     }
@@ -205,16 +184,17 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     }
 
     /** 
-     * @notice Calculates the safety margin numerator and denominator for a given project token, margin, and exposure. 
+     * @notice Calculates the safety margin numerator and denominator for a given position, margin, and exposure. 
      * Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
      * @param projectToken The address of the project token. 
+     * @param lendingToken The address of the lending token.
      * @param margin The margin amount. 
      * @param exp The exposure amount.
      * @return safetyMarginNumerator The calculated safety margin numerator.
      * @return safetyMarginDenominator The calculated safety margin denominator.
      */
-    function calculateSafetyMargin(address projectToken, uint margin, uint exp) public view returns(uint safetyMarginNumerator, uint safetyMarginDenominator){
-        (uint8 lvrNumerator, uint8 lvrDenominator) = getLVR(projectToken);
+    function calculateSafetyMargin(address projectToken, address lendingToken, uint margin, uint exp) public view returns(uint safetyMarginNumerator, uint safetyMarginDenominator){
+        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(projectToken, lendingToken);
         uint marginPrice = primaryIndexToken.getTokenEvaluation(projectToken, margin);
         safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
         safetyMarginDenominator = (exp * lvrDenominator);
@@ -227,7 +207,7 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
      * @param lendingToken The address of the lending token.
      */
     function _deferLiquidityCheck(address user, address projectToken, address lendingToken) internal view {
-        uint pit = primaryIndexToken.pit(user, projectToken);
+        uint pit = primaryIndexToken.pit(user, projectToken, lendingToken);
         uint totalOutstandingInUSD = primaryIndexToken.totalOutstandingInUSD(user, projectToken, lendingToken);
         uint newTotalBorrowPerCollateral = primaryIndexToken.getTotalBorrowPerCollateral(projectToken);
         uint borrowLimitPerCollateral =  primaryIndexToken.borrowLimitPerCollateral(projectToken);
@@ -288,15 +268,15 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     }
 
     /** 
-     * @notice Collateralizes a loan with the specified parameters. 
+     * @notice Collateralize a loan with the specified parameters. 
      * @param user The address of the user taking the loan. 
-     * @param projectToken The address of the project token to be collateralized. 
+     * @param projectToken The address of the project token to be collateralize. 
      * @param collateralTokenCount The amount of collateral tokens being provided. 
      * @param marginCollateralCount The margin collateral amount. 
      * @return totalCollateral The total amount of collateral tokens. 
      * @return addingAmount The additional collateral amount needed. 
      */
-    function _collateraliseLoan(address user, address projectToken, uint collateralTokenCount, uint marginCollateralCount) internal returns(uint totalCollateral, uint addingAmount){
+    function _collateralizeLoan(address user, address projectToken, uint collateralTokenCount, uint marginCollateralCount) internal returns(uint totalCollateral, uint addingAmount){
         addingAmount = calculateAddingAmount(user, projectToken, marginCollateralCount);
         totalCollateral = collateralTokenCount + addingAmount;
         primaryIndexToken.calcDepositPosition(projectToken, totalCollateral, user);
@@ -332,18 +312,6 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     }
 
     /** 
-     * @notice Checks if the slippage is within the acceptable range. 
-     * @param collateralTokenCount The amount of collateral tokens. 
-     * @param maxSlippage The maximum acceptable slippage. 
-     * @param amountRecive The amount of tokens received. 
-     */
-    function _checkSlippage(uint collateralTokenCount, uint maxSlippage, uint amountRecive) internal pure {
-        uint realRate = amountRecive * decimalPercent / collateralTokenCount;
-        uint slippage = decimalPercent >= realRate ? decimalPercent - realRate : realRate - decimalPercent;
-        require(maxSlippage >= slippage, "PITLeverage: over maxSlippage");
-    }
-
-    /** 
      * @notice Executes a leveraged borrow operation for the specified project token, lending token, and notional exposure. 
      * @param projectToken The address of the project token. 
      * @param lendingToken The address of the lending token. 
@@ -371,7 +339,7 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
     /**
      * @notice Executes a leveraged borrow for the borrower on the specified projectToken using the given lendingToken.
      * @dev This function checks for a valid lending token, a valid Augustus address, calculates the lendingTokenCount, and performs a naked borrow.
-     * It also approves the token transfer proxy, buys tokens on ParaSwap, collateralizes the loan, and defers liquidity check.
+     * It also approves the token transfer proxy, buys tokens on ParaSwap, collateralize the loan, and defers liquidity check.
      * Finally, it emits a LeveragedBorrow event.
      * @param projectToken The address of the token being borrowed.
      * @param lendingToken The address of the token being used as collateral.
@@ -389,7 +357,6 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
         _checkIsValidPosition(borrower, projectToken, lendingToken, marginCollateralAmount);
         
         uint lendingTokenCount = calculateLendingTokenCount(lendingToken, notionalExposure);
-        // uint collateralTokenCount = calculateCollateralTokenCount(projectToken, notionalExposure);
         address tokenTransferProxy = IParaSwapAugustus(augustusParaswap).getTokenTransferProxy();
 
         _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
@@ -398,9 +365,7 @@ contract PrimaryIndexTokenLeverage is Initializable, AccessControlUpgradeable, R
 
         uint amountRecive = _buyOnParaSwap(projectToken, augustusParaswap, buyCalldata);
 
-        // checkSlippage(collateralTokenCount, maxSlippage, amountRecive);
-
-        (uint totalCollateral, uint addingAmount) = _collateraliseLoan(borrower, projectToken, amountRecive, marginCollateralAmount);
+        (uint totalCollateral, uint addingAmount) = _collateralizeLoan(borrower, projectToken, amountRecive, marginCollateralAmount);
 
         _deferLiquidityCheck(borrower, projectToken, lendingToken);
 

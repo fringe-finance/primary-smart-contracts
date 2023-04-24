@@ -135,6 +135,8 @@ module.exports = {
         let name = blendingToken.name;
         let symbol = blendingToken.symbol;
         let decimals = blendingToken.decimals;
+        let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
+        let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
 
         let tokens = pitModeratorParams.tokens;
         let loanToValueRatioNumerator = pitModeratorParams.loanToValueRatioNumerator;
@@ -608,6 +610,7 @@ module.exports = {
             let adminBlendingToken = await blending.admin();
             if (adminBlendingToken == ZERO_ADDRESS) {
                 let admin = deployMaster.address;
+                console.log("blending " + blending.address + " admin " + admin)
                 await blending.init(
                     lendingTokens[i],
                     bondtrollerProxyAddress,
@@ -619,10 +622,6 @@ module.exports = {
                     admin
                 ).then(function(){
                     console.log("blending call init at " + blending.address);
-                });
-        
-                await blending.setReserveFactor(reserveFactorMantissa[i]).then(function(){
-                    console.log("blending set reserve factor " + reserveFactorMantissa[i]);
                 });
             
                 await blending.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
@@ -640,7 +639,7 @@ module.exports = {
                 console.log("PrimaryIndexToken call initialize at " + pit.address)
             });
 
-            await pit.setprimaryIndexTokenModerator(primaryIndexTokenModeratorProxyAddress)
+            await pit.setPrimaryIndexTokenModerator(primaryIndexTokenModeratorProxyAddress)
             .then(function(){
                 console.log("PrimaryIndexToken set moderator contract: " + primaryIndexTokenModeratorProxyAddress);
             });
@@ -692,9 +691,14 @@ module.exports = {
                 await pitModerator.addLendingToken(
                     lendingTokens[i], 
                     blendingTokenProxyAddresses[i], 
-                    isPaused
+                    isPaused,
+                    loanToValueRatioNumeratorLendingToken[i],
+                    loanToValueRatioDenominatorLendingToken[i],
                 ).then(function(){
                     console.log("Added lending token: " + lendingTokens[i]);
+                    console.log("LoanToValueRatio: ")
+                    console.log("   Numerator:   "+loanToValueRatioNumeratorLendingToken[i]);
+                    console.log("   Denominator: "+loanToValueRatioDenominatorLendingToken[i]);
                 });
     
             }
@@ -793,7 +797,7 @@ module.exports = {
         let moderatorRoleWrappedTokenGateway = await pitWrappedTokenGateway.MODERATOR_ROLE();
         let isModeratorWrappedTokenGateway = await pitWrappedTokenGateway.hasRole(moderatorRoleWrappedTokenGateway, deployMasterAddress);
         if (!isModeratorWrappedTokenGateway) { 
-            await pitWrappedTokenGateway.initialize(primaryIndexTokenProxyAddress, WETH, primaryIndexTokenLiquidationProxyAddress)
+            await pitWrappedTokenGateway.initialize(primaryIndexTokenProxyAddress, WETH, primaryIndexTokenLiquidationProxyAddress, primaryIndexTokenLeverageProxyAddress)
             .then(function(){
                 console.log("PrimaryIndexTokenWrappedTokenGateway call initialize at " + pitWrappedTokenGateway.address)
             });

@@ -30,7 +30,9 @@
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
-        "name": []
+        "name": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": []
     },
     "jumRateModel": {
         "gainPerYear": [],

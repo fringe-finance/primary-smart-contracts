@@ -100,7 +100,7 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
      * @return pitRemaining The remaining PIT amount for the user.
      */
     function getCurrentPitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256 pitRemaining) {
-        uint pit = primaryIndexToken.pit(account, projectToken);
+        uint pit = primaryIndexToken.pit(account, projectToken, lendingToken);
         uint outstandingInUSD = primaryIndexToken.getTokenEvaluation(lendingToken, getTotalOutstanding(account, projectToken, lendingToken));
         pitRemaining = pit > outstandingInUSD ? pit - outstandingInUSD : 0;
     }
@@ -131,11 +131,29 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
 
             uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
 
-            IPrimaryIndexToken.Ratio memory lvr = primaryIndexToken.projectTokenInfo(projectToken).loanToValueRatio;
+            (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(projectToken, lendingToken);
             
-            uint256 collateralRemaining = depositRemaining * lvr.denominator * (10 ** projectTokenDecimals) / primaryIndexToken.getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvr.numerator;
+            uint256 collateralRemaining = depositRemaining * lvrDenominator * (10 ** projectTokenDecimals) / primaryIndexToken.getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvrNumerator;
             
             remainingDeposit = depositedProjectTokenAmount >= collateralRemaining ? collateralRemaining : 0;
+        }
+   }
+
+   /**
+     * @dev Computes the available lending token amount that a user can repay for a given project token.
+     * @param user The user for which to compute the available lending token amount.
+     * @param projectToken The project token for which to compute the available lending token amount.
+     * @param lendingToken The lending token for which to compute the available lending token amount.
+     * @return availableLendingAmount The available lending token amount that the user can repay.
+     */
+    function getAvailableRepaidAmount(address user, address projectToken, address lendingToken) public view returns(uint256 availableLendingAmount) {
+        uint256 remainingDeposit = getRemainingDeposit(user, projectToken);
+        // convert remainingDeposit to lending token
+        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
+        availableLendingAmount = primaryIndexToken.getTokenEvaluation(projectToken, remainingDeposit) * lendingTokenMultiplier / primaryIndexToken.getTokenEvaluation(lendingToken, lendingTokenMultiplier);
+        uint256 totalOutStanding = getTotalOutstanding(msg.sender, projectToken, lendingToken);
+        if (availableLendingAmount > totalOutStanding) {
+            availableLendingAmount = totalOutStanding;
         }
    }
 
@@ -159,8 +177,8 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         if(ERC20Upgradeable(prjToken).allowance(address(this), tokenTransferProxy) <= collateralAmount) {
             ERC20Upgradeable(prjToken).approve(tokenTransferProxy, type(uint256).max);
         }
-        (uint amountSold, uint amountRecive) = _buyOnParaSwap(prjToken, lendingToken, augustusParaswap, buyCalldata);
-        if (isRepayFully) require(amountRecive >= totalOutStanding, "AtomicRepayment: amount receive not enough to repay fully");
+        (uint amountSold, uint amountReceive) = _buyOnParaSwap(prjToken, lendingToken, augustusParaswap, buyCalldata);
+        if (isRepayFully) require(amountReceive >= totalOutStanding, "AtomicRepayment: amount receive not enough to repay fully");
 
         //deposit collateral back in the pool, if left after the swap(buy)
         if (collateralAmount > amountSold) {
@@ -170,16 +188,16 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         }
 
         address bLendingToken = primaryIndexToken.lendingTokenInfo(lendingToken).bLendingToken;
-        ERC20Upgradeable(lendingToken).approve(bLendingToken, amountRecive);
+        ERC20Upgradeable(lendingToken).approve(bLendingToken, amountReceive);
 
-        primaryIndexToken.repayFromRelatedContract(prjToken, lendingToken, amountRecive, address(this), msg.sender);
+        primaryIndexToken.repayFromRelatedContract(prjToken, lendingToken, amountReceive, address(this), msg.sender);
         
         uint256 afterLendingBalance = ERC20Upgradeable(lendingToken).balanceOf(address(this));
         if (afterLendingBalance > 0) {
             ERC20Upgradeable(lendingToken).transfer(msg.sender, afterLendingBalance);
         }
 
-        emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountRecive);
+        emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountReceive);
     }
     /**
      * @dev Buys tokens on ParaSwap using the given project token and lending token.
@@ -188,9 +206,9 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
      * @param _target The address of the Augustus Paraswap contract.
      * @param buyCalldata The calldata for the buy operation.
      * @return amountSold The amount of tokens sold on ParaSwap.
-     * @return amountRecive The amount of tokens received from ParaSwap.
+     * @return amountReceive The amount of tokens received from ParaSwap.
      */
-    function _buyOnParaSwap(address tokenFrom, address tokenTo, address _target, bytes memory buyCalldata) public returns (uint amountSold, uint amountRecive) {
+    function _buyOnParaSwap(address tokenFrom, address tokenTo, address _target, bytes memory buyCalldata) public returns (uint amountSold, uint amountReceive) {
         uint beforeBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
         uint beforeBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
         // solium-disable-next-line security/no-call-value
@@ -205,7 +223,7 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         uint afterBalanceFrom = ERC20Upgradeable(tokenFrom).balanceOf(address(this));
         uint afterBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
         amountSold = beforeBalanceFrom - afterBalanceFrom;
-        amountRecive = afterBalanceTo - beforeBalanceTo;
+        amountReceive = afterBalanceTo - beforeBalanceTo;
     }
 
 }

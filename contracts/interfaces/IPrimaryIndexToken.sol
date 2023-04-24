@@ -38,7 +38,7 @@ interface IPrimaryIndexToken {
     function borrowLimitPerCollateral(address) external view returns(uint);
 
     function depositFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) external;
-    function withdrawFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiar) external returns(uint256);
+    function withdrawFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) external returns(uint256);
     function supplyFromRelatedContract(address lendingToken, uint256 lendingTokenAmount, address user) external;
     function redeemFromRelatedContract(address lendingToken, uint256 bLendingTokenAmount, address user) external;
     function redeemUnderlyingFromRelatedContract(address lendingToken, uint256 lendingTokenAmount, address user) external;
@@ -259,11 +259,15 @@ interface IPrimaryIndexToken {
      * @param _lendingToken - address of lending token
      * @param _bLendingToken - address of bLendingToken
      * @param _isPaused - true - if pause, false - if unpause
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio for the lending token
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio for the lending token
      */
     function setLendingTokenInfo(
         address _lendingToken, 
         address _bLendingToken,
-        bool _isPaused
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator
     ) external;
 
     /**
@@ -342,8 +346,9 @@ interface IPrimaryIndexToken {
      * @dev return pit amount of borrow position
      * @param account - address of borrower
      * @param projectToken - address of project token
+     * @param lendingToken - address of lending token
      */
-    function pit(address account, address projectToken) external view returns (uint256);
+    function pit(address account, address projectToken, address lendingToken) external view returns (uint256);
 
     /**
      * @dev return pit remaining amount of borrow position
@@ -398,4 +403,19 @@ interface IPrimaryIndexToken {
      * @dev return decimals of PrimaryIndexToken
      */
     function decimals() external view returns (uint8);
+
+    /**
+     * @dev return loan to value ratio of lending token
+     * @param lendingToken - address of lending token
+     */
+    function lendingTokenLoanToValueRatio(address lendingToken) external view returns(uint8 numerator, uint8 denominator);
+
+    /** 
+     * @dev Get the loan to value ratio of a position taken by a project token and a lending token
+     * @param projectToken The address of the project token 
+     * @param lendingToken The address of the lending token
+     * @return lvrNumerator The numerator of the loan to value ratio
+     * @return lvrDenominator The denominator of the loan to value ratio
+     */
+    function getLoanToValueRatio(address projectToken, address lendingToken) external view returns (uint256 lvrNumerator, uint256 lvrDenominator);
 }

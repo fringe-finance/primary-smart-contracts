@@ -139,12 +139,12 @@ if (isZksync) {
       apiKey: {
         mainnet: ETHERSCAN_API_KEY,
         goerli: ETHERSCAN_API_KEY,
-        polygon_mainnet: POLYGONSCAN_API_KEY,
-        polygon_mumbai: POLYGONSCAN_API_KEY,
-        arbitrum_mainnet: ARBISCAN_API_KEY,
-        arbitrum_goerli: ARBISCAN_API_KEY,
-        optimism_mainnet: OPTIMISM_API_KEY,
-        optimism_goerli: OPTIMISM_API_KEY,
+        polygon: POLYGONSCAN_API_KEY,
+        polygonMumbai: POLYGONSCAN_API_KEY,
+        arbitrumOne: ARBISCAN_API_KEY,
+        arbitrumGoerli: ARBISCAN_API_KEY,
+        optimisticEthereum: OPTIMISM_API_KEY,
+        optimisticGoerli: OPTIMISM_API_KEY,
       },
       
     },
