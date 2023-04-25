@@ -6,9 +6,9 @@
             "0x802B13F8A025357E5560D0FbEAbF7960114b36be"
         ],
         "uniswapPairs": [
-            "0x557c9280DF3f06D9EBD09985207326c520eaB421",
-            "0xaD55e1FE0C1c2caF835d8A88aB75442Cec4d4f29",
-            "0xB209b56F0DF053205dF20061044F38A07837cEE7"
+            "0x969883C417688D5846BEa78700702A23febC8e88",
+            "0x0E4fbF6e81E14a892Aba3bcd7A6C805449a4A253",
+            "0xDA61f5943C71b06A4462A989c018e3873C70b612"
         ],
         "tokensUseChainlink": [
             "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
@@ -26,10 +26,9 @@
             "0x543f08E7108CF023dee9F6290a383a8D1B3Db092"
         ],
         "wstETHAggregatorPath": [
-            "",
-            ""
+            "0x007A22900a3B98143368Bd5906f8E17e9867581b"
         ],
-        "wstETH": "",
+        "wstETH": "0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F",
         "usdc": "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
         "WETH": "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
     },
@@ -144,6 +143,16 @@
             "fUSDC",
             "fUSB",
             "fWETH"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10"
         ]
     },
     "jumRateModel": {

@@ -25,7 +25,7 @@ async function main() {
     let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
 
     let signers = await hre.ethers.getSigners();
-    let deployMaster = signers[1];
+    let deployMaster = signers[0];
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
@@ -152,22 +152,22 @@ async function main() {
           return instance;
         });
       
-      // // Atomic
-      // await proxyAdmin
-      //   .upgrade(
-      //     PrimaryIndexTokenAtomicRepaymentProxy,
-      //     PrimaryIndexTokenAtomicRepaymentLogic
-      //   )
-      //   .then(function (instance) {
-      //     console.log("Atomic:");
-      //     console.log(
-      //       "ProxyAdmin upgrade " +
-      //         PrimaryIndexTokenAtomicRepaymentProxy +
-      //         " to " +
-      //         PrimaryIndexTokenAtomicRepaymentLogic
-      //     );
-      //     return instance;
-      //   });
+      // Atomic
+      await proxyAdmin
+        .upgrade(
+          PrimaryIndexTokenAtomicRepaymentProxy,
+          PrimaryIndexTokenAtomicRepaymentLogic
+        )
+        .then(function (instance) {
+          console.log("Atomic:");
+          console.log(
+            "ProxyAdmin upgrade " +
+              PrimaryIndexTokenAtomicRepaymentProxy +
+              " to " +
+              PrimaryIndexTokenAtomicRepaymentLogic
+          );
+          return instance;
+        });
 
       //Liquidation
       await proxyAdmin

@@ -186,7 +186,6 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
      */
     function liquidateFromModerator(address _account, address _projectToken, address _lendingToken, uint256 _lendingTokenAmount, address liquidator) public isProjectTokenListed(_projectToken) isLendingTokenListed(_lendingToken) onlyRelatedContracts() nonReentrant returns(uint256) {
         return _liquidate(_account, _projectToken, _lendingToken, _lendingTokenAmount, liquidator);
-         
     }
 
     /**
@@ -301,8 +300,7 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
 
         if (lrfNumerator == 0 && depositedProjectTokenAmount == 0) return loanBody + accrual;
 
-        uint256 lvrNumerator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.numerator;
-        uint256 lvrDenominator = primaryIndexToken.projectTokenInfo(_projectToken).loanToValueRatio.denominator;
+        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(_projectToken, _lendingToken);
 
         maxLAParams.numeratorMaxLA = _checkNegativeNumber(lvrNumerator * depositedProjectTokenAmountInUSD * targetHf.denominator, lvrDenominator * targetHf.numerator * totalOutstandingInUSD) * lrfDenominator;
         maxLAParams.denominatorMaxLA = _checkNegativeNumber(lrfNumerator * lvrNumerator * targetHf.denominator, targetHf.numerator * lvrDenominator * lrfDenominator);

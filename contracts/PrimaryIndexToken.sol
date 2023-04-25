@@ -50,6 +50,8 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
 
     address public primaryIndexTokenModerator;
 
+    mapping(address => Ratio) public lendingTokenLoanToValueRatio;   // loan to value ratio of the lending token
+
     struct Ratio {
         uint8 numerator;
         uint8 denominator;
@@ -140,7 +142,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @dev Sets the address of the new moderator contract by the admin.
      * @param newModeratorContract The address of the new moderator contract.
      */ 
-    function setprimaryIndexTokenModerator(address newModeratorContract) public onlyAdmin {
+    function setPrimaryIndexTokenModerator(address newModeratorContract) public onlyAdmin {
         require(newModeratorContract != address(0), "PIT: invalid address");
         emit SetModeratorContract(primaryIndexTokenModerator, newModeratorContract);
         primaryIndexTokenModerator = newModeratorContract;
@@ -208,6 +210,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     ) public onlyModeratorContract {
         require(lendingTokens[_lendingTokenId] == lendingToken, "PIT: invalid address");
         delete lendingTokenInfo[lendingToken];
+        delete lendingTokenLoanToValueRatio[lendingToken];
 
         lendingTokens[_lendingTokenId] = lendingTokens[lendingTokens.length - 1];
         lendingTokens.pop();
@@ -298,11 +301,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @param _lendingToken The address of the lending token.
      * @param _bLendingToken The address of the bLendingToken.
      * @param _isPaused Boolean indicating whether the lending token is paused or unpaused.
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio for the lending token.
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio for the lending token.
      */
     function setLendingTokenInfo(
         address _lendingToken, 
         address _bLendingToken,
-        bool _isPaused
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator
     ) public onlyModeratorContract {
         if(!lendingTokenInfo[_lendingToken].isListed){
             lendingTokens.push(_lendingToken);
@@ -313,6 +320,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         
         info.isPaused = _isPaused;
         info.bLendingToken = BLendingToken(_bLendingToken);
+        lendingTokenLoanToValueRatio[_lendingToken] = Ratio(_loanToValueRatioNumerator, _loanToValueRatioDenominator);
     }
 
     /**
@@ -418,11 +426,11 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @param projectToken The address of the project token being withdrawn 
      * @param projectTokenAmount The amount of project tokens being withdrawn 
      * @param user The address of the user whose deposit position is being withdrawn from 
-     * @param beneficiar The address of the user receiving the withdrawn project tokens 
-     * @return amount of project tokens withdrawn and transferred to the beneficiar
+     * @param beneficiary The address of the user receiving the withdrawn project tokens 
+     * @return amount of project tokens withdrawn and transferred to the beneficiary
      */
-    function withdrawFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiar) public isProjectTokenListed(projectToken) nonReentrant returns(uint256) {
-        return _withdraw(projectToken, projectTokenAmount, user, beneficiar);
+    function withdrawFromRelatedContracts(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) public isProjectTokenListed(projectToken) nonReentrant returns(uint256) {
+        return _withdraw(projectToken, projectTokenAmount, user, beneficiary);
     }
 
     /** 
@@ -430,7 +438,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @param projectToken Address of the project token. 
      * @param projectTokenAmount Amount of project tokens to be withdrawn. 
      * @param user Address of the user. 
-     * @param beneficiar Address of the beneficiary to receive the withdrawn tokens. 
+     * @param beneficiary Address of the beneficiary to receive the withdrawn tokens. 
      * @return The amount of project tokens withdrawn. 
      * Requirements: 
      ** The project token is not paused for withdrawals. 
@@ -443,7 +451,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      ** Transfers the withdrawn project tokens to the beneficiary. 
      ** Emits a Withdraw event. 
      */
-    function _withdraw(address projectToken, uint256 projectTokenAmount, address user, address beneficiar) internal returns(uint256){
+    function _withdraw(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal returns(uint256){
         require(!projectTokenInfo[projectToken].isWithdrawPaused, "PIT: projectToken is paused");
         DepositPosition storage _depositPosition = depositPosition[user][projectToken][usdcToken];
         require(projectTokenAmount > 0 && _depositPosition.depositedProjectTokenAmount > 0, "PIT: invalid PRJ token amount or depositPosition doesn't exist");
@@ -457,7 +465,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (projectTokenAmount == type(uint256).max) {
             if (borrowPosition[user][projectToken][actualLendingToken].loanBody > 0) {
                 uint256 depositedProjectTokenAmount = _depositPosition.depositedProjectTokenAmount;
-                uint256 collateralAvailableToWithdraw = getCollateralAvailableToWithdraw(user, projectToken);
+                uint256 collateralAvailableToWithdraw = getCollateralAvailableToWithdraw(user, projectToken, actualLendingToken);
                 if (depositedProjectTokenAmount >= collateralAvailableToWithdraw){
                     projectTokenAmount = collateralAvailableToWithdraw;
                 } else {
@@ -469,15 +477,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
         require(projectTokenAmount <= _depositPosition.depositedProjectTokenAmount, "PIT: try to withdraw more than available");
         _depositPosition.depositedProjectTokenAmount -= projectTokenAmount;
-        if (_totalOutstanding >  0) {
+        if (_totalOutstanding > 0) {
             (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(user, projectToken, actualLendingToken);
             if (healthFactorNumerator < healthFactorDenominator) {
                 revert("PIT: withdrawable amount makes healthFactor<1");
             }
         }
         totalDepositedProjectToken[projectToken] -= projectTokenAmount;
-        ERC20Upgradeable(projectToken).safeTransfer(beneficiar, projectTokenAmount);
-        emit Withdraw(user, projectToken, actualLendingToken, projectTokenAmount, beneficiar);
+        ERC20Upgradeable(projectToken).safeTransfer(beneficiary, projectTokenAmount);
+        emit Withdraw(user, projectToken, actualLendingToken, projectTokenAmount, beneficiary);
         return projectTokenAmount;
     }
 
@@ -505,13 +513,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     /**
      * @dev Calculates the collateral available for withdrawal based on the loan-to-value ratio of a specific project token. 
      * @param account Address of the user. 
-     * @param projectToken Address of the project token. 
+     * @param projectToken Address of the project token.
+     * @param lendingToken Address of the lending token. 
      * @return collateralProjectToWithdraw The amount of collateral available for withdrawal in the project token.
      */
-    function getCollateralAvailableToWithdraw(address account, address projectToken) public view returns(uint collateralProjectToWithdraw) {
-        Ratio memory lvr = projectTokenInfo[projectToken].loanToValueRatio;
+    function getCollateralAvailableToWithdraw(address account, address projectToken, address lendingToken) public view returns(uint collateralProjectToWithdraw) {
+        (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
         uint depositRemaining = pitRemaining(account, projectToken); 
-        collateralProjectToWithdraw = depositRemaining * lvr.denominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvr.numerator;
+        collateralProjectToWithdraw = depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvrNumerator;
     }
 
     /** 
@@ -702,7 +711,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         totalBorrowPerLendingToken[lendingToken] += lendingTokenAmount;
 
         if(currentLendingToken == address(0)) {
-            lendingTokenPerCollateral[borrower][projectToken]  = lendingToken;
+            lendingTokenPerCollateral[borrower][projectToken] = lendingToken;
         }
         info.bLendingToken.borrowTo(borrower, lendingTokenAmount);
     }
@@ -869,15 +878,15 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     //************* VIEW FUNCTIONS ********************************
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and project token.
+     * @dev Returns the PIT (primary index token) value for a given account and position.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
+     * @param lendingToken Address of the lending token.
      * @return The PIT value.
-     * Formular: pit = $ * LVR
+     * Formula: pit = $ * LVR
      */
-    function pit(address account, address projectToken) public view returns (uint256) {
-        uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
-        uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
+    function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
         uint256 evaluation = getTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount * lvrNumerator / lvrDenominator);
         return evaluation;
     }
@@ -902,14 +911,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     /**
-     * @dev Returns the remaining PIT (primary index token) of a user's borrow position for a specific project token
+     * @dev Returns the remaining PIT (primary index token) of a user's borrow position
      * @param account The address of the user's borrow position
      * @param projectToken The address of the project token
      * @return remaining The remaining PIT of the user's borrow position
      */
     function pitRemaining(address account, address projectToken) public view returns (uint256) {
         address lendingToken = getLendingToken(account, projectToken);
-        uint256 _pit = pit(account, projectToken);
+        uint256 _pit = pit(account, projectToken, lendingToken);
         uint remaining;
         if(_pit > 0) {
             remaining = lendingToken == address(0) ? _pit : _pitRemaining(account, projectToken, lendingToken, _pit);
@@ -936,14 +945,6 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         }
     }
 
-    // function liquidationThreshold(address account, address projectToken, address lendingToken) public view returns (uint256) {
-    //     ProjectTokenInfo memory info = projectTokenInfo[projectToken];   
-    //     uint256 liquidationThresholdFactorNumerator = info.liquidationThresholdFactor.numerator;
-    //     uint256 liquidationThresholdFactorDenominator = info.liquidationThresholdFactor.denominator;
-    //     uint256 _totalOutstanding = totalOutstandingInUSD(account, projectToken, lendingToken);
-    //     return _totalOutstanding * liquidationThresholdFactorNumerator / liquidationThresholdFactorDenominator;
-    // }
-
     /**
      * @dev Returns the total outstanding amount of a user's borrow position for a specific project token and lending token
      * @param account The address of the user's borrow position
@@ -965,7 +966,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @return denominator The denominator of the health factor
      */
     function healthFactor(address account, address projectToken, address lendingToken) public view returns (uint256 numerator, uint256 denominator) {
-        numerator = pit(account, projectToken);
+        numerator = pit(account, projectToken, lendingToken);
         denominator = totalOutstandingInUSD(account, projectToken, lendingToken);
     }
 
@@ -1021,7 +1022,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (estimatedBorrowBalance >= cumulativeTotalOutstanding && cumulativeLoanBody > 0) {
             accrual += loanBody * (estimatedBorrowBalance - cumulativeTotalOutstanding) / cumulativeLoanBody;
         }
-        healthFactorNumerator = pit(account, projectToken);
+        healthFactorNumerator = pit(account, projectToken, lendingToken);
         uint amount = loanBody + accrual;
         healthFactorDenominator = getTokenEvaluation(lendingToken, amount);
     }
@@ -1093,5 +1094,19 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         uint256 lendingTokenAmount = pitRemainingValue * (10 ** lendingTokenDecimals) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals); 
         return lendingTokenAmount;
+    }
+
+    /** 
+     * @dev Get the loan to value ratio of a position taken by a project token and a lending token
+     * @param projectToken The address of the project token 
+     * @param lendingToken The address of the lending token
+     * @return lvrNumerator The numerator of the loan to value ratio
+     * @return lvrDenominator The denominator of the loan to value ratio
+     */
+    function getLoanToValueRatio(address projectToken, address lendingToken) public view returns (uint256 lvrNumerator, uint256 lvrDenominator) {
+        Ratio memory lvrProjectToken = projectTokenInfo[projectToken].loanToValueRatio;
+        Ratio memory lvrLendingToken = lendingTokenLoanToValueRatio[lendingToken];
+        lvrNumerator = lvrProjectToken.numerator * lvrLendingToken.numerator;
+        lvrDenominator = lvrProjectToken.denominator * lvrLendingToken.denominator;
     }
 }

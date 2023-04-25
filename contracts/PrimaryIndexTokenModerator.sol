@@ -38,6 +38,7 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
     event AddRelatedContracts(address newRelatedContract);
     event RemoveRelatedContracts(address relatedContract);
     event SetTotalBorrowPerLendingToken(address lendingToken, uint256 totalAmount);
+    event LendingTokenLoanToValueRatioSet(address indexed lendingToken, uint8 lvrNumerator, uint8 lvrDenominator);
 
     /** 
      * @dev Initializes the contract by setting up the default admin role, the moderator role, and the primary index token. 
@@ -60,7 +61,7 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         _;
     }
 
-        modifier isProjectTokenListed(address _projectToken) {
+    modifier isProjectTokenListed(address _projectToken) {
         require(primaryIndexToken.projectTokenInfo(_projectToken).isListed, "PIT: project token is not listed");
         _;
     }
@@ -148,7 +149,7 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
             _liquidationIncentiveDenominator
         );
 
-        primaryIndexToken.setPausedProjectToken(_projectToken, false, false);
+        setPausedProjectToken(_projectToken, false, false);
     }
 
     /** 
@@ -169,11 +170,15 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
      * @param _lendingToken The address of the lending token. 
      * @param _bLendingToken The address of the corresponding bLending token. 
      * @param _isPaused The initial pause status for the lending token
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio.
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio.
      */
     function addLendingToken(
         address _lendingToken, 
         address _bLendingToken,
-        bool _isPaused
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator
     ) public onlyAdmin {
         require(_lendingToken != address(0) && _bLendingToken != address(0), "PIT: invalid address");
 
@@ -184,7 +189,9 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
         setLendingTokenInfo(
             _lendingToken, 
             _bLendingToken, 
-            _isPaused
+            _isPaused,
+            _loanToValueRatioNumerator,
+            _loanToValueRatioDenominator
         );
     }
 
@@ -304,15 +311,20 @@ contract PrimaryIndexTokenModerator is Initializable, AccessControlUpgradeable
      * @param _lendingToken The address of the lending token 
      * @param _bLendingToken The address of the corresponding bLending token 
      * @param _isPaused The new pause status for the lending token
+     * @param _loanToValueRatioNumerator The numerator of the loan-to-value ratio for the lending token
+     * @param _loanToValueRatioDenominator The denominator of the loan-to-value ratio for the lending token
      */
     function setLendingTokenInfo(
         address _lendingToken, 
         address _bLendingToken,
-        bool _isPaused
+        bool _isPaused,
+        uint8 _loanToValueRatioNumerator,
+        uint8 _loanToValueRatioDenominator
     ) public onlyModerator {
-        primaryIndexToken.setLendingTokenInfo(_lendingToken, _bLendingToken, _isPaused);
+        primaryIndexToken.setLendingTokenInfo(_lendingToken, _bLendingToken, _isPaused, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
         require(IBLendingToken(_bLendingToken).underlying() == _lendingToken, "PIT: underlyingOfbLendingToken!=lendingToken");
         emit SetPausedLendingToken(_lendingToken, _isPaused);
+        emit LendingTokenLoanToValueRatioSet(_lendingToken, _loanToValueRatioNumerator, _loanToValueRatioDenominator);
     }
 
     /** 
