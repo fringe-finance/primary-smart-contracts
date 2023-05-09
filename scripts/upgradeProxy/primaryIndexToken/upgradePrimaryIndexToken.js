@@ -5,241 +5,78 @@ const path = require("path");
 const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
-async function main() {
-    const {
-      PRIMARY_PROXY_ADMIN,
-      PrimaryIndexTokenLogic,
-      PrimaryIndexTokenProxy,
-      PrimaryIndexTokenAtomicRepaymentLogic,
-      PrimaryIndexTokenAtomicRepaymentProxy,
-      PrimaryIndexTokenLiquidationLogic,
-      PrimaryIndexTokenLiquidationProxy,
-      PrimaryIndexTokenModeratorLogic,
-      PrimaryIndexTokenModeratorProxy,
-      PrimaryIndexTokenWrappedTokenGatewayLogic,
-      PrimaryIndexTokenWrappedTokenGatewayProxy,
-      PrimaryIndexTokenLeverageLogic,
-      PrimaryIndexTokenLeverageProxy,
-    } = config;
+let {
+  PRIMARY_PROXY_ADMIN,
+  PrimaryIndexTokenLogic,
+  PrimaryIndexTokenProxy
+} = config;
 
-    let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
+let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
+let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
+let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
+
+module.exports = {
+  upgradePrimaryIndexToken: async function () {
 
     let signers = await hre.ethers.getSigners();
     let deployMaster = signers[0];
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
+    let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
+
+    if (!primaryIndexTokenLogicAddress) {
+      pit = await PrimaryIndexToken.connect(deployMaster).deploy();
+      await pit.deployed().then(function (instance) {
+        primaryIndexTokenLogicAddress = instance.address;
+        config.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress;
+        fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
+      });
+    }
+    console.log("PrimaryIndexToken masterCopy address: " + primaryIndexTokenLogicAddress);
+
     let proxyAdmin = await ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
-
-    console.log("process.env.APPEND_UPGRADE: ",process.env.APPEND_UPGRADE);
-    if(process.env.APPEND_UPGRADE == 'true') {
-      // PIT
+    let upgradeData = await proxyAdmin.upgradeData(
+      primaryIndexTokenProxyAddress
+    );
+    let appendTimestamp = Number(upgradeData.appendTimestamp)
+    if (appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
-          PrimaryIndexTokenProxy,
-          PrimaryIndexTokenLogic
+          primaryIndexTokenProxyAddress,
+          primaryIndexTokenLogicAddress
         )
         .then(function (instance) {
-          console.log("PIT:");
           console.log(
             "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenProxy +
-              " to " +
-              PrimaryIndexTokenLogic
-          );
-          return instance;
-        });
-      
-      // Atomic
-      await proxyAdmin
-        .appendUpgrade(
-          PrimaryIndexTokenAtomicRepaymentProxy,
-          PrimaryIndexTokenAtomicRepaymentLogic
-        )
-        .then(function (instance) {
-          console.log("Atomic:");
-          console.log(
-            "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenAtomicRepaymentProxy +
-              " to " +
-              PrimaryIndexTokenAtomicRepaymentLogic
-          );
-          return instance;
-        });
-
-      //Liquidation
-      await proxyAdmin
-        .appendUpgrade(
-          PrimaryIndexTokenLiquidationProxy,
-          PrimaryIndexTokenLiquidationLogic
-        )
-        .then(function (instance) {
-          console.log("Liquidation:");
-          console.log(
-            "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenLiquidationProxy +
-              " to " +
-              PrimaryIndexTokenLiquidationLogic
-          );
-          return instance;
-        });
-
-      // Moderator
-      await proxyAdmin
-        .appendUpgrade(
-          PrimaryIndexTokenModeratorProxy,
-          PrimaryIndexTokenModeratorLogic
-        )
-        .then(function (instance) {
-          console.log("Moderator:");
-          console.log(
-            "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenModeratorProxy +
-              " to " +
-              PrimaryIndexTokenModeratorLogic
-          );
-          return instance;
-        });
-
-      // WTG
-      await proxyAdmin
-        .appendUpgrade(
-          PrimaryIndexTokenWrappedTokenGatewayProxy,
-          PrimaryIndexTokenWrappedTokenGatewayLogic
-        )
-        .then(function (instance) {
-          console.log("WTG:");
-          console.log(
-            "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenWrappedTokenGatewayProxy +
-              " to " +
-              PrimaryIndexTokenWrappedTokenGatewayLogic
-          );
-          return instance;
-        });
-
-      //Leverage
-      await proxyAdmin
-        .appendUpgrade(
-          PrimaryIndexTokenLeverageProxy,
-          PrimaryIndexTokenLeverageLogic
-        )
-        .then(function (instance) {
-          console.log("Leverage:");
-          console.log(
-            "ProxyAdmin appendUpgrade " +
-              PrimaryIndexTokenLeverageProxy +
-              " to " +
-              PrimaryIndexTokenLeverageLogic
+            primaryIndexTokenProxyAddress +
+            " to " +
+            primaryIndexTokenLogicAddress
           );
           return instance;
         });
     } else {
-      // PIT
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenProxy,
-          PrimaryIndexTokenLogic
-        )
-        .then(function (instance) {
-          console.log("PIT:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenProxy +
+      let timeStamp = (await hre.ethers.provider.getBlock("latest")).timestamp;
+      let delayPeriod = Number(upgradeData.delayPeriod);
+      if (appendTimestamp + delayPeriod <= timeStamp) {
+        await proxyAdmin
+          .upgrade(primaryIndexTokenProxyAddress, primaryIndexTokenLogicAddress)
+          .then(function (instance) {
+            console.log(
+              "ProxyAdmin upgraded " +
+              primaryIndexTokenProxyAddress +
               " to " +
-              PrimaryIndexTokenLogic
-          );
-          return instance;
-        });
-      
-      // Atomic
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenAtomicRepaymentProxy,
-          PrimaryIndexTokenAtomicRepaymentLogic
-        )
-        .then(function (instance) {
-          console.log("Atomic:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenAtomicRepaymentProxy +
-              " to " +
-              PrimaryIndexTokenAtomicRepaymentLogic
-          );
-          return instance;
-        });
-
-      //Liquidation
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenLiquidationProxy,
-          PrimaryIndexTokenLiquidationLogic
-        )
-        .then(function (instance) {
-          console.log("Liquidation:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenLiquidationProxy +
-              " to " +
-              PrimaryIndexTokenLiquidationLogic
-          );
-          return instance;
-        });
-
-      // Moderator
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenModeratorProxy,
-          PrimaryIndexTokenModeratorLogic
-        )
-        .then(function (instance) {
-          console.log("Moderator:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenModeratorProxy +
-              " to " +
-              PrimaryIndexTokenModeratorLogic
-          );
-          return instance;
-        });
-
-      // WTG
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenWrappedTokenGatewayProxy,
-          PrimaryIndexTokenWrappedTokenGatewayLogic
-        )
-        .then(function (instance) {
-          console.log("WTG:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenWrappedTokenGatewayProxy +
-              " to " +
-              PrimaryIndexTokenWrappedTokenGatewayLogic
-          );
-          return instance;
-        });
-
-      //Leverage
-      await proxyAdmin
-        .upgrade(
-          PrimaryIndexTokenLeverageProxy,
-          PrimaryIndexTokenLeverageLogic
-        )
-        .then(function (instance) {
-          console.log("Leverage:");
-          console.log(
-            "ProxyAdmin upgrade " +
-              PrimaryIndexTokenLeverageProxy +
-              " to " +
-              PrimaryIndexTokenLeverageLogic
-          );
-          return instance;
-        });
+              primaryIndexTokenLogicAddress
+            );
+            return instance;
+          });
+      } else {
+        console.log("AppendTimestamp", appendTimestamp);
+        console.log("Delay time ", delayPeriod);
+        console.log("Current ", timeStamp);
+        console.log("Can upgrade at ", appendTimestamp + delayPeriod);
+        console.log("Need to wait another " + (appendTimestamp + delayPeriod - timeStamp) + "s");
+      }
     }
+  }
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});

@@ -257,8 +257,6 @@ module.exports = {
             "0x"
         ], "JumpRateModelProxy");
 
-        let owner = deployMasterAddress;
-
     //====================================================
         console.log();
         console.log("***** BONDTROLLER DEPLOYMENT *****");
@@ -304,7 +302,6 @@ module.exports = {
                 blendingTokenLogicAddress = instance.address;
                 config.BLendingTokenLogic = blendingTokenLogicAddress;
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
-    
             });
         }
         console.log("BLendingToken masterCopy address: " + blendingTokenLogicAddress);
@@ -383,7 +380,7 @@ module.exports = {
             });
         }
 
-        console.log("PrimaryIndexToken masterCopy address: " + primaryIndexTokenModeratorLogicAddress);
+        console.log("PrimaryIndexTokenModerator masterCopy address: " + primaryIndexTokenModeratorLogicAddress);
         await verify(primaryIndexTokenModeratorLogicAddress, [], "PrimaryIndexTokenModeratorLogic");
 
         if(!primaryIndexTokenModeratorProxyAddress) {
@@ -399,7 +396,7 @@ module.exports = {
             });
         }
 
-        console.log("PrimaryIndexToken moderator proxy address: " + primaryIndexTokenModeratorProxyAddress);
+        console.log("PrimaryIndexTokenModerator proxy address: " + primaryIndexTokenModeratorProxyAddress);
         await verify(primaryIndexTokenModeratorProxyAddress, [
             primaryIndexTokenModeratorLogicAddress,
             proxyAdminAddress,
@@ -570,23 +567,36 @@ module.exports = {
         pitWrappedTokenGateway = await PrimaryIndexTokenWrappedTokenGateway.attach(primaryIndexTokenWrappedTokenGatewayProxyAddress).connect(deployMaster);
 
         console.log();
-        console.log("***** 1. Seting Bondtroller *****");
+        console.log("***** 1. Setting Bondtroller *****");
         let adminBondtroller = await bondtroller.admin();
         if (adminBondtroller == ZERO_ADDRESS) {
             await bondtroller.init().then(function(instance){
                 console.log("Bondtroller " + bondtroller.address + "call init at tx hash: " + instance.hash);
             });
-            await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress).then(function(){
-                console.log("Bondtroller set PIT " + primaryIndexTokenProxyAddress);
-            });
-            for(var i = 0; i < blendingTokenProxyAddresses.length; i++) {
-                await bondtroller.supportMarket(blendingTokenProxyAddresses[i]).then(function(){
-                    console.log("Bondtroller support market " + blendingTokenProxyAddresses[i]);
+        }
+        
+        {
+            let primaryIndexTokenAddress = await bondtroller.getPrimaryIndexTokenAddress();
+            if (primaryIndexTokenAddress != primaryIndexTokenProxyAddress) {
+                await bondtroller.setPrimaryIndexTokenAddress(primaryIndexTokenProxyAddress).then(function(){
+                    console.log("Bondtroller set PIT " + primaryIndexTokenProxyAddress);
                 });
             }
         }
-
-        console.log("***** 2. Seting JumRateModel *****");
+        
+        {
+            let allMarkets = await bondtroller.getAllMarkets();
+            for(var i = 0; i < blendingTokenProxyAddresses.length; i++) {
+                if (allMarkets.indexOf(blendingTokenProxyAddresses[i]) == -1) {
+                    await bondtroller.supportMarket(blendingTokenProxyAddresses[i]).then(function(){
+                        console.log("Bondtroller support market " + blendingTokenProxyAddresses[i]);
+                    });
+                }
+            }
+        }
+        
+        console.log();
+        console.log("***** 2. Setting JumRateModel *****");
 
         let MODERATOR_ROLE = await jumpRateModel.MODERATOR_ROLE();
         let isMODERATOR = await jumpRateModel.hasRole(MODERATOR_ROLE, deployMasterAddress);
@@ -603,7 +613,7 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 3. Seting BLending token *****");
+        console.log("***** 3. Setting BLending token *****");
 
         for(var i = 0; i < lendingTokens.length; i++) { 
             blending = await BLendingToken.attach(blendingTokenProxyAddresses[i]).connect(deployMaster);
@@ -623,47 +633,73 @@ module.exports = {
                 ).then(function(){
                     console.log("blending call init at " + blending.address);
                 });
-            
-                await blending.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
-                    console.log("blending " + blending.address +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
-                });
+            }
+            {
+                let pitAddress = await blending.primaryIndexToken();
+                if (pitAddress != primaryIndexTokenProxyAddress) {
+                    await blending.setPrimaryIndexToken(primaryIndexTokenProxyAddress).then(function(){
+                        console.log("blending " + blending.address +" set primaryIndexToken " + primaryIndexTokenProxyAddress);
+                    });
+                }
             }
         }
 
         console.log();
-        console.log("***** 4. Seting PIT token *****");
+        console.log("***** 4. Setting PIT token *****");
         let namePit = await pit.name();
         if(!namePit) {
             await pit.initialize()
             .then(function(){
                 console.log("PrimaryIndexToken call initialize at " + pit.address)
             });
+        }
 
-            await pit.setPrimaryIndexTokenModerator(primaryIndexTokenModeratorProxyAddress)
-            .then(function(){
-                console.log("PrimaryIndexToken set moderator contract: " + primaryIndexTokenModeratorProxyAddress);
-            });
-            
+        {
+            let pitModerator = await pit.primaryIndexTokenModerator();
+            if (pitModerator != primaryIndexTokenModeratorProxyAddress) {
+                await pit.setPrimaryIndexTokenModerator(primaryIndexTokenModeratorProxyAddress)
+                    .then(function(){
+                        console.log("PrimaryIndexToken set moderator contract: " + primaryIndexTokenModeratorProxyAddress);
+                    });
+            }
         }
 
         console.log();
-        console.log("***** 5. Seting PIT Moderator token *****");
+        console.log("***** 5. Setting PIT Moderator token *****");
         let primaryIndexToken = await pitModerator.primaryIndexToken();
         if(primaryIndexToken == ZERO_ADDRESS) {
             await pitModerator.initialize(primaryIndexTokenProxyAddress)
             .then(function(){
                 console.log("PrimaryIndexToken call initialize at " + pitModerator.address)
             });
-
-            await pitModerator.setPriceOracle(PriceProviderAggregatorProxy).then(function(){
-                console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy);
-            });
-
-            await pitModerator.setUSDCToken(usdc).then(function(){
-                console.log("PrimaryIndexToken set usdc: " + usdc);
-            });
-        
-            for(var i = 0; i < tokens.length; i++){
+        }
+        {
+            let priceOracle = await pit.priceOracle();
+            if (priceOracle != PriceProviderAggregatorProxy) {
+                await pitModerator.setPriceOracle(PriceProviderAggregatorProxy).then(function(){
+                    console.log("PrimaryIndexToken set priceOracle: " + PriceProviderAggregatorProxy);
+                });
+            }
+        }
+        {
+            let usdcToken = await pit.usdcToken();
+            if (usdcToken != usdc) {
+                await pitModerator.setUSDCToken(usdc).then(function(){
+                    console.log("PrimaryIndexToken set usdc: " + usdc);
+                });
+            }
+        }
+    
+        for(var i = 0; i < tokens.length; i++){
+            let projectTokenInfo = await pit.projectTokenInfo(tokens[i]);
+            if (projectTokenInfo.isListed == false 
+                || projectTokenInfo.loanToValueRatio.numerator != loanToValueRatioNumerator[i]
+                || projectTokenInfo.loanToValueRatio.denominator != loanToValueRatioDenominator[i]
+                || projectTokenInfo.liquidationThresholdFactor.numerator != liquidationTresholdFactorNumerator[i]
+                || projectTokenInfo.liquidationThresholdFactor.denominator != liquidationTresholdFactorDenominator[i]
+                || projectTokenInfo.liquidationIncentive.numerator != liquidationIncentiveNumerator[i]
+                || projectTokenInfo.liquidationIncentive.denominator != liquidationIncentiveDenominator[i]
+            ) {
                 await pitModerator.addProjectToken( 
                     tokens[i],
                     loanToValueRatioNumerator[i],
@@ -684,26 +720,35 @@ module.exports = {
                     console.log("   Numerator:   "+liquidationIncentiveNumerator[i]);
                     console.log("   Denominator: "+liquidationIncentiveDenominator[i]);
                 });
-                
             }
-        
-            for(var i = 0; i < lendingTokens.length; i++){
-                await pitModerator.addLendingToken(
-                    lendingTokens[i], 
-                    blendingTokenProxyAddresses[i], 
-                    isPaused,
-                    loanToValueRatioNumeratorLendingToken[i],
-                    loanToValueRatioDenominatorLendingToken[i],
-                ).then(function(){
-                    console.log("Added lending token: " + lendingTokens[i]);
-                    console.log("LoanToValueRatio: ")
-                    console.log("   Numerator:   "+loanToValueRatioNumeratorLendingToken[i]);
-                    console.log("   Denominator: "+loanToValueRatioDenominatorLendingToken[i]);
-                });
+        }
     
-            }
-    
-            for(var i = 0; i < tokens.length; i++){
+        for(var i = 0; i < lendingTokens.length; i++){
+            let lendingTokenInfo = await pit.lendingTokenInfo(lendingTokens[i]);
+            let lendingTokenLoanToValueRatio = await pit.lendingTokenLoanToValueRatio(lendingTokens[i]);
+            if (lendingTokenInfo.isListed == false 
+                || lendingTokenInfo.isPaused != isPaused
+                || lendingTokenInfo.bLendingToken != blendingTokenProxyAddresses[i]
+                || lendingTokenLoanToValueRatio.numerator != loanToValueRatioNumeratorLendingToken[i]
+                || lendingTokenLoanToValueRatio.denominator != loanToValueRatioDenominatorLendingToken[i]
+            )
+            await pitModerator.addLendingToken(
+                lendingTokens[i], 
+                blendingTokenProxyAddresses[i], 
+                isPaused,
+                loanToValueRatioNumeratorLendingToken[i],
+                loanToValueRatioDenominatorLendingToken[i],
+            ).then(function(){
+                console.log("Added lending token: " + lendingTokens[i]);
+                console.log("LoanToValueRatio: ")
+                console.log("   Numerator:   "+loanToValueRatioNumeratorLendingToken[i]);
+                console.log("   Denominator: "+loanToValueRatioDenominatorLendingToken[i]);
+            });
+        }
+
+        for(var i = 0; i < tokens.length; i++){
+            let borrowLimitPerCollateralValue = await pit.borrowLimitPerCollateral(tokens[i]);
+            if (borrowLimitPerCollateralValue.toString() != borrowLimitPerCollateral[i]) {
                 await pitModerator.setBorrowLimitPerCollateral(
                     tokens[i], 
                     borrowLimitPerCollateral[i]
@@ -711,8 +756,11 @@ module.exports = {
                     console.log("PrimaryIndexToken set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
                 });
             }
-    
-            for(var i = 0; i < lendingTokens.length; i++){
+        }
+
+        for(var i = 0; i < lendingTokens.length; i++){
+            let borrowLimitPerLendingTokenValue = await pit.borrowLimitPerLendingToken(lendingTokens[i]);
+            if (borrowLimitPerLendingTokenValue.toString() != borrowLimitPerLendingToken[i]) {
                 await pitModerator.setBorrowLimitPerLendingAsset(
                     lendingTokens[i], 
                     borrowLimitPerLendingToken[i]
@@ -720,31 +768,55 @@ module.exports = {
                     console.log("PrimaryIndexToken set " + lendingTokens[i] + " borrow limit " + borrowLimitPerLendingToken[i]);
                 });
             }
-
-            await pitModerator.addRelatedContracts(primaryIndexTokenAtomicRepaymentProxyAddress).then(function(){
-                console.log("PrimaryIndexToken set role for atomic repayment contract " + primaryIndexTokenAtomicRepaymentProxyAddress);
-            })
-    
-            await pitModerator.addRelatedContracts(primaryIndexTokenLiquidationProxyAddress).then(function(){
-                console.log("PrimaryIndexToken set role for liquidation contract " + primaryIndexTokenLiquidationProxyAddress);
-            }) 
-            
-            await pitModerator.addRelatedContracts(primaryIndexTokenLeverageProxyAddress).then(function(){
-                console.log("PrimaryIndexToken set role for Leverage contract " + primaryIndexTokenLeverageProxyAddress);
-            }) 
-
-            await pitModerator.addRelatedContracts(primaryIndexTokenWrappedTokenGatewayProxyAddress).then(function(){
-                console.log("PrimaryIndexToken set role for Wrapped Token Gateway contract " + primaryIndexTokenWrappedTokenGatewayProxyAddress);
-            }) 
-
-            await pitModerator.setPrimaryIndexTokenLeverage(primaryIndexTokenLeverageProxyAddress).then(function(){
-                console.log("PrimaryIndexToken set Leverage contract " + primaryIndexTokenLeverageProxyAddress);
-            }) 
         }
 
+        {
+            let primaryIndexTokenLeverage = await pit.primaryIndexTokenLeverage();
+            if (primaryIndexTokenLeverage != primaryIndexTokenLeverageProxyAddress) {
+                await pitModerator.setPrimaryIndexTokenLeverage(primaryIndexTokenLeverageProxyAddress).then(function(){
+                    console.log("PrimaryIndexToken set Leverage contract " + primaryIndexTokenLeverageProxyAddress);
+                })
+            }
+        }
+
+        {
+            let isRelatedContract = await pit.getRelatedContract(primaryIndexTokenAtomicRepaymentProxyAddress);
+            if (isRelatedContract == false) {
+                await pitModerator.addRelatedContracts(primaryIndexTokenAtomicRepaymentProxyAddress).then(function(){
+                    console.log("PrimaryIndexToken set role for atomic repayment contract " + primaryIndexTokenAtomicRepaymentProxyAddress);
+                })
+            }
+        }
+
+        {
+            let isRelatedContract = await pit.getRelatedContract(primaryIndexTokenLiquidationProxyAddress);
+            if (isRelatedContract == false) {
+                await pitModerator.addRelatedContracts(primaryIndexTokenLiquidationProxyAddress).then(function(){
+                    console.log("PrimaryIndexToken set role for liquidation contract " + primaryIndexTokenLiquidationProxyAddress);
+                })
+            }
+        }
+        
+        {
+            let isRelatedContract = await pit.getRelatedContract(primaryIndexTokenLeverageProxyAddress);
+            if (isRelatedContract == false) {
+                await pitModerator.addRelatedContracts(primaryIndexTokenLeverageProxyAddress).then(function(){
+                    console.log("PrimaryIndexToken set role for Leverage contract " + primaryIndexTokenLeverageProxyAddress);
+                })
+            }
+        }
+
+        {
+            let isRelatedContract = await pit.getRelatedContract(primaryIndexTokenWrappedTokenGatewayProxyAddress);
+            if (isRelatedContract == false) {
+                await pitModerator.addRelatedContracts(primaryIndexTokenWrappedTokenGatewayProxyAddress).then(function(){
+                    console.log("PrimaryIndexToken set role for Wrapped Token Gateway contract " + primaryIndexTokenWrappedTokenGatewayProxyAddress);
+                }) 
+            }
+        }
 
         console.log();
-        console.log("***** 6. Seting PIT Liquidation *****");
+        console.log("***** 6. Setting PIT Liquidation *****");
         let moderatorRoleLiquidation = await pitLiquidation.MODERATOR_ROLE();
         let isModeratorLiquidation = await pitLiquidation.hasRole(moderatorRoleLiquidation, deployMasterAddress);
         if (!isModeratorLiquidation) { 
@@ -752,26 +824,46 @@ module.exports = {
             .then(function(){
                 console.log("PrimaryIndexTokenLiquidation call initialize at " + pitLiquidation.address)
             });
+        }
 
-            await pitLiquidation.setMinPartialLiquidationAmount(minPA).then(function(){
-                console.log("PrimaryIndexTokenLiquidation set minPA " + minPA);
-            })
+        {
+            let minPartialLiquidationAmount = await pitLiquidation.minPartialLiquidationAmount();
+            if (minPartialLiquidationAmount != minPA) {
+                await pitLiquidation.setMinPartialLiquidationAmount(minPA).then(function(){
+                    console.log("PrimaryIndexTokenLiquidation set minPA " + minPA);
+                })
+            }
+        }
+        
+        {
+            let maxLRF = await pitLiquidation.maxLRF();
+            if (maxLRF.numerator != maxLRFNumerator || maxLRF.denominator != maxLRFDenominator) {
+                await pitLiquidation.setMaxLRF(maxLRFNumerator, maxLRFDenominator).then(function(){
+                    console.log("PrimaryIndexTokenLiquidation set maxLRF " + maxLRFNumerator + "/" + maxLRFDenominator);
+                })
+            }
+        }
 
-            await pitLiquidation.setMaxLRF(maxLRFNumerator, maxLRFDenominator).then(function(){
-                console.log("PrimaryIndexTokenLiquidation set maxLRF " + maxLRFNumerator + "/" + maxLRFDenominator);
-            })
-
-            await pitLiquidation.setLiquidatorRewardCalculationFactor(rewardCalcFactorNumerator, rewardCalcFactorDenominator).then(function(){
-                console.log("PrimaryIndexTokenLiquidation set rewardCalcFactor " + rewardCalcFactorNumerator + "/" + rewardCalcFactorDenominator);
-            })
-
-            await pitLiquidation.setTargetHealthFactor(targetHFNumerator, targetHFDenominator).then(function(){
-                console.log("PrimaryIndexTokenLiquidation set targetHF " + targetHFNumerator + "/" + targetHFDenominator);
-            })
+        {
+            let liquidatorRewardCalcFactor = await pitLiquidation.liquidatorRewardCalcFactor();
+            if (liquidatorRewardCalcFactor.numerator != rewardCalcFactorNumerator || liquidatorRewardCalcFactor.denominator != rewardCalcFactorDenominator) {
+                await pitLiquidation.setLiquidatorRewardCalculationFactor(rewardCalcFactorNumerator, rewardCalcFactorDenominator).then(function(){
+                    console.log("PrimaryIndexTokenLiquidation set rewardCalcFactor " + rewardCalcFactorNumerator + "/" + rewardCalcFactorDenominator);
+                })
+            }
+        }
+        
+        {
+            let targetHealthFactor = await pitLiquidation.targetHealthFactor();
+            if (targetHealthFactor.numerator != targetHFNumerator || targetHealthFactor.denominator != targetHFDenominator) {
+                await pitLiquidation.setTargetHealthFactor(targetHFNumerator, targetHFDenominator).then(function(){
+                    console.log("PrimaryIndexTokenLiquidation set targetHF " + targetHFNumerator + "/" + targetHFDenominator);
+                })
+            }
         }
 
         console.log();
-        console.log("***** 7. Seting PIT atomic repayment *****");
+        console.log("***** 7. Setting PIT atomic repayment *****");
         let moderatorRoleAtomic = await pitAtomicRepayment.MODERATOR_ROLE();
         let isModeratorAtomic = await pitAtomicRepayment.hasRole(moderatorRoleAtomic, deployMasterAddress);
         if (!isModeratorAtomic) { 
@@ -782,7 +874,7 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 8. Seting PIT leverage *****");
+        console.log("***** 8. Setting PIT leverage *****");
         let moderatorRoleLeverage = await pitLeverage.MODERATOR_ROLE();
         let isModeratorLeverage = await pitLeverage.hasRole(moderatorRoleLeverage, deployMasterAddress);
         if (!isModeratorLeverage) { 
@@ -793,7 +885,7 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 9. Seting PIT Wrapped Token Gateway *****");
+        console.log("***** 9. Setting PIT Wrapped Token Gateway *****");
         let moderatorRoleWrappedTokenGateway = await pitWrappedTokenGateway.MODERATOR_ROLE();
         let isModeratorWrappedTokenGateway = await pitWrappedTokenGateway.hasRole(moderatorRoleWrappedTokenGateway, deployMasterAddress);
         if (!isModeratorWrappedTokenGateway) { 
@@ -814,7 +906,6 @@ module.exports = {
             pitModerator: primaryIndexTokenModeratorProxyAddress,
             pitWrappedTokenGateway: primaryIndexTokenWrappedTokenGatewayProxyAddress
         }
-        console.log(addresses);
         return addresses;
     }
 };

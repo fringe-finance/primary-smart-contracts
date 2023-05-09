@@ -5,10 +5,10 @@ const toBN = (num) => BN.from(num);
 
 module.exports = {
    
-    deploymentRinkeby : async function () {
+    deployment : async function () {
 
     //====================================================
-    //declare parametrs
+    //declare parameters
 
         let network = await hre.network;
         console.log("Network name: "+network.name);
@@ -40,6 +40,10 @@ module.exports = {
         backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
         uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
+
+        console.log();
+        console.log();
+        console.log();
 
     //====================================================================
     //deploy all system of USBPlatform

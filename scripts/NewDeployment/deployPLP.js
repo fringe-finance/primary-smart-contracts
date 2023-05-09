@@ -1,9 +1,9 @@
 
-const { deploymentRinkeby } = require("./deploymentPLP.js");
+const { deployment } = require("./deploymentPLP.js");
 
 async function main() {
  
-    await deploymentRinkeby();
+    await deployment();
 }
 
 main().catch((error) => {
