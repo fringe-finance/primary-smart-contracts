@@ -164,6 +164,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function setPrimaryIndexTokenLeverage(address newPrimaryIndexTokenLeverage) public onlyModeratorContract {
         primaryIndexTokenLeverage = IPrimaryIndexTokenLeverage(newPrimaryIndexTokenLeverage);
+        setRelatedContract(newPrimaryIndexTokenLeverage, true);
     }
 
     /**
@@ -519,7 +520,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function getCollateralAvailableToWithdraw(address account, address projectToken, address lendingToken) public view returns(uint collateralProjectToWithdraw) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
-        uint depositRemaining = pitRemaining(account, projectToken); 
+        uint depositRemaining = pitRemaining(account, projectToken, lendingToken); 
         collateralProjectToWithdraw = depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvrNumerator;
     }
 
@@ -674,7 +675,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         if (lendingTokenAmount == type(uint256).max) {
             lendingTokenAmount = convertPitRemaining(user, projectToken, lendingToken);
         }
-        require(getTokenEvaluation(lendingToken, lendingTokenAmount) <= pitRemaining(user, projectToken), "PIT: lendingTokenAmount exceeds pitRemaining");
+        require(getTokenEvaluation(lendingToken, lendingTokenAmount) <= pitRemaining(user, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
         require(getTotalBorrowPerCollateral(projectToken) + getTokenEvaluation(lendingToken, lendingTokenAmount) <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit per collateral asset");
         require(getTotalBorrowPerLendingToken(lendingToken) + getTokenEvaluation(lendingToken, lendingTokenAmount) <= borrowLimitPerLendingToken[lendingToken], "PIT: totalBorrow exceeded borrowLimit per lending asset");
         
@@ -858,8 +859,10 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 cumulativeTotalOutstanding = 0;
         for(uint256 i = 0; i < projectTokens.length; i++) {
             BorrowPosition memory _borrowPosition = borrowPosition[account][projectTokens[i]][lendingToken];
-            cumulativeLoanBody += _borrowPosition.loanBody;
-            cumulativeTotalOutstanding += _borrowPosition.loanBody + _borrowPosition.accrual;
+            if (_borrowPosition.loanBody > 0) {
+                cumulativeLoanBody += _borrowPosition.loanBody;
+                cumulativeTotalOutstanding += _borrowPosition.loanBody + _borrowPosition.accrual;
+            }
         }
         if (cumulativeLoanBody == 0) {
             return;
@@ -867,10 +870,13 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         uint256 currentBorrowBalance = lendingTokenInfo[lendingToken].bLendingToken.borrowBalanceCurrent(account);
         if (currentBorrowBalance >= cumulativeTotalOutstanding){
             uint256 estimatedAccrual = currentBorrowBalance - cumulativeTotalOutstanding;
-            BorrowPosition storage _borrowPosition;
+            BorrowPosition memory _borrowPosition;
             for(uint i = 0; i < projectTokens.length; i++) {
                 _borrowPosition = borrowPosition[account][projectTokens[i]][lendingToken];
-                _borrowPosition.accrual += estimatedAccrual * _borrowPosition.loanBody / cumulativeLoanBody;
+                if (_borrowPosition.loanBody > 0) {
+                    _borrowPosition.accrual += estimatedAccrual * _borrowPosition.loanBody / cumulativeLoanBody;
+                    borrowPosition[account][projectTokens[i]][lendingToken] = _borrowPosition;
+                }
             }
         }
     }
@@ -878,7 +884,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     //************* VIEW FUNCTIONS ********************************
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and position.
+     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @param lendingToken Address of the lending token.
@@ -887,6 +893,20 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
+        uint256 evaluation = getTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount * lvrNumerator / lvrDenominator);
+        return evaluation;
+    }
+
+    /**
+     * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened
+     * @param account Address of the account.
+     * @param projectToken Address of the project token.
+     * @return The PIT value.
+     * Formula: pit = $ * LVR
+     */
+    function pitCollateral(address account, address projectToken) public view returns (uint256) {
+        uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
+        uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
         uint256 evaluation = getTokenEvaluation(projectToken, depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount * lvrNumerator / lvrDenominator);
         return evaluation;
     }
@@ -914,10 +934,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @dev Returns the remaining PIT (primary index token) of a user's borrow position
      * @param account The address of the user's borrow position
      * @param projectToken The address of the project token
+     * @param lendingToken The address of the lending token
      * @return remaining The remaining PIT of the user's borrow position
      */
-    function pitRemaining(address account, address projectToken) public view returns (uint256) {
-        address lendingToken = getLendingToken(account, projectToken);
+    function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        address existingLendingToken = getLendingToken(account, projectToken);
+        if (existingLendingToken != address(0) && existingLendingToken != lendingToken) {
+            lendingToken = existingLendingToken;
+        }
         uint256 _pit = pit(account, projectToken, lendingToken);
         uint remaining;
         if(_pit > 0) {
@@ -1090,7 +1114,7 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      * @return The converted lending token amount
      */
     function convertPitRemaining(address account, address projectToken, address lendingToken) public view returns(uint256) {
-        uint256 pitRemainingValue = pitRemaining(account, projectToken);
+        uint256 pitRemainingValue = pitRemaining(account, projectToken, lendingToken);
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         uint256 lendingTokenAmount = pitRemainingValue * (10 ** lendingTokenDecimals) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals); 
         return lendingTokenAmount;

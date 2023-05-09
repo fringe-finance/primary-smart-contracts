@@ -3,22 +3,22 @@
         "tokensUseUniswap": [
             "0x359d51f1164478C776dC8A71458c7570fC8b6D9D",
             "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E",
-            "0x802B13F8A025357E5560D0FbEAbF7960114b36be"
+            "0x802B13F8A025357E5560D0FbEAbF7960114b36be",
+            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB"
         ],
         "uniswapPairs": [
             "0x969883C417688D5846BEa78700702A23febC8e88",
             "0x0E4fbF6e81E14a892Aba3bcd7A6C805449a4A253",
-            "0xDA61f5943C71b06A4462A989c018e3873C70b612"
+            "0xDA61f5943C71b06A4462A989c018e3873C70b612",
+            "0xa64EFc25A11fdc863642B2473f7Ff9A1f69691AD"
         ],
         "tokensUseChainlink": [
             "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
-            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB",
             "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
         ],
         "chainlinkAggregatorV3": [
-            "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7",
-            "0x0d79df66BE487753B02D015Fb622DED7f0E9798d",
-            "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+            "0x572dDec9087154dC5dfBB1546Bb62713147e0Ab0",
+            "0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada"
         ],
         "tokensUseBackendProvider": [],
         "tokensUseLPProvider": [
@@ -39,7 +39,6 @@
             "0x802B13F8A025357E5560D0FbEAbF7960114b36be",
             "0xB3596108EcbEAfC0c48692701Ba7100944504231",
             "0x543f08E7108CF023dee9F6290a383a8D1B3Db092",
-            "0x60f7eE4835269d08d8E3Dd42EeD551688f18b8F7",
             "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
         ],
         "loanToValueRatioNumerator": [
@@ -48,11 +47,9 @@
             "6",
             "9",
             "9",
-            "6",
             "6"
         ],
         "loanToValueRatioDenominator": [
-            "10",
             "10",
             "10",
             "10",
@@ -66,11 +63,9 @@
             "1",
             "1",
             "1",
-            "1",
             "1"
         ], 
         "liquidationTresholdFactorDenominator": [
-            "1",
             "1",
             "1",
             "1",
@@ -84,11 +79,9 @@
             "115",
             "115",
             "115",
-            "115",
             "115"
         ],
         "liquidationIncentiveDenominator": [
-            "100",
             "100",
             "100",
             "100",
@@ -98,7 +91,6 @@
         ],
         "isPaused": false,
         "borrowLimitPerCollateral": [
-            "1000000000000",
             "1000000000000",
             "1000000000000",
             "1000000000000",

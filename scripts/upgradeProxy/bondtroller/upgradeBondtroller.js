@@ -5,14 +5,15 @@ const path = require("path");
 const configFile = path.join(__dirname, `../../config/${network}/config.json`);
 const config = require(configFile);
 
-let {PRIMARY_PROXY_ADMIN, BondtrollerLogic, BondtrollerProxy} = config;
+let { PRIMARY_PROXY_ADMIN, BondtrollerLogic, BondtrollerProxy } = config;
 
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let bondtrollerProxyAddress = BondtrollerProxy;
 let bondtrollerLogicAddress = BondtrollerLogic;
 
-async function main() {
-   
+module.exports = {
+  upgradeBondtroller: async function () {
+
     let signers = await hre.ethers.getSigners();
     let deployMaster = signers[0];
     console.log("DeployMaster: " + deployMaster.address);
@@ -20,7 +21,7 @@ async function main() {
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
     let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
 
-    if(!bondtrollerLogicAddress) {
+    if (!bondtrollerLogicAddress) {
       let bondtroller = await Bondtroller.connect(deployMaster).deploy();
       await bondtroller.deployed();
       bondtrollerLogicAddress = bondtroller.address;
@@ -28,14 +29,14 @@ async function main() {
       fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
     console.log("Bondtroller masterCopy address: " + bondtrollerLogicAddress);
-  
+
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
       bondtrollerProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
 
-    if(appendTimestamp == 0) {
+    if (appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
           bondtrollerProxyAddress,
@@ -44,9 +45,9 @@ async function main() {
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-              bondtrollerProxyAddress +
-              " to " +
-              bondtrollerLogicAddress
+            bondtrollerProxyAddress +
+            " to " +
+            bondtrollerLogicAddress
           );
           return instance;
         });
@@ -59,9 +60,9 @@ async function main() {
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-                bondtrollerProxyAddress +
-                " to " +
-                bondtrollerLogicAddress
+              bondtrollerProxyAddress +
+              " to " +
+              bondtrollerLogicAddress
             );
             return instance;
           });
@@ -70,12 +71,8 @@ async function main() {
         console.log("Delay time ", delayPeriod);
         console.log("Current ", timeStamp);
         console.log("Can upgrade at ", appendTimestamp + delayPeriod);
-        console.log("Need to wait another " + (appendTimestamp + delayPeriod - timeStamp)+ "s");
+        console.log("Need to wait another " + (appendTimestamp + delayPeriod - timeStamp) + "s");
       }
     }
-}
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+  }
+};

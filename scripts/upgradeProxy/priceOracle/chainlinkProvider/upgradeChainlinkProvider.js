@@ -11,7 +11,8 @@ let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let chainlinkProviderProxyAddress = ChainlinkPriceProviderProxy;
 let chainlinkProviderLogicAddress = ChainlinkPriceProviderLogic;
 
-async function main() {
+module.exports = {
+  upgradeChainlinkProvider: async function () {
    
     let signers = await hre.ethers.getSigners();
     let deployMaster = signers[0];
@@ -74,8 +75,4 @@ async function main() {
       }
     }
 }
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+};

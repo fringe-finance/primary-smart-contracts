@@ -5,14 +5,15 @@ const path = require("path");
 const configFile = path.join(__dirname, `../../../config/${network}/config.json`);
 const config = require(configFile);
 
-let {PRIMARY_PROXY_ADMIN, BackendPriceProviderLogic, BackendPriceProviderProxy} = config;
+let { PRIMARY_PROXY_ADMIN, BackendPriceProviderLogic, BackendPriceProviderProxy } = config;
 
 let proxyAdmingAddress = PRIMARY_PROXY_ADMIN;
 let backendProviderProxyAddress = BackendPriceProviderProxy;
 let backendProviderLogicAddress = BackendPriceProviderLogic;
 
-async function main() {
-   
+module.exports = {
+  upgradeBackendProvider: async function () {
+
     let signers = await hre.ethers.getSigners();
     let deployMaster = signers[0];
     console.log("DeployMaster: " + deployMaster.address);
@@ -20,7 +21,7 @@ async function main() {
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
     let BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
 
-    if(!backendProviderLogicAddress) {
+    if (!backendProviderLogicAddress) {
       let backendProvider = await BackendPriceProvider.connect(deployMaster).deploy();
       await backendProvider.deployed();
       backendProviderLogicAddress = backendProvider.address;
@@ -28,14 +29,14 @@ async function main() {
       fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
     }
     console.log("Chainlink provider masterCopy address: " + backendProviderLogicAddress);
-  
+
     let proxyAdmin = await ProxyAdmin.attach(proxyAdmingAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
       backendProviderProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
 
-    if(appendTimestamp == 0) {
+    if (appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
           backendProviderProxyAddress,
@@ -44,9 +45,9 @@ async function main() {
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-              backendProviderProxyAddress +
-              " to " +
-              backendProviderLogicAddress
+            backendProviderProxyAddress +
+            " to " +
+            backendProviderLogicAddress
           );
           return instance;
         });
@@ -59,9 +60,9 @@ async function main() {
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-                backendProviderProxyAddress +
-                " to " +
-                backendProviderLogicAddress
+              backendProviderProxyAddress +
+              " to " +
+              backendProviderLogicAddress
             );
             return instance;
           });
@@ -70,12 +71,8 @@ async function main() {
         console.log("Delay time ", delayPeriod);
         console.log("Current ", timeStamp);
         console.log("Can upgrade at ", appendTimestamp + delayPeriod);
-        console.log("Need to wait another " + (appendTimestamp + delayPeriod - timeStamp)+ "s");
+        console.log("Need to wait another " + (appendTimestamp + delayPeriod - timeStamp) + "s");
       }
     }
-}
-
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+  }
+};
