@@ -6,9 +6,9 @@
             "0x2fCabB640BDc5E23dD469f2b8F625236d063456c"
         ],
         "uniswapPairs": [
-            "0x557c9280DF3f06D9EBD09985207326c520eaB421",
-            "0xaD55e1FE0C1c2caF835d8A88aB75442Cec4d4f29",
-            "0xe39ab88f8a4777030a534146a9ca3b52bd5d43a3"
+            "0x92E94754e9bdFaC92f4f376093C6bB38042aEBB2",
+            "0xbbE83BF43BBc1185BBFbFdc160C650b549ee9eC7",
+            "0x7A4680dF7759A12ea0A7636e0EAC448F90CA6cb5"
         ],
         "tokensUseChainlink": [
             "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
@@ -144,6 +144,16 @@
             "fUSDC",
             "fUSB",
             "fWETH"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10"
         ]
     },
     "jumRateModel": {

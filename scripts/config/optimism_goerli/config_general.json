@@ -3,16 +3,17 @@
         "tokensUseUniswap": [
             "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
             "0xC5Dd0a058C28eA9E8a7268225dE3E9ce53c10923",
-            "0xFc10849184c31d5569cE3C3FDB0C3c918a57D733"
+            "0xFc10849184c31d5569cE3C3FDB0C3c918a57D733",
+            "0xC0a63a09504f38672F3a901d931Fc1017F18c759"
         ],
         "uniswapPairs": [
-            "0x557c9280DF3f06D9EBD09985207326c520eaB421",
-            "0xaD55e1FE0C1c2caF835d8A88aB75442Cec4d4f29",
-            "0xB209b56F0DF053205dF20061044F38A07837cEE7"
+            "0x1270A5F57De8415Dea019ADEB26B15547822fbc5",
+            "0x8C44bE1917B5dDf8bA6E8E459B6BD48Ca9AAaF92",
+            "0x85b09bc7a2cD43f30044A8A21495C901B66A1BFA",
+            "0x6744DD44AB8E6Ebb071197d3a569F3bE90eEF20A"
         ],
         "tokensUseChainlink": [
             "0x00FA31D99329E08D59859AC7452845A8bfEeccaC",
-            "0xC0a63a09504f38672F3a901d931Fc1017F18c759",
             "0x4200000000000000000000000000000000000006"
         ],
         "chainlinkAggregatorV3": [
@@ -143,6 +144,16 @@
             "fUSDC",
             "fUSB",
             "fWETH"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10"
         ]
     },
     "jumRateModel": {

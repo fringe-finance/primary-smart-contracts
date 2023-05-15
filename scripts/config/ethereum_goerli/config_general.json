@@ -121,9 +121,9 @@
             "10000000000000000000"
         ],
         "reserveFactorMantissa": [
-            "2500000000000000000",
-            "2500000000000000000",
-            "2500000000000000000"
+            "50000000000000000",
+            "70000000000000000",
+            "100000000000000000"
         ],
         "lendingTokens": [
             "0xccc70874548F12320DB34b1f36343C5afc5484e4",
@@ -144,6 +144,16 @@
             "fUSDC",
             "fUSB",
             "fWETH"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10"
         ]
     },
     "jumRateModel": {
