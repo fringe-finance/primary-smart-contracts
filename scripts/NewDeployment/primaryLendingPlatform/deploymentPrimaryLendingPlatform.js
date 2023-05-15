@@ -604,9 +604,16 @@ module.exports = {
             await jumpRateModel.initialize(blocksPerYear).then(function(instance){ 
                 console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
             })
+        }
 
-            for(var i=0; i < BLendingTokenProxies.length; i++) {
-                await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function(instance){
+        for (var i = 0; i < BLendingTokenProxies.length; i++) {
+            let blendingTokenInfo = await jumpRateModel.blendingTokens(BLendingTokenProxies[i]);
+            let rateInfo = await jumpRateModel.getRate(BLendingTokenProxies[i]);
+            let blocksPerYear = await jumpRateModel.blocksPerYear();
+            let gainPerBlock = gainPerYear[i].div(blocksPerYear);
+            let jumGainPerBlock = jumGainPerYear[i].div(blocksPerYear);
+            if (blendingTokenInfo.targetUtil != targetUtil[i] || rateInfo.maxBorrowRate != newMaxBorrow[i] || gainPerBlock != rateInfo.gainPerBlock || jumGainPerBlock != rateInfo.jumGainPerBlock) {
+                await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
                     console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " with params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " at tx hash " + instance.hash);
                 })
             }

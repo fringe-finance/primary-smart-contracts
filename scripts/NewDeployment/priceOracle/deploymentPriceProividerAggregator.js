@@ -399,8 +399,8 @@ module.exports = {
         }
 
         for (var i = 0; i < tokensUseChainlink.length; i++) {
-            let chainlinkMetadata = await chainlinkPriceProvider.chainlinkMetadata(tokensUseChainlink[i]);
-            if (chainlinkMetadata.isActive == false) {
+            let chainlinkMetadataIsActive = await chainlinkPriceProvider.chainlinkMetadata(tokensUseChainlink[i]);
+            if (chainlinkMetadataIsActive == false) {
                 await chainlinkPriceProvider.setTokenAndAggregator(
                     tokensUseChainlink[i],
                     [chainlinkAggregatorV3[i]]
