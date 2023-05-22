@@ -581,8 +581,13 @@ module.exports = {
             let gainPerYearValue = ethers.BigNumber.from(gainPerYear[i].toString());
             let jumGainPerYearValue = ethers.BigNumber.from(jumGainPerYear[i].toString());
 
-            let gainPerBlock = gainPerYearValue.div(blocksPerYearValue);
-            let jumGainPerBlock = jumGainPerYearValue.div(blocksPerYearValue);
+            let gainPerBlock = ethers.BigNumber.from(0);
+            let jumGainPerBlock = ethers.BigNumber.from(0);
+
+            if (blocksPerYearValue != 0){
+                gainPerBlock = gainPerYearValue.div(blocksPerYearValue);
+                jumGainPerBlock = jumGainPerYearValue.div(blocksPerYearValue);
+            }
 
             if (blendingTokenInfo.targetUtil != targetUtil[i] || rateInfo.maxBorrowRate != newMaxBorrow[i] || gainPerBlock.toString() != blendingTokenInfo.gainPerBlock || jumGainPerBlock.toString() != blendingTokenInfo.jumGainPerBlock) {
                 await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
