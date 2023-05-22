@@ -29,5 +29,7 @@
   "PrimaryIndexTokenLeverageLogic": true,
   "PrimaryIndexTokenLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV2PriceProviderProxy": true,
+  "UniswapV2PriceProviderMockLogic": true,
+  "UniswapV2PriceProviderMockProxy": true
 }
