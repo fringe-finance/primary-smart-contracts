@@ -93,16 +93,16 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
     }
 
     /**
-     * @dev Computes the remaining amount of PIT that a user has after taking into account their outstanding loan amount.
+     * @dev Computes the deposited remaining amount of PIT that a user has after taking into account their outstanding loan amount.
      * @param account The user for which to compute the remaining PIT amount.
      * @param projectToken The project token for which to compute the remaining PIT amount.
      * @param lendingToken The lending token for which to compute the remaining PIT amount.
-     * @return pitRemaining The remaining PIT amount for the user.
+     * @return depositedRemaining The deposited remaining amount for the user.
      */
-    function getCurrentPitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256 pitRemaining) {
-        uint pit = primaryIndexToken.pit(account, projectToken, lendingToken);
+    function getCurrentDepositedRemaining(address account, address projectToken, address lendingToken) public view returns (uint256 depositedRemaining) {
+        uint depositedAmount = primaryIndexToken.getTokenEvaluation(projectToken, primaryIndexToken.getDepositedAmount(projectToken, account));
         uint outstandingInUSD = primaryIndexToken.getTokenEvaluation(lendingToken, getTotalOutstanding(account, projectToken, lendingToken));
-        pitRemaining = pit > outstandingInUSD ? pit - outstandingInUSD : 0;
+        depositedRemaining = depositedAmount > outstandingInUSD ? depositedAmount - outstandingInUSD : 0;
     }
 
     /**
@@ -127,13 +127,11 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
         if(lendingToken == address(0)) {
             remainingDeposit = depositedProjectTokenAmount;
         } else {
-            uint depositRemaining = getCurrentPitRemaining(user, projectToken, lendingToken);
+            uint depositRemaining = getCurrentDepositedRemaining(user, projectToken, lendingToken);
 
             uint8 projectTokenDecimals = ERC20Upgradeable(projectToken).decimals();
 
-            (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(projectToken, lendingToken);
-            
-            uint256 collateralRemaining = depositRemaining * lvrDenominator * (10 ** projectTokenDecimals) / primaryIndexToken.getTokenEvaluation(projectToken, 10 ** projectTokenDecimals) / lvrNumerator;
+            uint256 collateralRemaining = depositRemaining * (10 ** projectTokenDecimals) / primaryIndexToken.getTokenEvaluation(projectToken, 10 ** projectTokenDecimals);
             
             remainingDeposit = depositedProjectTokenAmount >= collateralRemaining ? collateralRemaining : 0;
         }
@@ -166,6 +164,7 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
      */
     function repayAtomic(address prjToken, uint collateralAmount, bytes memory buyCalldata, bool isRepayFully) public nonReentrant{
         require(IParaSwapAugustusRegistry(AUGUSTUS_REGISTRY).isValidAugustus(augustusParaswap), "AtomicRepayment: INVALID_AUGUSTUS");
+        require(collateralAmount > 0, "AtomicRepayment: collateralAmount must be greater than 0");
         address lendingToken = getLendingToken(msg.sender, prjToken);
         uint remainingDeposit = getRemainingDeposit(msg.sender, prjToken);
         if (collateralAmount > remainingDeposit) {

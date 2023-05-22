@@ -5,7 +5,7 @@ require("@matterlabs/hardhat-zksync-solc");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-waffle");
 require("hardhat-contract-sizer");
-
+require("@matterlabs/hardhat-zksync-verify");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("solidity-docgen");
@@ -19,36 +19,33 @@ const {
   POLYGONSCAN_API_KEY,
   OPTIMISM_API_KEY,
   ARBISCAN_API_KEY,
+  ZKSYNCSCAN_API_KEY
 } = process.env;
 
 const isZksync = Object.keys(process.env).includes('ZKSYNC');
-console.log(isZksync)
+console.log("isZksync", isZksync)
 let hardhatConfig;
 if (isZksync) {
   hardhatConfig = {
     zksolc: {
-      version: "1.3.1",
+      version: "1.3.6",
       compilerSource: "binary",
-      settings: {
-        optimizer: {
-          enabled: true,
-        },
-        solidity: {
-          version: "0.8.9",
-        },
-        experimental: {
-          dockerImage: "matterlabs/zksolc",
-          tag: "v1.2.0"
-        },
+      settings: {},
+    },
+    defaultNetwork: "zkSyncTestnet",
+    networks: {
+      hardhat: {
+        zksync: false,
+      },
+      zkSyncTestnet: {
+        url: "https://zksync2-testnet.zksync.dev",
+        ethNetwork: "goerli",
+        zksync: true,
+        verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
       },
     },
-    defaultNetwork: "zkTestnet",
-    networks: {
-      zkTestnet: {
-        url: "https://zksync2-testnet.zksync.dev", // URL of the zkSync network RPC
-        ethNetwork: "https://goerli.infura.io/v3/1629e80003614d94915133a1ed88f25c", // URL of the Ethereum Web3 RPC, or the identifier of the network (e.g. `mainnet` or `goerli`)
-        zksync: true
-      }
+    etherscan: {
+      apiKey: ZKSYNCSCAN_API_KEY
     },
     solidity: {
       version: "0.8.9",
@@ -146,7 +143,7 @@ if (isZksync) {
         optimisticEthereum: OPTIMISM_API_KEY,
         optimisticGoerli: OPTIMISM_API_KEY,
       },
-      
+
     },
     contractSizer: {
       alphaSort: true,
