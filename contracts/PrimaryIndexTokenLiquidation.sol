@@ -198,14 +198,12 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
      * @return projectTokenLiquidatorReceived The amount of project tokens sent to the liquidator as a result of the liquidation.
      */
     function _liquidate(address _account, address _projectToken, address _lendingToken, uint256 _lendingTokenAmount, address liquidator) internal isProjectTokenListed(_projectToken) isLendingTokenListed(_lendingToken) returns(uint256) {
+        require(_lendingTokenAmount > 0, "PITLiquidation: lendingTokenAmount must be greater than 0");
         // under normal conditions: liquidator == msg.sender
-        uint minLA = getMinLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
-        uint maxLA = getMaxLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
-        require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PIT: invalid amount");
+        (uint maxLA, uint minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
+        require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PITLiquidation: invalid amount");
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
-        if (healthFactorDenominator != 0 ) {
-            require(healthFactorNumerator < healthFactorDenominator, "PIT: healthFactor>=1");
-        }
+        require(healthFactorNumerator < healthFactorDenominator, "PITLiquidation: healthFactor>=1");
         
         uint256 projectTokenToSendToLiquidator = _getProjectTokenToSendToLiquidator(_account, _projectToken, _lendingToken, _lendingTokenAmount, liquidator);
 
@@ -245,6 +243,9 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         uint256 depositedProjectTokenAmount = primaryIndexToken.getDepositedAmount(_projectToken, _account);
         if(projectTokenToSendToLiquidator > depositedProjectTokenAmount){
             projectTokenToSendToLiquidator = depositedProjectTokenAmount;
+        }
+        if (projectTokenToSendToLiquidator == 0) {
+            return 0;
         }
         return primaryIndexToken.calcAndTransferDepositPosition(_projectToken, projectTokenToSendToLiquidator, _account, liquidator);
     }
@@ -289,7 +290,7 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
      * @param _lendingToken The address of the lending token. 
      * @return maxLA The maximum liquidator reward amount in the lending token. 
      */
-    function getMaxLiquidatorRewardAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA) {
+    function getMaxLiquidationAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA) {
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
         Ratio memory targetHf = targetHealthFactor;
         MaxLAParams memory maxLAParams;
@@ -298,7 +299,7 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
         uint256 totalOutstandingInUSD = getTokenPrice(_lendingToken, loanBody + accrual);
         uint256 depositedProjectTokenAmountInUSD = getTokenPrice(_projectToken, depositedProjectTokenAmount);
 
-        if (lrfNumerator == 0 && depositedProjectTokenAmount == 0) return loanBody + accrual;
+        if (loanBody + accrual == 0) return 0;
 
         (uint256 lvrNumerator, uint256 lvrDenominator) = primaryIndexToken.getLoanToValueRatio(_projectToken, _lendingToken);
 
@@ -325,16 +326,17 @@ contract PrimaryIndexTokenLiquidation is Initializable, AccessControlUpgradeable
     }
 
     /**
-     * @dev Computes the minimum liquidator reward amount for a given account, project token, and lending token.
+     * @dev Computes the minimum and maximum liquidation amount for a given account, project token, and lending token.
      * MinLA = min(MaxLA, MPA)
      * @param _account The account for which to compute the minimum liquidator reward amount.
      * @param _projectToken The project token for which to compute the minimum liquidator reward amount.
      * @param _lendingToken The lending token for which to compute the minimum liquidator reward amount.
-     * @return The minimum liquidator reward amount.
+     * @return maxLA The maximum liquidation amount.
+     * @return minLA The minimum liquidation amount.
      */
-    function getMinLiquidatorRewardAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256) {
+    function getLiquidationAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA, uint256 minLA) {
         uint projectTokenMultiplier = 10 ** ERC20Upgradeable(_lendingToken).decimals();
-        uint256 maxLrf = getMaxLiquidatorRewardAmount(_account, _projectToken, _lendingToken);
-        return Math.min(maxLrf, minPartialLiquidationAmount * projectTokenMultiplier / getTokenPrice(_lendingToken, projectTokenMultiplier));
+        maxLA = getMaxLiquidationAmount(_account, _projectToken, _lendingToken);
+        minLA = Math.min(maxLA, minPartialLiquidationAmount * projectTokenMultiplier / getTokenPrice(_lendingToken, projectTokenMultiplier));
     }
 }

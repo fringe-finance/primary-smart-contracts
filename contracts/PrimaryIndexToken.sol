@@ -953,6 +953,28 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     /**
+     * @dev Returns the estimated remaining PIT (primary index token) of a user's borrow position
+     * @param account The address of the user's borrow position
+     * @param projectToken The address of the project token
+     * @param lendingToken The address of the lending token
+     * @return remaining The estimated remaining PIT of the user's borrow position
+     */
+    function estimatedPitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        address existingLendingToken = getLendingToken(account, projectToken);
+        if (existingLendingToken != address(0) && existingLendingToken != lendingToken) {
+            lendingToken = existingLendingToken;
+        }
+        uint256 _pit = pit(account, projectToken, lendingToken);
+        uint remaining;
+        if(_pit > 0) {
+            remaining = lendingToken == address(0) ? _pit : _estimatedPitRemaining(account, projectToken, lendingToken, _pit);
+        } else {
+            return 0;
+        }
+        return remaining;
+    }
+
+    /**
      * @dev Returns the remaining PIT (primary index token) of a user's borrow position for a specific project token and lending token
      * @param account The address of the user's borrow position
      * @param projectToken The address of the project token
@@ -962,6 +984,23 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function _pitRemaining(address account, address projectToken, address lendingToken, uint256 _pit) internal view returns (uint256) {
         uint256 _totalOutstandingInUSD = totalOutstandingInUSD(account, projectToken, lendingToken);
+        if (_pit >= _totalOutstandingInUSD) {
+            return _pit - _totalOutstandingInUSD;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * @dev Returns the estimated remaining PIT (primary index token) of a user's borrow position for a specific project token and lending token
+     * @param account The address of the user's borrow position
+     * @param projectToken The address of the project token
+     * @param lendingToken The address of the lending token
+     * @param _pit The PIT of the user's borrow position
+     * @return remaining PIT remaining of the user's borrow position
+     */
+    function _estimatedPitRemaining(address account, address projectToken, address lendingToken, uint256 _pit) internal view returns (uint256) {
+        uint256 _totalOutstandingInUSD = totalEstimatedOutstandingInUSD(account, projectToken, lendingToken);
         if (_pit >= _totalOutstandingInUSD) {
             return _pit - _totalOutstandingInUSD;
         } else {
@@ -1107,6 +1146,19 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
     }
 
     /** 
+     * @dev Returns the total estimated outstanding amount of a user's borrow position to USD 
+     * @param account The address of the user account 
+     * @param projectToken The address of the project token 
+     * @param lendingToken The address of the lending token 
+     * @return The total estimated outstanding amount in USD
+     */
+    function totalEstimatedOutstandingInUSD(address account, address projectToken, address lendingToken) public view returns (uint256) {
+        (, uint256 loanBody, uint256 accrual, , ) = getPosition(account, projectToken, lendingToken);
+        uint256 estimatedAmount = loanBody + accrual;
+        return getTokenEvaluation(lendingToken, estimatedAmount);
+    }
+
+    /** 
      * @dev Convert the remaining pit amount to the corresponding lending token amount 
      * @param account The address of the user account 
      * @param projectToken The address of the project token 
@@ -1115,6 +1167,20 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function convertPitRemaining(address account, address projectToken, address lendingToken) public view returns(uint256) {
         uint256 pitRemainingValue = pitRemaining(account, projectToken, lendingToken);
+        uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
+        uint256 lendingTokenAmount = pitRemainingValue * (10 ** lendingTokenDecimals) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals); 
+        return lendingTokenAmount;
+    }
+
+    /** 
+     * @dev Convert the estimated remaining pit amount to the corresponding lending token amount 
+     * @param account The address of the user account 
+     * @param projectToken The address of the project token 
+     * @param lendingToken The address of the lending token 
+     * @return The estimated lending token amount
+     */
+    function convertEstimatedPitRemaining(address account, address projectToken, address lendingToken) public view returns(uint256) {
+        uint256 pitRemainingValue = estimatedPitRemaining(account, projectToken, lendingToken);
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         uint256 lendingTokenAmount = pitRemainingValue * (10 ** lendingTokenDecimals) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals); 
         return lendingTokenAmount;

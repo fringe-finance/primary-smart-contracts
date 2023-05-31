@@ -152,21 +152,6 @@ contract PrimaryIndexTokenAtomicRepayment is Initializable, AccessControlUpgrade
    }
 
     /**
-      * @dev Computes the repay using collateral data for a given user, project token, and lending token.
-      * @param user The user address
-      * @param projectToken The project token address
-      * @param lendingToken The lending token address
-      * @return remainingDeposit The remaining deposit that the user can use as collateral.
-      * @return availableLendingAmount The available lending token amount that the user can repay.
-      * @return totalOutStanding The total outstanding amount for the user, project token, and lending token.
-      */
-    function getRepayUsingCollateralData(address user, address projectToken, address lendingToken) public view returns(uint256 remainingDeposit, uint256 availableLendingAmount, uint256 totalOutStanding) {
-        remainingDeposit = getRemainingDeposit(user, projectToken);
-        availableLendingAmount = getAvailableRepaidAmount(user, projectToken, lendingToken);
-        totalOutStanding = getTotalOutstanding(user, projectToken, lendingToken);
-    }
-
-    /**
      * @dev Repays a loan atomically using the given project token as collateral.
      * @param prjToken The project token to use as collateral.
      * @param collateralAmount The amount of collateral to use.
