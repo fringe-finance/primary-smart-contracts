@@ -520,8 +520,14 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
      */
     function getCollateralAvailableToWithdraw(address account, address projectToken, address lendingToken) public view returns(uint collateralProjectToWithdraw) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
-        uint depositRemaining = pitRemaining(account, projectToken, lendingToken); 
-        collateralProjectToWithdraw = depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvrNumerator;
+        uint256 depositRemaining = estimatedPitRemaining(account, projectToken, lendingToken);
+        uint256 collateralProjectRemaining = depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvrNumerator;
+        
+        uint256 depositedProjectTokenAmount = depositPosition[account][projectToken][usdcToken].depositedProjectTokenAmount;
+        uint256 _totalOutstandingInUSD = lendingToken == address(0) ? 0 : totalEstimatedOutstandingInUSD(account, projectToken, lendingToken);
+        uint256 depositedAmountSatisfyHF= _totalOutstandingInUSD  * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) / lvrNumerator;
+        uint256 amountToWithdraw= depositedProjectTokenAmount > depositedAmountSatisfyHF ? depositedProjectTokenAmount - depositedAmountSatisfyHF:0;
+        collateralProjectToWithdraw =  collateralProjectRemaining > amountToWithdraw ? amountToWithdraw: 0;
     }
 
     /** 
@@ -674,8 +680,9 @@ contract PrimaryIndexToken is Initializable, AccessControlUpgradeable, Reentranc
         updateInterestInBorrowPositions(user, lendingToken);
         if (lendingTokenAmount == type(uint256).max) {
             lendingTokenAmount = convertPitRemaining(user, projectToken, lendingToken);
+        } else {
+            require(getTokenEvaluation(lendingToken, lendingTokenAmount) <= pitRemaining(user, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
         }
-        require(getTokenEvaluation(lendingToken, lendingTokenAmount) <= pitRemaining(user, projectToken, lendingToken), "PIT: lendingTokenAmount exceeds pitRemaining");
         require(getTotalBorrowPerCollateral(projectToken) + getTokenEvaluation(lendingToken, lendingTokenAmount) <= borrowLimitPerCollateral[projectToken], "PIT: totalBorrow exceeded borrowLimit per collateral asset");
         require(getTotalBorrowPerLendingToken(lendingToken) + getTokenEvaluation(lendingToken, lendingTokenAmount) <= borrowLimitPerLendingToken[lendingToken], "PIT: totalBorrow exceeded borrowLimit per lending asset");
         
