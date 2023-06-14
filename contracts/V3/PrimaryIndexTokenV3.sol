@@ -965,7 +965,7 @@ contract PrimaryIndexTokenV3 is
 		bool isNeedToUpdatePositionData = primaryIndexTokenLeverage
 			.isNeedToUpdatePositionData(user, lendingToken, address(0));
 		if (isNeedToUpdatePositionData) {
-			primaryIndexTokenLeverage.addShotAsset(user, lendingToken);
+			primaryIndexTokenLeverage.addShortAsset(user, lendingToken);
 		}
 
 		emit Borrow(user, lendingToken, lendingTokenAmount);
@@ -1097,7 +1097,7 @@ contract PrimaryIndexTokenV3 is
 		bool isNeedToUpdatePositionData = primaryIndexTokenLeverage
 			.isNeedToUpdatePositionData(borrower, address(0), lendingToken);
 		if (isNeedToUpdatePositionData) {
-			primaryIndexTokenLeverage.reduceShotAsset(borrower, lendingToken);
+			primaryIndexTokenLeverage.reduceShortAsset(borrower, lendingToken);
 		}
 
 		emit RepayBorrow(

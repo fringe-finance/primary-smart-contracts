@@ -39,7 +39,7 @@ interface IPrimaryIndexTokenLeverageV3 {
         address projectToken
     ) external;
 
-    function reduceShotAsset(address account, address lendingToken) external;
+    function reduceShortAsset(address account, address lendingToken) external;
 
-    function addShotAsset(address account, address lendingToken) external;
+    function addShortAsset(address account, address lendingToken) external;
 }

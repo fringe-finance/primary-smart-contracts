@@ -27,10 +27,10 @@ contract PrimaryIndexTokenLeverageV3 is
     address public AUGUSTUS_REGISTRY;
 
     mapping(address => PositionData[]) public positionData;
-    mapping(address => uint256) public maxTotalLongAssetCount;
-    mapping(address => uint256) public currentTotalLongAssetCount;
-    mapping(address => uint256) public maxTotalShotAssetCount;
-    mapping(address => uint256) public currentShotAssetCount;
+    mapping(address => mapping(address => uint256)) public maxTotalLongAssetCount; //prj=>user=>uint256
+    mapping(address => mapping(address => uint256)) public currentTotalLongAssetCount; //prj=>user=>uint256
+    mapping(address => mapping(address => uint256)) public maxTotalShortAssetCount; //prj=>user=>uint256
+    mapping(address => mapping(address => uint256)) public currentShortAssetCount;//prj=>user=>uint256
 
     struct Ratio {
         uint8 numerator;
@@ -65,6 +65,10 @@ contract PrimaryIndexTokenLeverageV3 is
     event SetPrimaryIndexToken(
         address indexed oldPrimaryIndexToken,
         address indexed newPrimaryIndexToken
+    );
+    event SetPrimaryIndexTokenAtomic(
+        address indexed oldPrimaryIndexTokenAtomic,
+        address indexed newPrimaryIndexTokenAtomic
     );
     event SetAugustusParaswap(
         address indexed augustusParaswap,
@@ -161,6 +165,22 @@ contract PrimaryIndexTokenLeverageV3 is
             _newPrimaryIndexToken
         );
         primaryIndexToken = IPrimaryIndexTokenV3(_newPrimaryIndexToken);
+    }
+
+    function setPrimaryIndexTokenAtomicAddress(
+        address _newPrimaryIndexTokenAtomic
+    ) external onlyModerator {
+        require(
+            _newPrimaryIndexTokenAtomic != address(0),
+            "PITLeverage: invalid address"
+        );
+        emit SetPrimaryIndexTokenAtomic(
+            address(pitAtomicRepayment),
+            _newPrimaryIndexTokenAtomic
+        );
+        pitAtomicRepayment = IPrimaryIndexTokenAtomicRepaymentV3(
+            _newPrimaryIndexTokenAtomic
+        );
     }
 
     /**
@@ -616,12 +636,12 @@ contract PrimaryIndexTokenLeverageV3 is
                 leverageType: LeverageType(leverageType)
             });
 
-            currentTotalLongAssetCount[projectToken] += amountRecive;
-            maxTotalLongAssetCount[projectToken] = currentTotalLongAssetCount[
+            currentTotalLongAssetCount[borrower][projectToken] += amountRecive;
+            maxTotalLongAssetCount[borrower][projectToken] = currentTotalLongAssetCount[borrower][
                 projectToken
             ];
-            currentShotAssetCount[lendingToken] += lendingTokenCount;
-            maxTotalShotAssetCount[lendingToken] = currentShotAssetCount[
+            currentShortAssetCount[borrower][lendingToken] += lendingTokenCount;
+            maxTotalShortAssetCount[borrower][lendingToken] = currentShortAssetCount[borrower][
                 lendingToken
             ];
             _positionDatas.push(_positionData);
@@ -673,11 +693,11 @@ contract PrimaryIndexTokenLeverageV3 is
             account,
             projectToken
         );
-        uint256 totalLongAssetCountOfProjectToken = currentTotalLongAssetCount[
+        uint256 totalLongAssetCountOfProjectToken = currentTotalLongAssetCount[account][
             projectToken
         ];
         if (remainingDepositedCount < totalLongAssetCountOfProjectToken) {
-            currentTotalLongAssetCount[projectToken] = remainingDepositedCount;
+            currentTotalLongAssetCount[account][projectToken] = remainingDepositedCount;
             PositionData[] storage _positionDatas = positionData[account];
             for (uint256 i = 0; i < _positionDatas.length; i++) {
                 PositionData storage _positionData = _positionDatas[i];
@@ -699,10 +719,10 @@ contract PrimaryIndexTokenLeverageV3 is
             account,
             projectToken
         );
-        uint256 currentLongAssetCountOfProjectToken = currentTotalLongAssetCount[
+        uint256 currentLongAssetCountOfProjectToken = currentTotalLongAssetCount[account][
                 projectToken
             ];
-        uint256 maxLongAssetCountOfProjectToken = maxTotalLongAssetCount[
+        uint256 maxLongAssetCountOfProjectToken = maxTotalLongAssetCount[account][
             projectToken
         ];
         if (
@@ -714,7 +734,7 @@ contract PrimaryIndexTokenLeverageV3 is
             remainingDepositedCount = maxLongAssetCountOfProjectToken;
         }
         PositionData[] storage _positionDatas = positionData[account];
-        currentTotalLongAssetCount[projectToken] = remainingDepositedCount;
+        currentTotalLongAssetCount[account][projectToken] = remainingDepositedCount;
         for (uint256 i = 0; i < _positionDatas.length; i++) {
             PositionData storage _positionData = _positionDatas[i];
             if (_positionData.longAsset == projectToken) {
@@ -726,7 +746,7 @@ contract PrimaryIndexTokenLeverageV3 is
     }
 
     //repay check
-    function reduceShotAsset(
+    function reduceShortAsset(
         address account,
         address lendingToken
     ) external isPrimaryIndexToken {
@@ -736,24 +756,24 @@ contract PrimaryIndexTokenLeverageV3 is
                 lendingToken
             );
         uint256 totalBorrowCount = borrowPosition.loanBody;
-        uint256 totalShotAssetCountOfLendingToken = currentShotAssetCount[
+        uint256 totalShortAssetCountOfLendingToken = currentShortAssetCount[account][
             lendingToken
         ];
-        if (totalBorrowCount < totalShotAssetCountOfLendingToken) {
-            currentShotAssetCount[lendingToken] = totalBorrowCount;
+        if (totalBorrowCount < totalShortAssetCountOfLendingToken) {
+            currentShortAssetCount[account][lendingToken] = totalBorrowCount;
             PositionData[] storage _positionDatas = positionData[account];
             for (uint256 i = 0; i < _positionDatas.length; i++) {
                 PositionData storage _positionData = _positionDatas[i];
                 if (_positionData.shortAsset == lendingToken) {
                     _positionData.shortCount =
                         (_positionData.shortCount * totalBorrowCount) /
-                        totalShotAssetCountOfLendingToken;
+                        totalShortAssetCountOfLendingToken;
                 }
             }
         }
     }
 
-    function addShotAsset(
+    function addShortAsset(
         address account,
         address lendingToken
     ) external isPrimaryIndexToken {
@@ -763,28 +783,28 @@ contract PrimaryIndexTokenLeverageV3 is
                 lendingToken
             );
         uint256 totalBorrowCount = borrowPosition.loanBody;
-        uint256 currentShotAssetCountOfLendingToken = currentShotAssetCount[
+        uint256 currentShortAssetCountOfLendingToken = currentShortAssetCount[account][
             lendingToken
         ];
-        uint256 maxShortAssetCountOfLendingToken = maxTotalShotAssetCount[
+        uint256 maxShortAssetCountOfLendingToken = maxTotalShortAssetCount[account][
             lendingToken
         ];
         if (
-            currentShotAssetCountOfLendingToken ==
+            currentShortAssetCountOfLendingToken ==
             maxShortAssetCountOfLendingToken
         ) return;
 
         if (totalBorrowCount > maxShortAssetCountOfLendingToken) {
             totalBorrowCount = maxShortAssetCountOfLendingToken;
         }
-        currentShotAssetCount[lendingToken] = totalBorrowCount;
+        currentShortAssetCount[account][lendingToken] = totalBorrowCount;
         PositionData[] storage _positionDatas = positionData[account];
         for (uint256 i = 0; i < _positionDatas.length; i++) {
             PositionData storage _positionData = _positionDatas[i];
             if (_positionData.shortAsset == lendingToken) {
                 _positionData.shortCount =
                     (_positionData.shortCount * totalBorrowCount) /
-                    currentShotAssetCountOfLendingToken;
+                    currentShortAssetCountOfLendingToken;
             }
         }
     }
@@ -859,6 +879,4 @@ contract PrimaryIndexTokenLeverageV3 is
             positionId
         );
     }
-
-    // Update document for Leverage
 }
