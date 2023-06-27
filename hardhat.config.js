@@ -105,13 +105,15 @@ if (isZksync) {
       },
 
       polygon_mumbai: {
-        url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
+        url: `https://polygon-mumbai.g.alchemy.com/v2/TKx07_zc9Tc0kUIUJo-4dtbSi4n-oXQ4`,
         accounts: { mnemonic: MNEMONIC },
       },
       optimism_goerli: {
         url: `https://goerli.optimism.io`,
         network_id: 420,
         accounts: { mnemonic: MNEMONIC },
+        timeout: 99999999,
+        gasPrice: 500_000_000, // 500 gwei
       },
 
       ethereum_goerli: {

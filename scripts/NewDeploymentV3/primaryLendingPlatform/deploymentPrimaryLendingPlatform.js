@@ -143,6 +143,7 @@ module.exports = {
         let loanToValueRatioDenominator = pitModeratorParams.loanToValueRatioDenominator;
         let isPaused = pitModeratorParams.isPaused;
         let borrowLimitPerLendingToken = pitModeratorParams.borrowLimitPerLendingToken;
+        let depositLimitPerProjectToken = pitModeratorParams.depositLimitPerProjectToken;
 
         let augustusParaswap = pitAtomicRepaymentParams.augustusParaswap;
         let AUGUSTUS_REGISTRY = pitAtomicRepaymentParams.AUGUSTUS_REGISTRY;
@@ -675,6 +676,18 @@ module.exports = {
                     console.log("LoanToValueRatio: ")
                     console.log("   Numerator:   " + loanToValueRatioNumerator[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominator[i]);
+                });
+            }
+        }
+
+        for (var i = 0; i < tokens.length; i++) {
+            let depositLimitPerProjectTokenValue = await pit.depositLimitPerProjectToken(tokens[i]);
+            if (depositLimitPerProjectTokenValue.toString() != depositLimitPerProjectToken[i]) {
+                await pitModerator.setDepositLimitPerProjectAsset(
+                    tokens[i],
+                    depositLimitPerProjectToken[i]
+                ).then(function () {
+                    console.log("PrimaryIndexToken set " + tokens[i] + " deposit limit " + depositLimitPerProjectToken[i]);
                 });
             }
         }

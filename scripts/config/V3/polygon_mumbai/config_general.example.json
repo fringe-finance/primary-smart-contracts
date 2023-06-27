@@ -17,6 +17,7 @@
         "loanToValueRatioDenominator": [],
         "isPaused": false,
         "borrowLimitPerLendingToken": [],
+        "depositLimitPerProjectToken": [],
         "usdc": ""
     },
     "blendingToken": {

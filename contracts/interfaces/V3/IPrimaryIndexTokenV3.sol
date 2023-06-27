@@ -670,4 +670,28 @@ interface IPrimaryIndexTokenV3 {
         address account,
         address lendingToken
     ) external view returns (uint256);
+
+    /**
+	 * @dev Get deposited amount in USD for a specific project token
+	 * @param projectToken The address of the project token
+	 * @return The deposited amount in USD
+	 */
+	function getDepositedPerProjectTokenInUSD(address projectToken) external view returns (uint256);
+
+    /**
+     * @dev Get the deposit limit amount in USD for a specific project token
+     * @param projectToken The address of the project token
+     * @return The total deposited amount in USD
+    */
+    function depositLimitPerProjectToken(address projectToken) external view returns (uint256);
+
+    /**
+	 * @dev Sets the borrow limit per project asset by the moderator contract.
+	 * @param projectToken The address of the project token.
+	 * @param _depositLimit The new deposit limit.
+	 */
+	function setDepositLimitPerProjectAsset(
+		address projectToken,
+		uint256 _depositLimit
+	) external;
 }
