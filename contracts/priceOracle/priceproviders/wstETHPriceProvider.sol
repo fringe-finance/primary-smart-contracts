@@ -88,12 +88,26 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
         }
     }
 
+    /**
+     * Returns the latest price (answer).
+     */
+    function getLatestPrice(address _aggregatorPath) public view returns (uint256) {
+        (
+            /* uint80 roundID */,
+            int256 answer,
+            /*uint startedAt*/,
+            /*uint timeStamp*/,
+            /*uint80 answeredInRound*/
+        ) = AggregatorV3Interface(_aggregatorPath).latestRoundData();
+        return uint256(answer);
+    }
+
     function getPriceSTETH() public view returns (uint256 priceMantissa) {
         address[] memory _aggregatorPath = aggregatorPath;
         priceMantissa = 1;
         uint priceDecimals = 0;
         for(uint8 i = 0; i < _aggregatorPath.length; i++) {
-            priceMantissa *= AggregatorV3Interface(_aggregatorPath[i]).latestAnswer();   // earn price
+            priceMantissa *= getLatestPrice(aggregatorPath[i]);                           // earn price
             priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals();       // earn price decimals
         }
         priceMantissa /= 10 ** (priceDecimals - usdDecimals);
