@@ -24,6 +24,9 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     mapping(address => PriceInfo) public priceInfo; // address of token => PriceInfo
     mapping(address => bool) public twapEnabledForAsset;
 
+    uint16 public constant PERCENTAGE_DECIMALS = 10000;
+    uint16 public constant SECONDS_PER_HOUR = 3600;
+
     struct MostGovernedPrice {
         uint256 price;
         uint256 timestamp;
@@ -105,7 +108,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     }
 
     function setPriceCapPercentPerHour(uint16 _priceCapPercentPerHour) public onlyModerator {
-        require(_priceCapPercentPerHour <= 10000, "PriceOracle: invalid priceCapPercentPerHour");
+        require(_priceCapPercentPerHour <= PERCENTAGE_DECIMALS, "PriceOracle: invalid priceCapPercentPerHour");
         priceCapPercentPerHour = _priceCapPercentPerHour;
     }
 
@@ -206,7 +209,8 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     */
     function _applyVolatilityCap(address token, uint256 reportedPrice, uint32 currentTime) internal returns(uint256 governedPrice) {
         MostGovernedPrice storage mostGovernedPriceInfo = mostGovernedPrice[token];
-        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * priceCapPercentPerHour * (currentTime - mostGovernedPriceInfo.timestamp) / 10000;
+        uint256 deltaHours = (currentTime - mostGovernedPriceInfo.timestamp) / SECONDS_PER_HOUR;
+        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * priceCapPercentPerHour * deltaHours / PERCENTAGE_DECIMALS;
         uint256 actualPriceVariance = reportedPrice > mostGovernedPriceInfo.price ? reportedPrice - mostGovernedPriceInfo.price : mostGovernedPriceInfo.price - reportedPrice;
         if (reportedPrice < mostGovernedPriceInfo.price) {
             governedPrice = actualPriceVariance < allowedPriceVariance ? reportedPrice : mostGovernedPriceInfo.price - actualPriceVariance;
