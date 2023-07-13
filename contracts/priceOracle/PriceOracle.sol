@@ -209,8 +209,8 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     */
     function _applyVolatilityCap(address token, uint256 reportedPrice, uint32 currentTime) internal returns(uint256 governedPrice) {
         MostGovernedPrice storage mostGovernedPriceInfo = mostGovernedPrice[token];
-        uint256 deltaHours = (currentTime - mostGovernedPriceInfo.timestamp) / SECONDS_PER_HOUR;
-        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * priceCapPercentPerHour * deltaHours / PERCENTAGE_DECIMALS;
+        uint256 deltaTime = currentTime - mostGovernedPriceInfo.timestamp;
+        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * priceCapPercentPerHour * deltaTime / SECONDS_PER_HOUR / PERCENTAGE_DECIMALS;
         uint256 actualPriceVariance = reportedPrice > mostGovernedPriceInfo.price ? reportedPrice - mostGovernedPriceInfo.price : mostGovernedPriceInfo.price - reportedPrice;
         if (reportedPrice < mostGovernedPriceInfo.price) {
             governedPrice = actualPriceVariance < allowedPriceVariance ? reportedPrice : mostGovernedPriceInfo.price - actualPriceVariance;
