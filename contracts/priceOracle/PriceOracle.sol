@@ -5,31 +5,33 @@ import "../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "../openzeppelin/contracts-upgradeable/interfaces/IERC20MetadataUpgradeable.sol";
 import "./priceproviders/PriceProvider.sol";
+import "./../interfaces/NewPriceOracle/IPriceProviderAggregatorV2.sol";
 
 contract PriceOracle is Initializable, AccessControlUpgradeable
 {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
+    uint16 public constant PERCENTAGE_DECIMALS = 10000;
+    uint16 public constant SECONDS_PER_HOUR = 1 hours;
+
     uint8 public usdDecimals;
     
-    uint16 public priceCapPercentPerHour;   // the maximum per-hour threshold of price movement, above which the price is capped
-    uint256 public minSampleInterval;   // The period time that represent the minimum age of  mostRecentAccumLog before another entry is created in the longTWAPaccumLogs
-    uint256 public logMaturingAge;  // TWAP calculations can only be calculated if the oldest longTWAPaccumLogs entry is older than logMaturingAge
-    uint256 public longTWAPperiod;  // The period time for the long TWAP we produce from the series of logged reported prices.
+    uint16 public volatilityCapFixedPercent;    // the maximum per-hour threshold of price movement, above which the price is capped
+    uint256 public minSampleInterval;           // The period time that represent the minimum age of  mostRecentAccumLog before another entry is created in the longTWAPaccumLogs
+    uint256 public logMaturingAge;              // TWAP calculations can only be calculated if the oldest longTWAPaccumLogs entry is older than logMaturingAge
+    uint256 public longTWAPperiod;              // The period time for the long TWAP we produce from the series of logged reported prices.
 
-    mapping(address => address) public tokenPriceProvider; // address of token => priceProvider address
-    mapping(address => MostGovernedPrice) public mostGovernedPrice; // address of token => price
-    mapping(address => AccumLog[]) public longTWAPaccumLogs; // address of token => AccumLog
-    mapping(address => AccumLog) public mostRecentAccumLog; // address of token => AccumLog
-    mapping(address => PriceInfo) public priceInfo; // address of token => PriceInfo
-    mapping(address => bool) public twapEnabledForAsset;
+    mapping(address => GovernedPrice) public mostGovernedPrice;             // address of token => price
+    mapping(address => GovernedPrice) public mostAccumLogGovernedPrice;     // address of token => price
+    mapping(address => AccumLog[]) public longTWAPaccumLogs;                // address of token => AccumLog
+    mapping(address => AccumLog) public mostRecentAccumLog;                 // address of token => AccumLog
+    mapping(address => PriceInfo) public priceInfo;                         // address of token => PriceInfo
 
-    uint16 public constant PERCENTAGE_DECIMALS = 10000;
-    uint16 public constant SECONDS_PER_HOUR = 3600;
+    IPriceProviderAggregatorV2 public priceProviderAggregator;
 
-    struct MostGovernedPrice {
+    struct GovernedPrice {
+        uint32 timestamp;
         uint256 price;
-        uint256 timestamp;
     }
 
     struct AccumLog {
@@ -45,10 +47,14 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
         uint256 capitalPrice;
     }
 
+    event PriceUpdated(address indexed token, uint8 priceDecimals, uint32 currentTime, uint256 twapCollateralPrice, uint256 twapCapitalPrice);
     event GrandModeratorRole(address indexed who, address indexed newModerator);
     event RevokeModeratorRole(address indexed who, address indexed moderator);
-    event SetTokenAndPriceProvider(address indexed who, address indexed token, address indexed priceProvider);
-    event ChangeActive(address indexed who, address indexed priceProvider, address indexed token, bool active);
+    event SetVolatilityCapFixedPercent(uint16 volatilityCapFixedPercent);
+    event SetMinSampleInterval(uint256 minSampleInterval);
+    event SetLogMaturingAge(uint256 logMaturingAge);
+    event SetLongTWAPperiod(uint256 longTWAPperiod);
+    event SetPriceProviderAggregator(address newPriceProviderAggregator);
 
     function initialize() public initializer {
         __AccessControl_init();
@@ -57,7 +63,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
 
         usdDecimals = 6;
 
-        priceCapPercentPerHour = 1000; // 10%
+        volatilityCapFixedPercent = 1000; // 10%
         minSampleInterval = 1 hours;
         logMaturingAge = 1 days;
         longTWAPperiod = 1 days;
@@ -90,60 +96,120 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     /****************** Moderator functions ****************** */
 
     /**
-     * @dev sets price provider to `token`
-     * @param token the address of token
-     * @param priceProvider the address of price provider. Should implememnt the interface of `PriceProvider`
+    * @dev Set the price provider aggregator contract address
+    * @param newPriceProviderAggregator The address of the new price provider aggregator contract
+    */
+    function setPriceProviderAggregator(address newPriceProviderAggregator) public onlyModerator {
+        require(newPriceProviderAggregator != address(0), "PriceOracle: invalid priceProviderAggregator");
+        priceProviderAggregator = IPriceProviderAggregatorV2(newPriceProviderAggregator);
+        emit SetPriceProviderAggregator(newPriceProviderAggregator);
+    }
+
+    /**
+     * @dev Set the volatility cap fixed percent
+     * @param _volatilityCapFixedPercent The new volatility cap fixed percent
      */
-    function setTokenAndPriceProvider(address token, address priceProvider) public onlyModerator {
-        require(token != address(0), "PriceOracle: invalid token");
-        require(priceProvider != address(0), "PriceOracle: invalid priceProvider");
-        tokenPriceProvider[token] = priceProvider;
-        emit SetTokenAndPriceProvider(msg.sender, token, priceProvider);
+    function setVolatilityCapFixedPercent(uint16 _volatilityCapFixedPercent) public onlyModerator {
+        require(_volatilityCapFixedPercent <= PERCENTAGE_DECIMALS, "PriceOracle: invalid volatilityCapFixedPercent");
+        volatilityCapFixedPercent = _volatilityCapFixedPercent;
+        emit SetVolatilityCapFixedPercent(_volatilityCapFixedPercent);
     }
 
-    function changeActive(address priceProvider, address token, bool active) public onlyModerator {
-        require(tokenPriceProvider[token] == priceProvider, "PriceOracle: mismatch token`s price provider");
-        PriceProvider(priceProvider).changeActive(token, active);
-        emit ChangeActive(msg.sender, priceProvider, token, active);
-    }
-
-    function setPriceCapPercentPerHour(uint16 _priceCapPercentPerHour) public onlyModerator {
-        require(_priceCapPercentPerHour <= PERCENTAGE_DECIMALS, "PriceOracle: invalid priceCapPercentPerHour");
-        priceCapPercentPerHour = _priceCapPercentPerHour;
-    }
-
+    /** 
+     * @dev Set the minimum sample interval
+     * @param _minSampleInterval The new minimum sample interval
+     */
     function setMinSampleInterval(uint256 _minSampleInterval) public onlyModerator {
-        require(_minSampleInterval >= 0, "PriceOracle: invalid minSampleInterval");
         minSampleInterval = _minSampleInterval;
+        emit SetMinSampleInterval(_minSampleInterval);
     }
 
+    /**
+     * @dev Set the log maturing age
+     * @param _logMaturingAge The new log maturing age
+     */
     function setLogMaturingAge(uint256 _logMaturingAge) public onlyModerator {
-        require(_logMaturingAge >= 0, "PriceOracle: invalid logMaturingAge");
         logMaturingAge = _logMaturingAge;
+        emit SetLogMaturingAge(_logMaturingAge);
     }
 
+    /**
+     * @dev Set the long TWAP period
+     * @param _longTWAPperiod The new long TWAP period
+     */
     function setLongTWAPperiod(uint256 _longTWAPperiod) public onlyModerator {
-        require(_longTWAPperiod >= 0, "PriceOracle: invalid longTWAPperiod");
         longTWAPperiod = _longTWAPperiod;
-    }
-
-    function setTwapEnabledForAsset(address token, bool enabled) public onlyModerator {
-        twapEnabledForAsset[token] = enabled;
+        emit SetLongTWAPperiod(_longTWAPperiod);
     }
 
     /****************** end Moderator functions ****************** */
 
-    /****************** main functions ****************** */
+    /****************** Main functions ****************** */
+
+    /**
+    * @dev Calculates the final TWAP prices of a token.
+    * @param token The address of the token.
+    */
+    function calcFinalPrices(address token) external {
+        uint256 twapCollateralPrice = 0;
+        uint256 twapCapitalPrice = 0;
+
+        uint32 currentTime = uint32(block.timestamp);
+        (uint256 reportedPrice, uint8 priceDecimals) = getReportedPrice(token);
+        uint256 governedPrice = _applyVolatilityCap(token, reportedPrice, currentTime);
+
+        if (!priceProviderAggregator.twapEnabledForAsset(token)) {
+            (twapCollateralPrice, twapCapitalPrice) = (governedPrice, governedPrice);
+        } else {
+            _updateAccumLogs(token, governedPrice, currentTime);
+            uint256 longTWAPprice = _deriveLongTWAPprice(token, currentTime);
+            (twapCollateralPrice, twapCapitalPrice) = longTWAPprice == 0 ? (governedPrice, governedPrice) : _deriveFinalPrices(governedPrice, longTWAPprice);
+        }
+        priceInfo[token] = PriceInfo({
+            timestamp: currentTime,
+            priceDecimals: priceDecimals,
+            collateralPrice: twapCollateralPrice,
+            capitalPrice: twapCapitalPrice
+        });
+
+        emit PriceUpdated(token, priceDecimals, currentTime, twapCollateralPrice, twapCapitalPrice);
+    }
+
+    /**
+     * @dev Returns the most recent TWAP price of a token.
+     * @param token The address of the token.
+     * @return priceDecimals The decimals of the price.
+     * @return timestamp The last updated timestamp of the price.
+     * @return collateralPrice The collateral price of the token.
+     * @return capitalPrice The capital price of the token.
+     */
+    function getMostTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        PriceInfo memory info = priceInfo[token];
+        return (info.priceDecimals, info.timestamp, info.collateralPrice, info.capitalPrice);
+    }
+
+    /**
+     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
+        PriceInfo memory info = priceInfo[token];
+        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice, info.priceDecimals);
+        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice, info.priceDecimals);
+    }
 
     /**
      * @dev returns tuple (priceMantissa, priceDecimals)
      * @notice price = priceMantissa / (10 ** priceDecimals)
-     * @param token the address of token wich price is to return
+     * @param token the address of token which price is to return
      */
-    function getPrice(address token) public view returns(uint256 priceMantissa, uint8 priceDecimals){
-        return PriceProvider(tokenPriceProvider[token]).getPrice(token);
+    function getReportedPrice(address token) public view returns(uint256 priceMantissa, uint8 priceDecimals){
+        return PriceProvider(priceProviderAggregator.tokenPriceProvider(token)).getPrice(token);
     }
-
+    
     /**
      * @dev returns the USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
@@ -160,31 +226,20 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
             evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals)); 
         }
     }
-    
-    /**
-     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
-     * @param token the address of token to evaluate
-     * @param tokenAmount the amount of token to evaluate
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
-        PriceInfo memory info = priceInfo[token];
-        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice, info.priceDecimals);
-        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice, info.priceDecimals);
-    }
 
     /**
     * @dev Transforms a new accumulator log when having new price sample
     * @param mostLog The most recent accumulator log.
-    * @param priceCurrent The current price.
+    * @param mostAccumLogPrice The most recent accumulator log governed price.
     * @param currentTime The current time.
     * @return The transformed accumulator log.
     */
-    function _transformAccumLog(AccumLog memory mostLog, uint256 priceCurrent, uint32 currentTime) private pure returns(AccumLog memory){
-        uint32 deltaTime = currentTime - mostLog.timestamp;
+    function _transformAccumLog(AccumLog memory mostLog, GovernedPrice memory mostAccumLogPrice, uint32 currentTime) private pure returns(AccumLog memory){
+        uint32 deltaTime = currentTime - mostAccumLogPrice.timestamp;
         return AccumLog({
-            timestamp: currentTime,
+            timestamp: mostAccumLogPrice.timestamp,
             totalWeights: deltaTime + mostLog.totalWeights,
-            totalWeightedPrices: priceCurrent * deltaTime + mostLog.totalWeightedPrices
+            totalWeightedPrices: mostAccumLogPrice.price * deltaTime + mostLog.totalWeightedPrices
         });
     }
 
@@ -207,10 +262,10 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     * @param currentTime The current time.
     * @return governedPrice The governed price of the token.
     */
-    function _applyVolatilityCap(address token, uint256 reportedPrice, uint32 currentTime) internal returns(uint256 governedPrice) {
-        MostGovernedPrice storage mostGovernedPriceInfo = mostGovernedPrice[token];
-        uint256 deltaTime = currentTime - mostGovernedPriceInfo.timestamp;
-        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * priceCapPercentPerHour * deltaTime / SECONDS_PER_HOUR / PERCENTAGE_DECIMALS;
+    function _applyVolatilityCap(address token, uint256 reportedPrice, uint32 currentTime) private returns(uint256 governedPrice) {
+        GovernedPrice storage mostGovernedPriceInfo = mostGovernedPrice[token];
+        uint256 deltaHours = (currentTime - mostGovernedPriceInfo.timestamp) / SECONDS_PER_HOUR;
+        uint256 allowedPriceVariance = mostGovernedPriceInfo.price * volatilityCapFixedPercent * deltaHours / PERCENTAGE_DECIMALS;
         uint256 actualPriceVariance = reportedPrice > mostGovernedPriceInfo.price ? reportedPrice - mostGovernedPriceInfo.price : mostGovernedPriceInfo.price - reportedPrice;
         if (reportedPrice < mostGovernedPriceInfo.price) {
             governedPrice = actualPriceVariance < allowedPriceVariance ? reportedPrice : mostGovernedPriceInfo.price - actualPriceVariance;
@@ -224,10 +279,10 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     /**
     * @dev Derives a new long TWAP accumulator log and updates accumulator logs.
     * @param token The address of the token.
-    * @param governedPrice The governed price of the token.
+    * @param currentGovernedPrice The current governed price of the token.
     * @param currentTime The current time.
     */
-    function _updateAccumLogs(address token, uint256 governedPrice, uint32 currentTime) internal {
+    function _updateAccumLogs(address token, uint256 currentGovernedPrice, uint32 currentTime) private {
         AccumLog memory currentLog;
         AccumLog memory mostLog = mostRecentAccumLog[token];
         if (mostLog.timestamp == 0) {
@@ -238,12 +293,16 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
             });
         } else {
             if (currentTime - mostLog.timestamp >= minSampleInterval) {
-                currentLog = _transformAccumLog(mostLog, governedPrice, currentTime);
+                currentLog = _transformAccumLog(mostLog, mostAccumLogGovernedPrice[token], currentTime);
             }
         }
         if (currentLog.timestamp != 0) {
             mostRecentAccumLog[token] = currentLog;
             longTWAPaccumLogs[token].push(currentLog);
+            mostAccumLogGovernedPrice[token] = GovernedPrice({
+                price: currentGovernedPrice,
+                timestamp: currentTime
+            });
         }
     }
 
@@ -253,37 +312,42 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     * @param currentTime The current time.
     * @return longTWAPprice The long TWAP price of the token.
     */
-    function _deriveLongTWAPprice(address token, uint32 currentTime) internal view returns (uint256 longTWAPprice) {
+    function _deriveLongTWAPprice(address token, uint32 currentTime) private view returns (uint256 longTWAPprice) {
         AccumLog[] memory accumLogs = longTWAPaccumLogs[token];
-        if (accumLogs.length <= 1) {
+        if (accumLogs.length < 1) {
             return 0;
         }
 
+        GovernedPrice memory mostAccumLogPrice = mostAccumLogGovernedPrice[token];
         AccumLog memory mostLog = mostRecentAccumLog[token];
+        AccumLog memory currentLog;
         AccumLog memory lastLog;
         uint256 oldestTime = currentTime - longTWAPperiod;
         if (oldestTime <= accumLogs[0].timestamp) {
             lastLog = accumLogs[0];
-        } else if (mostLog.timestamp <= oldestTime) {
+        } else if (mostLog.timestamp < oldestTime) {
             return 0;
         } else {
-            uint256 count = 0;
             uint256 index = 0;
-            for (uint256 i = accumLogs.length - 2; i > 0; i--) {
-                if (accumLogs[i].timestamp >= oldestTime) {
+            for (uint256 i = accumLogs.length - 1; i > 0; i--) {
+                if (oldestTime <= accumLogs[i].timestamp) {
                     index = i;
-                    count++;
                 } else {                    
                     break;
                 }
             }
-            if (count > 0) {
-                lastLog = accumLogs[index];
-            } else {
-                return 0;
-            }
+            lastLog = accumLogs[index];
         }
-        longTWAPprice = _calArithmeticMean(lastLog, mostLog);
+
+        if (mostLog.timestamp == mostAccumLogPrice.timestamp) {
+            currentLog = mostLog;
+        } else {
+            currentLog = _transformAccumLog(mostLog, mostAccumLogPrice, currentTime);
+        }
+        if (lastLog.timestamp == currentLog.timestamp) {
+            return 0;
+        }
+        longTWAPprice = _calArithmeticMean(lastLog, currentLog);
     }
 
     /**
@@ -293,38 +357,8 @@ contract PriceOracle is Initializable, AccessControlUpgradeable
     * @return collateralPrice The collateral price of the token.
     * @return capitalPrice The capital price of the token.
     */
-    function _deriveFinalPrices(uint256 governedPrice, uint256 longTWAPprice) internal pure returns (uint256 collateralPrice, uint256 capitalPrice) {
+    function _deriveFinalPrices(uint256 governedPrice, uint256 longTWAPprice) private pure returns (uint256 collateralPrice, uint256 capitalPrice) {
         collateralPrice = governedPrice < longTWAPprice ? governedPrice : longTWAPprice;
         capitalPrice = governedPrice > longTWAPprice ? governedPrice : longTWAPprice;
-    }
-
-    /**
-    * @dev Calculates the final TWAP prices of a token.
-    * @param token The address of the token.
-    * @return twapCollateralPrice The collateral price of the token.
-    * @return twapCapitalPrice The capital price of the token.
-    */
-    function calcFinalPrices(address token) public returns (uint256 twapCollateralPrice, uint256 twapCapitalPrice) {
-        uint32 currentTime = uint32(block.timestamp);
-        (uint256 reportedPrice, uint8 priceDecimals) = getPrice(token);
-        uint256 governedPrice = _applyVolatilityCap(token, reportedPrice, currentTime);
-        
-        if (!twapEnabledForAsset[token]) {
-            (twapCollateralPrice, twapCapitalPrice) = (governedPrice, governedPrice);
-        } else {
-            _updateAccumLogs(token, governedPrice, currentTime);
-            uint256 longTWAPprice = _deriveLongTWAPprice(token, currentTime);
-            (twapCollateralPrice, twapCapitalPrice) = longTWAPprice == 0 ? (governedPrice, governedPrice) : _deriveFinalPrices(governedPrice, longTWAPprice);
-        }
-        priceInfo[token] = PriceInfo({
-            timestamp: currentTime,
-            priceDecimals: priceDecimals,
-            collateralPrice: twapCollateralPrice,
-            capitalPrice: twapCapitalPrice
-        });
-    }
-
-    function getMostTWAPprice(address token) public view returns (PriceInfo memory) {
-        return priceInfo[token];
     }
 }
