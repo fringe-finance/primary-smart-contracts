@@ -30,7 +30,5 @@
   "PrimaryIndexTokenLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": "",
-  "UniswapV2PriceProviderMockLogic": "",
-  "UniswapV2PriceProviderMockProxy": ""
+  "UniswapV2PriceProviderProxy": ""
 }

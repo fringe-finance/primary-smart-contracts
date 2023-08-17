@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
 abstract contract PriceProvider {
-
     function changeActive(address token, bool active) public virtual {}
+
+    function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external virtual payable {
+        priceIds; updateData;
+        revert("PriceProvider: UpdatePrices is forbidden");
+    }
 
     /****************** view functions ****************** */
 
@@ -29,4 +33,5 @@ abstract contract PriceProvider {
 
     function getPriceDecimals() public virtual view returns (uint8 priceDecimals) {}
 
+    function getExpiredPriceFeeds(address[] memory token, uint256 timeBeforeExpiration) external virtual view returns(bytes32[] memory priceIds, uint256 updateFee) {}
 }

@@ -2,8 +2,6 @@
     "priceOracle": {
         "tokensUseUniswap": [],
         "uniswapPairs": [],
-        "tokensUseUniswapMock": [],
-        "uniswapPrices": [],
         "tokensUseChainlink": [],
         "chainlinkAggregatorV3": [],
         "tokensUseBackendProvider": [],
@@ -32,9 +30,7 @@
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
-        "name": [],
-        "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
+        "name": []
     },
     "jumRateModel": {
         "gainPerYear": [],

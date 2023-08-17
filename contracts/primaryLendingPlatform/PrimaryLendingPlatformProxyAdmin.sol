@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-import "./openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
+import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
 
 contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
-    
     uint256 public constant minimumDelayPeriod = 1 days;
 
     uint256 public delayPeriod;
@@ -28,41 +27,36 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
         delayPeriod = 7 days;
     }
 
-    function setDelayPeriod(uint256 _delayPeriod) public onlyOwner {
+    function setDelayPeriod(uint256 _delayPeriod) external onlyOwner {
         require(minimumDelayPeriod <= _delayPeriod, "PrimaryLendingPlatformProxyAdmin: too low delayPeriod");
         emit SetDelayPeriod(delayPeriod, _delayPeriod);
         delayPeriod = _delayPeriod;
     }
 
-    function changeProxyAdmin(TransparentUpgradeableProxy proxy, address newAdmin) public override onlyOwner {
-        proxy; newAdmin;
+    function changeProxyAdmin(ITransparentUpgradeableProxy proxy, address newAdmin) public override onlyOwner {
+        proxy;
+        newAdmin;
         if (false) {
             delayPeriod++;
         }
-        revert("changeProxyAdmin is forbidden");
+        revert("PrimaryLendingPlatformProxyAdmin: ChangeProxyAdmin is forbidden");
     }
 
-    function appendUpgrade(TransparentUpgradeableProxy proxy, address newImplementation) public onlyOwner {
+    function appendUpgrade(ITransparentUpgradeableProxy proxy, address newImplementation) public onlyOwner {
         UpgradeData storage _upgrade = upgradeData[address(proxy)];
         if (_upgrade.appendTimestamp != 0) {
-            revert("PrimaryLendingPlatformProxyAdmin: wait for next upgrade");
+            revert("PrimaryLendingPlatformProxyAdmin: Wait for next upgrade");
         }
         _upgrade.appendTimestamp = block.timestamp;
         _upgrade.delayPeriod = delayPeriod;
         _upgrade.oldImplementation = getProxyImplementation(proxy);
         _upgrade.newImplementation = newImplementation;
-        emit AppendUpgrade(
-            address(proxy), 
-            _upgrade.appendTimestamp, 
-            _upgrade.delayPeriod, 
-            _upgrade.oldImplementation, 
-            newImplementation
-        );
+        emit AppendUpgrade(address(proxy), _upgrade.appendTimestamp, _upgrade.delayPeriod, _upgrade.oldImplementation, newImplementation);
     }
 
-    function upgrade(TransparentUpgradeableProxy proxy, address implementation) public override onlyOwner {
+    function upgrade(ITransparentUpgradeableProxy proxy, address implementation) public override onlyOwner {
         UpgradeData storage _upgrade = upgradeData[address(proxy)];
-        if(_upgrade.appendTimestamp == 0) {
+        if (_upgrade.appendTimestamp == 0) {
             revert("PrimaryLendingPlatformProxyAdmin: Call first appendUpgrade(...)");
         }
         require(_upgrade.appendTimestamp + _upgrade.delayPeriod <= block.timestamp);
@@ -71,20 +65,15 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
             emit Upgrade(address(proxy), block.timestamp, _upgrade.oldImplementation, implementation);
             delete upgradeData[address(proxy)];
         } else {
-            // proxy contract dont upgrade the implementation
+            // proxy contract don't upgrade the implementation
             delete upgradeData[address(proxy)];
         }
     }
 
-    function upgradeAndCall(
-        TransparentUpgradeableProxy proxy,
-        address implementation,
-        bytes memory data
-    ) public payable override onlyOwner {
-        proxy; implementation; data;
-        revert("Use default upgrade()");
+    function upgradeAndCall(ITransparentUpgradeableProxy proxy, address implementation, bytes memory data) public payable override onlyOwner {
+        proxy;
+        implementation;
+        data;
+        revert("PrimaryLendingPlatformProxyAdmin: Use default upgrade()");
     }
-
-
-
 }

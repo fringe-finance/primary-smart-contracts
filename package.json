@@ -42,6 +42,7 @@
     "upgradePriceProviderAggregator_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/priceOracle/upgradingPriceProviderAggregator.js",
     "upgradePrimaryIndexToken_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexToken/upgradingPrimaryIndexToken.js",
     "upgradePrimaryIndexTokenAtomicRepayment_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenAtomicRepayment/upgradingPrimaryIndexTokenAtomicRepayment.js",
+    "upgradePrimaryIndexTokenAtomicRepayment_goerli": "npx hardhat run --network ethereum_goerli ./scripts/upgradeProxy/primaryIndexTokenAtomicRepayment/upgradingPrimaryIndexTokenAtomicRepayment.js",
     "upgradePrimaryIndexTokenLeverage_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenLeverage/upgradingPrimaryIndexTokenLeverage.js",
     "upgradePrimaryIndexTokenLiquidation_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenLiquidation/upgradingPrimaryIndexTokenLiquidation.js",
     "upgradePrimaryIndexTokenModerator_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenModerator/upgradingPrimaryIndexTokenModerator.js",
@@ -52,13 +53,14 @@
   "license": "ISC",
   "dependencies": {
     "@chainlink/contracts": "^0.2.2",
-    "@openzeppelin/contracts": "^4.8.3",
-    "@openzeppelin/contracts-upgradeable": "^4.8.3",
+    "@openzeppelin/contracts": "4.9.3",
+    "@openzeppelin/contracts-upgradeable": "4.9.3",
     "@primitivefi/hardhat-dodoc": "^0.2.3",
     "hardhat": "^2.14.0",
     "hardhat-contract-sizer": "^2.4.0",
     "js-big-decimal": "^1.3.4",
-    "solidity-docgen": "^0.6.0-beta.10"
+    "solidity-docgen": "^0.6.0-beta.10",
+    "zksync-web3": "^0.14.3"
   },
   "devDependencies": {
     "@ethersproject/hash": "^5.7.0",

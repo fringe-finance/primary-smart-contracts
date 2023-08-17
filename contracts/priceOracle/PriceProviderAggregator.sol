@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-import "../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./priceproviders/PriceProvider.sol";
 
-contract PriceProviderAggregator is Initializable,
-                                    AccessControlUpgradeable
-{
-
+contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
-    
+
     uint8 public usdDecimals;
 
     mapping(address => PriceProviderInfo) public tokenPriceProvider; // address of project token => priceProvider address
@@ -21,10 +18,10 @@ contract PriceProviderAggregator is Initializable,
         bool hasSignedFunction;
     }
 
-    event GrandModeratorRole(address indexed who, address indexed newModerator);
-    event RevokeModeratorRole(address indexed who, address indexed moderator);
-    event SetTokenAndPriceProvider(address indexed who, address indexed token, address indexed priceProvider);
-    event ChangeActive(address indexed who, address indexed priceProvider, address indexed token, bool active);
+    event GrandModeratorRole(address indexed newModerator);
+    event RevokeModeratorRole(address indexed moderator);
+    event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider);
+    event ChangeActive(address indexed priceProvider, address indexed token, bool active);
 
     function initialize() public initializer {
         __AccessControl_init();
@@ -47,13 +44,13 @@ contract PriceProviderAggregator is Initializable,
 
     function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(msg.sender, newModerator);
+        emit GrandModeratorRole(newModerator);
     }
 
     function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(msg.sender, moderator);
-    }    
+        emit RevokeModeratorRole(moderator);
+    }
 
     /****************** end Admin functions ****************** */
 
@@ -62,23 +59,23 @@ contract PriceProviderAggregator is Initializable,
     /**
      * @dev sets price provider to `token`
      * @param token the address of token
-     * @param priceProvider the address of price provider. Should implememnt the interface of `PriceProvider`
+     * @param priceProvider the address of price provider. Should implement the interface of `PriceProvider`
      * @param hasFunctionWithSign true - if price provider has function with signatures
      *                            false - if price provider does not have function with signatures
      */
     function setTokenAndPriceProvider(address token, address priceProvider, bool hasFunctionWithSign) public onlyModerator {
-        require(token != address(0), "USBPriceOracle: invalid token");
-        require(priceProvider != address(0), "USBPriceOracle: invalid priceProvider");
+        require(token != address(0), "PriceProviderAggregator: Invalid token");
+        require(priceProvider != address(0), "PriceProviderAggregator: Invalid priceProvider");
         PriceProviderInfo storage priceProviderInfo = tokenPriceProvider[token];
         priceProviderInfo.priceProvider = priceProvider;
         priceProviderInfo.hasSignedFunction = hasFunctionWithSign;
-        emit SetTokenAndPriceProvider(msg.sender, token, priceProvider);
+        emit SetTokenAndPriceProvider(token, priceProvider);
     }
 
     function changeActive(address priceProvider, address token, bool active) public onlyModerator {
-        require(tokenPriceProvider[token].priceProvider == priceProvider, "USBPriceOracle: mismatch token`s price provider");
+        require(tokenPriceProvider[token].priceProvider == priceProvider, "PriceProviderAggregator: Mismatch token`s price provider");
         PriceProvider(priceProvider).changeActive(token, active);
-        emit ChangeActive(msg.sender, priceProvider, token, active);
+        emit ChangeActive(priceProvider, token, active);
     }
 
     /****************** main functions ****************** */
@@ -86,11 +83,11 @@ contract PriceProviderAggregator is Initializable,
     /**
      * @dev returns tuple (priceMantissa, priceDecimals)
      * @notice price = priceMantissa / (10 ** priceDecimals)
-     * @param token the address of token wich price is to return
+     * @param token the address of token which price is to return
      */
-    function getPrice(address token) public view returns(uint256 priceMantissa, uint8 priceDecimals){
+    function getPrice(address token) public view returns (uint256 priceMantissa, uint8 priceDecimals) {
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        require(priceProviderInfo.hasSignedFunction == false, "USBPriceOracle: call getPriceWithSign()");
+        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getPriceWithSign()");
         return PriceProvider(priceProviderInfo.priceProvider).getPrice(token);
     }
 
@@ -103,7 +100,12 @@ contract PriceProviderAggregator is Initializable,
      * @param validTo - the timestamp in seconds (used in verifying the signature)
      * @param signature - the backend signature of secp256k1. length is 65 bytes
      */
-    function getPriceSigned(address token, uint256 priceMantissa, uint256 validTo, bytes memory signature) public view returns(uint256 priceMantissa_, uint8 priceDecimals){
+    function getPriceSigned(
+        address token,
+        uint256 priceMantissa,
+        uint256 validTo,
+        bytes memory signature
+    ) public view returns (uint256 priceMantissa_, uint8 priceDecimals) {
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
         if (priceProviderInfo.hasSignedFunction) {
             return PriceProvider(priceProviderInfo.priceProvider).getPriceSigned(token, priceMantissa, validTo, signature);
@@ -117,12 +119,12 @@ contract PriceProviderAggregator is Initializable,
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
      */
-    function getEvaluation(address token, uint256 tokenAmount) public view returns(uint256 evaluation){
+    function getEvaluation(address token, uint256 tokenAmount) public view returns (uint256 evaluation) {
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        require(priceProviderInfo.hasSignedFunction == false, "USBPriceOracle: call getEvaluationWithSign()");
+        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getEvaluationWithSign()");
         return PriceProvider(priceProviderInfo.priceProvider).getEvaluation(token, tokenAmount);
     }
-    
+
     /**
      * @dev returns the USD evaluation of token by its `tokenAmount`
      * @param token the address of token
@@ -131,7 +133,13 @@ contract PriceProviderAggregator is Initializable,
      * @param validTo - the timestamp in seconds (used in verifying the signature)
      * @param signature - the backend signature of secp256k1. length is 65 bytes
      */
-    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint256 validTo, bytes memory signature) public view returns(uint256 evaluation){
+    function getEvaluationSigned(
+        address token,
+        uint256 tokenAmount,
+        uint256 priceMantissa,
+        uint256 validTo,
+        bytes memory signature
+    ) public view returns (uint256 evaluation) {
         PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
         if (priceProviderInfo.hasSignedFunction) {
             return PriceProvider(priceProviderInfo.priceProvider).getEvaluationSigned(token, tokenAmount, priceMantissa, validTo, signature);
@@ -139,5 +147,4 @@ contract PriceProviderAggregator is Initializable,
             return PriceProvider(priceProviderInfo.priceProvider).getEvaluation(token, tokenAmount);
         }
     }
-
 }

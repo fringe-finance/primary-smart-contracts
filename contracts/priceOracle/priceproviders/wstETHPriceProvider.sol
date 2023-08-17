@@ -1,21 +1,22 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
 import "./PriceProvider.sol";
 import "./chainlink/AggregatorV3Interface.sol";
 import "../../interfaces/IWstETH.sol";
-import "../../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "../../openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import "../../openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /**
  * Chainlink price provider
  */
 contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
-
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     string public constant DESCRIPTION = "Price provider that uses chainlink";
+
+    uint8 public constant MAX_PRICE_PATH_LENGTH = 5;
 
     uint8 public usdDecimals;
 
@@ -25,10 +26,9 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
 
     uint256 internal constant PRECISION = 10 ** 18;
 
-
-    event GrandModeratorRole(address indexed who, address indexed newModerator);
-    event RevokeModeratorRole(address indexed who, address indexed moderator);
-    event SetTokenAndAggregator(address indexed who, address indexed token, address[] aggeregatorPath);
+    event GrandModeratorRole(address indexed newModerator);
+    event RevokeModeratorRole(address indexed moderator);
+    event SetTokenAndAggregator(address indexed token, address[] aggregatorPath);
 
     function initialize(address _wstETH, address[] memory _aggregatorPath) public initializer {
         __AccessControl_init();
@@ -52,38 +52,38 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     /****************** Admin functions ****************** */
     function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(msg.sender, newModerator);
+        emit GrandModeratorRole(newModerator);
     }
 
     function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE,moderator);
-        emit RevokeModeratorRole(msg.sender, moderator);
+        revokeRole(MODERATOR_ROLE, moderator);
+        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
 
     function addAggregatorPath(address[] memory _aggregatorPath) public onlyModerator {
-        require(_aggregatorPath.length <= 5, "ChainlinkPriceProvider: too long path");
+        require(_aggregatorPath.length <= MAX_PRICE_PATH_LENGTH, "ChainlinkPriceProvider: Too long path");
         aggregatorPath = _aggregatorPath;
-        emit SetTokenAndAggregator(msg.sender, wstETH, aggregatorPath);
+        emit SetTokenAndAggregator(wstETH, aggregatorPath);
     }
 
     /****************** View functions ****************** */
 
-    function isListed(address token) public override view returns(bool){
-        require(token == wstETH, "ChainlinkPriceProvider: invalid token");
-        if(wstETH != address(0) && aggregatorPath[0] != address(0)){
+    function isListed(address token) public view override returns (bool) {
+        require(token == wstETH, "ChainlinkPriceProvider: Invalid token");
+        if (wstETH != address(0) && aggregatorPath[0] != address(0)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
 
-    function isActive(address token) public override view returns(bool){
-        require(token == wstETH, "ChainlinkPriceProvider: invalid token");
-        if(wstETH != address(0) && aggregatorPath[0] != address(0)){
+    function isActive(address token) public view override returns (bool) {
+        require(token == wstETH, "ChainlinkPriceProvider: Invalid token");
+        if (wstETH != address(0) && aggregatorPath[0] != address(0)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -91,38 +91,40 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     function getPriceSTETH() public view returns (uint256 priceMantissa) {
         address[] memory _aggregatorPath = aggregatorPath;
         priceMantissa = 1;
-        uint priceDecimals = 0;
-        for(uint8 i = 0; i < _aggregatorPath.length; i++) {
-            priceMantissa *= AggregatorV3Interface(_aggregatorPath[i]).latestAnswer();   // earn price
-            priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals();       // earn price decimals
+        uint256 priceDecimals = 0;
+        for (uint8 i = 0; i < _aggregatorPath.length; i++) {
+            priceMantissa *= AggregatorV3Interface(_aggregatorPath[i]).latestAnswer(); // earn price
+            priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals(); // earn price decimals
         }
         priceMantissa /= 10 ** (priceDecimals - usdDecimals);
     }
+
     /**
      * @notice Get price of one wstETH expressed in USD.
      * @param token the address of wstETH token
      */
-    function getPrice(address token) public override view returns (uint256 priceMantissa, uint8 priceDecimals) {
-        require(token == wstETH, "invalid token");
+    function getPrice(address token) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
+        require(token == wstETH, "Invalid token");
         uint256 wstETHToStETH = IWstETH(wstETH).stEthPerToken(); // 1wstETH = stETH
         assert(wstETHToStETH > 0);
         uint256 stETHToUSD = getPriceSTETH();
-        priceMantissa = wstETHToStETH * stETHToUSD / PRECISION;
+        priceMantissa = (wstETHToStETH * stETHToUSD) / PRECISION;
         priceDecimals = usdDecimals;
     }
+
     /**
      * @notice returns the equivalent amount in USD
      * @param token the address of wstETH token
-     * @param tokenAmount the amount of token 
+     * @param tokenAmount the amount of token
      */
-    function getEvaluation(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
+    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
         (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = tokenAmount * priceMantissa / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
+        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
         uint8 tokenDecimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 6
         evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
     }
+
     function getPriceDecimals() public view override returns (uint8) {
         return usdDecimals;
     }
-    
 }

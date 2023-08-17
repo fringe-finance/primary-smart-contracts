@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-import "../openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../bToken/BToken.sol";
 import "../util/ErrorReporter.sol";
 import "../util/ExponentialNoError.sol";
 import "./BondtrollerStorage.sol";
 import "../interfaces/IPriceProviderAggregator.sol";
 
-
 /**
  * @title Remastered from Compound's Bondtroller Contract
  * @author Bonded
  */
 contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, ExponentialNoError, Initializable {
-   
     /// @notice Emitted when an admin supports a market
     event MarketListed(BToken bToken);
 
@@ -31,40 +29,43 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     event NewPauseGuardian(address oldPauseGuardian, address newPauseGuardian);
 
     /// @notice Emitted when an action is paused globally
-    event ActionPaused(string action, bool pauseState);
+    event GlobalActionPaused(string action, bool pauseState);
 
     /// @notice Emitted when an action is paused on a market
     event ActionPaused(BToken bToken, string action, bool pauseState);
 
     /// @notice Emitted when borrow cap for a bToken is changed
-    event NewBorrowCap(BToken indexed bToken, uint newBorrowCap);
+    event NewBorrowCap(BToken indexed bToken, uint256 newBorrowCap);
 
     /// @notice Emitted when borrow cap guardian is changed
     event NewBorrowCapGuardian(address oldBorrowCapGuardian, address newBorrowCapGuardian);
 
     /// @notice Emitted when COMP is granted by admin
-    event CompGranted(address recipient, uint amount);
+    event CompGranted(address recipient, uint256 amount);
 
-    event NewPrimaryIndexToken(address oldPrimaryIndexToken, address newPrimaryIndexToken);
+    event NewPrimaryLendingPlatform(address oldPrimaryLendingPlatform, address newPrimaryLendingPlatform);
 
     /// @notice Emitted when admin address is changed by previous admin
     event NewAdmin(address newAdmin);
 
     /// @notice the address of primary index token
-    address public primaryIndexToken;
+    address public primaryLendingPlatform;
 
-    function init() public initializer{
+    function init() public initializer {
         admin = msg.sender;
         setPauseGuardian(admin);
     }
 
-    modifier onlyPrimaryIndexToken(){
-        require(msg.sender == primaryIndexToken);
+    /**
+     * @dev Throws if called by any account other than the primary index token.
+     */
+    modifier onlyPrimaryLendingPlatform() {
+        require(msg.sender == primaryLendingPlatform);
         _;
     }
 
-    function getPrimaryIndexTokenAddress() external view returns(address){
-        return primaryIndexToken;
+    function getPrimaryLendingPlatformAddress() external view returns (address) {
+        return primaryLendingPlatform;
     }
 
     /*** Assets You Are In ***/
@@ -91,7 +92,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     function changeAdmin(address newAdmin) external {
-        require( msg.sender == admin && newAdmin != address(0), "invalid address");
+        require(msg.sender == admin && newAdmin != address(0), "Bondtroller: Invalid address");
         admin = newAdmin;
         emit NewAdmin(newAdmin);
     }
@@ -101,14 +102,14 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param bTokens The list of addresses of the bToken markets to be enabled
      * @return Success indicator for whether each corresponding market was entered
      */
-    function enterMarkets(address[] memory bTokens) public onlyPrimaryIndexToken returns (uint[] memory) {
-        uint len = bTokens.length;
+    function enterMarkets(address[] memory bTokens) public onlyPrimaryLendingPlatform returns (uint256[] memory) {
+        uint256 len = bTokens.length;
 
-        uint[] memory results = new uint[](len);
-        for (uint i = 0; i < len; i++) {
+        uint256[] memory results = new uint256[](len);
+        for (uint256 i = 0; i < len; i++) {
             BToken bToken = BToken(bTokens[i]);
 
-            results[i] = uint(addToMarketInternal(bToken, msg.sender));
+            results[i] = uint256(addToMarketInternal(bToken, msg.sender));
         }
 
         return results;
@@ -119,7 +120,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param bToken The address of the bToken markets to be enabled
      * @param borrower The address of user, which enters to market
      */
-    function enterMarket(address bToken, address borrower) public onlyPrimaryIndexToken returns(Error) {
+    function enterMarket(address bToken, address borrower) public onlyPrimaryLendingPlatform returns (Error) {
         return addToMarketInternal(BToken(bToken), borrower);
     }
 
@@ -162,11 +163,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param cTokenAddress The address of the asset to be removed
      * @return Whether or not the account successfully exited the market
      */
-    function exitMarket(address cTokenAddress) external onlyPrimaryIndexToken returns (uint) {
+    function exitMarket(address cTokenAddress) external onlyPrimaryLendingPlatform returns (uint) {
         BToken bToken = BToken(cTokenAddress);
         /* Get sender tokensHeld and amountOwed underlying from the bToken */
-        (uint oErr, uint tokensHeld, uint amountOwed, ) = bToken.getAccountSnapshot(msg.sender);
-        require(oErr == 0, "exitMarket: getAccountSnapshot failed"); // semi-opaque error code
+        (uint256 oErr, uint256 tokensHeld, uint256 amountOwed, ) = bToken.getAccountSnapshot(msg.sender);
+        require(oErr == 0, "Bondtroller: GetAccountSnapshot failed"); // semi-opaque error code
 
         /* Fail if the sender has a borrow balance */
         if (amountOwed != 0) {
@@ -174,7 +175,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         }
 
         /* Fail if the sender is not permitted to redeem all of their tokens */
-        uint allowed = redeemAllowedInternal(cTokenAddress, msg.sender, tokensHeld);
+        uint256 allowed = redeemAllowedInternal(cTokenAddress, msg.sender, tokensHeld);
         if (allowed != 0) {
             return failOpaque(Error.REJECTION, FailureInfo.EXIT_MARKET_REJECTION, allowed);
         }
@@ -183,7 +184,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
 
         /* Return true if the sender is not already ‘in’ the market */
         if (!accountMembership[msg.sender][address(bToken)]) {
-            return uint(Error.NO_ERROR);
+            return uint256(Error.NO_ERROR);
         }
 
         /* Set bToken account membership to false */
@@ -192,9 +193,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         /* Delete bToken from the account’s list of assets */
         // load into memory for faster iteration
         BToken[] memory userAssetList = accountAssets[msg.sender];
-        uint len = userAssetList.length;
-        uint assetIndex = len;
-        for (uint i = 0; i < len; i++) {
+        uint256 len = userAssetList.length;
+        uint256 assetIndex = len;
+        for (uint256 i = 0; i < len; i++) {
             if (userAssetList[i] == bToken) {
                 assetIndex = i;
                 break;
@@ -211,7 +212,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
 
         emit MarketExited(bToken, msg.sender);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /*** Policy Hooks ***/
@@ -223,28 +224,28 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param mintAmount The amount of underlying being supplied to the market in exchange for tokens
      * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function mintAllowed(address bToken, address minter, uint mintAmount) external view returns (uint) {
+    function mintAllowed(address bToken, address minter, uint256 mintAmount) external view returns (uint) {
         // Shh - currently unused
         bToken;
         minter;
         mintAmount;
 
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!mintGuardianPaused[bToken], "mint is paused");
+        require(!mintGuardianPaused[bToken], "Bondtroller: Mint is paused");
 
         // Shh - currently unused
         minter;
         mintAmount;
 
         if (!markets[bToken].isListed) {
-            return uint(Error.MARKET_NOT_LISTED);
+            return uint256(Error.MARKET_NOT_LISTED);
         }
 
         // // Keep the flywheel moving
         // updateCompSupplyIndex(bToken);
         // distributeSupplierComp(bToken, minter);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -254,7 +255,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param actualMintAmount The amount of the underlying asset being minted
      * @param mintTokens The number of tokens being minted
      */
-    function mintVerify(address bToken, address minter, uint actualMintAmount, uint mintTokens) external {
+    function mintVerify(address bToken, address minter, uint256 actualMintAmount, uint256 mintTokens) external {
         // Shh - currently unused
         bToken;
         minter;
@@ -274,34 +275,34 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param redeemTokens The number of bTokens to exchange for the underlying asset in the market
      * @return 0 if the redeem is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function redeemAllowed(address bToken, address redeemer, uint redeemTokens) external view returns (uint) {
+    function redeemAllowed(address bToken, address redeemer, uint256 redeemTokens) external view returns (uint) {
         // Shh - - currently unused
-        bToken; 
-        redeemer; 
+        bToken;
+        redeemer;
         redeemTokens;
 
-        uint allowed = redeemAllowedInternal(bToken, redeemer, redeemTokens);
-        if (allowed != uint(Error.NO_ERROR)){
+        uint256 allowed = redeemAllowedInternal(bToken, redeemer, redeemTokens);
+        if (allowed != uint256(Error.NO_ERROR)) {
             return allowed;
         }
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
-    function redeemAllowedInternal(address bToken, address redeemer, uint redeemTokens) internal view returns (uint) {
+    function redeemAllowedInternal(address bToken, address redeemer, uint256 redeemTokens) internal view returns (uint) {
         // Shh - currently unused
         redeemTokens;
-        
+
         if (!markets[bToken].isListed) {
-            return uint(Error.MARKET_NOT_LISTED);
+            return uint256(Error.MARKET_NOT_LISTED);
         }
 
         /* If the redeemer is not 'in' the market, then we can bypass the liquidity check */
         if (!accountMembership[redeemer][address(bToken)]) {
-            return uint(Error.NO_ERROR);
+            return uint256(Error.NO_ERROR);
         }
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -311,14 +312,14 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param redeemAmount The amount of the underlying asset being redeemed
      * @param redeemTokens The number of tokens being redeemed
      */
-    function redeemVerify(address bToken, address redeemer, uint redeemAmount, uint redeemTokens) external pure {
+    function redeemVerify(address bToken, address redeemer, uint256 redeemAmount, uint256 redeemTokens) external pure {
         // Shh - currently unused
         bToken;
         redeemer;
 
         // Require tokens is zero or amount is also zero
         if (redeemTokens == 0 && redeemAmount > 0) {
-            revert("redeemTokens zero");
+            revert("Bondtroller: RedeemTokens zero");
         }
     }
 
@@ -329,12 +330,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param borrowAmount The amount of underlying the account would borrow
      * @return 0 if the borrow is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function borrowAllowed(address bToken, address borrower, uint borrowAmount) external returns (uint) {
+    function borrowAllowed(address bToken, address borrower, uint256 borrowAmount) external returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!borrowGuardianPaused[bToken], "borrow is paused");
+        require(!borrowGuardianPaused[bToken], "Bondtroller: Borrow is paused");
 
         if (!markets[bToken].isListed) {
-            return uint(Error.MARKET_NOT_LISTED);
+            return uint256(Error.MARKET_NOT_LISTED);
         }
 
         if (!accountMembership[borrower][address(bToken)]) {
@@ -344,7 +345,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
             // attempt to add borrower to the market
             Error errAddMarketInternal = addToMarketInternal(BToken(msg.sender), borrower);
             if (errAddMarketInternal != Error.NO_ERROR) {
-                return uint(errAddMarketInternal);
+                return uint256(errAddMarketInternal);
             }
 
             // it should be impossible to break the important invariant
@@ -352,18 +353,17 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         }
 
         // if (oracle.getUnderlyingPrice(BToken(bToken)) == 0) {
-        //     return uint(Error.PRICE_ERROR);
+        //     return uint256(Error.PRICE_ERROR);
         // }
 
-
-        uint borrowCap = borrowCaps[bToken];
+        uint256 borrowCap = borrowCaps[bToken];
         // Borrow cap of 0 corresponds to unlimited borrowing
         if (borrowCap != 0) {
-            uint totalBorrows = BToken(bToken).totalBorrows();
-            uint nextTotalBorrows = add_(totalBorrows, borrowAmount);
-            require(nextTotalBorrows < borrowCap, "market borrow cap reached");
+            uint256 totalBorrows = BToken(bToken).totalBorrows();
+            uint256 nextTotalBorrows = add_(totalBorrows, borrowAmount);
+            require(nextTotalBorrows < borrowCap, "Bondtroller: Market borrow cap reached");
         }
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -372,7 +372,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param borrower The address borrowing the underlying
      * @param borrowAmount The amount of the underlying asset requested to borrow
      */
-    function borrowVerify(address bToken, address borrower, uint borrowAmount) external {
+    function borrowVerify(address bToken, address borrower, uint256 borrowAmount) external {
         // Shh - currently unused
         bToken;
         borrower;
@@ -392,18 +392,14 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param repayAmount The amount of the underlying asset the account would repay
      * @return 0 if the repay is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function repayBorrowAllowed(
-        address bToken,
-        address payer,
-        address borrower,
-        uint repayAmount) external view returns (uint) {
+    function repayBorrowAllowed(address bToken, address payer, address borrower, uint256 repayAmount) external view returns (uint) {
         // Shh - currently unused
         payer;
         borrower;
         repayAmount;
 
         if (!markets[bToken].isListed) {
-            return uint(Error.MARKET_NOT_LISTED);
+            return uint256(Error.MARKET_NOT_LISTED);
         }
 
         // // Keep the flywheel moving
@@ -411,7 +407,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         // updateCompBorrowIndex(bToken, borrowIndex);
         // distributeBorrowerComp(bToken, borrower, borrowIndex);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -421,12 +417,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param borrower The address of the borrower
      * @param actualRepayAmount The amount of underlying being repaid
      */
-    function repayBorrowVerify(
-        address bToken,
-        address payer,
-        address borrower,
-        uint actualRepayAmount,
-        uint borrowerIndex) external {
+    function repayBorrowVerify(address bToken, address payer, address borrower, uint256 actualRepayAmount, uint256 borrowerIndex) external {
         // Shh - currently unused
         bToken;
         payer;
@@ -448,17 +439,20 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param transferTokens The number of bTokens to transfer
      * @return 0 if the transfer is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
      */
-    function transferAllowed(address bToken, address src, address dst, uint transferTokens) external returns (uint) {
+    function transferAllowed(address bToken, address src, address dst, uint256 transferTokens) external returns (uint) {
         // Shh - currently unused
-        bToken;src;dst;transferTokens;
-        
+        bToken;
+        src;
+        dst;
+        transferTokens;
+
         // Pausing is a very serious situation - we revert to sound the alarms
-        require(!transferGuardianPaused, "transfer is paused");
+        require(!transferGuardianPaused, "Bondtroller: Transfer is paused");
 
         // Currently the only consideration is whether or not
         //  the src is allowed to redeem this many tokens
-        // uint allowed = redeemAllowedInternal(bToken, src, transferTokens);
-        // if (allowed != uint(Error.NO_ERROR)) {
+        // uint256 allowed = redeemAllowedInternal(bToken, src, transferTokens);
+        // if (allowed != uint256(Error.NO_ERROR)) {
         //     return allowed;
         // }
 
@@ -467,7 +461,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
             maxAssets = maxAssets;
         }
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     /**
@@ -477,7 +471,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param dst The account which receives the tokens
      * @param transferTokens The number of bTokens to transfer
      */
-    function transferVerify(address bToken, address src, address dst, uint transferTokens) external onlyPrimaryIndexToken {
+    function transferVerify(address bToken, address src, address dst, uint256 transferTokens) external onlyPrimaryLendingPlatform {
         // Shh - currently unused
         bToken;
         src;
@@ -493,10 +487,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /*** Admin Functions ***/
 
     /**
-      * @notice Sets a new price oracle for the bondtroller
-      * @dev Admin function to set a new price oracle
-      * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details)
-      */
+     * @notice Sets a new price oracle for the bondtroller
+     * @dev Admin function to set a new price oracle
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     */
     function setPriceOracle(address newOracle) public returns (uint) {
         // Check caller is admin
         if (msg.sender != admin) {
@@ -512,30 +506,30 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         // Emit NewPriceOracle(oldOracle, newOracle)
         emit NewPriceOracle(oldOracle, newOracle);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
-    function setPrimaryIndexTokenAddress(address _newPrimaryIndexToken) external returns(uint){
-         // Check caller is admin
+    function setPrimaryLendingPlatformAddress(address _newPrimaryLendingPlatform) external returns (uint) {
+        // Check caller is admin
         if (msg.sender != admin) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SET_LIQUIDATION_INCENTIVE_OWNER_CHECK);
         }
 
-        address oldPrimaryIndexToken = primaryIndexToken;
+        address oldPrimaryLendingPlatform = primaryLendingPlatform;
 
-        primaryIndexToken = _newPrimaryIndexToken;
+        primaryLendingPlatform = _newPrimaryLendingPlatform;
 
-        emit NewPrimaryIndexToken(oldPrimaryIndexToken, _newPrimaryIndexToken);
-        
-        return uint(Error.NO_ERROR);
+        emit NewPrimaryLendingPlatform(oldPrimaryLendingPlatform, _newPrimaryLendingPlatform);
+
+        return uint256(Error.NO_ERROR);
     }
 
     /**
-      * @notice Add the market to the markets mapping and set it as listed
-      * @dev Admin function to set isListed and add support for the market
-      * @param bToken The address of the market (token) to list
-      * @return uint 0=success, otherwise a failure. (See enum Error for details)
-      */
+     * @notice Add the market to the markets mapping and set it as listed
+     * @dev Admin function to set isListed and add support for the market
+     * @param bToken The address of the market (token) to list
+     * @return uint256 0=success, otherwise a failure. (See enum Error for details)
+     */
     function supportMarket(BToken bToken) external returns (uint) {
         if (msg.sender != admin) {
             return fail(Error.UNAUTHORIZED, FailureInfo.SUPPORT_MARKET_OWNER_CHECK);
@@ -554,31 +548,31 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
 
         emit MarketListed(bToken);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     function _addMarketInternal(address bToken) internal {
-        for (uint i = 0; i < allMarkets.length; i ++) {
-            require(allMarkets[i] != BToken(bToken), "market already added");
+        for (uint256 i = 0; i < allMarkets.length; i++) {
+            require(allMarkets[i] != BToken(bToken), "Bondtroller: Market already added");
         }
         allMarkets.push(BToken(bToken));
     }
 
     /**
-      * @notice Set the given borrow caps for the given bToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
-      * @dev Admin or borrowCapGuardian function to set the borrow caps. A borrow cap of 0 corresponds to unlimited borrowing.
-      * @param bTokens The addresses of the markets (tokens) to change the borrow caps for
-      * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
-      */
-    function setMarketBorrowCaps(BToken[] calldata bTokens, uint[] calldata newBorrowCaps) external {
-            require(msg.sender == admin || msg.sender == borrowCapGuardian, "only admin or borrow cap guardian can set borrow caps"); 
+     * @notice Set the given borrow caps for the given bToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
+     * @dev Admin or borrowCapGuardian function to set the borrow caps. A borrow cap of 0 corresponds to unlimited borrowing.
+     * @param bTokens The addresses of the markets (tokens) to change the borrow caps for
+     * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
+     */
+    function setMarketBorrowCaps(BToken[] calldata bTokens, uint256[] calldata newBorrowCaps) external {
+        require(msg.sender == admin || msg.sender == borrowCapGuardian, "Bondtroller: Only admin or borrow cap guardian can set borrow caps");
 
-        uint numMarkets = bTokens.length;
-        uint numBorrowCaps = newBorrowCaps.length;
+        uint256 numMarkets = bTokens.length;
+        uint256 numBorrowCaps = newBorrowCaps.length;
 
-        require(numMarkets != 0 && numMarkets == numBorrowCaps, "invalid input");
+        require(numMarkets != 0 && numMarkets == numBorrowCaps, "Bondtroller: Invalid input");
 
-        for(uint i = 0; i < numMarkets; i++) {
+        for (uint256 i = 0; i < numMarkets; i++) {
             borrowCaps[address(bTokens[i])] = newBorrowCaps[i];
             emit NewBorrowCap(bTokens[i], newBorrowCaps[i]);
         }
@@ -589,7 +583,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      * @param newBorrowCapGuardian The address of the new Borrow Cap Guardian
      */
     function setBorrowCapGuardian(address newBorrowCapGuardian) external {
-        require(msg.sender == admin, "only admin can set borrow cap guardian");
+        require(msg.sender == admin, "Bondtroller: Only admin can set borrow cap guardian");
 
         // Save current value for inclusion in log
         address oldBorrowCapGuardian = borrowCapGuardian;
@@ -604,7 +598,7 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /**
      * @notice Admin function to change the Pause Guardian
      * @param newPauseGuardian The address of the new Pause Guardian
-     * @return uint 0=success, otherwise a failure. (See enum Error for details)
+     * @return uint256 0=success, otherwise a failure. (See enum Error for details)
      */
     function setPauseGuardian(address newPauseGuardian) public returns (uint) {
         if (msg.sender != admin) {
@@ -620,13 +614,13 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         // Emit NewPauseGuardian(OldPauseGuardian, NewPauseGuardian)
         emit NewPauseGuardian(oldPauseGuardian, pauseGuardian);
 
-        return uint(Error.NO_ERROR);
+        return uint256(Error.NO_ERROR);
     }
 
     function setMintPaused(BToken bToken, bool state) public returns (bool) {
-        require(markets[address(bToken)].isListed, "cannot pause a market that is not listed");
-        require(msg.sender == pauseGuardian || msg.sender == admin, "only pause guardian and admin can pause");
-        require(msg.sender == admin || state == true, "only admin can unpause");
+        require(markets[address(bToken)].isListed, "Bondtroller: Cannot pause a market that is not listed");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
+        require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
 
         mintGuardianPaused[address(bToken)] = state;
         emit ActionPaused(bToken, "Mint", state);
@@ -634,9 +628,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     function setBorrowPaused(BToken bToken, bool state) public returns (bool) {
-        require(markets[address(bToken)].isListed, "cannot pause a market that is not listed");
-        require(msg.sender == pauseGuardian || msg.sender == admin, "only pause guardian and admin can pause");
-        require(msg.sender == admin || state == true, "only admin can unpause");
+        require(markets[address(bToken)].isListed, "Bondtroller: Cannot pause a market that is not listed");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
+        require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
 
         borrowGuardianPaused[address(bToken)] = state;
         emit ActionPaused(bToken, "Borrow", state);
@@ -644,20 +638,20 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     function setTransferPaused(bool state) public returns (bool) {
-        require(msg.sender == pauseGuardian || msg.sender == admin, "only pause guardian and admin can pause");
-        require(msg.sender == admin || state == true, "only admin can unpause");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
+        require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
 
         transferGuardianPaused = state;
-        emit ActionPaused("Transfer", state);
+        emit GlobalActionPaused("Transfer", state);
         return state;
     }
 
     function setSeizePaused(bool state) public returns (bool) {
-        require(msg.sender == pauseGuardian || msg.sender == admin, "only pause guardian and admin can pause");
-        require(msg.sender == admin || state == true, "only admin can unpause");
+        require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
+        require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
 
         seizeGuardianPaused = state;
-        emit ActionPaused("Seize", state);
+        emit GlobalActionPaused("Seize", state);
         return state;
     }
 
@@ -684,14 +678,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
      */
     function isDeprecated(BToken bToken) public view returns (bool) {
         return
-            markets[address(bToken)].collateralFactorMantissa == 0 && 
-            borrowGuardianPaused[address(bToken)] == true && 
-            bToken.reserveFactorMantissa() == 1e18
-        ;
+            markets[address(bToken)].collateralFactorMantissa == 0 &&
+            borrowGuardianPaused[address(bToken)] == true &&
+            bToken.reserveFactorMantissa() == 1e18;
     }
 
     function getBlockNumber() public view returns (uint) {
         return block.number;
     }
-
 }
