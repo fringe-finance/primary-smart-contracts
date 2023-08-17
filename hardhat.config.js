@@ -48,7 +48,7 @@ if (isZksync) {
       apiKey: ZKSYNCSCAN_API_KEY
     },
     solidity: {
-      version: "0.8.9",
+      version: "0.8.19",
     },
   };
 } else {
@@ -57,7 +57,7 @@ if (isZksync) {
     solidity: {
       compilers: [
         {
-          version: "0.8.9",
+          version: "0.8.19",
           settings: {
             optimizer: {
               enabled: true,

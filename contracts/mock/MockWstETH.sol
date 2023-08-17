@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
-import "../openzeppelin/contracts/token/ERC20/ERC20.sol";
+pragma solidity 0.8.19;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 contract MockWstETH is ERC20{
     uint8 private _decimals;
     

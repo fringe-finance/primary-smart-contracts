@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
 contract BondtrollerErrorReporter {
     enum Error {
@@ -56,18 +56,18 @@ contract BondtrollerErrorReporter {
       * @dev use this when reporting a known error from the money market or a non-upgradeable collaborator
       */
     function fail(Error err, FailureInfo info) internal returns (uint) {
-        emit Failure(uint(err), uint(info), 0);
+        emit Failure(uint256(err), uint256(info), 0);
 
-        return uint(err);
+        return uint256(err);
     }
 
     /**
       * @dev use this when reporting an opaque error from an upgradeable collaborator contract
       */
     function failOpaque(Error err, FailureInfo info, uint opaqueError) internal returns (uint) {
-        emit Failure(uint(err), uint(info), opaqueError);
+        emit Failure(uint256(err), uint256(info), opaqueError);
 
-        return uint(err);
+        return uint256(err);
     }
 }
 
@@ -192,17 +192,17 @@ contract TokenErrorReporter {
       * @dev use this when reporting a known error from the money market or a non-upgradeable collaborator
       */
     function fail(Error err, FailureInfo info) internal returns (uint) {
-        emit Failure(uint(err), uint(info), 0);
+        emit Failure(uint256(err), uint256(info), 0);
 
-        return uint(err);
+        return uint256(err);
     }
 
     /**
       * @dev use this when reporting an opaque error from an upgradeable collaborator contract
       */
     function failOpaque(Error err, FailureInfo info, uint opaqueError) internal returns (uint) {
-        emit Failure(uint(err), uint(info), opaqueError);
+        emit Failure(uint256(err), uint256(info), opaqueError);
 
-        return uint(err);
+        return uint256(err);
     }
 }
