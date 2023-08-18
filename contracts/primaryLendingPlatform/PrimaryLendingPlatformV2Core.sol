@@ -683,8 +683,10 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 availableToBorrowInUSD = limitBorrowPerCollateral < limitBorrowPerLendingToken
             ? limitBorrowPerCollateral
             : limitBorrowPerLendingToken;
-        availableToBorrowInUSD = availableToBorrow < pitRemainingValue ? availableToBorrow : pitRemainingValue;
-
+        if (availableToBorrowInUSD > pitRemainingValue) {
+            availableToBorrowInUSD = pitRemainingValue;
+        }
+        
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         availableToBorrow = (availableToBorrowInUSD * (10 ** lendingTokenDecimals)) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
     }
