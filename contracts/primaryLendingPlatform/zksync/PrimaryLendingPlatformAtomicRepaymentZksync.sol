@@ -4,6 +4,8 @@ import "../PrimaryLendingPlatformAtomicRepaymentCore.sol";
 import "../../interfaces/IPriceProviderAggregator.sol";
 
 contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAtomicRepaymentCore {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
+
     event SetOpenOceanExchangeProxy(address indexed newOpenOceanExchangeProxy);
 
     /**
@@ -71,4 +73,14 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
         _repayAtomic(prjToken, collateralAmount, buyCalldata, isRepayFully);
     }
 
+    /**
+     * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal override {
+        if (ERC20Upgradeable(token).allowance(address(this), exchangeAggregator) <= tokenAmount) {
+            ERC20Upgradeable(token).safeApprove(exchangeAggregator, type(uint256).max);
+        }
+    }
 }

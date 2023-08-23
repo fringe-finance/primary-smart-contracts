@@ -5,6 +5,8 @@ import "../PrimaryLendingPlatformLeverageCore.sol";
 import "../../interfaces/IPriceProviderAggregator.sol";
 
 contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageCore {
+    using SafeERC20Upgradeable for ERC20Upgradeable;
+    
     event SetOpenOceanExchangeProxy(address indexed newOpenOceanExchangeProxy);
 
     /**
@@ -47,6 +49,17 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
     function leveragedBorrowFromRelatedContract(address projectToken, address lendingToken, uint notionalExposure, uint marginCollateralAmount, bytes memory buyCalldata, address borrower, uint8 leverageType, bytes32[] memory priceIds, bytes[] calldata updateData) external payable nonReentrant onlyRelatedContracts() {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{ value: msg.value }(priceIds, updateData);
         _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
+    }
+
+    /**
+     * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal override {
+        if (ERC20Upgradeable(token).allowance(address(this), exchangeAggregator) <= tokenAmount) {
+            ERC20Upgradeable(token).safeApprove(exchangeAggregator, type(uint256).max);
+        }
     }
 
     /** 

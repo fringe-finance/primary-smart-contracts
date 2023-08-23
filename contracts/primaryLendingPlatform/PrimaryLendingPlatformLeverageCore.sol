@@ -269,10 +269,10 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     /**
      * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
      * @param token The address of the ERC20 token to be approved.
-     * @param tokenTransferProxy The address of the token transfer proxy.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
-    function _approve(address token, address tokenTransferProxy, uint256 tokenAmount) internal {
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
+        address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
         if (ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy) <= tokenAmount) {
             ERC20Upgradeable(token).safeApprove(tokenTransferProxy, type(uint256).max);
         }
@@ -364,11 +364,9 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
         uint256 lendingTokenCount = calculateLendingTokenCount(lendingToken, notionalExposure);
 
-        address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
-
         _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
 
-        _approve(lendingToken, tokenTransferProxy, lendingTokenCount);
+        _approveTokenTransfer(lendingToken, lendingTokenCount);
 
         uint256 amountReceive = _buyOnExchangeAggregator(projectToken, buyCalldata);
 

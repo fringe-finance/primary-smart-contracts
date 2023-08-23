@@ -19,6 +19,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
 
     uint8 public usdDecimals;
 
+    mapping(address => uint256) public timeOuts; // address of aggregatorPath => timeout of aggregatorPath
     mapping(address => ChainlinkMetadata) public chainlinkMetadata; // address of token => metadata of chainlink
 
     struct ChainlinkMetadata {
@@ -30,6 +31,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     event RevokeModeratorRole(address indexed moderator);
     event SetTokenAndAggregator(address indexed token, address[] aggregatorPath);
     event ChangeActive(address indexed token, bool active);
+    event SetTimeOut(address indexed aggregatorPath, uint256 newTimeOut);
 
     function initialize() public initializer {
         __AccessControl_init();
@@ -69,6 +71,22 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /****************** Moderator functions ****************** */
+
+    /**
+     * @notice Sets the timeout value corresponding to the aggregatorPath.
+     * @param aggregatorPath The address of chainlink aggregator contract.
+     * @param newTimeOut It is the amount of time it takes for a new round of aggregation to start after a specified
+     * amount of time since the last update plus a period of time waiting for new price update transactions to execute.
+     * @dev Example: ETH/USD have a new answer is written when the off-chain data moves more than the
+     *      0.5% deviation threshold or 3600 seconds have passed since the last answer was written on-chain.
+     *      So, the timeOut value for each aggregator will be equal to the heartbeat threshold value plus a
+     *      period of time to make the transaction update the price, that time period can be 60s or a little more.
+     */
+    function setTimeOut(address aggregatorPath, uint256 newTimeOut) external onlyModerator {
+        require(aggregatorPath != address(0), "ChainlinkPriceProvider: Invalid aggregatorPath!");
+        timeOuts[aggregatorPath] = newTimeOut;
+        emit SetTimeOut(aggregatorPath, newTimeOut);
+    }
 
     /**
      * @dev Set token and aggregator path
@@ -128,6 +146,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
             aggregatorPath
         ).latestRoundData();
         require(roundId != 0 && answer >= 0 && updatedAt != 0 && updatedAt <= block.timestamp, "ChainlinkPriceProvider: Fetched data is invalid!");
+        require(block.timestamp - updatedAt <= timeOuts[aggregatorPath], "ChainlinkPriceProvider: price is too old!");
         return uint256(answer);
     }
 

@@ -133,11 +133,10 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
             collateralAmount = depositedProjectTokenAmount;
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjToken, collateralAmount, msg.sender, address(this));
-        address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
+        
+        _approveTokenTransfer(prjToken, collateralAmount);
+
         uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
-        if (ERC20Upgradeable(prjToken).allowance(address(this), tokenTransferProxy) <= collateralAmount) {
-            ERC20Upgradeable(prjToken).approve(tokenTransferProxy, type(uint256).max);
-        }
         (uint256 amountSold, uint256 amountReceive) = _buyOnExchangeAggregator(prjToken, lendingToken, buyCalldata);
         if (isRepayFully) require(amountReceive >= totalOutStanding, "AtomicRepayment: Amount receive not enough to repay fully");
 
@@ -163,6 +162,18 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         }
 
         emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountReceive);
+    }
+
+    /**
+     * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
+        address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
+        if (ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy) <= tokenAmount) {
+            ERC20Upgradeable(token).safeApprove(tokenTransferProxy, type(uint256).max);
+        }
     }
 
     /**

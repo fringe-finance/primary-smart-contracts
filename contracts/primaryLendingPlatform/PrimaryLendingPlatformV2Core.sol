@@ -405,10 +405,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
             projectTokenAmount = withdrawableAmount;
         }
         depositedAmount[user][projectToken] -= projectTokenAmount;
-        if (loanBody > 0) {
-            (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = healthFactor(user, projectToken, actualLendingToken);
-            require(healthFactorNumerator >= healthFactorDenominator, "PIT: Withdrawable amount makes healthFactor<1");
-        }
         totalDepositedProjectToken[projectToken] -= projectTokenAmount;
         ERC20Upgradeable(projectToken).safeTransfer(beneficiary, projectTokenAmount);
         emit Withdraw(user, projectToken, actualLendingToken, projectTokenAmount, beneficiary);
@@ -686,7 +682,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         if (availableToBorrowInUSD > pitRemainingValue) {
             availableToBorrowInUSD = pitRemainingValue;
         }
-        
+
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
         availableToBorrow = (availableToBorrowInUSD * (10 ** lendingTokenDecimals)) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
     }
@@ -759,23 +755,17 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 amountRepaid;
         bool isPositionFullyRepaid;
         uint256 _totalOutstanding = totalOutstanding(borrower, projectToken, lendingToken);
-        if (borrowPositionsAmount == 1) {
-            if (lendingTokenAmount > info.bLendingToken.borrowBalanceStored(borrower) || lendingTokenAmount >= _totalOutstanding) {
+
+        if (lendingTokenAmount < _totalOutstanding && lendingTokenAmount < info.bLendingToken.borrowBalanceStored(borrower)) {
+            amountRepaid = _repayTo(repairer, borrower, info, lendingTokenAmount);
+            isPositionFullyRepaid = _repayPartially(projectToken, lendingToken, lendingTokenAmount, _borrowPosition);
+        } else {
+            if (borrowPositionsAmount == 1) {
                 amountRepaid = _repayTo(repairer, borrower, info, type(uint256).max);
                 isPositionFullyRepaid = _repayFully(borrower, projectToken, lendingToken, _borrowPosition);
             } else {
-                uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                amountRepaid = _repayTo(repairer, borrower, info, lendingTokenAmountToRepay);
-                isPositionFullyRepaid = _repayPartially(projectToken, lendingToken, lendingTokenAmountToRepay, _borrowPosition);
-            }
-        } else {
-            if (lendingTokenAmount >= _totalOutstanding) {
                 amountRepaid = _repayTo(repairer, borrower, info, _totalOutstanding);
                 isPositionFullyRepaid = _repayFully(borrower, projectToken, lendingToken, _borrowPosition);
-            } else {
-                uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-                amountRepaid = _repayTo(repairer, borrower, info, lendingTokenAmountToRepay);
-                isPositionFullyRepaid = _repayPartially(projectToken, lendingToken, lendingTokenAmountToRepay, _borrowPosition);
             }
         }
 
@@ -1065,9 +1055,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @dev Returns whether an address is a related contract or not.
      * @param relatedContract The address of the contract to check.
-     * @return isRelated Boolean indicating whether the contract is related or not.    
+     * @return isRelated Boolean indicating whether the contract is related or not.
      */
-    function getRelatedContract(address relatedContract) public view returns(bool) {
+    function getRelatedContract(address relatedContract) public view returns (bool) {
         return isRelatedContract[relatedContract];
     }
 
