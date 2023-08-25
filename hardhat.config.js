@@ -9,12 +9,12 @@ require("@matterlabs/hardhat-zksync-verify");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("solidity-docgen");
-
+require("hardhat-tracer");
 require("dotenv").config();
 
 const {
   INFURA_KEY,
-  MNEMONIC,
+  PRIVATE_KEY,
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   OPTIMISM_API_KEY,
@@ -23,7 +23,16 @@ const {
 } = process.env;
 
 const isZksync = Object.keys(process.env).includes('ZKSYNC');
-console.log("isZksync", isZksync)
+const chain = process.env.CHAIN ? process.env.CHAIN : "no-chain";
+const blockNumber = process.env.BLOCKNUMBER;
+const isTesting = Object.keys(process.env).includes('TESTING');
+
+console.log("isZksync", isZksync);
+console.log("chain", chain);
+console.log("blockNumber", blockNumber);
+console.log("isTesting", isTesting);
+
+
 let hardhatConfig;
 if (isZksync) {
   hardhatConfig = {
@@ -68,61 +77,58 @@ if (isZksync) {
       ],
     },
     networks: {
+      
       hardhat: {
         forking: {
-          url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
-        },
-        allowUnlimitedContractSize: false,
-        timeout: 99999999,
-        blockGasLimit: 100_000_000,
-        gas: 100_000_000,
-        gasMultiplier: 1,
-        gasPrice: 500_000_000_000, // 500 gwei
-        accounts: { mnemonic: MNEMONIC },
+          url: `https://${chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+          blockNumber: Number(blockNumber)
+        } 
       },
 
       ethereum_mainnet: {
         url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
         allowUnlimitedContractSize: false,
         timeout: 99999999,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
       },
 
       polygon_mainnet: {
         url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
       },
 
       arbitrum_mainnet: {
         url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
       },
 
       optimism_mainnet: {
         url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`,
         network_id: 420,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
       },
 
       polygon_mumbai: {
-        url: `https://rpc-mumbai.maticvigil.com/v1/8ec24f48b4472038e2b1d8522ae4cb5b4c9ca621`,
-        accounts: { mnemonic: MNEMONIC },
+        url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
+        accounts: [PRIVATE_KEY]
       },
       optimism_goerli: {
-        url: `https://goerli.optimism.io`,
+        url: `https://optimism-goerli.infura.io/v3${INFURA_KEY}`,
         network_id: 420,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
+        timeout: 99999999,
+        gasPrice: 500_000_000, // 500 gwei
       },
 
       ethereum_goerli: {
         url: "https://rpc.ankr.com/eth_goerli",
         timeout: 99999999,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
         network_id: 5,
       },
       arbitrum_goerli: {
         url: "https://goerli-rollup.arbitrum.io/rpc",
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY],
       },
     },
     gasReporter: {
