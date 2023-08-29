@@ -6,13 +6,33 @@ import "./../bondtroller/Bondtroller.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
+/**
+ * @title BLendingToken
+ * @notice The BLendingToken contract
+ */
 contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
     address public primaryLendingPlatform;
 
+    /**
+     * @dev Emitted when the primary lending platform is set.
+     * @param oldPrimaryLendingPlatform The address of the old primary lending platform.
+     * @param newPrimaryLendingPlatform The address of the new primary lending platform.
+     */
     event SetPrimaryLendingPlatform(address indexed oldPrimaryLendingPlatform, address indexed newPrimaryLendingPlatform);
 
+    /**
+     * @dev Initializes the bToken contract with the given parameters.
+     * @param underlying_ The address of the underlying asset contract.
+     * @param bondtroller_ The address of the Bondtroller contract.
+     * @param interestRateModel_ The address of the interest rate model contract.
+     * @param initialExchangeRateMantissa_ The initial exchange rate mantissa for the bToken contract.
+     * @param name_ The name of the bToken contract.
+     * @param symbol_ The symbol of the bToken contract.
+     * @param decimals_ The number of decimals for the bToken contract.
+     * @param admin_ The address of the admin for the bToken contract.
+     */
     function init(
         address underlying_,
         Bondtroller bondtroller_,
@@ -31,16 +51,25 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         admin = payable(admin_);
     }
 
+    /**
+     * @dev Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "msg.sender not admin!");
         _;
     }
 
+    /**
+     * @dev Modifier to restrict access to functions that can only be called by the primary lending platform.
+     */
     modifier onlyPrimaryLendingPlatform() {
         require(msg.sender == primaryLendingPlatform);
         _;
     }
 
+    /**
+     * @dev Modifier to check if the caller has the moderator role.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "msg.sender not moderator");
         _;
@@ -48,20 +77,36 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
     /********************** ADMIN FUNCTIONS ********************** */
 
+    /**
+     * @dev Sets the primary lending platform for the BLendingToken contract.
+     * @param _primaryLendingPlatform The address of the primary lending platform to be set.
+     */
     function setPrimaryLendingPlatform(address _primaryLendingPlatform) public onlyAdmin {
         require(primaryLendingPlatform == address(0), "BLendingToken: primary index token is set");
         emit SetPrimaryLendingPlatform(primaryLendingPlatform, _primaryLendingPlatform);
         primaryLendingPlatform = _primaryLendingPlatform;
     }
 
+    /**
+     * @dev Grants the `MODERATOR_ROLE` to a new address.
+     * @param newModerator The address to grant the `MODERATOR_ROLE` to.
+     */
     function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
+    /**
+     * @dev Revokes the moderator role from the specified address.
+     * @param moderator The address of the moderator to revoke the role from.
+     */
     function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
     }
 
+    /**
+     * @dev Transfers the adminship to a new address.
+     * @param newAdmin The address of the new admin.
+     */
     function transferAdminship(address payable newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "BLendingToken: newAdmin==0");
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
@@ -73,16 +118,24 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
     /********************** MODERATOR FUNCTIONS ********************** */
 
-    // function setReserveFactor(uint256 reserveFactorMantissa) public onlyModerator{
-    //     _setReserveFactorFresh(reserveFactorMantissa);
-    // }
-
+    /**
+     * @dev Returns true if the specified account has the moderator role.
+     * @param account The address to check for the moderator role.
+     * @return A boolean indicating whether the account has the moderator role or not.
+     */
     function hasRoleModerator(address account) public view override returns (bool) {
         return hasRole(MODERATOR_ROLE, account);
     }
 
     /********************** END MODERATOR FUNCTIONS ********************** */
 
+    /**
+     * @dev Mints new tokens to the specified minter address.
+     * @param minter The address of the minter.
+     * @param mintAmount The amount of tokens to mint.
+     * @return err An error code (0 if successful).
+     * @return mintedAmount The amount of tokens that were minted.
+     */
     function mintTo(address minter, uint256 mintAmount) external onlyPrimaryLendingPlatform returns (uint256 err, uint256 mintedAmount) {
         uint256 error = accrueInterest();
 
@@ -96,6 +149,13 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         require(mintedAmount > 0, "BLendingToken: minted amount is zero!");
     }
 
+    /**
+     * @dev Redeems `redeemTokens` amount of bTokens for underlying assets to the `redeemer` address.
+     * Only the primary lending platform can call this function.
+     * @param redeemer The address of the account that will receive the underlying assets.
+     * @param redeemTokens The amount of bTokens to be redeemed.
+     * @return redeemErr An error code corresponding to the success or failure of the redemption operation.
+     */
     function redeemTo(address redeemer, uint256 redeemTokens) external onlyPrimaryLendingPlatform returns (uint256 redeemErr) {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
@@ -107,6 +167,13 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         redeemErr = redeemFresh(payable(redeemer), redeemTokens, 0);
     }
 
+    /**
+     * @dev Redeems `redeemAmount` of bTokens for underlying asset and transfers them to `redeemer`.
+     * Only the primary lending platform can call this function.
+     * @param redeemer The address of the account that will receive the underlying asset.
+     * @param redeemAmount The amount of bTokens to redeem for underlying asset.
+     * @return redeemUnderlyingError An error code corresponding to the success or failure of the redeem operation.
+     */
     function redeemUnderlyingTo(address redeemer, uint256 redeemAmount) external onlyPrimaryLendingPlatform returns (uint256 redeemUnderlyingError) {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
@@ -117,6 +184,12 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         redeemUnderlyingError = redeemFresh(payable(redeemer), 0, redeemAmount);
     }
 
+    /**
+     * @dev Allows the primary lending platform to borrow tokens on behalf of a borrower.
+     * @param borrower The address of the borrower.
+     * @param borrowAmount The amount of tokens to be borrowed.
+     * @return borrowError The error code (if any) returned by the borrowFresh function.
+     */
     function borrowTo(address borrower, uint256 borrowAmount) external onlyPrimaryLendingPlatform returns (uint256 borrowError) {
         uint256 error = accrueInterest();
         if (error != uint256(Error.NO_ERROR)) {
@@ -127,6 +200,15 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         borrowError = borrowFresh(payable(borrower), borrowAmount);
     }
 
+    /**
+     * @dev Repays a specified amount of the calling user's borrow balance to a borrower.
+     * Only callable by the primary lending platform.
+     * @param payer The address of the account that will be paying the borrow balance.
+     * @param borrower The address of the account with the borrow balance being repaid.
+     * @param repayAmount The amount of the borrow balance to repay.
+     * @return repayBorrowError The error code corresponding to the success or failure of the repay borrow operation.
+     * @return amountRepaid The actual amount repaid, which may be less than the specified `repayAmount` if there is not enough balance available to repay.
+     */
     function repayTo(
         address payer,
         address borrower,
@@ -141,6 +223,10 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         (repayBorrowError, amountRepaid) = repayBorrowFresh(payer, borrower, repayAmount);
     }
 
+    /**
+     * @dev Calculates the estimated borrow index based on the current borrow interest rate and the number of blocks elapsed since the last accrual.
+     * @return The estimated borrow index as a uint256 value.
+     */
     function getEstimatedBorrowIndex() public view returns (uint256) {
         /* Remember the initial block number */
         uint256 currentBlockNumber = getBlockNumber();
@@ -207,6 +293,11 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         return borrowIndexNew;
     }
 
+    /**
+     * @dev Returns the estimated borrow balance of an account based on the current borrow index.
+     * @param account The address of the account to get the borrow balance for.
+     * @return accrual The estimated borrow balance of the account.
+     */
     function getEstimatedBorrowBalanceStored(address account) public view returns (uint256 accrual) {
         uint256 borrowIndexNew = getEstimatedBorrowIndex();
         MathError mathErr;

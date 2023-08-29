@@ -15,13 +15,13 @@ import "../interestRateModel/InterestRateModel.sol";
  */
 abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     /**
-     * @notice Initialize the money market
-     * @param bondtroller_ The address of the Bondtroller
-     * @param interestRateModel_ The address of the interest rate model
-     * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18
-     * @param name_ EIP-20 name of this token
-     * @param symbol_ EIP-20 symbol of this token
-     * @param decimals_ EIP-20 decimal precision of this token
+     * @dev Initializes the money market.
+     * @param bondtroller_ The address of the Bondtroller.
+     * @param interestRateModel_ The address of the interest rate model.
+     * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18.
+     * @param name_ EIP-20 name of this token.
+     * @param symbol_ EIP-20 symbol of this token.
+     * @param decimals_ EIP-20 decimal precision of this token.
      */
     function initialize(
         Bondtroller bondtroller_,
@@ -59,13 +59,13 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Transfer `tokens` tokens from `src` to `dst` by `spender`
-     * @dev Called by both `transfer` and `transferFrom` internally
-     * @param spender The address of the account performing the transfer
-     * @param src The address of the source account
-     * @param dst The address of the destination account
-     * @param tokens The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
+     * @dev Transfers `tokens` tokens from `src` to `dst` by `spender`.
+     * Called by both `transfer` and `transferFrom` internally.
+     * @param spender The address of the account performing the transfer.
+     * @param src The address of the source account.
+     * @param dst The address of the destination account.
+     * @param tokens The number of tokens to transfer.
+     * @return Whether or not the transfer succeeded.
      */
     function transferTokens(address spender, address src, address dst, uint256 tokens) internal returns (uint) {
         /* Fail if transfer not allowed */
@@ -130,33 +130,33 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Transfer `amount` tokens from `msg.sender` to `dst`
-     * @param dst The address of the destination account
-     * @param amount The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
+     * @dev Transfers `amount` tokens from `msg.sender` to `dst`.
+     * @param dst The address of the destination account.
+     * @param amount The number of tokens to transfer.
+     * @return Whether or not the transfer succeeded.
      */
     function transfer(address dst, uint256 amount) external override nonReentrant returns (bool) {
         return transferTokens(msg.sender, msg.sender, dst, amount) == uint256(Error.NO_ERROR);
     }
 
     /**
-     * @notice Transfer `amount` tokens from `src` to `dst`
-     * @param src The address of the source account
-     * @param dst The address of the destination account
-     * @param amount The number of tokens to transfer
-     * @return Whether or not the transfer succeeded
+     * @dev Transfers `amount` tokens from `src` to `dst`.
+     * @param src The address of the source account.
+     * @param dst The address of the destination account.
+     * @param amount The number of tokens to transfer.
+     * @return Whether or not the transfer succeeded.
      */
     function transferFrom(address src, address dst, uint256 amount) external override nonReentrant returns (bool) {
         return transferTokens(msg.sender, src, dst, amount) == uint256(Error.NO_ERROR);
     }
 
     /**
-     * @notice Approve `spender` to transfer up to `amount` from `src`
-     * @dev This will overwrite the approval amount for `spender`
-     *  and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve)
-     * @param spender The address of the account which may transfer tokens
-     * @param amount The number of tokens that are approved (-1 means infinite)
-     * @return Whether or not the approval succeeded
+     * @dev Approves `spender` to transfer up to `amount` from `src`.
+     * This will overwrite the approval amount for `spender`
+     * and is subject to issues noted [here](https://eips.ethereum.org/EIPS/eip-20#approve).
+     * @param spender The address of the account which may transfer tokens.
+     * @param amount The number of tokens that are approved (-1 means infinite).
+     * @return Whether or not the approval succeeded.
      */
     function approve(address spender, uint256 amount) external override returns (bool) {
         address src = msg.sender;
@@ -166,29 +166,29 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Get the current allowance from `owner` for `spender`
-     * @param owner The address of the account which owns the tokens to be spent
-     * @param spender The address of the account which may transfer tokens
-     * @return The number of tokens allowed to be spent (-1 means infinite)
+     * @dev Gets the current allowance from `owner` for `spender`.
+     * @param owner The address of the account which owns the tokens to be spent.
+     * @param spender The address of the account which may transfer tokens.
+     * @return The number of tokens allowed to be spent (-1 means infinite).
      */
     function allowance(address owner, address spender) external view override returns (uint256) {
         return transferAllowances[owner][spender];
     }
 
     /**
-     * @notice Get the token balance of the `owner`
-     * @param owner The address of the account to query
-     * @return The number of tokens owned by `owner`
+     * @dev Gets the token balance of the `owner`.
+     * @param owner The address of the account to query.
+     * @return The number of tokens owned by `owner`.
      */
     function balanceOf(address owner) external view override returns (uint256) {
         return accountTokens[owner];
     }
 
     /**
-     * @notice Get the underlying balance of the `owner`
-     * @dev This also accrues interest in a transaction
-     * @param owner The address of the account to query
-     * @return The amount of underlying owned by `owner`
+     * @dev Gets the underlying balance of the `owner`.
+     * This also accrues interest in a transaction.
+     * @param owner The address of the account to query.
+     * @return The amount of underlying owned by `owner`.
      */
     function balanceOfUnderlying(address owner) external override returns (uint) {
         Exp memory exchangeRate = Exp({mantissa: exchangeRateCurrent()});
@@ -197,6 +197,12 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         return balance;
     }
 
+    /**
+     * @dev Returns the balance of the underlying asset of this bToken for the given account.
+     * This is a view function, which means it will not modify the blockchain state.
+     * @param owner The address of the account to query.
+     * @return The balance of the underlying asset of this bToken for the given account.
+     */
     function balanceOfUnderlyingView(address owner) external view returns (uint) {
         Exp memory exchangeRate = Exp({mantissa: exchangeRateStored()});
         (MathError mErr, uint256 balance) = mulScalarTruncate(exchangeRate, accountTokens[owner]);
@@ -205,8 +211,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Get a snapshot of the account's balances, and the cached exchange rate
-     * @dev This is used by bondtroller to more efficiently perform liquidity checks.
+     * @dev Gets a snapshot of the account's balances, and the cached exchange rate.
+     * This is used by bondtroller to more efficiently perform liquidity checks.
      * @param account Address of the account to snapshot
      * @return (possible error, token balance, borrow balance, exchange rate mantissa)
      */
@@ -231,32 +237,32 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @dev Function to simply retrieve block number
-     *  This exists mainly for inheriting test contracts to stub this result.
+     * @dev Function to simply retrieve block number.
+     * This exists mainly for inheriting test contracts to stub this result.
      */
     function getBlockNumber() internal view returns (uint) {
         return block.number;
     }
 
     /**
-     * @notice Returns the current per-block borrow interest rate for this cToken
-     * @return The borrow interest rate per block, scaled by 1e18
+     * @dev Returns the current per-block borrow interest rate for this cToken.
+     * @return The borrow interest rate per block, scaled by 1e18.
      */
     function borrowRatePerBlock() external view override returns (uint) {
         return interestRateModel.getBorrowRate(getCashPrior(), totalBorrows, totalReserves, address(this));
     }
 
     /**
-     * @notice Returns the current per-block supply interest rate for this cToken
-     * @return The supply interest rate per block, scaled by 1e18
+     * @dev Returns the current per-block supply interest rate for this cToken.
+     * @return The supply interest rate per block, scaled by 1e18.
      */
     function supplyRatePerBlock() external view override returns (uint) {
         return interestRateModel.getSupplyRate(getCashPrior(), totalBorrows, totalReserves, reserveFactorMantissa, address(this));
     }
 
     /**
-     * @notice Returns the current total borrows plus accrued interest
-     * @return The total borrows with interest
+     * @dev Returns the current total borrows plus accrued interest.
+     * @return The total borrows with interest.
      */
     function totalBorrowsCurrent() external override nonReentrant returns (uint) {
         require(accrueInterest() == uint256(Error.NO_ERROR), "BToken: Accrue interest failed");
@@ -264,9 +270,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Accrue interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex
-     * @param account The address whose balance should be calculated after updating borrowIndex
-     * @return The calculated balance
+     * @dev Accrues interest to updated borrowIndex and then calculate account's borrow balance using the updated borrowIndex.
+     * @param account The address whose balance should be calculated after updating borrowIndex.
+     * @return The calculated balance.
      */
     function borrowBalanceCurrent(address account) external override nonReentrant returns (uint) {
         require(accrueInterest() == uint256(Error.NO_ERROR), "BToken: Accrue interest failed");
@@ -274,9 +280,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Return the borrow balance of account based on stored data
-     * @param account The address whose balance should be calculated
-     * @return The calculated balance
+     * @dev Returns the borrow balance of account based on stored data.
+     * @param account The address whose balance should be calculated.
+     * @return The calculated balance.
      */
     function borrowBalanceStored(address account) public view override returns (uint) {
         (MathError err, uint256 result) = borrowBalanceStoredInternal(account);
@@ -285,9 +291,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Return the borrow balance of account based on stored data
-     * @param account The address whose balance should be calculated
-     * @return (error code, the calculated balance or 0 if error code is non-zero)
+     * @dev Returns the borrow balance of account based on stored data.
+     * @param account The address whose balance should be calculated.
+     * @return (error code, the calculated balance or 0 if error code is non-zero).
      */
     function borrowBalanceStoredInternal(address account) internal view returns (MathError, uint) {
         /* Note: we do not assert that the market is up to date */
@@ -322,8 +328,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Accrue interest then return the up-to-date exchange rate
-     * @return Calculated exchange rate scaled by 1e18
+     * @dev Accrues interest then return the up-to-date exchange rate.
+     * @return Calculated exchange rate scaled by 1e18.
      */
     function exchangeRateCurrent() public override nonReentrant returns (uint) {
         require(accrueInterest() == uint256(Error.NO_ERROR), "BToken: Accrue interest failed");
@@ -331,9 +337,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Calculates the exchange rate from the underlying to the CToken
-     * @dev This function does not accrue interest before calculating the exchange rate
-     * @return Calculated exchange rate scaled by 1e18
+     * @dev Calculates the exchange rate from the underlying to the CToken.
+     * @dev This function does not accrue interest before calculating the exchange rate.
+     * @return Calculated exchange rate scaled by 1e18.
      */
     function exchangeRateStored() public view override returns (uint) {
         (MathError err, uint256 result) = exchangeRateStoredInternal();
@@ -342,9 +348,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Calculates the exchange rate from the underlying to the CToken
-     * @dev This function does not accrue interest before calculating the exchange rate
-     * @return (error code, calculated exchange rate scaled by 1e18)
+     * @dev Calculates the exchange rate from the underlying to the CToken.
+     * @dev This function does not accrue interest before calculating the exchange rate.
+     * @return (error code, calculated exchange rate scaled by 1e18).
      */
     function exchangeRateStoredInternal() internal view returns (MathError, uint) {
         uint256 _totalSupply = totalSupply;
@@ -379,17 +385,17 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Get cash balance of this cToken in the underlying asset
-     * @return The quantity of underlying asset owned by this contract
+     * @dev Gets cash balance of this cToken in the underlying asset.
+     * @return The quantity of underlying asset owned by this contract.
      */
     function getCash() external view override returns (uint) {
         return getCashPrior();
     }
 
     /**
-     * @notice Applies accrued interest to total borrows and reserves
-     * @dev This calculates interest accrued from the last checkpointed block
-     *   up to the current block and writes new checkpoint to storage.
+     * @dev Applies accrued interest to total borrows and reserves.
+     * This calculates interest accrued from the last checkpointed block
+     * up to the current block and writes new checkpoint to storage.
      */
     function accrueInterest() public override returns (uint) {
         /* Remember the initial block number */
@@ -472,9 +478,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender supplies assets into the market and receives cTokens in exchange
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param mintAmount The amount of the underlying asset to supply
+     * @dev Sender supplies assets into the market and receives cTokens in exchange.
+     * Accrues interest whether or not the operation succeeds, unless reverted.
+     * @param mintAmount The amount of the underlying asset to supply.
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintInternal(uint256 mintAmount) internal nonReentrant returns (uint, uint) {
@@ -498,10 +504,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice User supplies assets into the market and receives cTokens in exchange
-     * @dev Assumes interest has already been accrued up to the current block
-     * @param minter The address of the account which is supplying the assets
-     * @param mintAmount The amount of the underlying asset to supply
+     * @dev User supplies assets into the market and receives cTokens in exchange.
+     * Assumes interest has already been accrued up to the current block.
+     * @param minter The address of the account which is supplying the assets.
+     * @param mintAmount The amount of the underlying asset to supply.
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual mint amount.
      */
     function mintFresh(address minter, uint256 mintAmount) internal returns (uint, uint) {
@@ -572,10 +578,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender redeems cTokens in exchange for the underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemTokens The number of cTokens to redeem into underlying
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sender redeems cTokens in exchange for the underlying asset.
+     * Accrues interest whether or not the operation succeeds, unless reverted.
+     * @param redeemTokens The number of cTokens to redeem into underlying.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function redeemInternal(uint256 redeemTokens) internal nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -588,10 +594,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender redeems cTokens in exchange for a specified amount of underlying asset
-     * @dev Accrues interest whether or not the operation succeeds, unless reverted
-     * @param redeemAmount The amount of underlying to receive from redeeming cTokens
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sender redeems cTokens in exchange for a specified amount of underlying asset.
+     * Accrues interest whether or not the operation succeeds, unless reverted.
+     * @param redeemAmount The amount of underlying to receive from redeeming cTokens.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function redeemUnderlyingInternal(uint256 redeemAmount) internal nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -614,12 +620,12 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice User redeems cTokens in exchange for the underlying asset
-     * @dev Assumes interest has already been accrued up to the current block
-     * @param redeemer The address of the account which is redeeming the tokens
-     * @param redeemTokensIn The number of cTokens to redeem into underlying (only one of redeemTokensIn or redeemAmountIn may be non-zero)
-     * @param redeemAmountIn The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero)
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev User redeems cTokens in exchange for the underlying asset.
+     * Assumes interest has already been accrued up to the current block.
+     * @param redeemer The address of the account which is redeeming the tokens.
+     * @param redeemTokensIn The number of cTokens to redeem into underlying (only one of redeemTokensIn or redeemAmountIn may be non-zero).
+     * @param redeemAmountIn The number of underlying tokens to receive from redeeming cTokens (only one of redeemTokensIn or redeemAmountIn may be non-zero).
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function redeemFresh(address payable redeemer, uint256 redeemTokensIn, uint256 redeemAmountIn) internal returns (uint) {
         require(redeemTokensIn == 0 || redeemAmountIn == 0, "BToken: One of redeemTokensIn or redeemAmountIn must be zero");
@@ -718,9 +724,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender borrows assets from the protocol to their own address
-     * @param borrowAmount The amount of the underlying asset to borrow
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sender borrows assets from the protocol to their own address.
+     * @param borrowAmount The amount of the underlying asset to borrow.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function borrowInternal(uint256 borrowAmount) internal nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -740,9 +746,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Users borrow assets from the protocol to their own address
-     * @param borrowAmount The amount of the underlying asset to borrow
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Users borrow assets from the protocol to their own address.
+     * @param borrowAmount The amount of the underlying asset to borrow.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function borrowFresh(address payable borrower, uint256 borrowAmount) internal returns (uint) {
         /* Fail if borrow not allowed */
@@ -812,8 +818,8 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender repays their own borrow
-     * @param repayAmount The amount to repay
+     * @dev Sender repays their own borrow.
+     * @param repayAmount The amount to repay.
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
      */
     function repayBorrowInternal(uint256 repayAmount) internal nonReentrant returns (uint, uint) {
@@ -827,9 +833,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sender repays a borrow belonging to borrower
-     * @param borrower the account with the debt being payed off
-     * @param repayAmount The amount to repay
+     * @dev Sender repays a borrow belonging to borrower.
+     * @param borrower the account with the debt being payed off.
+     * @param repayAmount The amount to repay.
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
      */
     function repayBorrowBehalfInternal(address borrower, uint256 repayAmount) internal nonReentrant returns (uint, uint) {
@@ -854,10 +860,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Borrows are repaid by another user (possibly the borrower).
-     * @param payer the account paying off the borrow
-     * @param borrower the account with the debt being payed off
-     * @param repayAmount the amount of undelrying tokens being returned
+     * @dev Borrows are repaid by another user (possibly the borrower).
+     * @param payer the account paying off the borrow.
+     * @param borrower the account with the debt being payed off.
+     * @param repayAmount the amount of undelrying tokens being returned.
      * @return (uint, uint) An error code (0=success, otherwise a failure, see ErrorReporter.sol), and the actual repayment amount.
      */
     function repayBorrowFresh(address payer, address borrower, uint256 repayAmount) internal returns (uint, uint) {
@@ -934,9 +940,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     /*** Admin Functions ***/
 
     /**
-     * @notice Sets a new bondtroller for the market
-     * @dev Admin function to set a new bondtroller
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sets a new bondtroller for the market.
+     * Admin function to set a new bondtroller.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _setBondtroller(Bondtroller newBondtroller) public override returns (uint) {
         // Check caller has moderator role
@@ -958,9 +964,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh
-     * @dev Admin function to accrue interest and set a new reserve factor
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Accrues interest and sets a new reserve factor for the protocol using _setReserveFactorFresh.
+     * Admin function to accrue interest and set a new reserve factor.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _setReserveFactor(uint256 newReserveFactorMantissa) external override nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -973,9 +979,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Sets a new reserve factor for the protocol (*requires fresh interest accrual)
-     * @dev Admin function to set a new reserve factor
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sets a new reserve factor for the protocol (*requires fresh interest accrual).
+     * Admin function to set a new reserve factor.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _setReserveFactorFresh(uint256 newReserveFactorMantissa) internal returns (uint) {
         // Check caller has moderator role
@@ -1002,9 +1008,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Accrues interest and reduces reserves by transferring from msg.sender
-     * @param addAmount Amount of addition to reserves
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Accrues interest and reduces reserves by transferring from msg.sender.
+     * @param addAmount Amount of addition to reserves.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _addReservesInternal(uint256 addAmount) internal nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -1019,10 +1025,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Add reserves by transferring from caller
-     * @dev Requires fresh interest accrual
-     * @param addAmount Amount of addition to reserves
-     * @return (uint, uint) An error code (0=success, otherwise a failure (see ErrorReporter.sol for details)) and the actual amount added, net token fees
+     * @dev Adds reserves by transferring from caller.
+     * Requires fresh interest accrual.
+     * @param addAmount Amount of addition to reserves.
+     * @return (uint, uint) An error code (0=success, otherwise a failure (see ErrorReporter.sol for details)) and the actual amount added, net token fees.
      */
     function _addReservesFresh(uint256 addAmount) internal returns (uint, uint) {
         // totalReserves + actualAddAmount
@@ -1064,9 +1070,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Accrues interest and reduces reserves by transferring to moderator
-     * @param reduceAmount Amount of reduction to reserves
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Accrues interest and reduces reserves by transferring to moderator.
+     * @param reduceAmount Amount of reduction to reserves.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _reduceReserves(uint256 reduceAmount) external override nonReentrant returns (uint) {
         uint256 error = accrueInterest();
@@ -1079,10 +1085,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice Reduces reserves by transferring to moderator
-     * @dev Requires fresh interest accrual
-     * @param reduceAmount Amount of reduction to reserves
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Reduces reserves by transferring to moderator.
+     * Requires fresh interest accrual.
+     * @param reduceAmount Amount of reduction to reserves.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _reduceReservesFresh(uint256 reduceAmount) internal returns (uint) {
         // totalReserves - reduceAmount
@@ -1128,10 +1134,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice accrues interest and updates the interest rate model using _setInterestRateModelFresh
-     * @dev Admin function to accrue interest and update the interest rate model
-     * @param newInterestRateModel the new interest rate model to use
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev accrues interest and updates the interest rate model using _setInterestRateModelFresh.
+     * Admin function to accrue interest and update the interest rate model.
+     * @param newInterestRateModel the new interest rate model to use.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _setInterestRateModel(InterestRateModel newInterestRateModel) public override returns (uint) {
         uint256 error = accrueInterest();
@@ -1144,10 +1150,10 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     }
 
     /**
-     * @notice updates the interest rate model (*requires fresh interest accrual)
-     * @dev Admin function to update the interest rate model
-     * @param newInterestRateModel the new interest rate model to use
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev updates the interest rate model (*requires fresh interest accrual).
+     * Admin function to update the interest rate model.
+     * @param newInterestRateModel the new interest rate model to use.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _setInterestRateModelFresh(InterestRateModel newInterestRateModel) internal returns (uint) {
         // Used to store old model for use in the event that is emitted on success
@@ -1181,9 +1187,9 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
     /*** Safe Token ***/
 
     /**
-     * @notice Gets balance of this contract in terms of the underlying
-     * @dev This excludes the value of the current message, if any
-     * @return The quantity of underlying owned by this contract
+     * @dev Gets balance of this contract in terms of the underlying.
+     * This excludes the value of the current message, if any.
+     * @return The quantity of underlying owned by this contract.
      */
     function getCashPrior() internal view virtual returns (uint);
 
@@ -1200,6 +1206,11 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
      */
     function doTransferOut(address payable to, uint256 amount) internal virtual {}
 
+    /**
+     * @dev Returns whether the specified account has the moderator role.
+     * @param account The address to check for moderator role.
+     * @return A boolean indicating whether the account has the moderator role.
+     */
     function hasRoleModerator(address account) public view virtual returns (bool) {}
 
     /*** Reentrancy Guard ***/

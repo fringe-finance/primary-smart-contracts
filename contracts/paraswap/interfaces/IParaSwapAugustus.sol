@@ -2,7 +2,8 @@
 pragma solidity 0.8.19;
 
 interface IParaSwapAugustus {
+    /**
+     * @dev Returns the address of the token transfer proxy contract used by Augustus.
+     */
     function getTokenTransferProxy() external view returns (address);
-
-    function approveToken(address, address, uint) external;
 }

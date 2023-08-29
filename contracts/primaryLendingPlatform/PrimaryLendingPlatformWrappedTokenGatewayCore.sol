@@ -13,6 +13,11 @@ import "../interfaces/IBLendingToken.sol";
 import "../interfaces/IPrimaryLendingPlatformLiquidation.sol";
 import "../interfaces/IPrimaryLendingPlatformLeverage.sol";
 
+/**
+ * @title PrimaryLendingPlatformWrappedTokenGatewayCore.
+ * @notice Core contract for the Primary Lending Platform Wrapped Token Gateway Core
+ * @dev Abstract contract that defines the core functionality of the primary lending platform wrapped token gateway.
+ */
 abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
@@ -24,12 +29,25 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
 
     IPrimaryLendingPlatformLeverage public pitLeverage;
 
+    /**
+     * @dev Emitted when the PrimaryLendingPlatform contract address is updated.
+     * @param newPrimaryLendingPlatform The new address of the PrimaryLendingPlatform contract.
+     */
     event SetPrimaryLendingPlatform(address newPrimaryLendingPlatform);
+
+    /**
+     * @dev Emitted when the PIT liquidation address is set.
+     */
     event SetPITLiquidation(address newPITLiquidation);
+    
+    /**
+     * @dev Emitted when the PIT (Pool Interest Token) leverage is set to a new address.
+     * @param newPITLeverage The address of the new PIT leverage contract.
+     */
     event SetPITLeverage(address newPITLeverage);
 
     /**
-     * @notice Initializes the PrimaryLendingPlatformWrappedTokenGateway contract.
+     * @dev Initializes the PrimaryLendingPlatformWrappedTokenGateway contract.
      * @param pit Address of the primary index token contract.
      * @param weth Address of the wrapped Ether (WETH) token contract.
      * @param pitLiquidationAddress Address of the primary index token liquidation contract.
@@ -48,29 +66,46 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
         pitLeverage = IPrimaryLendingPlatformLeverage(pitLeverageAddress);
     }
 
+    /**
+     * @dev Modifier that allows only the admin to execute the function.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "WTG: Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier that allows only the moderator to execute the function.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "WTG: Caller is not the Moderator");
         _;
     }
 
+    /**
+     * @dev Modifier that checks if the project token is listed.
+     * @param projectToken Address of the project token.
+     */
     modifier isProjectTokenListed(address projectToken) {
         require(primaryLendingPlatform.projectTokenInfo(projectToken).isListed, "WTG: Project token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier that checks if the lending token is listed.
+     * @param lendingToken Address of the lending token.
+     */
     modifier isLendingTokenListed(address lendingToken) {
         require(primaryLendingPlatform.lendingTokenInfo(lendingToken).isListed, "WTG: Lending token is not listed");
         _;
     }
 
     /**
-     * @notice Sets the primary index token contract address.
-     * @param newPit Address of the new primary index token contract.
+     * @dev Sets the address of the primary lending platform contract.
+     * #### Requirements:
+     * - `newPit` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param newPit The address of the new primary lending platform contract.
      */
     function setPrimaryLendingPlatform(address newPit) external onlyModerator {
         require(newPit != address(0), "WTG: Invalid address");
@@ -79,8 +114,14 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Sets the primary index token liquidation contract address.
-     * @param newLiquidation Address of the new primary index token liquidation contract.
+     * @dev Sets the address of the PrimaryLendingPlatformLiquidation contract for PIT liquidation.
+     * #### Requirements:
+     * - `newLiquidation` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param newLiquidation The address of the new PrimaryLendingPlatformLiquidation contract.
+     * @notice Only the moderator can call this function.
+     * @notice The new address must not be the zero address.
+     * @notice Emits a SetPITLiquidation event.
      */
     function setPITLiquidation(address newLiquidation) external onlyModerator {
         require(newLiquidation != address(0), "WTG: Invalid address");
@@ -89,8 +130,11 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Sets the primary index token leverage contract address.
-     * @param newLeverage Address of the new primary index token leverage contract.
+     * @dev Sets the Primary Lending Platform Leverage contract address.
+     * #### Requirements:
+     * - `newLeverage` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param newLeverage The address of the new Primary Lending Platform Leverage contract.
      */
     function setPITLeverage(address newLeverage) external onlyModerator {
         require(newLeverage != address(0), "WTG: Invalid address");
@@ -99,17 +143,17 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Gets the total outstanding amount for a user and a specific project token.
-     * @param user Address of the user.
-     * @param projectToken Address of the project token.
-     * @return outstanding Total outstanding amount.
+     * @dev Returns the total outstanding balance of a user for a specific project token.
+     * @param user The address of the user.
+     * @param projectToken The address of the project token.
+     * @return outstanding The total outstanding balance of the user.
      */
     function getTotalOutstanding(address user, address projectToken) public view returns (uint256 outstanding) {
         outstanding = primaryLendingPlatform.totalOutstanding(user, projectToken, address(WETH));
     }
 
     /**
-     * @notice Allows users to deposit Ether and receive WETH tokens.
+     * @dev Deposits Ether into the PrimaryLendingPlatformWrappedTokenGatewayCore contract and wraps it into WETH.
      */
     function deposit() external payable nonReentrant {
         WETH.deposit{value: msg.value}();
@@ -120,8 +164,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Allows users to withdraw their WETH tokens and receive Ether.
-     * @param receivedProjectTokenAmount Amount of project tokens to withdraw.
+     * @dev Internal function to withdraw received project token amount and transfer it to the caller.
+     * @param receivedProjectTokenAmount The amount of project token received.
      */
     function _withdraw(uint256 receivedProjectTokenAmount) internal {
         WETH.withdraw(receivedProjectTokenAmount);
@@ -129,7 +173,9 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Supplies Ether and converts it to WETH, then supplies it to the primary index token contract.
+     * @dev Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
+     * The ETH is converted to WETH and then transferred to the user's address.
+     * The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
      */
     function supply() external payable nonReentrant {
         WETH.deposit{value: msg.value}();
@@ -138,8 +184,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Redeems bLending tokens to Ether and transfers it to the caller.
-     * @param bLendingTokenAmount Amount of bLending tokens to redeem.
+     * @dev Redeems the specified amount of bLendingToken for the underlying asset (WETH) and transfers it to the caller.
+     * @param bLendingTokenAmount The amount of bLendingToken to redeem. If set to `type(uint256).max`, redeems all the bLendingToken balance of the caller.
      */
     function redeem(uint256 bLendingTokenAmount) external nonReentrant {
         address fWETH = primaryLendingPlatform.lendingTokenInfo(address(WETH)).bLendingToken;
@@ -157,8 +203,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Redeems underlying lending tokens to Ether and transfers it to the caller.
-     * @param lendingTokenAmount Amount of lending tokens to redeem.
+     * @dev Redeems the underlying asset from the Primary Lending Platform and transfers it to the caller.
+     * @param lendingTokenAmount The amount of the lending token to redeem.
      */
     function redeemUnderlying(uint256 lendingTokenAmount) external nonReentrant {
         primaryLendingPlatform.redeemUnderlyingFromRelatedContract(address(WETH), lendingTokenAmount, msg.sender);
@@ -168,9 +214,9 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Repays a loan in Ether for the caller.
-     * @param projectToken Address of the project token.
-     * @param lendingTokenAmount Amount of lending tokens to repay.
+     * @dev Repays the specified amount of the project token's Ether outstanding debt using the lending token.
+     * @param projectToken The address of the project token.
+     * @param lendingTokenAmount The amount of the lending token to be used for repayment.
      */
     function repay(address projectToken, uint256 lendingTokenAmount) external payable nonReentrant {
         uint256 totalOutStanding = getTotalOutstanding(msg.sender, projectToken);
@@ -184,8 +230,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Borrows lending tokens for the caller and converts them to Ether Internal.
-     * @param lendingTokenAmount Amount of lending tokens to borrow.
+     * @dev Internal function to borrow WETH from the Primary Lending Platform.
+     * @param lendingTokenAmount The amount of WETH to be borrowed.
      */
     function _borrow(uint256 lendingTokenAmount) internal {
         WETH.transferFrom(msg.sender, address(this), lendingTokenAmount);
@@ -194,7 +240,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @notice Liquidates a position by providing project tokens in Ether.
+     * @dev Internal function to liquidate a position by providing project tokens in Ether.
      * @param receivedWETH Amount of lending tokens to liquidate.
      */
     function _liquidateWithProjectETH(uint256 receivedWETH) internal {
@@ -204,7 +250,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Safely transfers ETH to the specified address.
+     * @dev Internal function to safely transfer ETH to the specified address.
      * @param to Recipient of the transfer.
      * @param value Amount of ETH to transfer.
      */

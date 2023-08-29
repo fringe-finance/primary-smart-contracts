@@ -3,13 +3,24 @@ pragma solidity 0.8.19;
 
 import "./PriceProviderAggregator.sol";
 
+/**
+ * @title PriceProviderAggregatorPyth
+ * @notice The PriceProviderAggregatorPyth contract is the contract that provides the functionality of getting the latest price from PythNetwork.
+ * @dev Contract that provides the functionality of getting the latest price from PythNetwork. Inherit from PriceProviderAggregator.
+ */
 contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     address public pythPriceProvider;
 
+    /**
+     * @dev Emitted when a new Pyth price provider is set.
+     */
     event SetPythPriceProvider(address indexed newPythPriceProvider);
 
     /**
-     * @notice Set PythPriceProvider contract.
+     * @dev Sets PythPriceProvider contract.
+     * #### Requirements:
+     * - The caller must be the moderator.
+     * - `newPythPriceProvider` must not be the zero address.
      * @param newPythPriceProvider The address of PythPriceProvider contract.
      */
     function setPythPriceProvider(address newPythPriceProvider) external onlyModerator {
@@ -19,7 +30,7 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
-     * @notice Perform a price update if the price is no longer valid.
+     * @dev Performs a price update if the price is no longer valid.
      * @param priceIds The priceIds need to update.
      * @param updateData The updateData provided by PythNetwork.
      */
@@ -32,7 +43,7 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
-     * @notice Returns the priceId array to update the price before expiration and the update fee.
+     * @dev Returns the priceId array to update the price before expiration and the update fee.
      * @param token The address array of tokens needs to check if the price is about to expire.
      * @param timeBeforeExpiration Time before expiration.
      * @return priceIds The priceId array needs to update the price.

@@ -8,8 +8,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /**
- * UniswapV2 price provider
- * This implementation can be affected by price manipulation due to not using TWAP
+ * @title UniswapV2 price provider Mock
+ * @dev This implementation can be affected by price manipulation due to not using TWAP.
  * For development purposes only
  */
 contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessControlUpgradeable {

@@ -264,6 +264,7 @@ interface IPrimaryLendingPlatform {
      * @param lendingToken The address of the lending token being borrowed.
      * @param lendingTokenAmount The amount of lending tokens to be borrowed.
      * @param user The address of the user on whose behalf the lending tokens are being borrowed.
+     * @return amount of lending tokens borrowed
      */
     function borrowFromRelatedContract(
         address projectToken,
@@ -272,7 +273,7 @@ interface IPrimaryLendingPlatform {
         address user,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable;
+    ) external payable returns (uint256 amount);
 
     /**
      * @dev Allows a user to borrow lending tokens by providing project tokens as collateral.
@@ -288,8 +289,9 @@ interface IPrimaryLendingPlatform {
      * @param lendingToken The address of the lending token being borrowed.
      * @param lendingTokenAmount The amount of lending tokens to be borrowed.
      * @param user The address of the user on whose behalf the lending tokens are being borrowed.
+     * @return amount of lending tokens borrowed
      */
-    function borrowFromRelatedContract(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) external;
+    function borrowFromRelatedContract(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) external returns (uint256 amount);
 
     //************* supply FUNCTION ********************************
 

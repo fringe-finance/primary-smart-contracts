@@ -4,20 +4,31 @@ pragma solidity 0.8.19;
 import "./ChainlinkPriceProvider.sol";
 
 /**
- * Chainlink price provider
+ * @title ChainlinkPriceProviderL2
+ * @notice The ChainlinkPriceProviderL2 contract is the contract that provides the functionality of getting the latest price from Chainlink. This contract is used for Layer 2 networks.
  */
 contract ChainlinkPriceProviderL2 is ChainlinkPriceProvider {
     uint32 public gracePeriodTime;
 
     address public sequencerUptimeFeed;
 
+    /**
+     * @dev Emitted when the address of the L2 sequencer uptime feed is set.
+     * @param newSequencerUptimeFeed The address of the new L2 sequencer uptime feed.
+     */
     event SetSequencerUptimeFeed(address indexed newSequencerUptimeFeed);
+
+    /**
+     * @dev Emitted when the grace period time is set.
+     * @param newGracePeriodTime The new grace period time value.
+     */
     event SetGracePeriodTime(uint32 newGracePeriodTime);
 
     /****************** Moderator functions ****************** */
 
     /**
      * @dev Sets proxy addresses for the L2 sequencer feeds.
+     * Caller must be the moderator.
      * @param newSequencerUptimeFeed The address of new SequencerUptimeFeed contract.
      */
     function setSequencerUptimeFeed(address newSequencerUptimeFeed) external onlyModerator {
@@ -28,6 +39,7 @@ contract ChainlinkPriceProviderL2 is ChainlinkPriceProvider {
 
     /**
      * @dev Sets the grace period after the sequencer is backed up.
+     * Caller must be the moderator.
      * @param newGracePeriodTime The new grace period time value.
      */
     function setGracePeriodTime(uint32 newGracePeriodTime) external onlyModerator {
@@ -38,7 +50,7 @@ contract ChainlinkPriceProviderL2 is ChainlinkPriceProvider {
     /****************** View functions ****************** */
 
     /**
-     * @dev Return the latest price after performing sanity check and staleness check.
+     * @dev ReturnS the latest price after performing sanity check and staleness check.
      * @param aggregatorPath The address of chainlink aggregator contract.
      * @return answer The latest price (answer).
      */
@@ -48,7 +60,7 @@ contract ChainlinkPriceProviderL2 is ChainlinkPriceProvider {
     }
 
     /**
-     * @notice check the sequencer status
+     * @dev Internal function to check the status of the sequencer and the grace period time.
      */
     function _checkSequencerStatus() internal view {
         (, /*uint80 roundId*/ int256 answer, uint256 startedAt /*uint256 updatedAt*/ /*uint80 answeredInRound*/, , ) = AggregatorV3Interface(

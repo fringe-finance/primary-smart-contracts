@@ -9,7 +9,10 @@ require("@matterlabs/hardhat-zksync-verify");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("solidity-docgen");
-require("hardhat-tracer");
+
+require("@solarity/hardhat-markup");
+require('hardhat-output-validator');
+
 require("dotenv").config();
 
 const {
@@ -149,7 +152,6 @@ if (isZksync) {
         optimisticEthereum: OPTIMISM_API_KEY,
         optimisticGoerli: OPTIMISM_API_KEY,
       },
-
     },
     contractSizer: {
       alphaSort: true,
@@ -168,6 +170,29 @@ if (isZksync) {
       runOnCompile: false,
       debugMode: false,
     },
+    markup: {
+      outdir: "./generated-markups",
+      onlyFiles: [
+        "contracts",
+      ],
+      skipFiles: [],
+      noCompile: false,
+      verbose: false,
+    },
+    // outputValidator: {
+    //   runOnCompile: true,
+    //   errorMode: true,
+    //   checks: {
+    //     title: "error",
+    //     details: "error",
+    //     params: "error",
+    //     returns: "error",
+    //     compilationWarnings: "warning",
+    //     variables: false,
+    //     events: true,
+    //   },
+    //   include: [],
+    // },
   };
 }
 

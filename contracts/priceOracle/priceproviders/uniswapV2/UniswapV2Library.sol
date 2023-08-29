@@ -87,7 +87,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `+` operator.
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - Addition cannot overflow.
      */
@@ -101,7 +101,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `-` operator.
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - Subtraction cannot overflow.
      */
@@ -115,7 +115,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `*` operator.
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - Multiplication cannot overflow.
      */
@@ -129,7 +129,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `/` operator.
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - The divisor cannot be zero.
      */
@@ -145,7 +145,7 @@ library SafeMath {
      * opcode (which leaves remaining gas untouched) while Solidity uses an
      * invalid opcode to revert (consuming all remaining gas).
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - The divisor cannot be zero.
      */
@@ -162,7 +162,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `-` operator.
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - Subtraction cannot overflow.
      */
@@ -185,7 +185,7 @@ library SafeMath {
      * `revert` opcode (which leaves remaining gas untouched) while Solidity
      * uses an invalid opcode to revert (consuming all remaining gas).
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - The divisor cannot be zero.
      */
@@ -211,7 +211,7 @@ library SafeMath {
      * opcode (which leaves remaining gas untouched) while Solidity uses an
      * invalid opcode to revert (consuming all remaining gas).
      *
-     * Requirements:
+     * #### Requirements:
      *
      * - The divisor cannot be zero.
      */
