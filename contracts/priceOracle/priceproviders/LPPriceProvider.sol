@@ -108,7 +108,8 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
 
     /**
      * @dev Sets the LP token and price provider for the given LP token address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `lpToken` cannot be the zero address.
      * - `provider` cannot be the zero address.
      * @param lpToken The address of the LP token.
@@ -125,7 +126,8 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
 
     /**
      * @dev Changes the active status of a token in the LPPriceProvider contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The token must be listed in the contract.
      * - Only the contract moderator can call this function.
      * @param token The address of the token to change the active status for.

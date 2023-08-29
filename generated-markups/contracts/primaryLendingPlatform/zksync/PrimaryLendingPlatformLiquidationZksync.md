@@ -37,14 +37,16 @@ function liquidate(
 Liquidates a user's position based on the specified lending token amount and update related token's prices.
 
 The function to be called when a user wants to liquidate their position.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - The lending token amount must be greater than 0.
 - The user must have a position for the given project token and lending token.
 - The health factor must be less than 1.
 - `_lendingTokenAmount` must be within the permissible range of liquidation amount.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - Calculates the health factor of the position using `getCurrentHealthFactor` function.
 - Validates the health factor and ensures it's less than 1.
@@ -87,7 +89,8 @@ function liquidateFromModerator(
 ```
 
 Liquidates a portion of the borrower's debt using the lending token, called by a related contract and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - Called by a related contract.
@@ -95,7 +98,8 @@ Liquidates a portion of the borrower's debt using the lending token, called by a
 - The user must have a position for the given project token and lending token.
 - The health factor must be less than 1.
 - `_lendingTokenAmount` must be within the permissible range of liquidation amount.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - Calculates the health factor of the position using `getCurrentHealthFactor` function.
 - Validates the health factor and ensures it's less than 1.
@@ -272,7 +276,8 @@ function getLiquidationAmountWithUpdatePrices(
 ```
 
 Returns the minimum and maximum liquidation amount for a given account, project token, and lending token after updating related token's prices.
-#### Formula:
+
+Formula: 
 - MinLA = min(MaxLA, MPA)
 - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
 

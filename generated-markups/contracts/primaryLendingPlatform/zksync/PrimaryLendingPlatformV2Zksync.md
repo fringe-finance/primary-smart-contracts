@@ -30,11 +30,13 @@ function withdraw(
 Withdraws project tokens from the caller's deposit position.
 
 Allows a user to withdraw project tokens and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The project token is not paused for withdrawals.
 - The project token amount and deposited project token amount in the user's deposit position is greater than 0.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - The deposited amount for the user and the specified project token is decreased by the withdrawn amount.
 - The total deposited project tokens for the specified token is decreased by the withdrawn amount.
@@ -70,11 +72,13 @@ function withdrawFromRelatedContracts(
 ```
 
 Withdraws project tokens from related contracts and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The project token is not paused for withdrawals.
 - The project token amount and deposited project token amount in the user's deposit position is greater than 0.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - The deposited amount for the user and the specified project token is decreased by the withdrawn amount.
 - The total deposited project tokens for the specified token is decreased by the withdrawn amount.
@@ -119,14 +123,16 @@ function borrow(
 Borrows lending tokens for the caller.
 
 Allows a user to borrow lending tokens by providing project tokens as collateral and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - The user must not have a leverage position for the `projectToken`.
 - The `lendingToken` address must not be address(0).
 - The `lendingTokenAmount` must be greater than zero.
 - If the user already has a lending token for the `projectToken`, it must match the `lendingToken` address.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - Increases the borrower's borrow position in the given project and lending token.
 - Increase the total borrow statistics.
@@ -165,7 +171,8 @@ function borrowFromRelatedContract(
 ```
 
 Allows a related contract to borrow lending tokens on behalf of a user by providing project tokens as collateral and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - Caller is a related contract.
 - The lending token is listed on the platform.
@@ -173,7 +180,8 @@ Allows a related contract to borrow lending tokens on behalf of a user by provid
 - The `lendingToken` address must not be address(0).
 - The `lendingTokenAmount` must be greater than zero.
 - If the user already has a lending token for the `projectToken`, it must match the `lendingToken` address.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - Increases the borrower's borrow position in the given project and lending token.
 - Increase the total borrow statistics.
@@ -212,8 +220,8 @@ function pitWithUpdatePrices(
 ```
 
 Returns the PIT (primary index token) value for a given account and position after a position is opened after updating related token's prices.
-#### Formula: 
-- pit = $ * LVR of position.
+
+Formula: pit = $ * LVR of position.
 
 
 Parameters:
@@ -245,8 +253,8 @@ function pitCollateralWithUpdatePrices(
 ```
 
 Returns the PIT (primary index token) value for a given account and collateral before a position is opened after updating related token's prices.
-#### Formula: 
-- pit = $ * LVR of project token.
+
+Formula: pit = $ * LVR of project token.
 
 
 Parameters:

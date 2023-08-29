@@ -20,7 +20,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
 
     /**
      * @dev Sets the address of the exchange aggregator contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator can call this function.
      * - The exchange aggregator address must not be the zero address.
      * @param exchangeAggregatorAddress The address of the exchange aggregator contract.
@@ -34,13 +35,15 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
     /**
      * @notice The function to be called when a user wants to leverage their position.
      * @dev Executes a leveraged borrow for the borrower on the specified projectToken using the given lendingToken and update related token's prices.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token is listed on the platform.
      * - The lending token is listed on the platform.
      * - Notional exposure must be greater than 0.
      * - The lending token must be the same as the current lending token or the current lending token must be address(0).
      * - The user must have a valid position for the given project token and lending token.
-     * #### Effects:
+     *
+     * Effects:
      * - Update price of related tokens.
      * - Calculates the required `lendingTokenCount` based on `notionalExposure`.
      * - Performs a naked borrow using `_nakedBorrow` function.
@@ -74,14 +77,16 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
 
     /**
      * @dev Allows a related contract to borrow funds on behalf of a user to enter a leveraged position and update related token's prices.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Caller must be a related contract.
      * - The project token is listed on the platform.
      * - The lending token is listed on the platform.
      * - Notional exposure must be greater than 0.
      * - The lending token must be the same as the current lending token or the current lending token must be address(0).
      * - The user must have a valid position for the given project token and lending token.
-     * #### Effects:
+     *
+     * Effects:
      * - Update price of related tokens.
      * - Calculates the required `lendingTokenCount` based on `notionalExposure`.
      * - Performs a naked borrow using `_nakedBorrow` function.
@@ -162,8 +167,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
 
     /**
      * @notice Calculates the margin amount for a given position and safety margin after updating related token's prices.
-     * #### Formula: 
-     * - Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
+     *
+     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param safetyMarginNumerator The numerator of the safety margin ratio.
@@ -188,8 +193,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
 
     /**
      * @notice Calculates the safety margin numerator and denominator for a given position, margin, and exposure after updating related token's prices.
-     * #### Formula: 
-     * - Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
+     *
+     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param margin The margin amount.

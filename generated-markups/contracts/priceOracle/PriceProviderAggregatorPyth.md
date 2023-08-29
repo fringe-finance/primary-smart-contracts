@@ -43,7 +43,8 @@ function setPythPriceProvider(
 ```
 
 Sets PythPriceProvider contract.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator.
 - `newPythPriceProvider` must not be the zero address.
 

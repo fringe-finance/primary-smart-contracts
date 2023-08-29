@@ -154,7 +154,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Sets the maximum Liquidation Reserve Factor (LRF) that can be used for liquidation.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The denominator must not be zero.
      * - Only the moderator can call this function.
      * @param numeratorLRF The numerator of the LRF ratio.
@@ -168,7 +169,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Sets the liquidator reward calculation factor.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must have the `MODERATOR_ROLE` role.
      * - The denominatorLRF cannot be zero.
      * @param numeratorLRF The numerator of the liquidator reward calculation factor.
@@ -182,7 +184,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Sets the address of the primary lending platform contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator can call this function.
      * - The new primary lending platform address must not be the zero address.
      * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
@@ -195,7 +198,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Sets the target health factor.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator can call this function.
      * - The denominatorHF cannot be zero.
      * @param numeratorHF The numerator for the target health factor.
@@ -324,8 +328,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Calculates the liquidator reward factor (LRF) for a given position.
-     * #### Formula: 
-     * - LRF = (1 + (1 - HF) * k)
+     *
+     * Formula: LRF = (1 + (1 - HF) * k)
      * @param _account The address of the borrower whose position is being considered.
      * @param _projectToken The address of the project token.
      * @param _lendingToken The address of the lending token.
@@ -362,8 +366,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Calculates the maximum liquidation amount (MaxLA) for a given position.
-     * #### Formula: 
-     * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
+     *
+     * Formula: MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
      * @param account The address of the borrower whose position is being considered.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
@@ -428,7 +432,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
-     * #### Formula:
+     *
+     * Formula: 
      * - MinLA = min(MaxLA, MPA)
      * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
      * @param _account The account for which to calculate the liquidation amount.

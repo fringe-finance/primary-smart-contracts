@@ -128,9 +128,9 @@ Sets the delay period for the PrimaryLendingPlatformProxyAdmin contract.
 
 Parameters:
 
-| Name         | Type    | Description                                                                                                                                                                       |
-| :----------- | :------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| _delayPeriod | uint256 | The new delay period to be set. #### Requirements: - The caller must be the owner of the contract. - `_delayPeriod` must be greater than or equal to the minimum delay period. |
+| Name         | Type    | Description                                                                                                                                                                    |
+| :----------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| _delayPeriod | uint256 | The new delay period to be set.  Requirements: - The caller must be the owner of the contract. - `_delayPeriod` must be greater than or equal to the minimum delay period. |
 
 ### changeProxyAdmin (0x7eff275e)
 
@@ -146,10 +146,10 @@ Changes the admin of a transparent proxy.
 
 Parameters:
 
-| Name     | Type                                  | Description                                                                                                                                              |
-| :------- | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| proxy    | contract ITransparentUpgradeableProxy | The address of the proxy to change the admin of.                                                                                                         |
-| newAdmin | address                               | The address of the new admin. #### Requirements: - The caller must be the owner of the contract. - This function is forbidden and will always revert. |
+| Name     | Type                                  | Description                                                                                                                                           |
+| :------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proxy    | contract ITransparentUpgradeableProxy | The address of the proxy to change the admin of.                                                                                                      |
+| newAdmin | address                               | The address of the new admin.  Requirements: - The caller must be the owner of the contract. - This function is forbidden and will always revert. |
 
 ### appendUpgrade (0xb14faf17)
 
@@ -165,10 +165,10 @@ Appends an upgrade to the upgrade queue for the given proxy contract.
 
 Parameters:
 
-| Name              | Type                                  | Description                                                                                                                                                                                                                                                                                                                                                                                  |
-| :---------------- | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| proxy             | contract ITransparentUpgradeableProxy | The proxy contract to upgrade.                                                                                                                                                                                                                                                                                                                                                               |
-| newImplementation | address                               | The address of the new implementation contract. #### Requirements: - The caller must be the owner of the contract. - The upgrade queue for the given proxy contract must be empty. #### Effects: - Sets the append timestamp for the upgrade. - Sets the delay period for the upgrade. - Sets the old implementation for the upgrade. - Sets the new implementation for the upgrade. |
+| Name              | Type                                  | Description                                                                                                                                                                                                                                                                                                                                                                            |
+| :---------------- | :------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proxy             | contract ITransparentUpgradeableProxy | The proxy contract to upgrade.                                                                                                                                                                                                                                                                                                                                                         |
+| newImplementation | address                               | The address of the new implementation contract.  Requirements: - The caller must be the owner of the contract. - The upgrade queue for the given proxy contract must be empty.  Effects: - Sets the append timestamp for the upgrade. - Sets the delay period for the upgrade. - Sets the old implementation for the upgrade. - Sets the new implementation for the upgrade. |
 
 ### upgrade (0x99a88ec4)
 
@@ -184,10 +184,10 @@ Upgrades the implementation of a transparent proxy contract.
 
 Parameters:
 
-| Name           | Type                                  | Description                                                                                                                                                                                                                                                                                                                                                           |
-| :------------- | :------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| proxy          | contract ITransparentUpgradeableProxy | The transparent proxy contract to upgrade.                                                                                                                                                                                                                                                                                                                            |
-| implementation | address                               | The address of the new implementation contract. #### Requirements: - The caller must be the owner of the contract. - The `appendUpgrade` function must have been called before. - The delay period must have passed since the `appendUpgrade` function was called. - The new implementation address must match the one provided in the `appendUpgrade` function. |
+| Name           | Type                                  | Description                                                                                                                                                                                                                                                                                                                                                        |
+| :------------- | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| proxy          | contract ITransparentUpgradeableProxy | The transparent proxy contract to upgrade.                                                                                                                                                                                                                                                                                                                         |
+| implementation | address                               | The address of the new implementation contract.  Requirements: - The caller must be the owner of the contract. - The `appendUpgrade` function must have been called before. - The delay period must have passed since the `appendUpgrade` function was called. - The new implementation address must match the one provided in the `appendUpgrade` function. |
 
 ### upgradeAndCall (0x9623609d)
 

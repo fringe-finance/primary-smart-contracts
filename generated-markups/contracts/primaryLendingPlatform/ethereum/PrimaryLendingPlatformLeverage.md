@@ -53,7 +53,8 @@ function setExchangeAggregator(
 ```
 
 Updates the Exchange Aggregator contract and registry contract addresses.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator.
 - `exchangeAggregatorAddress` must not be the zero address.
 - `registryAggregatorAddress` must not be the zero address.
@@ -83,13 +84,15 @@ function leveragedBorrow(
 Executes a leveraged borrow for the borrower on the specified projectToken using the given lendingToken.
 
 The function to be called when a user wants to leverage their position.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - Notional exposure must be greater than 0.
 - The lending token must be the same as the current lending token or the current lending token must be address(0).
 - The user must have a valid position for the given project token and lending token.
-#### Effects:
+
+Effects:
 - Calculates the required `lendingTokenCount` based on `notionalExposure`.
 - Performs a naked borrow using `_nakedBorrow` function.
 - Approves the transfer of `lendingToken` to the system.
@@ -125,14 +128,16 @@ function leveragedBorrowFromRelatedContract(
 ```
 
 Allows a related contract to borrow funds on behalf of a user to enter a leveraged position.
-#### Requirements:
+
+Requirements:
 - Caller must be a related contract.
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - Notional exposure must be greater than 0.
 - The lending token must be the same as the current lending token or the current lending token must be address(0).
 - The user must have a valid position for the given project token and lending token.
-#### Effects:
+
+Effects:
 - Calculates the required `lendingTokenCount` based on `notionalExposure`.
 - Performs a naked borrow using `_nakedBorrow` function.
 - Approves the transfer of `lendingToken` to the system.

@@ -136,7 +136,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     /**
      * @dev Adds support for a new blending token to the JumpRateModelV3 contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `blendingToken` cannot be the zero address.
      * - Only the contract moderator can call this function.
      * @param blendingToken The address of the blending token to add support for.
@@ -161,7 +162,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     /**
      * @dev Removes blending token support for the specified blending token address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `_blending` cannot be the zero address.
      * - `_blending` must be a supported blending token.
      * @param _blending The address of the blending token to remove support for.
@@ -174,7 +176,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     /**
      * @dev Sets the maximum borrow rate for a blending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must have the `onlyModerator` modifier.
      * - The blending token must be supported by the contract.
      * @param blendingToken The address of the blending token.
@@ -187,7 +190,8 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     /**
      * @dev Updates the block number for a given blending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must have the `onlyModerator` modifier.
      * - The blending token must be supported.
      * @param blendingToken The address of the blending token to update.

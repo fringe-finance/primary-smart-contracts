@@ -186,7 +186,8 @@ function setTokenAndPair(address token, address pair) public onlyModerator
 ```
 
 Sets the token and pair addresses for the UniswapV2PriceProvider contract.
-#### Requirements:
+
+Requirements:
 - `token` and `pair` addresses must not be zero.
 - Only the contract moderator can call this function.
 - The `token` and `pair` addresses must be valid.
@@ -207,7 +208,8 @@ function changeActive(address token, bool active) public override onlyModerator
 ```
 
 Changes the active status of a token in the UniswapV2PriceProvider contract.
-#### Requirements:
+
+Requirements:
 - The token must be listed in the UniswapV2PriceProvider contract.
 - Only the contract moderator can call this function.
 

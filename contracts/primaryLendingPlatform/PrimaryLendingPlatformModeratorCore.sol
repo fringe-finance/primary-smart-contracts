@@ -169,7 +169,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Grants the moderator role to a new address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Called by the admin role.
      * - The new moderator address must not be the zero address.
      * @param newModerator The address of the new moderator.
@@ -182,7 +183,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Revokes the moderator role from an address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Called by the admin role.
      * - The moderator address must not be the zero address.
      * @param moderator The address of the moderator to be revoked.
@@ -195,7 +197,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Transfers the admin role to a new address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Called by the admin role.
      * - The moderator address must not be the zero address.
      * @param newAdmin The address of the new admin.
@@ -208,7 +211,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Transfers the admin role for the primary index token to a new address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Called by the admin role.
      * - The current admin address must not be the zero address.
      * - The new admin address must not be the zero address.
@@ -226,10 +230,12 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
      * @param projectToken The address of the project token to be added.
      * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio.
      * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token address must not be the zero address.
      * - Only the admin can call this function.
-     * #### Effects:
+     *
+     * Effects:
      * - Adds the project token to the platform.
      * - Sets the loan-to-value ratio for the project token.
      * - Sets the pause status for deposit and withdrawal of the project token to false.
@@ -247,7 +253,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     /**
      * @dev Removes a project token from the primary lending platform.
      * @param projectTokenId The ID of the project token to be removed.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be an admin.
      * - The project token must be listed on the primary lending platform.
      * - The total deposited project token amount must be zero.
@@ -268,10 +275,12 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
      * @param isPaused A boolean indicating whether the lending token is paused or not.
      * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio for the lending token.
      * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio for the lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lending token address and bLending token address must not be zero.
      * - Only the admin can call this function.
-     * #### Effects:
+     *
+     * Effects:
      * - Adds the lending token to the platform.
      * - Sets the loan-to-value ratio for the lending token.
      * - Sets the pause status for borrowing of the lending token.
@@ -295,7 +304,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     /**
      * @dev Removes a lending token from the primary lending platform.
      * @param lendingTokenId The ID of the lending token to be removed.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must have admin role.
      * - The lending token must be listed in the primary lending platform.
      * - There must be no borrow of the lending token in any project.
@@ -317,7 +327,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the address of the primary lending platform leverage contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the admin can call this function.
      * - The new address must not be the zero address.
      * @param newPrimaryLendingPlatformLeverage The address of the new primary lending platform leverage contract.
@@ -330,7 +341,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the price oracle address for the primary lending platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the admin can call this function.
      * - The new address must not be the zero address.
      * @param newOracle The new price oracle address to be set.
@@ -343,7 +355,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Adds an address to the list of related contracts.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the admin can call this function.
      * - The new address must not be the zero address.
      * @param newRelatedContract The address of the new related contract to be added.
@@ -356,7 +369,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Removes an address from the list of related contracts.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the admin can call this function.
      * - The new address must not be the zero address.
      * @param relatedContract The address of the related contract to be removed.
@@ -371,7 +385,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the project token information such as deposit and withdraw pause status, and loan-to-value ratio for a given project token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The `loanToValueRatioNumerator` must be less than or equal to `loanToValueRatioDenominator`.
      * - Only the moderator can call this function.
      * @param projectToken The address of the project token.
@@ -417,7 +432,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the lending token information for the primary lending platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The function can only be called by the moderator.
      * - The underlying asset of the bLending token must be the same as the lending token.
      * @param lendingToken The address of the lending token.
@@ -441,7 +457,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the pause status for a lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The function can only be called by the moderator.
      * - The lending token must be listed on the primary lending platform.
      * @param lendingToken The address of the lending token.
@@ -454,7 +471,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the borrow limit per collateral for a given project token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The function can only be called by the moderator.
      * - The project token must be listed on the primary lending platform.
      * - The borrow limit must be greater than zero.
@@ -471,7 +489,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
 
     /**
      * @dev Sets the borrow limit per lending asset for a given lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The function can only be called by the moderator.
      * - The lending token must be listed on the primary lending platform.
      * - The borrow limit must be greater than zero.

@@ -102,7 +102,8 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
 
     /**
      * @dev Adds a new aggregator path for the price oracle.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator can call this function.
      * - The length of the aggregator path must not exceed MAX_PRICE_PATH_LENGTH.
      * @param _aggregatorPath The new aggregator path to be added.

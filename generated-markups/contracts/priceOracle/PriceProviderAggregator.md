@@ -183,7 +183,8 @@ function setTokenAndPriceProvider(
 ```
 
 Sets price provider to `token` and its corresponding price provider.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator.
 - `token` cannot be the zero address.
 - `priceProvider` cannot be the zero address.
@@ -208,7 +209,8 @@ function changeActive(
 ```
 
 Allows the moderator to change the active status of a price provider for a specific token.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator.
 - The token's current price provider must match the provided price provider address.
 
@@ -230,8 +232,8 @@ function getPrice(
 ```
 
 Returns the price of a given token.
-#### Formula:
-- price = priceMantissa / (10 ** priceDecimals)
+
+Formula: price = priceMantissa / (10 ** priceDecimals)
 
 
 Parameters:

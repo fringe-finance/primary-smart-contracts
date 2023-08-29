@@ -105,7 +105,8 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
 
     /**
      * @dev Sets the token and pair addresses for the UniswapV2PriceProvider contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `token` and `pair` addresses must not be zero.
      * - Only the contract moderator can call this function.
      * - The `token` and `pair` addresses must be valid.
@@ -130,7 +131,8 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
 
     /**
      * @dev Changes the active status of a token in the UniswapV2PriceProvider contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The token must be listed in the UniswapV2PriceProvider contract.
      * - Only the contract moderator can call this function.
      * @param token The address of the token to change the active status for.

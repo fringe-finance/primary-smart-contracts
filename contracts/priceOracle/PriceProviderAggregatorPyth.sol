@@ -18,7 +18,8 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
 
     /**
      * @dev Sets PythPriceProvider contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator.
      * - `newPythPriceProvider` must not be the zero address.
      * @param newPythPriceProvider The address of PythPriceProvider contract.

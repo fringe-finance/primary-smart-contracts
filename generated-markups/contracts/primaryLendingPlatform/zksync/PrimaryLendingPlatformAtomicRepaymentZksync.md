@@ -42,7 +42,8 @@ function setExchangeAggregator(
 ```
 
 Sets the address of the exchange aggregator contract.
-#### Requirements:
+
+Requirements:
 - Only the moderator can call this function.
 - The exchange aggregator address must not be the zero address.
 
@@ -133,12 +134,14 @@ function repayAtomic(
 Repays a loan atomically using the given project token as collateral.
 
 Repays the loan in a single atomic transaction and update related token's prices.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - Collateral amount must be greater than 0.
 - The user must have a position for the given project token and lending token.
-#### Effects:
+
+Effects:
 - Update price of related tokens.
 - Transfers the collateral amount from the user to the contract.
 - Approves the collateral amount to the primary lending platform contract.

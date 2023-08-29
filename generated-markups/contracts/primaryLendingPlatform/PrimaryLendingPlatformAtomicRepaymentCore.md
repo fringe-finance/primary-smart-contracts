@@ -134,9 +134,9 @@ Sets the address of the primary lending platform contract.
 
 Parameters:
 
-| Name | Type    | Description                                                                                                    |
-| :--- | :------ | :------------------------------------------------------------------------------------------------------------- |
-| pit  | address | The address of the primary lending platform contract. #### Requirements: - `pit` cannot be the zero address. |
+| Name | Type    | Description                                                                                                 |
+| :--- | :------ | :---------------------------------------------------------------------------------------------------------- |
+| pit  | address | The address of the primary lending platform contract.  Requirements: - `pit` cannot be the zero address. |
 
 ### getTotalOutstanding (0x00fe5da3)
 

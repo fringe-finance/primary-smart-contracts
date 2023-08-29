@@ -103,7 +103,8 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     /**
      * @dev Sets price provider to `token` and its corresponding price provider.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator.
      * - `token` cannot be the zero address.
      * - `priceProvider` cannot be the zero address.
@@ -123,7 +124,8 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     /**
      * @dev Allows the moderator to change the active status of a price provider for a specific token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator.
      * - The token's current price provider must match the provided price provider address.
      * @param priceProvider The address of the price provider to change the active status for.
@@ -140,8 +142,8 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     /**
      * @dev Returns the price of a given token.
-     * #### Formula:
-     * - price = priceMantissa / (10 ** priceDecimals)
+     *
+     * Formula: price = priceMantissa / (10 ** priceDecimals)
      * @param token The address of the token to get the price for.
      * @return priceMantissa The price of the token, represented as a mantissa.
      * @return priceDecimals The number of decimal places in the token's price.

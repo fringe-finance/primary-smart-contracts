@@ -170,7 +170,8 @@ function setPrimaryLendingPlatform(address newPit) external onlyModerator
 ```
 
 Sets the address of the primary lending platform contract.
-#### Requirements:
+
+Requirements:
 - `newPit` cannot be the zero address.
 - Caller must be a moderator.
 
@@ -190,7 +191,8 @@ function setPITLiquidation(address newLiquidation) external onlyModerator
 Only the moderator can call this function.
 
 Sets the address of the PrimaryLendingPlatformLiquidation contract for PIT liquidation.
-#### Requirements:
+
+Requirements:
 - `newLiquidation` cannot be the zero address.
 - Caller must be a moderator.
 
@@ -208,7 +210,8 @@ function setPITLeverage(address newLeverage) external onlyModerator
 ```
 
 Sets the Primary Lending Platform Leverage contract address.
-#### Requirements:
+
+Requirements:
 - `newLeverage` cannot be the zero address.
 - Caller must be a moderator.
 

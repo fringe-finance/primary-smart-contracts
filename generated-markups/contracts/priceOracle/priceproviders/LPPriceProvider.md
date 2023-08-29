@@ -182,7 +182,8 @@ function setLPTokenAndProvider(
 ```
 
 Sets the LP token and price provider for the given LP token address.
-#### Requirements:
+
+Requirements:
 - `lpToken` cannot be the zero address.
 - `provider` cannot be the zero address.
 
@@ -201,7 +202,8 @@ function changeActive(address token, bool active) public override onlyModerator
 ```
 
 Changes the active status of a token in the LPPriceProvider contract.
-#### Requirements:
+
+Requirements:
 - The token must be listed in the contract.
 - Only the contract moderator can call this function.
 

@@ -80,7 +80,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     /**
      * @dev Sets the address of the primary lending platform contract.
      * @param pit The address of the primary lending platform contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `pit` cannot be the zero address.
      */
     function setPrimaryLendingPlatform(address pit) external onlyModerator {

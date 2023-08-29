@@ -73,7 +73,8 @@ overflow.
 
 Counterpart to Solidity's `+` operator.
 
-#### Requirements:
+
+Requirements:
 
 - Addition cannot overflow.
 ### sub
@@ -87,7 +88,8 @@ overflow (when the result is negative).
 
 Counterpart to Solidity's `-` operator.
 
-#### Requirements:
+
+Requirements:
 
 - Subtraction cannot overflow.
 ### mul
@@ -101,7 +103,8 @@ overflow.
 
 Counterpart to Solidity's `*` operator.
 
-#### Requirements:
+
+Requirements:
 
 - Multiplication cannot overflow.
 ### div
@@ -115,7 +118,8 @@ division by zero. The result is rounded towards zero.
 
 Counterpart to Solidity's `/` operator.
 
-#### Requirements:
+
+Requirements:
 
 - The divisor cannot be zero.
 ### mod
@@ -131,7 +135,8 @@ Counterpart to Solidity's `%` operator. This function uses a `revert`
 opcode (which leaves remaining gas untouched) while Solidity uses an
 invalid opcode to revert (consuming all remaining gas).
 
-#### Requirements:
+
+Requirements:
 
 - The divisor cannot be zero.
 ### sub
@@ -152,7 +157,8 @@ message unnecessarily. For custom revert reasons use {trySub}.
 
 Counterpart to Solidity's `-` operator.
 
-#### Requirements:
+
+Requirements:
 
 - Subtraction cannot overflow.
 ### div
@@ -172,7 +178,8 @@ Counterpart to Solidity's `/` operator. Note: this function uses a
 `revert` opcode (which leaves remaining gas untouched) while Solidity
 uses an invalid opcode to revert (consuming all remaining gas).
 
-#### Requirements:
+
+Requirements:
 
 - The divisor cannot be zero.
 ### mod
@@ -195,6 +202,7 @@ Counterpart to Solidity's `%` operator. This function uses a `revert`
 opcode (which leaves remaining gas untouched) while Solidity uses an
 invalid opcode to revert (consuming all remaining gas).
 
-#### Requirements:
+
+Requirements:
 
 - The divisor cannot be zero.

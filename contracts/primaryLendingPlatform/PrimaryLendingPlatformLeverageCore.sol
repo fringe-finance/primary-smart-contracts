@@ -130,7 +130,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     /**
      * @dev Sets the address of the primary lending platform contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator can call this function.
      * - The new primary lending platform address cannot be the zero address.
      * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
@@ -198,8 +199,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     /**
      * @dev Calculates the margin amount for a given position and safety margin.
-     * #### Formula: 
-     * - Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
+     *
+     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param safetyMarginNumerator The numerator of the safety margin ratio.
@@ -233,8 +234,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     /**
      * @dev Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-     * #### Formula: 
-     * - Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
+     *
+     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param margin The margin amount.
@@ -259,7 +260,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `totalOutstandingInUSD` must be less than or equal to `pit`.
      * - `newTotalBorrowPerCollateral` must be less than or equal to `borrowLimitPerCollateral`.
      * - `newTotalBorrowPerLendingToken` must be less than or equal to `borrowLimitPerLendingToken`.

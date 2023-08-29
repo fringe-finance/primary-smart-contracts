@@ -204,7 +204,8 @@ function setPrimaryLendingPlatformAddress(
 ```
 
 Sets the address of the primary lending platform contract.
-#### Requirements:
+
+Requirements:
 - Only the moderator can call this function.
 - The new primary lending platform address cannot be the zero address.
 
@@ -339,8 +340,8 @@ function calculateMargin(
 ```
 
 Calculates the margin amount for a given position and safety margin.
-#### Formula: 
-- Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
+
+Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
 
 
 Parameters:
@@ -395,8 +396,8 @@ function calculateSafetyMargin(
 ```
 
 Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-#### Formula: 
-- Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
+
+Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
 
 
 Parameters:

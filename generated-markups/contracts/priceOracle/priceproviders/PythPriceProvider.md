@@ -239,7 +239,8 @@ function setPythOracle(address newPythOracle) public onlyModerator
 ```
 
 Sets PythOracle contract.
-#### Requirements:
+
+Requirements:
 - Only the moderator can call this function.
 - The address of PythOracle contract must not be zero.
 
@@ -273,7 +274,8 @@ function changeActive(address token, bool active) public override onlyModerator
 ```
 
 Changes the active status of a token in the Pyth price provider.
-#### Requirements:
+
+Requirements:
 - The token must be listed in the Pyth price provider.
 - Only the moderator can call this function.
 
@@ -357,7 +359,8 @@ function getPrice(
 ```
 
 Returns the latest price of a given token in USD.
-#### Requirements:
+
+Requirements:
 - This function retrieves the price of a token from the Pyth oracle and calculates the price in USD.
 - If the retrieved price is too old, the function reverts.
 - If the number of decimal places in the retrieved price is greater than the number of decimal places in the token, the function adjusts the price accordingly.

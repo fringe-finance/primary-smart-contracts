@@ -408,7 +408,8 @@ function setPrimaryLendingPlatformModeratorModerator(
 ```
 
 Sets the address of the new moderator contract for the Primary Lending Platform.
-#### Requirements:
+
+Requirements:
 - `newModeratorContract` cannot be the zero address.
 - Only the admin can call this function.
 
@@ -426,7 +427,8 @@ function setPriceOracle(address newPriceOracle) external onlyModeratorContract
 ```
 
 Sets the price oracle contract address.
-#### Requirements:
+
+Requirements:
 - Only the moderator contract can call this function.
 
 
@@ -445,7 +447,8 @@ function setPrimaryLendingPlatformLeverage(
 ```
 
 Sets the address of the new primary index token leverage contract by the moderator contract.
-#### Requirements:
+
+Requirements:
 - Only the moderator contract can call this function.
 
 
@@ -465,7 +468,8 @@ function setRelatedContract(
 ```
 
 Sets the related contract status for a given contract address.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -486,7 +490,8 @@ function removeProjectToken(
 ```
 
 Removes a project token from the platform.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 - The project token must exist in the platform.
 
@@ -508,7 +513,8 @@ function removeLendingToken(
 ```
 
 Removes a lending token from the platform.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 - The lending token address must be valid.
 
@@ -530,7 +536,8 @@ function setBorrowLimitPerCollateralAsset(
 ```
 
 Sets the borrow limit for a specific collateral asset.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -551,7 +558,8 @@ function setBorrowLimitPerLendingAsset(
 ```
 
 Sets the borrow limit for a specific lending asset.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -575,7 +583,8 @@ function setProjectTokenInfo(
 ```
 
 Sets the information of a project token.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -600,7 +609,8 @@ function setPausedProjectToken(
 ```
 
 Sets the deposit and withdraw pause status for a given project token.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -625,7 +635,8 @@ function setLendingTokenInfo(
 ```
 
 Sets the lending token information for a given lending token.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 
 
@@ -649,7 +660,8 @@ function setPausedLendingToken(
 ```
 
 Sets the pause status of a lending token.
-#### Requirements:
+
+Requirements:
 - The caller must be the moderator contract.
 - The lending token must be listed.
 
@@ -673,11 +685,13 @@ function deposit(
 Deposits project tokens into the platform.
 
 Deposits project tokens and calculates the deposit position.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - The project token must not be paused for deposits.
 - The project token amount must be greater than 0.
-#### Effects:
+
+Effects:
 - Transfers the project tokens from the user to the contract.
 - Calculates the deposit position for the user.
 
@@ -701,12 +715,14 @@ function depositFromRelatedContracts(
 ```
 
 Deposits project tokens from related contracts into the platform.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - Caller must be a related contract.
 - The project token must not be paused for deposits.
 - The project token amount must be greater than 0.
-#### Effects:
+
+Effects:
 - Transfers the project tokens from the user to the contract.
 - Calculates the deposit position for the user.
 
@@ -737,10 +753,12 @@ function calcAndTransferDepositPosition(
 ```
 
 Calculates and transfers the deposit position of a user for a specific project token.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - Called by a related contract.
-#### Effects:
+
+Effects:
 - Decreases the deposited project token amount in the user's deposit position.
 - Decreases the total deposited project token amount.
 - Transfers the project tokens to the receiver.
@@ -773,7 +791,8 @@ function calcDepositPosition(
 ```
 
 Calculates the deposit position for a user based on the project token, project token amount and user address.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - Called by a related contract.
 
@@ -830,10 +849,10 @@ Allows a user to supply a specified amount of a lending token to the platform.
 
 Parameters:
 
-| Name               | Type    | Description                                                                                                                                                                                                                                                                                                                                                        |
-| :----------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| lendingToken       | address | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                                   |
-| lendingTokenAmount | uint256 | The amount of the lending token being supplied. #### Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0. #### Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
+| Name               | Type    | Description                                                                                                                                                                                                                                                                                                                                                  |
+| :----------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lendingToken       | address | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                             |
+| lendingTokenAmount | uint256 | The amount of the lending token being supplied.  Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0.  Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
 
 ### supplyFromRelatedContract (0xb3c38b6e)
 
@@ -846,13 +865,15 @@ function supplyFromRelatedContract(
 ```
 
 Supplies a certain amount of lending tokens to the platform from a specific user.
-#### Requirements:
+
+Requirements:
 - The lending token is listed.
 - Called by a related contract.
 - The lending token is not paused.
 - The lending token amount is greater than 0.
 - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-#### Effects:
+
+Effects:
 - Mints the corresponding bLendingTokens and credits them to the user.
 
 
@@ -876,12 +897,14 @@ function redeem(
 Redeems a specified amount of bLendingToken from the platform.
 
 Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
-#### Requirements:
+
+Requirements:
 - The lendingToken is listed.
 - The lending token should not be paused.
 - The bLendingTokenAmount should be greater than zero.
 - The redemption of bLendingToken should not result in a redemption error.
-#### Effects:
+
+Effects:
 - Burns the bLendingTokens from the user.
 - Transfers the corresponding lending tokens to the user.
 
@@ -904,13 +927,15 @@ function redeemFromRelatedContract(
 ```
 
 Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
-#### Requirements:
+
+Requirements:
 - The lendingToken is listed.
      _ - Called by a related contract.
 - The lending token should not be paused.
 - The bLendingTokenAmount should be greater than zero.
 - The redemption of bLendingToken should not result in a redemption error.
-#### Effects:
+
+Effects:
 - Burns the bLendingTokens from the user.
 - Transfers the corresponding lending tokens to the user.
 
@@ -935,12 +960,14 @@ function redeemUnderlying(
 Redeems a specified amount of lendingToken from the platform.
 
 Function that performs the redemption of lending token and returns the corresponding underlying token to user.
-#### Requirements:
+
+Requirements:
 - The lending token is listed.
 - The lending token should not be paused.
 - The lendingTokenAmount should be greater than zero.
 - The redemption of lendingToken should not result in a redemption error.
-#### Effects:
+
+Effects:
 - Transfers the corresponding underlying tokens to the user.
 
 
@@ -962,13 +989,15 @@ function redeemUnderlyingFromRelatedContract(
 ```
 
 Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
-#### Requirements:
+
+Requirements:
 - The lending token is listed.
 - Called by a related contract.
 - The lending token should not be paused.
 - The lendingTokenAmount should be greater than zero.
 - The redemption of lendingToken should not result in a redemption error.
-#### Effects:
+
+Effects:
 - Transfers the corresponding underlying tokens to the user.
 
 
@@ -998,7 +1027,8 @@ function calcBorrowPosition(
 ```
 
 Allows a related contract to calculate the new borrow position of a user.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - The lending token must be listed.
 - Called by a related contract.
@@ -1060,12 +1090,14 @@ function repay(
 Repays a specified amount of lendingToken for a given project token and lending token.
 
 Allows a borrower to repay their outstanding loan for a given project token and lending token.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - The lending token must be listed.
 - The lending amount must be greater than 0.
 - The borrower must have an outstanding loan for the given project and lending token before.
-#### Effects:
+
+Effects:
 Updates the interest in the borrower's borrow positions for the given `lendingToken`.
 - Repays the specified `lendingTokenAmount` towards the borrower's loan.
 - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
@@ -1105,13 +1137,15 @@ function repayFromRelatedContract(
 ```
 
 Allows a related contract to repay the outstanding loan for a given borrower's project token and lending token.
-#### Requirements:
+
+Requirements:
 - The project token must be listed.
 - The lending token must be listed.
 - Called by a related contract.
 - The lending amount must be greater than 0.
 - The borrower must have an outstanding loan for the given project and lending token before.
-#### Effects:
+
+Effects:
 Updates the interest in the borrower's borrow positions for the given `lendingToken`.
 - Repays the specified `lendingTokenAmount` towards the borrower's loan.
 - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
@@ -1164,8 +1198,8 @@ function pit(
 ```
 
 Returns the PIT (primary index token) value for a given account and position after a position is opened.
-#### Formula: 
-- pit = $ * LVR of position.
+
+Formula: pit = $ * LVR of position.
 
 
 Parameters:
@@ -1193,8 +1227,8 @@ function pitCollateral(
 ```
 
 Returns the PIT (primary index token) value for a given account and collateral before a position is opened.
-#### Formula: 
-- pit = $ * LVR of project token.
+
+Formula: pit = $ * LVR of project token.
 
 
 Parameters:

@@ -207,7 +207,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the address of the new moderator contract for the Primary Lending Platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `newModeratorContract` cannot be the zero address.
      * - Only the admin can call this function.
      * @param newModeratorContract The address of the new moderator contract.
@@ -222,7 +223,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the price oracle contract address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator contract can call this function.
      * @param newPriceOracle The address of the new price oracle contract.
      */
@@ -232,7 +234,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the address of the new primary index token leverage contract by the moderator contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - Only the moderator contract can call this function.
      * @param newPrimaryLendingPlatformLeverage The address of the new primary index token leverage contract.
      */
@@ -243,7 +246,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the related contract status for a given contract address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param relatedContract The address of the contract to set the related status for.
      * @param isRelated The related status to set for the contract.
@@ -254,7 +258,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Removes a project token from the platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * - The project token must exist in the platform.
      * @param projectTokenId The ID of the project token to remove.
@@ -269,7 +274,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Removes a lending token from the platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * - The lending token address must be valid.
      * @param lendingTokenId The ID of the lending token to be removed.
@@ -284,7 +290,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the borrow limit for a specific collateral asset.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param projectToken The address of the collateral asset.
      * @param newBorrowLimit The new borrow limit for the collateral asset.
@@ -295,7 +302,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the borrow limit for a specific lending asset.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param lendingToken The address of the lending asset.
      * @param newBorrowLimit The new borrow limit for the lending asset.
@@ -306,7 +314,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the information of a project token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param projectToken The address of the project token.
      * @param isDepositPaused A boolean indicating whether deposit is paused for the project token.
@@ -333,7 +342,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the deposit and withdraw pause status for a given project token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param projectToken The address of the project token.
      * @param isDepositPaused The boolean value indicating whether deposit is paused or not.
@@ -346,7 +356,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the lending token information for a given lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * @param lendingToken The address of the lending token.
      * @param bLendingToken The address of the corresponding bLending token.
@@ -374,7 +385,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the pause status of a lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the moderator contract.
      * - The lending token must be listed.
      * @param lendingToken The address of the lending token.
@@ -390,11 +402,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @notice Deposits project tokens into the platform.
      * @dev Deposits project tokens and calculates the deposit position.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - The project token must not be paused for deposits.
      * - The project token amount must be greater than 0.
-     * #### Effects:
+     *
+     * Effects:
      * - Transfers the project tokens from the user to the contract.
      * - Calculates the deposit position for the user.
      * @param projectToken The address of the project token to be deposited.
@@ -406,12 +420,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Deposits project tokens from related contracts into the platform.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - Caller must be a related contract.
      * - The project token must not be paused for deposits.
      * - The project token amount must be greater than 0.
-     * #### Effects:
+     *
+     * Effects:
      * - Transfers the project tokens from the user to the contract.
      * - Calculates the deposit position for the user.
      * @param projectToken The address of the project token being deposited.
@@ -445,10 +461,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Calculates and transfers the deposit position of a user for a specific project token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - Called by a related contract.
-     * #### Effects:
+     *
+     * Effects:
      * - Decreases the deposited project token amount in the user's deposit position.
      * - Decreases the total deposited project token amount.
      * - Transfers the project tokens to the receiver.
@@ -472,7 +490,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Calculates the deposit position for a user based on the project token, project token amount and user address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - Called by a related contract.
      * @param projectToken The address of the project token.
@@ -572,12 +591,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Allows a user to supply a specified amount of a lending token to the platform.
      * @param lendingToken The address of the lending token being supplied.
      * @param lendingTokenAmount The amount of the lending token being supplied.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lending token is listed.
      * - The lending token is not paused.
      * - The lending token amount is greater than 0.
      * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     * #### Effects:
+     *
+     * Effects:
      * - Mints the corresponding bLendingTokens and credits them to the user.
      */
     function supply(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
@@ -586,13 +607,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Supplies a certain amount of lending tokens to the platform from a specific user.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lending token is listed.
      * - Called by a related contract.
      * - The lending token is not paused.
      * - The lending token amount is greater than 0.
      * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     * #### Effects:
+     *
+     * Effects:
      * - Mints the corresponding bLendingTokens and credits them to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be supplied.
@@ -628,12 +651,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @notice Redeems a specified amount of bLendingToken from the platform.
      * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lendingToken is listed.
      * - The lending token should not be paused.
      * - The bLendingTokenAmount should be greater than zero.
      * - The redemption of bLendingToken should not result in a redemption error.
-     * #### Effects:
+     *
+     * Effects:
      * - Burns the bLendingTokens from the user.
      * - Transfers the corresponding lending tokens to the user.
      * @param lendingToken Address of the lending token.
@@ -645,13 +670,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lendingToken is listed.
      _ - Called by a related contract.
      * - The lending token should not be paused.
      * - The bLendingTokenAmount should be greater than zero.
      * - The redemption of bLendingToken should not result in a redemption error.
-     * #### Effects:
+     *
+     * Effects:
      * - Burns the bLendingTokens from the user.
      * - Transfers the corresponding lending tokens to the user.
      * @param lendingToken Address of the lending token.
@@ -687,12 +714,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @notice Redeems a specified amount of lendingToken from the platform.
      * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to user.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lending token is listed.
      * - The lending token should not be paused.
      * - The lendingTokenAmount should be greater than zero.
      * - The redemption of lendingToken should not result in a redemption error.
-     * #### Effects:
+     *
+     * Effects:
      * - Transfers the corresponding underlying tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be redeemed.
@@ -703,13 +732,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The lending token is listed.
      * - Called by a related contract.
      * - The lending token should not be paused.
      * - The lendingTokenAmount should be greater than zero.
      * - The redemption of lendingToken should not result in a redemption error.
-     * #### Effects:
+     *
+     * Effects:
      * - Transfers the corresponding underlying tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be redeemed.
@@ -774,7 +805,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Allows a related contract to calculate the new borrow position of a user.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - The lending token must be listed.
      * - Called by a related contract.
@@ -853,12 +885,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @notice Repays a specified amount of lendingToken for a given project token and lending token.
      * @dev Allows a borrower to repay their outstanding loan for a given project token and lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - The lending token must be listed.
      * - The lending amount must be greater than 0.
      * - The borrower must have an outstanding loan for the given project and lending token before.
-     * #### Effects:
+     *
+     * Effects:
      * Updates the interest in the borrower's borrow positions for the given `lendingToken`.
      * - Repays the specified `lendingTokenAmount` towards the borrower's loan.
      * - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
@@ -877,13 +911,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Allows a related contract to repay the outstanding loan for a given borrower's project token and lending token.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The project token must be listed.
      * - The lending token must be listed.
      * - Called by a related contract.
      * - The lending amount must be greater than 0.
      * - The borrower must have an outstanding loan for the given project and lending token before.
-     * #### Effects:
+     *
+     * Effects:
      * Updates the interest in the borrower's borrow positions for the given `lendingToken`.
      * - Repays the specified `lendingTokenAmount` towards the borrower's loan.
      * - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
@@ -1058,8 +1094,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened.
-     * #### Formula: 
-     * - pit = $ * LVR of position.
+     *
+     * Formula: pit = $ * LVR of position.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @param lendingToken Address of the lending token.
@@ -1073,8 +1109,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened.
-     * #### Formula: 
-     * - pit = $ * LVR of project token.
+     *
+     * Formula: pit = $ * LVR of project token.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @return The PIT value.

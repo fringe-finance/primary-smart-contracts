@@ -102,7 +102,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
 
     /**
      * @dev Sets the address of the primary lending platform contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `newPit` cannot be the zero address.
      * - Caller must be a moderator.
      * @param newPit The address of the new primary lending platform contract.
@@ -115,7 +116,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
 
     /**
      * @dev Sets the address of the PrimaryLendingPlatformLiquidation contract for PIT liquidation.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `newLiquidation` cannot be the zero address.
      * - Caller must be a moderator.
      * @param newLiquidation The address of the new PrimaryLendingPlatformLiquidation contract.
@@ -131,7 +133,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
 
     /**
      * @dev Sets the Primary Lending Platform Leverage contract address.
-     * #### Requirements:
+     *
+     * Requirements:
      * - `newLeverage` cannot be the zero address.
      * - Caller must be a moderator.
      * @param newLeverage The address of the new Primary Lending Platform Leverage contract.

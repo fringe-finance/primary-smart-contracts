@@ -55,7 +55,8 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
     /**
      * @dev Sets the delay period for the PrimaryLendingPlatformProxyAdmin contract.
      * @param _delayPeriod The new delay period to be set.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the owner of the contract.
      * - `_delayPeriod` must be greater than or equal to the minimum delay period.
      */
@@ -69,7 +70,8 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
      * @dev Changes the admin of a transparent proxy.
      * @param proxy The address of the proxy to change the admin of.
      * @param newAdmin The address of the new admin.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the owner of the contract.
      * - This function is forbidden and will always revert.
      */
@@ -86,10 +88,12 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
      * @dev Appends an upgrade to the upgrade queue for the given proxy contract.
      * @param proxy The proxy contract to upgrade.
      * @param newImplementation The address of the new implementation contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the owner of the contract.
      * - The upgrade queue for the given proxy contract must be empty.
-     * #### Effects:
+     *
+     * Effects:
      * - Sets the append timestamp for the upgrade.
      * - Sets the delay period for the upgrade.
      * - Sets the old implementation for the upgrade.
@@ -111,7 +115,8 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
      * @dev Upgrades the implementation of a transparent proxy contract.
      * @param proxy The transparent proxy contract to upgrade.
      * @param implementation The address of the new implementation contract.
-     * #### Requirements:
+     *
+     * Requirements:
      * - The caller must be the owner of the contract.
      * - The `appendUpgrade` function must have been called before.
      * - The delay period must have passed since the `appendUpgrade` function was called.

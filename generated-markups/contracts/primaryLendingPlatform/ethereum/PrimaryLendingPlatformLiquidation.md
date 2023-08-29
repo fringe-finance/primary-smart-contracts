@@ -34,14 +34,16 @@ function liquidate(
 Liquidates a user's position based on the specified lending token amount.
 
 The function to be called when a user wants to liquidate their position.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - The lending token amount must be greater than 0.
 - The user must have a position for the given project token and lending token.
 - The health factor must be less than 1.
 - `_lendingTokenAmount` must be within the permissible range of liquidation amount.
-#### Effects:
+
+Effects:
 - Calculates the health factor of the position using `getCurrentHealthFactor` function.
 - Validates the health factor and ensures it's less than 1.
 - Calculates the permissible liquidation range using `getLiquidationAmount` function.
@@ -78,7 +80,8 @@ function liquidateFromModerator(
 ```
 
 Liquidates a user's position based on the specified lending token amount, called by a related contract.
-#### Requirements:
+
+Requirements:
 - The project token is listed on the platform.
 - The lending token is listed on the platform.
 - Called by a related contract.
@@ -86,7 +89,8 @@ Liquidates a user's position based on the specified lending token amount, called
 - The user must have a position for the given project token and lending token.
 - The health factor must be less than 1.
 - `_lendingTokenAmount` must be within the permissible range of liquidation amount.
-#### Effects:
+
+Effects:
 - Calculates the health factor of the position using `getCurrentHealthFactor` function.
 - Validates the health factor and ensures it's less than 1.
 - Calculates the permissible liquidation range using `getLiquidationAmount` function.

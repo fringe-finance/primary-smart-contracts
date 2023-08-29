@@ -249,7 +249,8 @@ function addBLendingTokenSuport(
 ```
 
 Adds support for a new blending token to the JumpRateModelV3 contract.
-#### Requirements:
+
+Requirements:
 - `blendingToken` cannot be the zero address.
 - Only the contract moderator can call this function.
 
@@ -271,7 +272,8 @@ function removeBLendingTokenSuport(address _blending) external onlyModerator
 ```
 
 Removes blending token support for the specified blending token address.
-#### Requirements:
+
+Requirements:
 - `_blending` cannot be the zero address.
 - `_blending` must be a supported blending token.
 
@@ -292,7 +294,8 @@ function setMaxBorrowRate(
 ```
 
 Sets the maximum borrow rate for a blending token.
-#### Requirements:
+
+Requirements:
 - The caller must have the `onlyModerator` modifier.
 - The blending token must be supported by the contract.
 
@@ -311,7 +314,8 @@ function updateBlockNumber(address blendingToken) public onlyModerator
 ```
 
 Updates the block number for a given blending token.
-#### Requirements:
+
+Requirements:
 - The caller must have the `onlyModerator` modifier.
 - The blending token must be supported.
 
