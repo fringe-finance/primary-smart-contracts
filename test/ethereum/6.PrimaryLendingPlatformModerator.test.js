@@ -1,5 +1,7 @@
 require("dotenv").config();
-const chain = process.env.CHAIN ? "_" + process.env.CHAIN : "";
+const chainConfigs = require('../../chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
+const chain =chainConfigs.chain ? "_" +chainConfigs.chain : "";
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
 const path = require("path");
@@ -12,11 +14,6 @@ const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const ParaSwapAdapter_ARTIFACT = require("./artifacts/NewUniswapV2Router.json");
 const UniSwapV2Pair_ARTIFACT = require("./artifacts/UniswapV2Pair.json");
 const UniswapV2FACTORY_ARTIFACT = require("./artifacts/UniswapV2Factory.json");
-const {
-    INFURA_KEY,
-    CHAIN,
-    BLOCKNUMBER
-  } = process.env;
 const toBN = (num) => hre.ethers.BigNumber.from(num);
 
 describe("PrimaryLendingPlatformModerator", function () {
@@ -62,8 +59,7 @@ describe("PrimaryLendingPlatformModerator", function () {
     let prj1;
     let prj2;
     let prj3;
-    let prj1Usdc;
-    let prj1Prj2;
+
     let wstETH;
 
     let usdc;
@@ -73,8 +69,7 @@ describe("PrimaryLendingPlatformModerator", function () {
     let prj1Decimals;
     let prj2Decimals;
     let prj3Decimals;
-    let prj1UsdcDecimals;
-    let prj1Prj2Decimals;
+
     let wstEthDecimals;
 
     let usdcDecimals;
@@ -84,8 +79,7 @@ describe("PrimaryLendingPlatformModerator", function () {
     let prj1Address;
     let prj2Address;
     let prj3Address;
-    let prj1UsdcAddress;
-    let prj1Prj2Address;
+
     let wstEthAddress;
 
     let usdcAddress;
@@ -99,155 +93,12 @@ describe("PrimaryLendingPlatformModerator", function () {
     let bLendingTokenAddress;
     let bLendingTokenInstance;
 
-    async function setHighPricePrj1() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            chainlinkPriceProviderAddress,
-            false
-        );
-    };
-
-    async function setLowPricePrj1() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            uniswapV2PriceProviderAddress,
-            false
-        );
-    }
-    async function setLowPriceUSDC() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            usdcAddress,
-            chainlinkPriceProviderAddress,
-            false
-        );
-    };
-
-    async function setHighPriceUSDC() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            usdcAddress,
-            uniswapV2PriceProviderAddress,
-            false
-        );
-    }
-
-    async function loadBtokenInstance(bTokenAddress, deployMaster) {
-        let BToken = await hre.ethers.getContractFactory("BLendingToken");
-        return BToken.attach(bTokenAddress).connect(deployMaster);
-    }
 
     async function impersonateAccount(account) {
         await helpers.impersonateAccount(account);
         return await hre.ethers.getSigner(account);
     }
 
-    async function createSellCallData(
-        tokenIn,
-        amountIn,
-        amountOutMin,
-        weth,
-        pools
-    ) {
-        signers = await hre.ethers.getSigners();
-        let poolsList = new Array();
-        let tokenInNext;
-        for (let i = 0; i < pools.length; i++) {
-            let pairToken = new hre.ethers.Contract(
-                pools[i],
-                UniSwapV2Pair_ARTIFACT.abi,
-                signers[0]
-            );
-            let token0 = await pairToken.token0();
-            let token1 = await pairToken.token1();
-            let prefix;
-            if (i == 0) {
-                if (tokenIn.toLowerCase() == token0.toLowerCase()) {
-                    prefix = "4de4";
-                    tokenInNext = token1.toLowerCase();
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0.toLowerCase();
-                }
-            } else {
-                if (tokenInNext.toLowerCase() == token0.toLowerCase()) {
-                    prefix = "4de4";
-                    tokenInNext = token1.toLowerCase();
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0.toLowerCase();
-                }
-            }
-            let convertedPool = pools[i].slice(0, 2) + prefix + pools[i].slice(2);
-            poolsList.push(convertedPool);
-        }
-
-        let iface = new ethers.utils.Interface(ParaSwapAdapter_ARTIFACT.abi);
-        return result = iface.encodeFunctionData("swapOnUniswapV2Fork", [
-            tokenIn,
-            amountIn,
-            amountOutMin,
-            weth,
-            poolsList
-        ]);
-    }
-    async function createBuyCallData(
-        tokenIn,
-        amountInMax,
-        amountOut,
-        weth,
-        pools
-    ) {
-        signers = await hre.ethers.getSigners();
-        let poolsList = new Array();
-        let tokenInNext;
-        for (let i = 0; i < pools.length; i++) {
-            let pairToken = new hre.ethers.Contract(
-                pools[i],
-                UniSwapV2Pair_ARTIFACT.abi,
-                signers[0]
-            );
-            let token0 = await pairToken.token0();
-            let token1 = await pairToken.token1();
-            let prefix;
-            if (i == 0) {
-                if (tokenIn == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            } else {
-                if (tokenInNext == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            }
-            let convertedPool = pools[i].slice(0, 2) + prefix + pools[i].slice(2);
-            poolsList.push(convertedPool);
-        }
-
-
-        let iface = new ethers.utils.Interface(ParaSwapAdapter_ARTIFACT.abi);
-        return iface.encodeFunctionData("buyOnUniswapV2Fork", [
-            tokenIn,
-            amountInMax,
-            amountOut,
-            weth,
-            poolsList
-        ]);
-    }
-    async function resetNetwork() {
-        await helpers.reset(
-            `https://${CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(BLOCKNUMBER)
-        )
-    }
-    after(async function(){
-        await resetNetwork();
-    });
     async function loadFixture() {
         signers = await hre.ethers.getSigners();
         deployMaster = signers[0];
@@ -268,16 +119,15 @@ describe("PrimaryLendingPlatformModerator", function () {
             uniswapV2PriceProviderAddress = addresses.uniswapV2PriceProviderAddress;
             priceProviderAggregatorAddress = addresses.priceProviderAggregatorAddress;
 
-            prj1Address = addresses.projectTokens[0];
-            prj2Address = addresses.projectTokens[1];
-            prj3Address = addresses.projectTokens[2];
-            prj1UsdcAddress = addresses.projectTokens[3];
-            prj1Prj2Address = addresses.projectTokens[4];
-            wstEthAddress = addresses.projectTokens[5];
+            prj1Address = ethers.utils.getAddress(addresses.projectTokens[0]);
+            prj2Address = ethers.utils.getAddress(addresses.projectTokens[1]);
+            prj3Address = ethers.utils.getAddress(addresses.projectTokens[2]);
 
-            usdcAddress = addresses.lendingTokens[0];
-            usbAddress = addresses.lendingTokens[1];
-            wethAddress = addresses.lendingTokens[2];
+            wstEthAddress = ethers.utils.getAddress(addresses.projectTokens[projectTokens.length - 1]);
+
+            usdcAddress = ethers.utils.getAddress(addresses.lendingTokens[0]);
+            usbAddress = ethers.utils.getAddress(addresses.lendingTokens[1]);
+            wethAddress = ethers.utils.getAddress(addresses.lendingTokens[2]);
 
             masterAddress = deployMaster.address;
             firstSignerAddress = firstSigner.address;
@@ -320,8 +170,7 @@ describe("PrimaryLendingPlatformModerator", function () {
             prj1 = MockPRJ.attach(prj1Address).connect(projectTokenDeployer);
             prj2 = MockPRJ.attach(prj2Address).connect(projectTokenDeployer);
             prj3 = MockPRJ.attach(prj3Address).connect(projectTokenDeployer);
-            prj1Usdc = MockPRJ.attach(prj1UsdcAddress).connect(projectTokenDeployer);
-            prj1Prj2 = MockPRJ.attach(prj1Prj2Address).connect(projectTokenDeployer);
+
             wstETH = MockWstETH.attach(wstEthAddress).connect(projectTokenDeployer);
 
             usdc = MockToken.attach(usdcAddress).connect(usdcDeployer);
@@ -331,15 +180,12 @@ describe("PrimaryLendingPlatformModerator", function () {
             prj1Decimals = await prj1.decimals();
             prj2Decimals = await prj2.decimals();
             prj3Decimals = await prj3.decimals();
-            prj1UsdcDecimals = await prj1Usdc.decimals();
-            prj1Prj2Decimals = await prj1Prj2.decimals();
+
             wstEthDecimals = await wstETH.decimals();
 
             usdcDecimals = await usdc.decimals();
             usbDecimals = await usb.decimals();
             wethDecimals = await weth.decimals();
-            // console.log("usdc: " + (await plpInstance.getTokenEvaluation(usdcAddress, ethers.utils.parseUnits("1", usdcDecimals))).toString());
-            // console.log("weth: " + (await plpInstance.getTokenEvaluation(wethAddress, ethers.utils.parseUnits("1", wethDecimals))).toString());
         }
         {
             bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
@@ -360,11 +206,8 @@ describe("PrimaryLendingPlatformModerator", function () {
     let denominator;
 
     describe("admin functions", async function () {
-        this.timeout(24 * 3600);
-
         before(async function () {
             await loadFixture();
-
             ADMIN_BYTES_32 = await plpModeratorInstance.DEFAULT_ADMIN_ROLE();
             MODERATOR_BYTES_32 = await plpModeratorInstance.MODERATOR_ROLE();
         });
@@ -379,7 +222,13 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when newModerator is invalid address', async () => {
+            it('2.1. Failure: Should throw error when newModerator is invalid address', async () => {
+                newModerator = "Not address";
+                expect(plpModeratorInstance.grandModerator(newModerator))
+                    .to.throw;
+            });
+
+            it('2.2. Failure: Should revert when newModerator is address zero', async () => {
                 newModerator = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.grandModerator(newModerator))
                     .to.be.revertedWith("PITModerator: Invalid address");
@@ -388,6 +237,8 @@ describe("PrimaryLendingPlatformModerator", function () {
             it('3. Success: Should grant the moderator role to newModerator successfully', async () => {
                 await expect(plpModeratorInstance.grandModerator(firstSignerAddress))
                     .to.be.emit(plpModeratorInstance, "GrandModerator").withArgs(firstSignerAddress);
+
+                expect(await plpModeratorInstance.hasRole(MODERATOR_BYTES_32, firstSignerAddress)).to.be.equal(true);
             });
         });
 
@@ -401,15 +252,25 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when moderator is invalid address', async () => {
+            it('2.1. Failure: Should throw error when moderator is invalid address', async () => {
+                moderator = "Not address";
+                expect(plpModeratorInstance.revokeModerator(moderator))
+                    .to.throw;
+            });
+
+            it('2.2. Failure: Should revert when moderator is address zero', async () => {
                 moderator = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.revokeModerator(moderator))
                     .to.be.revertedWith("PITModerator: Invalid address");
             });
 
             it('3. Success: Should revoke moderator successfully', async () => {
+                await plpModeratorInstance.grandModerator(firstSignerAddress);
+
                 await expect(plpModeratorInstance.revokeModerator(firstSignerAddress))
                     .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);
+
+                expect(await plpModeratorInstance.hasRole(MODERATOR_BYTES_32, firstSignerAddress)).to.be.equal(false);
             });
         });
 
@@ -423,7 +284,13 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when newAdmin is invalid address', async () => {
+            it('2.1. Failure: Should throw error when newAdmin is invalid address', async () => {
+                newAdmin = "Not address";
+                expect(plpModeratorInstance.transferAdminRole(newAdmin))
+                    .to.throw;
+            });
+
+            it('2.2. Failure: Should revert when newAdmin is address zero', async () => {
                 newAdmin = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.transferAdminRole(newAdmin))
                     .to.be.revertedWith("PITModerator: Invalid newAdmin");
@@ -449,10 +316,16 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when newAdmin is invalid address', async () => {
+            it('2.1. Failure: Should throw error when newAdmin is invalid address', async () => {
+                newAdmin = "Not address";
+                expect(plpModeratorInstance.transferAdminRoleForPIT(masterAddress, newAdmin))
+                    .to.throw;
+            });
+
+            it('2.2. Failure: Should revert when newAdmin is address zero', async () => {
                 newAdmin = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.transferAdminRoleForPIT(masterAddress, newAdmin))
-                    .to.be.revertedWith("PITModerator: Invalid newAdmin");
+                    .to.be.revertedWith("PITModerator: Invalid addresses");
             });
 
             it('3. Success: Should transfer admin role for PIT to newAdmin successfully', async () => {
@@ -477,22 +350,28 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when projectTokenId < 0', async () => {
+            it('2. Failure: Should throw error when projectTokenId < 0', async () => {
                 expect(plpModeratorInstance.connect(firstSigner).removeProjectToken(-1))
                     .to.throw;
             });
 
-            it('3. Failure: Should revert when projectTokenId > maxUint256', async () => {
+            it('3. Failure: Should throw error when projectTokenId > maxUint256', async () => {
                 expect(plpModeratorInstance.connect(firstSigner).removeProjectToken(ethers.constants.MaxUint256.add(toBN(1))))
                     .to.throw;
             });
 
-            it('4. Failure: Should revert when projectTokenId is not uint', async () => {
+            it('4. Failure: Should throw error when projectTokenId is not uint', async () => {
                 expect(plpModeratorInstance.connect(firstSigner).removeProjectToken(1.1))
                     .to.throw;
             });
 
-            it('5. Failure: Should revert when token is deposited', async () => {
+            it('5. Failure: Should throw error when projectTokenId > numOfProjectTokens', async () => {
+                numOfProjectTokens = await plpInstance.projectTokensLength();
+                expect(plpModeratorInstance.connect(firstSigner)
+                    .removeProjectToken(Number(numOfProjectTokens) + 1)).to.throw;
+            });
+
+            it('6. Failure: Should revert when token is deposited', async () => {
                 depositPrj1Amount = ethers.utils.parseUnits("100", prj1Decimals);
                 await prj1.mintTo(masterAddress, depositPrj1Amount);
                 await prj1.connect(deployMaster).approve(plpAddress, depositPrj1Amount);
@@ -502,7 +381,7 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: ProjectToken amount exist on PIT");
             });
 
-            it('6. Success: Should remove project toke successfully', async () => {
+            it('7. Success: Should remove project toke successfully', async () => {
                 await loadFixture();
                 numOfProjectTokensBeforeRemove = await plpInstance.projectTokensLength();
 
@@ -518,7 +397,7 @@ describe("PrimaryLendingPlatformModerator", function () {
                 expect(projectTokenInfo.isListed).to.be.equal(false);
             });
 
-            it.skip('7. Failure: Should revert when isProjectTokenListed = FALSE', async () => { });
+            it.skip('8. Failure: Should revert when isProjectTokenListed = FALSE', async () => { });
         });
 
         describe("addProjectToken", async function () {
@@ -540,43 +419,49 @@ describe("PrimaryLendingPlatformModerator", function () {
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
-            it('2. Failure: Should revert when project token is invalid address', async () => {
+            it('2. Failure: Should throw error when project token is invalid address', async () => {
+                projectToken = "Not address";
+                expect(plpModeratorInstance.addProjectToken(projectToken, numerator, denominator))
+                    .to.throw;
+            });
+
+            it('3. Failure: Should revert when project token is address zero', async () => {
                 projectToken = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.addProjectToken(projectToken, numerator, denominator))
                     .to.be.revertedWith("PITModerator: Invalid token");
             });
 
-            it('3. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
+            it('4. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
                 loanToValueRatioNumerator = -1;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, loanToValueRatioNumerator, denominator)).to.throw;
             });
 
-            it('4. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
+            it('5. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
                 loanToValueRatioNumerator = ethers.constants.MaxUint256;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, loanToValueRatioNumerator, denominator)).to.throw;
             });
 
-            it('5. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
+            it('6. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
                 loanToValueRatioNumerator = 1.1;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, loanToValueRatioNumerator, denominator)).to.throw;
             });
 
-            it('6. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
+            it('7. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
                 loanToValueRatioDenominator = -1;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, numerator, loanToValueRatioDenominator)).to.throw;
             });
 
-            it('7. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
+            it('8. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
                 loanToValueRatioDenominator = ethers.constants.MaxUint256;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, numerator, loanToValueRatioDenominator)).to.throw;
             });
 
-            it('8. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
+            it('9. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
                 loanToValueRatioDenominator = 1.1;
                 expect(plpModeratorInstance.addProjectToken(projectTokenAddress, numerator, loanToValueRatioDenominator)).to.throw;
             });
 
-            it('9. Success: Should add project token successfully', async () => {
+            it('10. Success: Should add project token successfully', async () => {
                 projectTokenName = await prj1.name();
                 projectTokenSymbol = await prj1.symbol();
 
@@ -644,12 +529,18 @@ describe("PrimaryLendingPlatformModerator", function () {
                 expect(plpModeratorInstance.removeLendingToken(1.1)).to.throw;
             });
 
-            it('5. Failure: Should revert when token is not deposited', async () => {
+            it('5. Failure: Should throw error when lendingTokenId > numOfLendingTokens', async () => {
+                numOfLendingTokens = await plpInstance.lendingTokensLength();
+                expect(plpModeratorInstance.removeLendingToken(Number(numOfLendingTokens) + 1))
+                    .to.throw;
+            });
+
+            it('6. Failure: Should revert when token is borrowed', async () => {
                 await expect(plpModeratorInstance.removeLendingToken(lendingTokenId))
                     .to.be.revertedWith("PITModerator: Exist borrow of lendingToken");
             });
 
-            it('6. Success: Should remove lending token successfully', async () => {
+            it('7. Success: Should remove lending token successfully', async () => {
                 await loadFixture();
 
                 numOfLendingTokensBeforeRemove = await plpInstance.lendingTokensLength();
@@ -665,7 +556,7 @@ describe("PrimaryLendingPlatformModerator", function () {
                 expect(lendingTokenInfo.isListed).to.be.equal(false);
             });
 
-            it.skip('7. Failure: Should revert when islendingTokenListed = FALSE', async () => { });
+            it.skip('8. Failure: Should revert when islendingTokenListed = FALSE', async () => { });
         });
 
         describe("addLendingToken", async function () {
@@ -687,69 +578,77 @@ describe("PrimaryLendingPlatformModerator", function () {
                 )).to.be.revertedWith("PITModerator: Caller is not the Admin");
             });
 
-            it('2. Failure: Should revert when lendingTokenAddress is invalid', async () => {
+            it('2. Failure: Should throw error when lendingTokenAddress is invalid', async () => {
+                let lendingToken = "Not address";
+                expect(plpModeratorInstance.addLendingToken(
+                    lendingToken, bLendingTokenAddress, isPaused, numerator, denominator
+                )).to.throw;
+            });
+
+            it('3. Failure: Should revert when lendingTokenAddress zero', async () => {
                 let lendingToken = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.addLendingToken(
                     lendingToken, bLendingTokenAddress, isPaused, numerator, denominator
                 )).to.be.revertedWith("PITModerator: Invalid address");
             });
 
-            it('3. Failure: Should revert when bLendingTokenAddress is invalid', async () => {
+            it('4. Failure: Should throw error when bLendingTokenAddress is invalid', async () => {
+                let bLendingToken = "Not address";
+                expect(plpModeratorInstance.addLendingToken(
+                    usdcAddress, bLendingToken, isPaused, numerator, denominator
+                )).to.throw;
+            });
+
+            it('5. Failure: Should revert when bLendingTokenAddress is zero', async () => {
                 let bLendingToken = ethers.constants.AddressZero;
                 await expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingToken, isPaused, numerator, denominator
                 )).to.be.revertedWith("PITModerator: Invalid address");
             });
 
-            it.skip('4. Failure: Should throw error when isPaused is not boolean', async () => {
-                expect(plpModeratorInstance.addLendingToken(
-                    usdcAddress, bLendingTokenAddress, "false", numerator, denominator
-                )).to.throw;
-            });
-
-            it('5. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
+            it('6. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
                 loanToValueRatioNumerator = -1;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, loanToValueRatioNumerator, denominator
                 )).to.throw;
             });
 
-            it('6. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
+            it('7. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
                 loanToValueRatioNumerator = ethers.constants.MaxUint256;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, loanToValueRatioNumerator, denominator
                 )).to.throw;
             });
 
-            it('7. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
+            it('8. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
                 loanToValueRatioNumerator = 1.1;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, loanToValueRatioNumerator, denominator
                 )).to.throw;
             });
 
-            it('8. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
+            it('9. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
                 loanToValueRatioDenominator = -1;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, numerator, loanToValueRatioDenominator
                 )).to.throw;
             });
 
-            it('9. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
+            it('10. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
                 loanToValueRatioDenominator = ethers.constants.MaxUint256;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, numerator, loanToValueRatioDenominator
                 )).to.throw;
             });
 
-            it('10. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
+            it('11. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
                 loanToValueRatioDenominator = 1.1;
                 expect(plpModeratorInstance.addLendingToken(
                     usdcAddress, bLendingTokenAddress, isPaused, numerator, loanToValueRatioDenominator
                 )).to.throw;
             });
 
-            it('11. Success: Should add lending token successfully', async () => {
+            it('12. Success: Should add lending token successfully', async () => {
                 lendingTokenName = await usdc.name();
                 lendingTokenSymbol = await usdc.symbol();
 
@@ -772,90 +671,638 @@ describe("PrimaryLendingPlatformModerator", function () {
             });
         });
 
-        // describe("setPrimaryLendingPlatformLeverage", async function () {
-        //     it('1. Failure: Should revert when sender is not admin', async () => {
-        //         await expect(plpModeratorInstance.connect(firstSigner).transferAdminRole(firstSignerAddress))
-        //             .to.be.revertedWith("PITModerator: Caller is not the Admin'");
-        //     });
+        describe("setPrimaryLendingPlatformLeverage", async function () {
+            before(async function () {
+                await loadFixture();
+            });
 
-        //     it('2. Failure: Should revert when newAdmin is invalid address', async () => {
-        //         newAdmin = ethers.constants.AddressZero;
-        //         await expect(plpModeratorInstance.transferAdminRole(newAdmin))
-        //             .to.be.revertedWith("PITModerator: Invalid newAdmin");
-        //     });
+            it('1. Failure: Should revert when sender is not admin', async () => {
+                newPrimaryLendingPlatformLeverageAddress = plpLeverageAddress;
+                await expect(plpModeratorInstance.connect(firstSigner)
+                    .setPrimaryLendingPlatformLeverage(newPrimaryLendingPlatformLeverageAddress))
+                    .to.be.revertedWith("PITModerator: Caller is not the Admin'");
+            });
 
-        //     it('3. Success: Should revoke newAdmin successfully', async () => {
-        //         await expect(plpModeratorInstance.transferAdminRole(firstSignerAddress))
-        //             .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);
-        //     });
-        // });
+            it('2.1. Failure: Should throw error when newPrimaryLendingPlatformLeverage is invalid address', async () => {
+                newPrimaryLendingPlatformLeverageAddress = "Not address";
+                expect(plpModeratorInstance.setPrimaryLendingPlatformLeverage(newPrimaryLendingPlatformLeverageAddress))
+                    .to.throw;
+            });
 
-        // describe("setPriceOracle", async function () {
-        //     it('1. Failure: Should revert when sender is not admin', async () => {
-        //         await expect(plpModeratorInstance.connect(firstSigner).transferAdminRole(firstSignerAddress))
-        //             .to.be.revertedWith("PITModerator: Caller is not the Admin'");
-        //     });
+            it('2.2. Failure: Should revert when newPrimaryLendingPlatformLeverage is address zero', async () => {
+                newPrimaryLendingPlatformLeverageAddress = ethers.constants.AddressZero;
+                await expect(plpModeratorInstance.setPrimaryLendingPlatformLeverage(newPrimaryLendingPlatformLeverageAddress))
+                    .to.be.revertedWith("PITModerator: Invalid address");
+            });
 
-        //     it('2. Failure: Should revert when newAdmin is invalid address', async () => {
-        //         newAdmin = ethers.constants.AddressZero;
-        //         await expect(plpModeratorInstance.transferAdminRole(newAdmin))
-        //             .to.be.revertedWith("PITModerator: Invalid newAdmin");
-        //     });
+            it('3. Success: Should revoke newAdmin successfully', async () => {
+                newPrimaryLendingPlatformLeverageAddress = signers[2].address;
+                await expect(plpModeratorInstance.setPrimaryLendingPlatformLeverage(newPrimaryLendingPlatformLeverageAddress))
+                    .to.be.emit(plpModeratorInstance, "SetPrimaryLendingPlatformLeverage")
+                    .withArgs(newPrimaryLendingPlatformLeverageAddress);
 
-        //     it('3. Success: Should revoke newAdmin successfully', async () => {
-        //         await expect(plpModeratorInstance.transferAdminRole(firstSignerAddress))
-        //             .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);
-        //     });
-        // });
+                isRelatedContract = await plpInstance.isRelatedContract(newPrimaryLendingPlatformLeverageAddress);
+                expect(isRelatedContract).to.be.equal(true);
+            });
+        });
 
-        // describe("addRelatedContracts", async function () {
-        //     it('1. Failure: Should revert when sender is not admin', async () => {
-        //         await expect(plpModeratorInstance.connect(firstSigner).transferAdminRole(firstSignerAddress))
-        //             .to.be.revertedWith("PITModerator: Caller is not the Admin'");
-        //     });
+        describe("setPriceOracle", async function () {
+            before(async function () {
+                await loadFixture();
+            });
 
-        //     it('2. Failure: Should revert when newAdmin is invalid address', async () => {
-        //         newAdmin = ethers.constants.AddressZero;
-        //         await expect(plpModeratorInstance.transferAdminRole(newAdmin))
-        //             .to.be.revertedWith("PITModerator: Invalid newAdmin");
-        //     });
+            it('1. Failure: Should revert when sender is not admin', async () => {
+                newPriceOracleAddress = signers[2].address;
+                await expect(plpModeratorInstance.connect(firstSigner)
+                    .setPriceOracle(newPriceOracleAddress))
+                    .to.be.revertedWith("PITModerator: Caller is not the Admin'");
+            });
 
-        //     it('3. Success: Should revoke newAdmin successfully', async () => {
-        //         await expect(plpModeratorInstance.transferAdminRole(firstSignerAddress))
-        //             .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);
-        //     });
-        // });
+            it('2.1. Failure: Should throw error when newPriceOracle is invalid address', async () => {
+                newPriceOracleAddress = "Not address";
+                expect(plpModeratorInstance.setPriceOracle(newPriceOracleAddress))
+                    .to.throw;
+            });
 
-        // describe("removeRelatedContracts", async function () {
-        //     it('1. Failure: Should revert when sender is not admin', async () => {
-        //         await expect(plpModeratorInstance.connect(firstSigner).transferAdminRole(firstSignerAddress))
-        //             .to.be.revertedWith("PITModerator: Caller is not the Admin'");
-        //     });
+            it('2.1. Failure: Should revert when newPriceOracle is invalid address', async () => {
+                newPriceOracleAddress = ethers.constants.AddressZero;
+                expect(plpModeratorInstance.setPriceOracle(newPriceOracleAddress))
+                    .to.be.revertedWith("PITModerator: Invalid address");
+            });
 
-        //     it('2. Failure: Should revert when newAdmin is invalid address', async () => {
-        //         newAdmin = ethers.constants.AddressZero;
-        //         await expect(plpModeratorInstance.transferAdminRole(newAdmin))
-        //             .to.be.revertedWith("PITModerator: Invalid newAdmin");
-        //     });
+            it('3. Success: Should set the price oracle successfully', async () => {
+                newPriceOracleAddress = signers[2].address;
+                await expect(plpModeratorInstance.setPriceOracle(newPriceOracleAddress))
+                    .to.be.emit(plpModeratorInstance, "SetPriceOracle")
+                    .withArgs(newPriceOracleAddress);
+            });
+        });
 
-        //     it('3. Success: Should revoke newAdmin successfully', async () => {
-        //         await expect(plpModeratorInstance.transferAdminRole(firstSignerAddress))
-        //             .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);
-        //     });
-        // });
+        describe("addRelatedContracts", async function () {
+            before(async function () {
+                await loadFixture();
+            });
+
+            it('1. Failure: Should revert when sender is not admin', async () => {
+                newRelatedContract = signers[2].address;
+                await expect(plpModeratorInstance.connect(firstSigner)
+                    .addRelatedContracts(newRelatedContract))
+                    .to.be.revertedWith("PITModerator: Caller is not the Admin'");
+            });
+
+            it('2.1. Failure: Should throw error when newPrimaryLendingPlatformLeverage is invalid address', async () => {
+                newRelatedContract = "Not address";
+                expect(plpModeratorInstance.addRelatedContracts(newRelatedContract))
+                    .to.throw;
+            });
+
+            it('2.2. Failure: Should revert when newPrimaryLendingPlatformLeverage is address zero', async () => {
+                newRelatedContract = ethers.constants.AddressZero;
+                await expect(plpModeratorInstance.addRelatedContracts(newRelatedContract))
+                    .to.be.revertedWith("PITModerator: Invalid address");
+            });
+
+            it('3. Success: Should add new related contract successfully', async () => {
+                newRelatedContract = signers[2].address;
+                await expect(plpModeratorInstance.addRelatedContracts(newRelatedContract))
+                    .to.be.emit(plpModeratorInstance, "AddRelatedContracts")
+                    .withArgs(newRelatedContract);
+
+                isRelatedContract = await plpInstance.isRelatedContract(newRelatedContract);
+                expect(isRelatedContract).to.be.equal(true);
+            });
+        });
+
+        describe("removeRelatedContracts", async function () {
+            before(async function () {
+                await loadFixture();
+            });
+
+            it('1. Failure: Should revert when sender is not admin', async () => {
+                relatedContract = signers[2].address;
+                await expect(plpModeratorInstance.connect(firstSigner)
+                    .removeRelatedContracts(relatedContract)).to.be.revertedWith("PITModerator: Caller is not the Admin'");
+            });
+
+            it('2.1. Failure: Should throw error when newPrimaryLendingPlatformLeverage is invalid address', async () => {
+                relatedContract = "Not address";
+                expect(plpModeratorInstance.removeRelatedContracts(relatedContract)).to.throw;
+            });
+
+            it('2.2. Failure: Should revert when newPrimaryLendingPlatformLeverage is address zero', async () => {
+                relatedContract = ethers.constants.AddressZero;
+                await expect(plpModeratorInstance.removeRelatedContracts(relatedContract))
+                    .to.be.revertedWith("PITModerator: Invalid address");
+            });
+
+            it('3. Success: Should remove related contract successfully', async () => {
+                relatedContract = signers[2].address;
+                await expect(plpModeratorInstance.removeRelatedContracts(relatedContract))
+                    .to.be.emit(plpModeratorInstance, "RemoveRelatedContracts")
+                    .withArgs(relatedContract);
+
+                isRelatedContract = await plpInstance.isRelatedContract(relatedContract);
+                expect(isRelatedContract).to.be.equal(false);
+            });
+        });
     });
 
     describe("moderator functions", async function () {
-        describe("setProjectTokenInfo", async function () { });
+        this.timeout(24 * 3600 * 1000);
 
-        describe("setPausedProjectToken", async function () { });
+        before(async function () {
+            await loadFixture();
+            MODERATOR_BYTES_32 = await plpModeratorInstance.MODERATOR_ROLE();
+        });
 
-        describe("setLendingTokenInfo", async function () { });
+        describe("setProjectTokenInfo", async function () {
+            before(async function () {
+                await loadFixture();
 
-        describe("setPausedLendingToken", async function () { });
+                isDepositPaused = false;
+                isWithdrawPaused = false;
+                numerator = 6;
+                denominator = 10;
+            });
 
-        describe("setBorrowLimitPerCollateralAsset", async function () { });
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    denominator,
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
 
-        describe("setBorrowLimitPerLendingAsset", async function () { });
+            it('2. Failure: Should throw error when project token is invalid address', async () => {
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    "Not address",
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('3. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
+                loanToValueRatioNumerator = -1;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('4. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
+                loanToValueRatioNumerator = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('5. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
+                loanToValueRatioNumerator = 1.1;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('6. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
+                loanToValueRatioDenominator = -1;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('7. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
+                loanToValueRatioDenominator = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('8. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
+                loanToValueRatioDenominator = 1.1;
+                expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('9. Failure: Should revert when loanToValueRatioNumerator > loanToValueRatioDenominator', async () => {
+                loanToValueRatioNumerator = 6;
+                loanToValueRatioDenominator = 1;
+                await expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    loanToValueRatioNumerator,
+                    loanToValueRatioDenominator,
+                )).to.be.revertedWith("PITModerator: Invalid loanToValueRatio");
+            });
+
+            it('10. Success: Should set project token info successfully', async () => {
+                await expect(plpModeratorInstance.setProjectTokenInfo(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused,
+                    numerator,
+                    denominator,
+                ))
+                    .to.be.emit(plpModeratorInstance, "SetProjectTokenInfo")
+                    .withArgs(prj1Address, isDepositPaused, isWithdrawPaused)
+                    .to.be.emit(plpModeratorInstance, "LoanToValueRatioSet")
+                    .withArgs(prj1Address, numerator, denominator);
+
+                projectTokenInfo = await plpInstance.projectTokenInfo(prj1Address);
+                loanToValueRatio = projectTokenInfo.loanToValueRatio;
+
+                expect(projectTokenInfo.isListed).to.be.equal(true);
+                expect(projectTokenInfo.isDepositPaused).to.be.equal(isDepositPaused);
+                expect(projectTokenInfo.isWithdrawPaused).to.be.equal(isWithdrawPaused);
+                expect(loanToValueRatio.numerator).to.be.equal(numerator);
+                expect(loanToValueRatio.denominator).to.be.equal(denominator);
+            });
+        });
+
+        describe("setPausedProjectToken", async function () {
+            before(async function () {
+                await loadFixture();
+                isDepositPaused = false;
+                isWithdrawPaused = false;
+            });
+
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setPausedProjectToken(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
+
+            it('2. Failure: Should revert when isProjectTokenListed = FALSE', async () => {
+                await expect(plpModeratorInstance.setPausedProjectToken(
+                    ethers.constants.AddressZero,
+                    isDepositPaused,
+                    isWithdrawPaused
+                )).to.be.revertedWith("PITModerator: Project token is not listed");
+            });
+
+            it('3. Failure: Should throw error when projectToken is invalid address', async () => {
+                expect(plpModeratorInstance.setPausedProjectToken(
+                    "Not address",
+                    isDepositPaused,
+                    isWithdrawPaused
+                )).to.throw;
+            });
+
+            it('4. Success: Should set project token info successfully', async () => {
+                await expect(plpModeratorInstance.setPausedProjectToken(
+                    prj1Address,
+                    isDepositPaused,
+                    isWithdrawPaused
+                ))
+                    .to.be.emit(plpModeratorInstance, "SetPausedProjectToken")
+                    .withArgs(prj1Address, isDepositPaused, isWithdrawPaused);
+
+                projectTokenInfo = await plpInstance.projectTokenInfo(prj1Address);
+
+                expect(projectTokenInfo.isListed).to.be.equal(true);
+                expect(projectTokenInfo.isDepositPaused).to.be.equal(isDepositPaused);
+                expect(projectTokenInfo.isWithdrawPaused).to.be.equal(isWithdrawPaused);
+            });
+        });
+
+        describe("setLendingTokenInfo", async function () {
+            before(async function () {
+                await loadFixture();
+                isPaused = false;
+                numerator = 6;
+                denominator = 10;
+            });
+
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    denominator,
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
+
+            it('2. Failure: Should throw error when lendingToken is invalid address', async () => {
+                lendingToken = "Not address";
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    lendingToken,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('3. Failure: Should throw error when bLendingToken is invalid address', async () => {
+                bLendingToken = "Not address";
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingToken,
+                    isPaused,
+                    numerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('4. Failure: Should throw error when loanToValueRatioNumerator < 0', async () => {
+                loanToValueRatioNumerator = -1;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('5. Failure: Should throw error when loanToValueRatioNumerator > maxUint8', async () => {
+                loanToValueRatioNumerator = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('6. Failure: Should throw error when loanToValueRatioNumerator is not a uint', async () => {
+                loanToValueRatioNumerator = 1.1;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    loanToValueRatioNumerator,
+                    denominator,
+                )).to.throw;
+            });
+
+            it('7. Failure: Should throw error when loanToValueRatioDenominator < 0', async () => {
+                loanToValueRatioDenominator = -1;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('8. Failure: Should throw error when loanToValueRatioDenominator > maxUint8', async () => {
+                loanToValueRatioDenominator = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('9. Failure: Should throw error when loanToValueRatioDenominator is not a uint', async () => {
+                loanToValueRatioDenominator = 1.1;
+                expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    loanToValueRatioDenominator,
+                )).to.throw;
+            });
+
+            it('10. Failure: Should revert when UnderlyingOfbLendingToken != lendingToken', async () => {
+                await expect(plpModeratorInstance.setLendingTokenInfo(
+                    usbAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    denominator,
+                )).to.be.revertedWith("PITModerator: UnderlyingOfbLendingToken!=lendingToken");
+            });
+
+            it('11. Success: Should set project token info successfully', async () => {
+                await expect(plpModeratorInstance.setLendingTokenInfo(
+                    usdcAddress,
+                    bLendingTokenAddress,
+                    isPaused,
+                    numerator,
+                    denominator,
+                ))
+                    .to.be.emit(plpModeratorInstance, "SetPausedLendingToken")
+                    .withArgs(usdcAddress, isPaused)
+                    .to.be.emit(plpModeratorInstance, "LoanToValueRatioSet")
+                    .withArgs(usdcAddress, numerator, denominator);
+
+                lendingTokenInfo = await plpInstance.lendingTokenInfo(usdcAddress);
+                loanToValueRatio = lendingTokenInfo.loanToValueRatio;
+
+                expect(lendingTokenInfo.isListed).to.be.equal(true);
+                expect(lendingTokenInfo.isPaused).to.be.equal(isPaused);
+                expect(lendingTokenInfo.bLendingToken).to.be.equal(bLendingTokenAddress);
+                expect(loanToValueRatio.numerator).to.be.equal(numerator);
+                expect(loanToValueRatio.denominator).to.be.equal(denominator);
+            });
+        });
+
+        describe("setPausedLendingToken", async function () {
+            before(async function () {
+                await loadFixture();
+                isPaused = false;
+            });
+
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setPausedLendingToken(
+                    usdcAddress,
+                    isPaused
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
+
+            it('2. Failure: Should revert when isProjectTokenListed = FALSE', async () => {
+                lendingToken = ethers.constants.AddressZero;
+                await expect(plpModeratorInstance.setPausedLendingToken(
+                    lendingToken,
+                    isPaused
+                )).to.be.revertedWith("PITModerator: Lending token is not listed");
+            });
+
+            it('3. Failure: Should throw error when projectToken is invalid address', async () => {
+                lendingToken = "Not address";
+                expect(plpModeratorInstance.setPausedLendingToken(
+                    lendingToken,
+                    isPaused
+                )).to.throw;
+            });
+
+            it('4. Success: Should set project token info successfully', async () => {
+                await expect(plpModeratorInstance.setPausedLendingToken(
+                    usdcAddress,
+                    isPaused,
+                ))
+                    .to.be.emit(plpModeratorInstance, "SetPausedLendingToken")
+                    .withArgs(usdcAddress, isPaused);
+
+                lendingTokenInfo = await plpInstance.lendingTokenInfo(prj1Address);
+
+                expect(lendingTokenInfo.isListed).to.be.equal(false);
+                expect(lendingTokenInfo.isPaused).to.be.equal(isPaused);
+            });
+        });
+
+        describe("setBorrowLimitPerCollateralAsset", async function () {
+            before(async function () {
+                await loadFixture();
+                // set borrow limit per collateral asset
+                borrowLimitPerCollateralAsset = toBN(100);
+            });
+
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setBorrowLimitPerCollateralAsset(
+                    prj1Address,
+                    borrowLimitPerCollateralAsset
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
+
+            it('2. Failure: Should throw error when project token is invalid address', async () => {
+                projectToken = "Not address";
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    projectToken,
+                    borrowLimitPerCollateralAsset
+                )).to.throw;
+            });
+
+            it('3. Failure: Should revert when isProjectTokenListed = FALSE', async () => {
+                projectToken = ethers.constants.AddressZero;
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    projectToken,
+                    borrowLimitPerCollateralAsset
+                )).to.be.revertedWith("PITModerator: Project token is not listed");
+            });
+
+            it('4. Failure: Should throw error when borrowLimit < 0', async () => {
+                borrowLimit = -1;
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    prj1Address,
+                    borrowLimit
+                )).to.throw;
+            });
+
+            it('5. Failure: Should throw error when borrowLimit > maxUint8', async () => {
+                borrowLimit = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    prj1Address,
+                    borrowLimit
+                )).to.throw;
+            });
+
+            it('6. Failure: Should throw error when borrowLimit = 0', async () => {
+                borrowLimit = 0;
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    prj1Address,
+                    borrowLimit
+                )).to.be.revertedWith("PITModerator: BorrowLimit = 0");
+            });
+
+            it('7. Success: Should set the borrow limit per lending asset successfully', async () => {
+                expect(plpModeratorInstance.setBorrowLimitPerCollateralAsset(
+                    prj1Address,
+                    borrowLimitPerCollateralAsset
+                )).to.be.emit(plpModeratorInstance, "SetBorrowLimitPerCollateralAsset")
+                    .withArgs(prj1Address, borrowLimitPerCollateralAsset);
+            });
+        });
+
+        describe("setBorrowLimitPerLendingAsset", async function () {
+            before(async function () {
+                await loadFixture();
+                // set borrow limit per lending asset
+                borrowLimitPerLendingAsset = toBN(100);
+            });
+
+            it('1. Failure: Should revert when sender is not moderator', async () => {
+                await expect(plpModeratorInstance.connect(firstSigner).setBorrowLimitPerLendingAsset(
+                    usdcAddress,
+                    borrowLimitPerLendingAsset
+                )).to.be.revertedWith("PITModerator: Caller is not the Moderator");
+            });
+
+            it('2. Failure: Should throw error when project token is invalid address', async () => {
+                lendingToken = "Not address";
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    lendingToken,
+                    borrowLimitPerLendingAsset
+                )).to.throw;
+            });
+
+            it('3. Failure: Should revert when isLendingTokenListed = FALSE', async () => {
+                lendingToken = ethers.constants.AddressZero;
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    lendingToken,
+                    borrowLimitPerLendingAsset
+                )).to.be.revertedWith("PITModerator: Lending token is not listed");
+            });
+
+            it('4. Failure: Should throw error when borrowLimit < 0', async () => {
+                borrowLimit = -1;
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    usdcAddress,
+                    borrowLimit
+                )).to.throw;
+            });
+
+            it('5. Failure: Should throw error when borrowLimit > maxUint8', async () => {
+                borrowLimit = ethers.constants.MaxUint256;
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    usdcAddress,
+                    borrowLimit
+                )).to.throw;
+            });
+
+            it('6. Failure: Should throw error when borrowLimit = 0', async () => {
+                borrowLimit = 0;
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    usdcAddress,
+                    borrowLimit
+                )).to.be.revertedWith("PITModerator: BorrowLimit = 0");
+            });
+
+            it('7. Success: Should set the borrow limit per lending asset successfully', async () => {
+                expect(plpModeratorInstance.setBorrowLimitPerLendingAsset(
+                    usdcAddress,
+                    borrowLimitPerLendingAsset
+                )).to.be.emit(plpModeratorInstance, "SetBorrowLimitPerLendingAsset")
+                    .withArgs(usdcAddress, borrowLimitPerLendingAsset);
+            });
+        });
     });
 });

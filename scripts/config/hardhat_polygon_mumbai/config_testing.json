@@ -3,10 +3,10 @@
         "projectToken": "0x3edef3d7a9b94edb0457613e7cf27e2fb9f5bb3e",
         "usdc": "0x3edef3d7a9b94edb0457613e7cf27e2fb9f5bb3e",
         "usb": "0x8c54240Cf91691b1c898B678D61124056b711456",
-        "WETH": "0x08Ff27EDD8CC750d2EE8A44105B3CE6dB2963a5c"
+        "WETH": "0xbf126c7aab8aee364d1b74e37def83e80d75b303"
     },
-    "uniswapFactory": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
-    "uniswapV2Router": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "uniswapFactory": "0x5757371414417b8c6caad45baef941abc7d3ab32",
+    "uniswapV2Router": "0x8954AfA98594b838bda56FE4C12a09D7739D179b",
     "price": {
         "prj1": "200520",
         "prj2": "6321489",

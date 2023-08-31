@@ -1,5 +1,7 @@
 require("dotenv").config();
-const chain = process.env.CHAIN ? "_" + process.env.CHAIN : "";
+const chainConfigs = require('../../chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
+const chain =chainConfigs.chain ? "_" +chainConfigs.chain : "";
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
 const path = require("path");
@@ -12,11 +14,7 @@ const helpers = require("@nomicfoundation/hardhat-network-helpers");
 const ParaSwapAdapter_ARTIFACT = require("./artifacts/NewUniswapV2Router.json");
 const UniSwapV2Pair_ARTIFACT = require("./artifacts/UniswapV2Pair.json");
 const UniswapV2FACTORY_ARTIFACT = require("./artifacts/UniswapV2Factory.json");
-const {
-    INFURA_KEY,
-    CHAIN,
-    BLOCKNUMBER
-  } = process.env;
+const INFURA_KEY = process.env.INFURA_KEY;
 const toBN = (num) => hre.ethers.BigNumber.from(num);
 
 describe("PrimaryLendingPlatformLiquidation", function () {
@@ -42,6 +40,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     let plpWTGInstance;
     let plpModeratorInstance;
     let chainlinkPriceProviderInstance;
+    let uniswapPriceProviderMockInstance;
     let priceProviderAggregatorInstance;
 
     let factory;
@@ -55,13 +54,13 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     let plpModeratorAddress;
     let chainlinkPriceProviderAddress;
     let uniswapV2PriceProviderAddress;
+    let uniswapV2PriceProviderMockAddress;
     let priceProviderAggregatorAddress;
 
     let prj1;
     let prj2;
     let prj3;
-    let prj1Usdc;
-    let prj1Prj2;
+
     let wstETH;
 
     let usdc;
@@ -71,8 +70,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     let prj1Decimals;
     let prj2Decimals;
     let prj3Decimals;
-    let prj1UsdcDecimals;
-    let prj1Prj2Decimals;
+
     let wstEthDecimals;
 
     let usdcDecimals;
@@ -82,8 +80,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     let prj1Address;
     let prj2Address;
     let prj3Address;
-    let prj1UsdcAddress;
-    let prj1Prj2Address;
+
     let wstEthAddress;
 
     let usdcAddress;
@@ -93,17 +90,33 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     let masterAddress;
     let MockToken;
 
-    async function setHighPricePrj1() {
+    async function setHighPrice(tokenAddress, tokenDecimal) {
+        let currentPrice = await priceProviderAggregatorInstance.getEvaluation(
+            tokenAddress,
+            ethers.utils.parseUnits("1", tokenDecimal)
+        );
+        await uniswapPriceProviderMockInstance.setTokenAndPrice(
+            tokenAddress,
+            currentPrice.mul(10)
+        );
         await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            chainlinkPriceProviderAddress,
+            tokenAddress,
+            uniswapV2PriceProviderMockAddress,
             false
         );
     }
-    async function setLowPricePrj1() {
+    async function setLowPrice(tokenAddress, tokenDecimal) {
+        let currentPrice = await priceProviderAggregatorInstance.getEvaluation(
+            tokenAddress,
+            ethers.utils.parseUnits("1", tokenDecimal)
+        );
+        await uniswapPriceProviderMockInstance.setTokenAndPrice(
+            tokenAddress,
+            currentPrice.div(10)
+        );
         await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            uniswapV2PriceProviderAddress,
+            tokenAddress,
+            uniswapV2PriceProviderMockAddress,
             false
         );
     }
@@ -112,115 +125,15 @@ describe("PrimaryLendingPlatformLiquidation", function () {
         return await hre.ethers.getSigner(account);
     }
 
-    async function createSellCallData(
-        tokenIn,
-        amountIn,
-        amountOutMin,
-        weth,
-        pools
-    ) {
-        signers = await hre.ethers.getSigners();
-        let poolsList = new Array();
-        let tokenInNext;
-        for (let i = 0; i < pools.length; i++) {
-            let pairToken = new hre.ethers.Contract(
-                pools[i],
-                UniSwapV2Pair_ARTIFACT.abi,
-                signers[0]
-            );
-            let token0 = await pairToken.token0();
-            let token1 = await pairToken.token1();
-            let prefix;
-            if (i == 0) {
-                if (tokenIn.toLowerCase() == token0.toLowerCase()) {
-                    prefix = "4de4";
-                    tokenInNext = token1.toLowerCase();
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0.toLowerCase();
-                }
-            } else {
-                if (tokenInNext.toLowerCase() == token0.toLowerCase()) {
-                    prefix = "4de4";
-                    tokenInNext = token1.toLowerCase();
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0.toLowerCase();
-                }
-            }
-            let convertedPool = pools[i].slice(0, 2) + prefix + pools[i].slice(2);
-            poolsList.push(convertedPool);
-        }
-
-        let iface = new ethers.utils.Interface(ParaSwapAdapter_ARTIFACT.abi);
-        return result = iface.encodeFunctionData("swapOnUniswapV2Fork", [
-            tokenIn,
-            amountIn,
-            amountOutMin,
-            weth,
-            poolsList
-        ]);
-    }
-    async function createBuyCallData(
-        tokenIn,
-        amountInMax,
-        amountOut,
-        weth,
-        pools
-    ) {
-        signers = await hre.ethers.getSigners();
-        let poolsList = new Array();
-        let tokenInNext;
-        for (let i = 0; i < pools.length; i++) {
-            let pairToken = new hre.ethers.Contract(
-                pools[i],
-                UniSwapV2Pair_ARTIFACT.abi,
-                signers[0]
-            );
-            let token0 = await pairToken.token0();
-            let token1 = await pairToken.token1();
-            let prefix;
-            if (i == 0) {
-                if (tokenIn == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            } else {
-                if (tokenInNext == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            }
-            let convertedPool = pools[i].slice(0, 2) + prefix + pools[i].slice(2);
-            poolsList.push(convertedPool);
-        }
-
-
-        let iface = new ethers.utils.Interface(ParaSwapAdapter_ARTIFACT.abi);
-        return iface.encodeFunctionData("buyOnUniswapV2Fork", [
-            tokenIn,
-            amountInMax,
-            amountOut,
-            weth,
-            poolsList
-        ]);
-    }
     async function resetNetwork() {
+        console.log(`https://${chainConfig.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`)
         await helpers.reset(
-            `https://${CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(BLOCKNUMBER)
-        )
+            `https://${chainConfig.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(chainConfig.blockNumber)
+        );
     }
-    after(async function(){
-        await resetNetwork();
-    });
     async function loadFixture() {
+        await resetNetwork();
         signers = await hre.ethers.getSigners();
         deployMaster = signers[0];
         {
@@ -236,18 +149,18 @@ describe("PrimaryLendingPlatformLiquidation", function () {
             plpModeratorAddress = addresses.plpModerator;
             chainlinkPriceProviderAddress = addresses.chainlinkPriceProviderAddress;
             uniswapV2PriceProviderAddress = addresses.uniswapV2PriceProviderAddress;
+            uniswapV2PriceProviderMockAddress = addresses.uniswapV2PriceProviderMockAddress;
             priceProviderAggregatorAddress = addresses.priceProviderAggregatorAddress;
 
-            prj1Address = addresses.projectTokens[0];
-            prj2Address = addresses.projectTokens[1];
-            prj3Address = addresses.projectTokens[2];
-            prj1UsdcAddress = addresses.projectTokens[3];
-            prj1Prj2Address = addresses.projectTokens[4];
-            wstEthAddress = addresses.projectTokens[5];
+            prj1Address = ethers.utils.getAddress(addresses.projectTokens[0]);
+            prj2Address = ethers.utils.getAddress(addresses.projectTokens[1]);
+            prj3Address = ethers.utils.getAddress(addresses.projectTokens[2]);
 
-            usdcAddress = addresses.lendingTokens[0];
-            usbAddress = addresses.lendingTokens[1];
-            wethAddress = addresses.lendingTokens[2];
+            wstEthAddress = ethers.utils.getAddress(addresses.projectTokens[projectTokens.length - 1]);
+
+            usdcAddress = ethers.utils.getAddress(addresses.lendingTokens[0]);
+            usbAddress = ethers.utils.getAddress(addresses.lendingTokens[1]);
+            wethAddress = ethers.utils.getAddress(addresses.lendingTokens[2]);
 
             masterAddress = deployMaster.address;
         }
@@ -259,6 +172,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
             let PLPWTG = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGateway");
             let PLPModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
             let ChainlinkPriceProvider = await hre.ethers.getContractFactory("ChainlinkPriceProvider");
+            let UniswapPriceProviderMock = await hre.ethers.getContractFactory("UniswapV2PriceProviderMock");
             let PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
 
             let MockPRJ = await hre.ethers.getContractFactory("PRJ");
@@ -273,6 +187,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
             plpWTGInstance = PLPWTG.attach(plpWTGAddress).connect(deployMaster);
             plpModeratorInstance = PLPModerator.attach(plpModeratorAddress).connect(deployMaster);
             chainlinkPriceProviderInstance = ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
+            uniswapPriceProviderMockInstance = UniswapPriceProviderMock.attach(uniswapV2PriceProviderMockAddress).connect(deployMaster);
             priceProviderAggregatorInstance = PriceProviderAggregator.attach(priceProviderAggregatorAddress).connect(deployMaster);
 
             factory = new hre.ethers.Contract(
@@ -289,8 +204,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
             prj1 = MockPRJ.attach(prj1Address).connect(projectTokenDeployer);
             prj2 = MockPRJ.attach(prj2Address).connect(projectTokenDeployer);
             prj3 = MockPRJ.attach(prj3Address).connect(projectTokenDeployer);
-            prj1Usdc = MockPRJ.attach(prj1UsdcAddress).connect(projectTokenDeployer);
-            prj1Prj2 = MockPRJ.attach(prj1Prj2Address).connect(projectTokenDeployer);
+
             wstETH = MockWstETH.attach(wstEthAddress).connect(projectTokenDeployer);
 
             usdc = MockToken.attach(usdcAddress).connect(usdcDeployer);
@@ -300,13 +214,26 @@ describe("PrimaryLendingPlatformLiquidation", function () {
             prj1Decimals = await prj1.decimals();
             prj2Decimals = await prj2.decimals();
             prj3Decimals = await prj3.decimals();
-            prj1UsdcDecimals = await prj1Usdc.decimals();
-            prj1Prj2Decimals = await prj1Prj2.decimals();
+
             wstEthDecimals = await wstETH.decimals();
 
             usdcDecimals = await usdc.decimals();
             usbDecimals = await usb.decimals();
             wethDecimals = await weth.decimals();
+
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj1Address, configTesting.price.prj1);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj2Address, configTesting.price.prj2);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj3Address, configTesting.price.prj3);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(usdcAddress, configTesting.price.usdc);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(usbAddress, configTesting.price.usb);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(wethAddress, configTesting.price.weth);
+
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj1Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj2Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj3Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(usdcAddress, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(usbAddress, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(wethAddress, uniswapV2PriceProviderMockAddress, false);
         }
     }
 
@@ -456,7 +383,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
                 await loadFixture();
                 {
                     {
-                        await setHighPricePrj1();
+                        await setHighPrice(prj1Address, prj1Decimals);
                         // deposit prj1
                         let depositPrj1Amount = ethers.utils.parseUnits("100", prj1Decimals); // 100 prj1
                         await prj1.mintTo(masterAddress, depositPrj1Amount);
@@ -480,7 +407,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
                         await plpInstance.updateInterestInBorrowPositions(masterAddress, usdcAddress);
 
                         // check HF and liquidation amount
-                        await setLowPricePrj1();
+                        await setLowPrice(prj1Address, prj1Decimals);
                         let currentHealthFactor = await plpLiquidationInstance.getCurrentHealthFactor(masterAddress, prj1Address, usdcAddress);
                         let liquidationAmount = await plpLiquidationInstance.getLiquidationAmount(masterAddress, prj1Address, usdcAddress);
 
@@ -531,9 +458,8 @@ describe("PrimaryLendingPlatformLiquidation", function () {
 
                 let balanceProjectTokenBeforeLiquidate = await usdc.balanceOf(bLendingTokenAddress);
                 let borrowPositionBeforeLiquidate = await plpInstance.borrowPosition(masterAddress, prj1Address, usdcAddress);
-                let isLeveragePositionBeforeLiquidate = await plpLeverageInstance.isLeveragePosition(masterAddress, prj1Address);
-                let totalBorrowedUsdcTokenBeforeLiquidate = await plpInstance.getTotalBorrowPerLendingToken(usdcAddress);
-                let totalBorrowPrj1BeforeLiquidate = await plpInstance.getTotalBorrowPerCollateral(prj1Address);
+                let totalBorrowedUsdcTokenBeforeLiquidate = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                let totalBorrowPrj1BeforeLiquidate = await plpInstance.totalBorrow(prj1Address, usdcAddress);
 
                 let liquidateTx = await (plpLiquidationInstance.liquidate(
                     masterAddress,
@@ -545,12 +471,13 @@ describe("PrimaryLendingPlatformLiquidation", function () {
 
                 let balanceProjectTokenAfterLiquidate = await usdc.balanceOf(bLendingTokenAddress);
                 let borrowPositionAfterLiquidate = await plpInstance.borrowPosition(masterAddress, prj1Address, usdcAddress);
-                let isLeveragePositionAfterLiquidate = await plpLeverageInstance.isLeveragePosition(masterAddress, prj1Address);
-                let totalBorrowedUsdcTokenAfterLiquidate = await plpInstance.getTotalBorrowPerLendingToken(usdcAddress);
-                let totalBorrowPrj1AfterLiquidate = await plpInstance.getTotalBorrowPerCollateral(prj1Address);
+                let totalBorrowedUsdcTokenAfterLiquidate = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                let totalBorrowPrj1AfterLiquidate = await plpInstance.totalBorrow(prj1Address, usdcAddress);
 
                 expect(balanceProjectTokenBeforeLiquidate).to.eq(balanceProjectTokenAfterLiquidate.sub(lendingTokenAmount));
                 expect(borrowPositionBeforeLiquidate.loanBody).to.eq(borrowPositionAfterLiquidate.loanBody.add(lendingTokenAmount));
+                expect(totalBorrowedUsdcTokenBeforeLiquidate).to.eq(totalBorrowedUsdcTokenAfterLiquidate.add(lendingTokenAmount));
+                expect(totalBorrowPrj1BeforeLiquidate).to.eq(totalBorrowPrj1AfterLiquidate.add(lendingTokenAmount));
             });
 
             it("16. Failure: Should revert when balance user < lendingTokenAmount", async function () {

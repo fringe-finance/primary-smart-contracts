@@ -9,11 +9,13 @@ require("@matterlabs/hardhat-zksync-verify");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("solidity-docgen");
-
 require("@solarity/hardhat-markup");
 require('hardhat-output-validator');
 
 require("dotenv").config();
+
+const chainConfigs = require('./chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
 
 const {
   INFURA_KEY,
@@ -24,17 +26,10 @@ const {
   ARBISCAN_API_KEY,
   ZKSYNCSCAN_API_KEY
 } = process.env;
-
-const isZksync = Object.keys(process.env).includes('ZKSYNC');
-const chain = process.env.CHAIN ? process.env.CHAIN : "no-chain";
-const blockNumber = process.env.BLOCKNUMBER;
-const isTesting = Object.keys(process.env).includes('TESTING');
-
-console.log("isZksync", isZksync);
-console.log("chain", chain);
-console.log("blockNumber", blockNumber);
-console.log("isTesting", isTesting);
-
+const isZksync = chainConfigs.isZksync;
+console.log({ "chain": chainConfigs.chain });
+console.log({ chainConfig });
+console.log({ "isZsync": isZksync });
 
 let hardhatConfig;
 if (isZksync) {
@@ -44,17 +39,19 @@ if (isZksync) {
       compilerSource: "binary",
       settings: {},
     },
-    defaultNetwork: "zkSyncTestnet",
+    defaultNetwork: "zksync_fork_mainnet",
     networks: {
-      hardhat: {
-        zksync: false,
-      },
       zkSyncTestnet: {
         url: "https://zksync2-testnet.zksync.dev",
         ethNetwork: "goerli",
         zksync: true,
         verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
       },
+      zksync_fork_mainnet: {
+        url: "http://127.0.0.1:8011",
+        ethNetwork: "mainnet",
+        zksync: true
+      }
     },
     etherscan: {
       apiKey: ZKSYNCSCAN_API_KEY
@@ -80,12 +77,12 @@ if (isZksync) {
       ],
     },
     networks: {
-      
+
       hardhat: {
         forking: {
-          url: `https://${chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-          blockNumber: Number(blockNumber)
-        } 
+          url: `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+          blockNumber: Number(chainConfig.blockNumber)
+        }
       },
 
       ethereum_mainnet: {
@@ -116,11 +113,11 @@ if (isZksync) {
         accounts: [PRIVATE_KEY]
       },
       optimism_goerli: {
-        url: `https://optimism-goerli.infura.io/v3${INFURA_KEY}`,
-        network_id: 420,
+        url: `https://optimism-goerli.infura.io/v3/${INFURA_KEY}`,
+        // network_id: 420,
         accounts: [PRIVATE_KEY],
         timeout: 99999999,
-        gasPrice: 500_000_000, // 500 gwei
+        gasPrice: 1_500_000_000, // 500 gwei
       },
 
       ethereum_goerli: {

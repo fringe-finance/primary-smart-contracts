@@ -1,14 +1,15 @@
 const hre = require("hardhat");
 const BN = hre.ethers.BigNumber;
 require("dotenv").config();
-require("dotenv").config();
+const chainConfigs = require('../../chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
+const isTesting = chainConfig.isTesting;
 
-const toBN = (num) => BN.from(num);
 
 module.exports = {
 
     deployment: async function () {
-     
+
         //====================================================
 
         //contracts addresses
@@ -16,6 +17,7 @@ module.exports = {
         let backendPriceProviderAddress;
         let chainlinkPriceProviderAddress;
         let uniswapV2PriceProviderAddress;
+        let uniswapV2PriceProviderMockAddress;
         let priceProviderAggregatorAddress;
 
         let bondtrollerAddress;
@@ -25,21 +27,14 @@ module.exports = {
         //====================================================================
         //deploy all system of PriceProviderAggregator
 
-        // const { deployMockToken } = require("./deployMockToken.js");
-        // let mockTokenAddress = await deployMockToken();
-
-        // console.log(mockTokenAddress);
-        // console.log();
-        // console.log();
-        // console.log();
-
         const { deploymentPriceOracle } = require("./priceOracle/deploymentPriceProividerAggregator.js");
         let priceOracleAddresses = await deploymentPriceOracle();
-        console.log(priceOracleAddresses);
+        console.log({ priceOracleAddresses });
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
         chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
         backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
         uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
+        uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
         console.log();
@@ -52,7 +47,7 @@ module.exports = {
         const { deploymentPrimaryLendingPlatform } = require("./primaryLendingPlatform/deploymentPrimaryLendingPlatform.js");
         let primaryLendingPlatformAddresses = await deploymentPrimaryLendingPlatform();
 
-        console.log(primaryLendingPlatformAddresses);
+        console.log({ primaryLendingPlatformAddresses });
         bondtrollerAddress = primaryLendingPlatformAddresses.bondtrollerAddress;
         busdcAddress = primaryLendingPlatformAddresses.blendingAddress;
         plpAddress = primaryLendingPlatformAddresses.plpAddress;
@@ -73,6 +68,7 @@ module.exports = {
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
             backendPriceProviderAddress: backendPriceProviderAddress,
             uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
+            uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
             priceProviderAggregatorAddress: priceProviderAggregatorAddress,
             bondtrollerAddress: bondtrollerAddress,
             busdcAddress: busdcAddress,
@@ -85,8 +81,12 @@ module.exports = {
             projectTokens: projectTokens,
             lendingTokens: lendingTokens,
             jumpRateModelAddress: jumpRateModelAddress
+        };
+        if (isTesting) {
+            return addresses;
+        } else {
+            console.log(addresses);
         }
-        return addresses;
     }
 
 
