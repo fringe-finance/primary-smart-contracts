@@ -504,6 +504,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address user
     ) external isProjectTokenListed(projectToken) onlyRelatedContracts nonReentrant {
         _calcDepositPosition(projectToken, projectTokenAmount, user);
+        emit Deposit(user, projectToken, projectTokenAmount, user);
     }
 
     /**
@@ -824,6 +825,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address currentLendingToken
     ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
         _calcBorrowPosition(borrower, projectToken, lendingToken, lendingTokenAmount, currentLendingToken);
+        emit Borrow(borrower, lendingToken, lendingTokenAmount, projectToken, depositedAmount[borrower][projectToken]);
     }
 
     /**

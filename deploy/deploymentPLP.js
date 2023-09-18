@@ -1,7 +1,6 @@
-const hre = require("hardhat");
-const BN = hre.ethers.BigNumber;
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
+const chainConfigs = require('../chain.config');
+const { deploymentMockToken } = require("./deploymentMockToken");
 const chainConfig = chainConfigs[chainConfigs.chain];
 const isTesting = chainConfig.isTesting;
 
@@ -12,6 +11,10 @@ module.exports = {
 
         //====================================================
 
+        if (isTesting) {
+            await deploymentMockToken();
+        }
+
         //contracts addresses
         let proxyAdminAddress;
         let backendPriceProviderAddress;
@@ -21,21 +24,21 @@ module.exports = {
         let priceProviderAggregatorAddress;
 
         let bondtrollerAddress;
-        let busdcAddress;
+        let blendingAddress;
         let plpAddress;
 
         //====================================================================
         //deploy all system of PriceProviderAggregator
 
-        const { deploymentPriceOracle } = require("./priceOracle/deploymentPriceProviderAggregator.js");
-        let priceOracleAddresses = await deploymentPriceOracle();
+        const { deploymentPriceProviderAggregator } = require("./priceOracle/deploymentPriceProviderAggregator.js");
+        let priceOracleAddresses = await deploymentPriceProviderAggregator();
         console.log({ priceOracleAddresses });
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
+        pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress,
         chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
         backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
         uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
         uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
-        pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
         console.log();
@@ -50,7 +53,7 @@ module.exports = {
 
         console.log({ primaryLendingPlatformAddresses });
         bondtrollerAddress = primaryLendingPlatformAddresses.bondtrollerAddress;
-        busdcAddress = primaryLendingPlatformAddresses.blendingAddress;
+        blendingAddress = primaryLendingPlatformAddresses.blendingAddress;
         plpAddress = primaryLendingPlatformAddresses.plpAddress;
         plpLiquidationAddress = primaryLendingPlatformAddresses.plpLiquidationAddress;
         plpAtomicRepaymentAddress = primaryLendingPlatformAddresses.plpAtomicRepaymentAddress;
@@ -66,14 +69,14 @@ module.exports = {
 
         let addresses = {
             proxyAdminAddress: proxyAdminAddress,
+            pythPriceProviderAddress: pythPriceProviderAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
             backendPriceProviderAddress: backendPriceProviderAddress,
             uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
-            pythPriceProviderAddress: pythPriceProviderAddress,
             priceProviderAggregatorAddress: priceProviderAggregatorAddress,
             bondtrollerAddress: bondtrollerAddress,
-            busdcAddress: busdcAddress,
+            blendingAddress: blendingAddress,
             plpAddress: plpAddress,
             plpLiquidationAddress: plpLiquidationAddress,
             plpAtomicRepaymentAddress: plpAtomicRepaymentAddress,
@@ -84,12 +87,11 @@ module.exports = {
             lendingTokens: lendingTokens,
             jumpRateModelAddress: jumpRateModelAddress
         };
+        return addresses;
         if (isTesting) {
             return addresses;
         } else {
             console.log(addresses);
         }
     }
-
-
 };

@@ -56,4 +56,16 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     ) external view returns (bytes32[] memory priceIds, uint256 updateFee) {
         (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
     }
+
+    /**
+     * @dev Returns the evaluation of a given token amount based on the last updated price.
+     * @param token The address of the token to evaluate.
+     * @param tokenAmount The amount of tokens to evaluate.
+     * @return evaluation The evaluation of the token amount.
+     */
+    function getEvaluationUnsafe(address token, uint256 tokenAmount) public view returns (uint256 evaluation) {
+        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
+        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getEvaluationWithSign()");
+        return PriceProvider(priceProviderInfo.priceProvider).getEvaluationUnsafe(token, tokenAmount);
+    }
 }

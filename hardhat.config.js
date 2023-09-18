@@ -11,7 +11,8 @@ require("solidity-coverage");
 require("solidity-docgen");
 require("@solarity/hardhat-markup");
 require('hardhat-output-validator');
-
+require("hardhat-tracer");
+require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 
 const chainConfigs = require('./chain.config');
@@ -27,9 +28,13 @@ const {
   ZKSYNCSCAN_API_KEY
 } = process.env;
 const isZksync = chainConfigs.isZksync;
+const isTestingForZksync = chainConfigs.isTestingForZksync;
 console.log({ "chain": chainConfigs.chain });
-console.log({ chainConfig });
-console.log({ "isZsync": isZksync });
+console.log({ 
+  chainConfig,
+  isTestingForZksync,
+  isZksync
+ });
 
 let hardhatConfig;
 if (isZksync) {
@@ -39,15 +44,15 @@ if (isZksync) {
       compilerSource: "binary",
       settings: {},
     },
-    defaultNetwork: "zksync_fork_mainnet",
+    defaultNetwork: "goerli",
     networks: {
-      zkSyncTestnet: {
+      goerli: {
         url: "https://zksync2-testnet.zksync.dev",
         ethNetwork: "goerli",
         zksync: true,
         verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
       },
-      zksync_fork_mainnet: {
+      fork_mainnet: {
         url: "http://127.0.0.1:8011",
         ethNetwork: "mainnet",
         zksync: true
@@ -82,7 +87,8 @@ if (isZksync) {
         forking: {
           url: `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
           blockNumber: Number(chainConfig.blockNumber)
-        }
+        },
+        allowUnlimitedContractSize: true
       },
 
       ethereum_mainnet: {

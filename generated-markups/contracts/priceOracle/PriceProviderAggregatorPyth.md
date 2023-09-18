@@ -100,3 +100,29 @@ Return values:
 | :-------- | :-------- | :--------------------------------------------- |
 | priceIds  | bytes32[] | The priceId array needs to update the price.   |
 | updateFee | uint256   | The update fee.                                |
+
+### getEvaluationUnsafe (0xb03ec98d)
+
+```solidity
+function getEvaluationUnsafe(
+    address token,
+    uint256 tokenAmount
+) public view returns (uint256 evaluation)
+```
+
+Returns the evaluation of a given token amount based on the last updated price.
+
+
+Parameters:
+
+| Name        | Type    | Description                             |
+| :---------- | :------ | :-------------------------------------- |
+| token       | address | The address of the token to evaluate.   |
+| tokenAmount | uint256 | The amount of tokens to evaluate.       |
+
+
+Return values:
+
+| Name       | Type    | Description                         |
+| :--------- | :------ | :---------------------------------- |
+| evaluation | uint256 | The evaluation of the token amount. |

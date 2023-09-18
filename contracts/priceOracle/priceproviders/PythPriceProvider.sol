@@ -267,13 +267,52 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      */
     function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
         (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
+        evaluation = (tokenAmount * priceMantissa);
         uint8 decimals = ERC20Upgradeable(token).decimals();
         if (decimals >= tokenDecimals) {
             evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
         } else {
             evaluation = evaluation * (10 ** (tokenDecimals - decimals));
         }
+        evaluation = evaluation / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
+    }
+
+    /**
+     * @dev Returns the evaluation of a given token amount based on the last updated price.
+     * @param token The address of the token to evaluate.
+     * @param tokenAmount The amount of tokens to evaluate.
+     * @return evaluation The evaluation of the token amount.
+     */
+    function getEvaluationUnsafe(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
+        PythMetadata memory metadata = pythMetadata[token];
+        require(metadata.isActive, "PythPriceProvider: Token is not available!");
+
+        uint256 priceMantissa = 1;
+        uint256 priceDecimals = 0;
+
+        for (uint256 i = 0; i < metadata.priceIdPath.length; i++) {
+            bytes32 priceId = metadata.priceIdPath[i];
+
+            PythStructs.Price memory emaPrice = IPyth(pythOracle).getEmaPriceUnsafe(priceId);
+
+            priceMantissa *= uint256(uint64(emaPrice.price));
+            priceDecimals += uint8(uint32(-emaPrice.expo));
+        }
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
+        } else {
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
+        }
+        priceDecimals = tokenDecimals;
+
+        evaluation = (tokenAmount * priceMantissa);
+        uint8 decimals = ERC20Upgradeable(token).decimals();
+        if (decimals >= tokenDecimals) {
+            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
+        } else {
+            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
+        }
+        evaluation = evaluation / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
     }
 
     /**

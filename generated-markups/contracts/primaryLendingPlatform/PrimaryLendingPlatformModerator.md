@@ -19,7 +19,7 @@ Contract for managing the moderators of the PrimaryLendingPlatform contract.
 ### AddPrjToken
 
 ```solidity
-event AddPrjToken(address indexed tokenPrj, string indexed name, string indexed symbol)
+event AddPrjToken(address indexed tokenPrj)
 ```
 
 Emitted when a project token is added to the platform.
@@ -27,11 +27,9 @@ Emitted when a project token is added to the platform.
 
 Parameters:
 
-| Name     | Type    | Description                         |
-| :------- | :------ | :---------------------------------- |
-| tokenPrj | address | The address of the project token.   |
-| name     | string  | The name of the project token.      |
-| symbol   | string  | The symbol of the project token.    |
+| Name     | Type    | Description                       |
+| :------- | :------ | :-------------------------------- |
+| tokenPrj | address | The address of the project token. |
 
 ### RemoveProjectToken
 
@@ -51,7 +49,7 @@ Parameters:
 ### AddLendingToken
 
 ```solidity
-event AddLendingToken(address indexed lendingToken, string indexed name, string indexed symbol)
+event AddLendingToken(address indexed lendingToken)
 ```
 
 Emitted when a lending token is added to the platform.
@@ -59,11 +57,9 @@ Emitted when a lending token is added to the platform.
 
 Parameters:
 
-| Name         | Type    | Description                         |
-| :----------- | :------ | :---------------------------------- |
-| lendingToken | address | The address of the lending token.   |
-| name         | string  | The name of the lending token.      |
-| symbol       | string  | The symbol of the lending token.    |
+| Name         | Type    | Description                       |
+| :----------- | :------ | :-------------------------------- |
+| lendingToken | address | The address of the lending token. |
 
 ### RemoveLendingToken
 
@@ -653,7 +649,7 @@ Parameters:
 | :-------------------------- | :------ | :----------------------------------------------------------------- |
 | lendingToken                | address | The address of the lending token.                                  |
 | bLendingToken               | address | The address of the corresponding bLending token.                   |
-| isPaused                    | bool    | A boolean indicating whether the lending token is paused or not.   |
+| isPaused                    | bool    | A boolean indicating whether the project token is paused or not.   |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio.                          |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio.                        |
 

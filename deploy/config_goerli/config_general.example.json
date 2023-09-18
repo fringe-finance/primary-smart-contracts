@@ -1,0 +1,70 @@
+{
+  "priceOracle": {
+      "Pyth": {
+          "pythOracle": "",
+          "tokensUsePyth": [],
+          "priceIdPath": []
+      },
+      "Chainlink": {
+          "sequencerUptimeFeed": "",
+          "gracePeriodTime": "",
+          "tokensUseChainlink": [],
+          "chainlinkAggregatorV3": [[]],
+          "timeOuts": [[]]
+      },
+      "Uniswap": {
+          "tokensUseUniswap": [],
+          "uniswapPairs": []
+      },
+      "BackendProvider": {
+          "tokensUseBackendProvider": []
+      },
+      "LPProvider": {
+          "tokensUseLPProvider": []
+      },
+      "wstETHProvider": {
+          "wstETHAggregatorPath": []
+      },
+      "wstETH": "",
+      "usdc": "",
+      "WETH": ""
+  },
+  "exchangeAggregatorParams": {
+      "exchangeAggregator": "",
+      "registryAggregator": ""
+  },
+  "plpModeratorParams": {
+      "projectTokens": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [],
+        "borrowLimitPerLendingToken": []
+  },
+  "blendingToken": {
+      "initialExchangeRateMantissa": [],
+      "reserveFactorMantissa": [],
+      "lendingTokens": [],
+      "symbol": [],
+      "decimals": [],
+      "name": [],
+      "loanToValueRatioNumerator": [],
+      "loanToValueRatioDenominator": []
+    },
+    "jumRateModel": {
+      "gainPerYear": [],
+      "jumGainPerYear": [],
+      "targetUtil": [],
+      "newMaxBorrow": [],
+      "blocksPerYear": ""
+    },
+    "plpLiquidationParams": {
+      "minPA": "",
+      "maxLRFNumerator": "",
+      "maxLRFDenominator": "",
+      "rewardCalcFactorNumerator": "",
+      "rewardCalcFactorDenominator": "",
+      "targetHFNumerator": "",
+      "targetHFDenominator": ""
+    }
+}

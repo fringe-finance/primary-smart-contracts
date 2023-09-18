@@ -86,18 +86,21 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
      * @param _lendingTokenAmount Amount of lending tokens in Ether to liquidate.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
+     * @param updateFee Update fee pays for updating price.
      */
     function liquidateWithLendingETH(
         address _account,
         address _projectToken,
         uint256 _lendingTokenAmount,
         bytes32[] memory priceIds,
-        bytes[] calldata updateData
+        bytes[] calldata updateData,
+        uint256 updateFee
     ) public payable nonReentrant {
-        WETH.deposit{value: msg.value}();
-        WETH.transfer(msg.sender, msg.value);
-        require(msg.value == _lendingTokenAmount, "WTG: invalid value");
-        pitLiquidation.liquidateFromModerator{value: msg.value}(
+        uint256 actualLendingTokenAmount = msg.value - updateFee;
+        WETH.deposit{value: actualLendingTokenAmount}();
+        WETH.transfer(msg.sender, actualLendingTokenAmount);
+        require(actualLendingTokenAmount == _lendingTokenAmount, "WTG: invalid value");
+        pitLiquidation.liquidateFromModerator{value: updateFee}(
             _account,
             _projectToken,
             address(WETH),
@@ -117,6 +120,7 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
      * @param leverageType The type of leverage.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
+     * @param updateFee Update fee pays for updating price.
      */
     function leveragedBorrowWithProjectETH(
         address _lendingToken,
@@ -125,13 +129,14 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
         bytes memory buyCalldata,
         uint8 leverageType,
         bytes32[] memory priceIds,
-        bytes[] calldata updateData
+        bytes[] calldata updateData,
+        uint256 updateFee
     ) public payable nonReentrant {
         uint256 addingAmount = pitLeverage.calculateAddingAmount(msg.sender, address(WETH), _marginCollateralAmount);
-        require(msg.value == addingAmount, "WTG: invalid value");
+        require(msg.value == addingAmount + updateFee, "WTG: invalid value");
         WETH.deposit{value: addingAmount}();
         WETH.transfer(msg.sender, addingAmount);
-        pitLeverage.leveragedBorrowFromRelatedContract{value: msg.value}(
+        pitLeverage.leveragedBorrowFromRelatedContract{value: updateFee}(
             address(WETH),
             _lendingToken,
             _notionalExposure,

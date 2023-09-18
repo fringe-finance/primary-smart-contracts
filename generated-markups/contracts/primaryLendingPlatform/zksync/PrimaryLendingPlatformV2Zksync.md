@@ -533,10 +533,10 @@ Return values:
 | :-------------------------- | :------ | :---------------------------------------------------------------------- |
 | collateralProjectToWithdraw | uint256 | The amount of collateral available for withdrawal in the project token. |
 
-### getLendingAvailableToBorrow (0xdc8b040b)
+### getLendingAvailableToBorrowWithUpdatePrices (0x5da267d7)
 
 ```solidity
-function getLendingAvailableToBorrow(
+function getLendingAvailableToBorrowWithUpdatePrices(
     address account,
     address projectToken,
     address lendingToken,

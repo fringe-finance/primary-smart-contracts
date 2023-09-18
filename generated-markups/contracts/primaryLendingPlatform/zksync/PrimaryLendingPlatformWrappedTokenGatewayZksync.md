@@ -85,7 +85,7 @@ Parameters:
 | priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
 | updateData          | bytes[]   | An array of update data used to update the price oracle.         |
 
-### liquidateWithLendingETH (0xb62fff11)
+### liquidateWithLendingETH (0x49b009d4)
 
 ```solidity
 function liquidateWithLendingETH(
@@ -93,7 +93,8 @@ function liquidateWithLendingETH(
     address _projectToken,
     uint256 _lendingTokenAmount,
     bytes32[] memory priceIds,
-    bytes[] calldata updateData
+    bytes[] calldata updateData,
+    uint256 updateFee
 ) public payable nonReentrant
 ```
 
@@ -109,8 +110,9 @@ Parameters:
 | _lendingTokenAmount | uint256   | Amount of lending tokens in Ether to liquidate.                  |
 | priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
 | updateData          | bytes[]   | An array of update data used to update the price oracle.         |
+| updateFee           | uint256   | Update fee pays for updating price.                              |
 
-### leveragedBorrowWithProjectETH (0x7e6dcfb7)
+### leveragedBorrowWithProjectETH (0xd5790a86)
 
 ```solidity
 function leveragedBorrowWithProjectETH(
@@ -120,7 +122,8 @@ function leveragedBorrowWithProjectETH(
     bytes memory buyCalldata,
     uint8 leverageType,
     bytes32[] memory priceIds,
-    bytes[] calldata updateData
+    bytes[] calldata updateData,
+    uint256 updateFee
 ) public payable nonReentrant
 ```
 
@@ -138,3 +141,4 @@ Parameters:
 | leverageType            | uint8     | The type of leverage.                                            |
 | priceIds                | bytes32[] | An array of price identifiers used to update the price oracle.   |
 | updateData              | bytes[]   | An array of update data used to update the price oracle.         |
+| updateFee               | uint256   | Update fee pays for updating price.                              |

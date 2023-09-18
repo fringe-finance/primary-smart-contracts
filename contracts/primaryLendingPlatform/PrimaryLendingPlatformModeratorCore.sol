@@ -22,10 +22,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     /**
      * @dev Emitted when a project token is added to the platform.
      * @param tokenPrj The address of the project token.
-     * @param name The name of the project token.
-     * @param symbol The symbol of the project token.
      */
-    event AddPrjToken(address indexed tokenPrj, string indexed name, string indexed symbol);
+    event AddPrjToken(address indexed tokenPrj);
 
     /**
      * @dev Emitted when a project token is removed from the platform.
@@ -36,10 +34,8 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     /**
      * @dev Emitted when a lending token is added to the platform.
      * @param lendingToken The address of the lending token.
-     * @param name The name of the lending token.
-     * @param symbol The symbol of the lending token.
      */
-    event AddLendingToken(address indexed lendingToken, string indexed name, string indexed symbol);
+    event AddLendingToken(address indexed lendingToken);
 
     /**
      * @dev Emitted when a lending token is removed from the platform.
@@ -243,9 +239,7 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     function addProjectToken(address projectToken, uint8 loanToValueRatioNumerator, uint8 loanToValueRatioDenominator) public onlyAdmin {
         require(projectToken != address(0), "PITModerator: Invalid token");
 
-        string memory projectTokenName = ERC20Upgradeable(projectToken).name();
-        string memory projectTokenSymbol = ERC20Upgradeable(projectToken).symbol();
-        emit AddPrjToken(projectToken, projectTokenName, projectTokenSymbol);
+        emit AddPrjToken(projectToken);
 
         setProjectTokenInfo(projectToken, false, false, loanToValueRatioNumerator, loanToValueRatioDenominator);
     }
@@ -294,9 +288,7 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     ) external onlyAdmin {
         require(lendingToken != address(0) && bLendingToken != address(0), "PITModerator: Invalid address");
 
-        string memory lendingTokenName = ERC20Upgradeable(lendingToken).name();
-        string memory lendingTokenSymbol = ERC20Upgradeable(lendingToken).symbol();
-        emit AddLendingToken(lendingToken, lendingTokenName, lendingTokenSymbol);
+        emit AddLendingToken(lendingToken);
 
         setLendingTokenInfo(lendingToken, bLendingToken, isPaused, loanToValueRatioNumerator, loanToValueRatioDenominator);
     }
@@ -438,7 +430,7 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
      * - The underlying asset of the bLending token must be the same as the lending token.
      * @param lendingToken The address of the lending token.
      * @param bLendingToken The address of the corresponding bLending token.
-     * @param isPaused A boolean indicating whether the lending token is paused or not.
+     * @param isPaused A boolean indicating whether the project token is paused or not.
      * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio.
      * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio.
      */

@@ -365,7 +365,7 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
      * @param updateData An array of update data used to update the price oracle.
      * @return availableToBorrow The amount of lending token available amount for borrowing.
      */
-    function getLendingAvailableToBorrow(
+    function getLendingAvailableToBorrowWithUpdatePrices(
         address account,
         address projectToken,
         address lendingToken,
