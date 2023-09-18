@@ -3,9 +3,14 @@ pragma solidity 0.8.19;
 
 import "../PrimaryLendingPlatformWrappedTokenGatewayCore.sol";
 
+/**
+ * @title PrimaryLendingPlatformWrappedTokenGateway.
+ * @notice The PrimaryLendingPlatformWrappedTokenGateway contract is the contract that provides the functionality for lending platform system using WETH.
+ * @dev Contract that provides the functionality for lending platform system using WETH. Inherit from PrimaryLendingPlatformWrappedTokenGatewayCore.
+ */
 contract PrimaryLendingPlatformWrappedTokenGateway is PrimaryLendingPlatformWrappedTokenGatewayCore {
     /**
-     * @notice Allows users to withdraw their WETH tokens and receive Ether.
+     * @dev Allows users to withdraw their WETH tokens and receive Ether.
      * @param projectTokenAmount Amount of project tokens to withdraw.
      */
     function withdraw(uint256 projectTokenAmount) external nonReentrant {
@@ -19,17 +24,17 @@ contract PrimaryLendingPlatformWrappedTokenGateway is PrimaryLendingPlatformWrap
     }
 
     /**
-     * @notice Borrows lending tokens for the caller and converts them to Ether.
+     * @dev Borrows lending tokens for the caller and converts them to Ether.
      * @param projectToken Address of the project token.
      * @param lendingTokenAmount Amount of lending tokens to borrow.
      */
     function borrow(address projectToken, uint256 lendingTokenAmount) external nonReentrant {
-        primaryLendingPlatform.borrowFromRelatedContract(projectToken, address(WETH), lendingTokenAmount, msg.sender);
-        _borrow(lendingTokenAmount);
+        uint256 borrowedAmount = primaryLendingPlatform.borrowFromRelatedContract(projectToken, address(WETH), lendingTokenAmount, msg.sender);
+        _borrow(borrowedAmount);
     }
 
     /**
-     * @notice Liquidates a position by providing project tokens in Ether.
+     * @dev Liquidates a position by providing project tokens in Ether.
      * @param account Address of the account to be liquidated.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to liquidate.
@@ -40,7 +45,7 @@ contract PrimaryLendingPlatformWrappedTokenGateway is PrimaryLendingPlatformWrap
     }
 
     /**
-     * @notice Liquidates a position by providing lending tokens in Ether.
+     * @dev Liquidates a position by providing lending tokens in Ether.
      * @param account Address of the account to be liquidated.
      * @param projectToken Address of the project token.
      * @param lendingTokenAmount Amount of lending tokens in Ether to liquidate.
@@ -53,7 +58,7 @@ contract PrimaryLendingPlatformWrappedTokenGateway is PrimaryLendingPlatformWrap
     }
 
     /**
-     * @notice Borrows lending tokens in a leveraged position using project tokens in Ether.
+     * @dev Borrows lending tokens in a leveraged position using project tokens in Ether.
      * @param lendingToken Address of the lending token.
      * @param notionalExposure The notional exposure of the leveraged position.
      * @param marginCollateralAmount Amount of collateral in margin.

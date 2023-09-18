@@ -4,14 +4,14 @@ pragma solidity 0.8.19;
 interface IPrimaryLendingPlatformLeverage {
 
     /**
-     * @notice Checks if a user has a leverage position for a project token.
+     * @dev Checks if a user has a leverage position for a project token.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      */
     function isLeveragePosition(address user, address projectToken) external view returns (bool);
 
     /**
-     * @notice Deletes a leverage position for a user and project token.
+     * @dev Deletes a leverage position for a user and project token.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      */
@@ -37,7 +37,7 @@ interface IPrimaryLendingPlatformLeverage {
     ) external;
 
     /**
-     * @notice Calculates the additional collateral amount needed for the specified user and project token.
+     * @dev Calculates the additional collateral amount needed for the specified user and project token.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      * @param marginCollateralCount The margin collateral amount.

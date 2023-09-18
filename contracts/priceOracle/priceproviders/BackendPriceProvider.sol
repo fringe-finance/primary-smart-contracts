@@ -7,7 +7,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
 /**
- * Backend price verifier.
+ * @title BackendPriceProvider
+ * @notice The BackendPriceProvider contract is the contract that provides prices for assets using a trusted backend.
  */
 contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
     bytes32 public constant TRUSTED_BACKEND_ROLE = keccak256("TRUSTED_BACKEND_ROLE");
@@ -23,11 +24,35 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         bool isActive; // true - active, false - not active
     }
 
+    /**
+     * @dev Emitted when the trusted backend role is granted to a new trusted backend.
+     * @param newTrustedBackend The address of the new trusted backend.
+     */
     event GrandTrustedBackendRole(address indexed newTrustedBackend);
+
+    /**
+     * @dev Emitted when the trusted backend role is revoked from a trusted backend.
+     * @param trustedBackend The address of the trusted backend to revoke the role from.
+     */
     event RevokeTrustedBackendRole(address indexed trustedBackend);
+
+    
+    /**
+     * @dev Emitted when a new token is set as the price provider.
+     * @param token The address of the token set as the price provider.
+     */
     event SetToken(address indexed token);
+
+    /**
+     * @dev Emitted when the active status of a token is changed.
+     * @param token The address of the token to change the active status for.
+     * @param active The new active status for the token.
+     */
     event ChangeActive(address indexed token, bool active);
 
+    /**
+     * @dev Initializes the contract by setting up the access control roles and the number of decimals for the USD price.
+     */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -35,11 +60,17 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         usdDecimals = 6;
     }
 
+    /**
+     * @dev Modifier to restrict access to only the contract admin.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier to restrict access to only the trusted backend.
+     */
     modifier onlyTrustedBackend() {
         require(hasRole(TRUSTED_BACKEND_ROLE, msg.sender), "Caller is not the trusted backend");
         _;
@@ -47,11 +78,19 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
 
     /****************** Admin functions ****************** */
 
+    /**
+     * @dev Grants the TRUSTED_BACKEND_ROLE to a new trusted backend address.
+     * @param newTrustedBackend The address of the new trusted backend.
+     */
     function grandTrustedBackendRole(address newTrustedBackend) public onlyAdmin {
         grantRole(TRUSTED_BACKEND_ROLE, newTrustedBackend);
         emit GrandTrustedBackendRole(newTrustedBackend);
     }
 
+    /**
+     * @dev Revokes the trusted backend role from the specified address.
+     * @param trustedBackend The address of the trusted backend to revoke the role from.
+     */
     function revokeTrustedBackendRole(address trustedBackend) public onlyAdmin {
         revokeRole(TRUSTED_BACKEND_ROLE, trustedBackend);
         emit RevokeTrustedBackendRole(trustedBackend);
@@ -59,12 +98,21 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
 
     /****************** TrustedBackendRole functions ****************** */
 
+    /**
+     * @dev Sets the token as listed and active in the backend metadata.
+     * @param token The address of the token to be set.
+     */
     function setToken(address token) public onlyTrustedBackend {
         backendMetadata[token].isListed = true;
         backendMetadata[token].isActive = true;
         emit SetToken(token);
     }
 
+    /**
+     * @dev Changes the active status of a token in the backend metadata.
+     * @param token The address of the token to change the active status for.
+     * @param active The new active status for the token.
+     */
     function changeActive(address token, bool active) public override onlyTrustedBackend {
         backendMetadata[token].isActive = active;
         emit ChangeActive(token, active);
@@ -73,7 +121,7 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     /****************** sign steps ****************** */
 
     /**
-     * @notice 1. step. Backend creates offchain data and get hash of this data. This data calls message.
+     * @notice 1. Step. Backend creates offchain data and get hash of this data. This data calls message.
      * @dev returns the keccak256 of concatenated input data
      * @param token the address of asset
      * @param priceMantissa the price of asset that include decimals
@@ -84,8 +132,8 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @notice 2. step. Backend formatting the message and get hash of this message.
-     * @dev returns the keccak256 of formatted message
+     * @notice 2. Step. Backend formatting the message and get hash of this message.
+     * @dev Returns the keccak256 of formatted message
      * @param messageHash the keccak256 of message
      */
     function getEthSignedMessageHash(bytes32 messageHash) public pure returns (bytes32) {
@@ -101,15 +149,15 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @notice 3. step. Backend sign the message using web3 library and get signature.
-        # using browser
+     * @notice 3. Step. Backend sign the message using web3 library and get signature.
+        #### Using browser
         account = "copy paste account of signer here"
         ethereum.request({ method: "personal_sign", params: [account, hash]}).then(console.log)
 
-        # using web3
+        #### Using web3
         web3.personal.sign(hash, web3.eth.defaultAccount, console.log)
         
-        # using rust secp256k1 and web3:
+        #### Using rust secp256k1 and web3:
         let signature = secret_key.sign(&ethSignedMessageHash,None).unwrap();
 
         Signature will be different for different accounts
@@ -121,8 +169,8 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
      */
 
     /**
-     * @notice 4. step. Smart contract verify the message (tuple)
-     * @dev returns true if the message is signed by trusted backend. Else returns false.
+     * @notice 4. Step. Smart contract verify the message (tuple)
+     * @dev Returns true if the message is signed by trusted backend. Else returns false.
      * @param token the address of asset
      * @param priceMantissa the price of asset that include decimals
      * @param validTo the unix timestamp in seconds that define the validity of given price to `validTo` timestamp
@@ -139,7 +187,10 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev returns the signer of `ethSignedMessageHash`
+     * @dev Recovers the signer of a message signed with the Ethereum signature scheme.
+     * @param ethSignedMessageHash The hash of the signed message.
+     * @param signature The signature of the message.
+     * @return The address of the signer.
      */
     function recoverSigner(bytes32 ethSignedMessageHash, bytes memory signature) public pure returns (address) {
         require(signature.length == 65, "BackendPriceProvider: Invalid signature length");
@@ -170,17 +221,27 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
 
     /****************** View functions ****************** */
 
+    /**
+     * @dev Returns whether a token is listed on the backend price provider.
+     * @param token The address of the token to check.
+     * @return A boolean indicating whether the token is listed.
+     */
     function isListed(address token) public view override returns (bool) {
         return backendMetadata[token].isListed;
     }
 
+    /**
+     * @dev Returns whether a token is active or not.
+     * @param token The address of the token to check.
+     * @return A boolean indicating whether the token is active or not.
+     */
     function isActive(address token) public view override returns (bool) {
         return backendMetadata[token].isActive;
     }
 
     /**
-     * @notice Returns the latest asset price and price decimals
-     * @param token the token address
+     * @notice Returns the latest asset price and price decimals.
+     * @param token the token address.
      */
     function getPrice(address token) public pure override returns (uint256 price, uint8 priceDecimals) {
         token;
@@ -189,6 +250,15 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         revert("Use getPriceSigned(...)");
     }
 
+    /**
+     * @dev Returns the price of a token as a signed integer, along with the number of decimals for the price.
+     * @param token The address of the token.
+     * @param priceMantissa The price of the token as a mantissa.
+     * @param validTo The timestamp until which the price is valid.
+     * @param signature The signature of the price provided by a moderator.
+     * @return _priceMantissa The price of the token as a mantissa.
+     * @return priceDecimals The number of decimals for the price.
+     */
     function getPriceSigned(
         address token,
         uint256 priceMantissa,
@@ -200,6 +270,13 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         return (priceMantissa, getPriceDecimals());
     }
 
+    /**
+     * @dev This function is used to get the evaluation of a token with a given amount.
+     * @param token The address of the token to be evaluated.
+     * @param tokenAmount The amount of the token to be evaluated.
+     * @return evaluation The evaluation of the token with the given amount.
+     * @notice This function is deprecated. Use getEvaluationSigned(...) instead.
+     */
     function getEvaluation(address token, uint256 tokenAmount) public pure override returns (uint256 evaluation) {
         token;
         tokenAmount;
@@ -208,10 +285,10 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev return the evaluation in $ of `tokenAmount` with signed price
-     * @param token the address of token to get evaluation in $
-     * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals
-     * @param priceMantissa the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token
+     * @dev ReturnS the evaluation in $ of `tokenAmount` with signed price.
+     * @param token the address of token to get evaluation in $.
+     * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals.
+     * @param priceMantissa the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token.
      * @param validTo the timestamp in seconds, when price is gonna be not valid.
      * @param signature the ECDSA sign on eliptic curve secp256k1.
      */
@@ -233,6 +310,10 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         }
     }
 
+    /**
+     * @dev Returns the number of decimals used for the price returned by this price provider.
+     * @return The number of decimals used for the price returned by this price provider.
+     */
     function getPriceDecimals() public view override returns (uint8) {
         return usdDecimals;
     }

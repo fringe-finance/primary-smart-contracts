@@ -11,6 +11,11 @@ import "../interfaces/IPrimaryLendingPlatform.sol";
 import "../paraswap/interfaces/IParaSwapAugustus.sol";
 import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 
+/**
+ * @title PrimaryLendingPlatformAtomicRepaymentCore.
+ * @notice Core contract for the atomic repayment functionality for the PrimaryLendingPlatform contract.
+ * @dev Abstract contract that implements the atomic repayment core functionality for the PrimaryLendingPlatform contract.
+ */
 abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
@@ -19,7 +24,20 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     IPrimaryLendingPlatform public primaryLendingPlatform;
     address public exchangeAggregator;
 
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new address of the primary lending platform.
+     */
     event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
+
+    /**
+     * @dev Emitted when an atomic repayment is executed, where a user sells collateral to repay a loan.
+     * @param user The address of the user who executed the atomic repayment.
+     * @param collateral The address of the collateral asset sold by the user.
+     * @param lendingAsset The address of the lending asset that was repaid.
+     * @param amountSold The amount of collateral sold by the user.
+     * @param amountReceive The amount of lending asset received by the user after the repayment.
+     */
     event AtomicRepayment(address indexed user, address indexed collateral, address indexed lendingAsset, uint256 amountSold, uint256 amountReceive);
 
     /**
@@ -34,24 +52,37 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         primaryLendingPlatform = IPrimaryLendingPlatform(pit);
     }
 
+    /**
+     * @dev Throws if the caller is not the admin.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AtomicRepayment: Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Throws if the caller is not the moderator.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "AtomicRepayment: Caller is not the Moderator");
         _;
     }
 
+    /**
+     * @dev Throws if the project token is not listed.
+     * @param projectToken The project token address.
+     */
     modifier isProjectTokenListed(address projectToken) {
         require(primaryLendingPlatform.projectTokenInfo(projectToken).isListed, "AtomicRepayment: Project token is not listed");
         _;
     }
 
     /**
-     * @dev Sets the primary index token to a new value.
-     * @param pit The new primary index token address.
+     * @dev Sets the address of the primary lending platform contract.
+     * @param pit The address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - `pit` cannot be the zero address.
      */
     function setPrimaryLendingPlatform(address pit) external onlyModerator {
         require(pit != address(0), "AtomicRepayment: Invalid address");
@@ -60,7 +91,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Computes the outstanding amount (i.e., loanBody + accrual) for a given user, project token, and lending token.
+     * @dev Calculates the outstanding amount (i.e., loanBody + accrual) for a given user, project token, and lending token.
      * @param user The user for which to compute the outstanding amount.
      * @param projectToken The project token for which to compute the outstanding amount.
      * @param lendingAsset The lending token for which to compute the outstanding amount.
@@ -72,31 +103,31 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Computes the lending token for a given user and project token.
-     * @param user The user for which to compute the lending token.
-     * @param projectToken The project token for which to compute the lending token.
-     * @return actualLendingToken The lending token for the user and project token.
+     * @dev Returns the actual lending token address for a user and project token.
+     * @param user The user address.
+     * @param projectToken The project token address.
+     * @return actualLendingToken The actual lending token address.
      */
     function getLendingToken(address user, address projectToken) public view returns (address actualLendingToken) {
         actualLendingToken = primaryLendingPlatform.getLendingToken(user, projectToken);
     }
 
     /**
-     * @dev Get the remaining deposit that a user can withdraw for a given project token.
-     * @param user The user for which to compute the remaining deposit.
-     * @param projectToken The project token for which to compute the remaining deposit.
-     * @return remainingDeposit The remaining deposit that the user can withdraw.
+     * @dev Returns the remaining deposit of a user for a specific project token.
+     * @param user The address of the user.
+     * @param projectToken The address of the project token.
+     * @return remainingDeposit The remaining deposit of the user for the project token.
      */
     function getRemainingDeposit(address user, address projectToken) public view returns (uint256 remainingDeposit) {
         remainingDeposit = primaryLendingPlatform.getDepositedAmount(projectToken, user);
     }
 
     /**
-     * @dev Computes the available lending token amount that a user can repay for a given project token.
-     * @param user The user for which to compute the available lending token amount.
-     * @param projectToken The project token for which to compute the available lending token amount.
-     * @param lendingToken The lending token for which to compute the available lending token amount.
-     * @return availableLendingAmount The available lending token amount that the user can repay.
+     * @dev Returns the available repaid amount for a user in a specific project token and lending token.
+     * @param user The address of the user.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return availableLendingAmount The available repaid amount in the lending token.
      */
     function getAvailableRepaidAmount(address user, address projectToken, address lendingToken) public view returns (uint256 availableLendingAmount) {
         uint256 remainingDeposit = getRemainingDeposit(user, projectToken);
@@ -108,7 +139,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @notice Defers the liquidity check for a given user, project token, and lending token.
+     * @dev Internal function to defer the liquidity check for a given user, project token, and lending token.
+     * The user's position must have a health factor greater than or equal to 1.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
@@ -119,10 +151,10 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Repays a loan atomically using the given project token as collateral internal.
+     * @dev Internal function to repay a loan atomically using the given project token as collateral internal.
      * @param prjToken The project token to use as collateral.
-     * @param collateralAmount The amount of collateral to use.
-     * @param buyCalldata The calldata for the swap operation.
+     * @param collateralAmount The amount of collateral to use for repayment.
+     * @param buyCalldata The calldata for buying the lending token from the exchange aggregator.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
      */
     function _repayAtomic(address prjToken, uint256 collateralAmount, bytes memory buyCalldata, bool isRepayFully) internal {
@@ -133,7 +165,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
             collateralAmount = depositedProjectTokenAmount;
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjToken, collateralAmount, msg.sender, address(this));
-        
+
         _approveTokenTransfer(prjToken, collateralAmount);
 
         uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
@@ -165,7 +197,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
+     * @dev Internal function to approve a specified amount of tokens to be transferred by the token transfer proxy.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
@@ -177,7 +209,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Buys tokens on exchange aggregator using the given project token and lending token.
+     * @dev Internal function to execute a buy order on the exchange aggregator contract.
      * @param tokenFrom The token to sell on exchange aggregator.
      * @param tokenTo The token to buy on exchange aggregator.
      * @param buyCalldata The calldata for the buy operation.

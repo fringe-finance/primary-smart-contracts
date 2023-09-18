@@ -9,6 +9,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/IPrimaryLendingPlatform.sol";
 
+/**
+ * @title PrimaryLendingPlatformLiquidationCore.
+ * @notice Core contract for liquidating loans on the PrimaryLendingPlatform.
+ * @dev Abstract contract that allows users to liquidate loans.
+ */
 abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
@@ -33,6 +38,14 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         uint256 maxLACompare;
     }
 
+    /**
+     * @dev Emitted when a liquidation occurs.
+     * @param liquidator The address of the account that initiates the liquidation.
+     * @param borrower The address of the borrower whose position is being liquidated.
+     * @param lendingToken The address of the token being used for lending.
+     * @param prjAddress The address of the project being liquidated.
+     * @param amountPrjLiquidated The amount of the project's tokens being liquidated.
+     */
     event Liquidate(
         address indexed liquidator,
         address indexed borrower,
@@ -40,10 +53,38 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address indexed prjAddress,
         uint256 amountPrjLiquidated
     );
+
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new primary lending platform address.
+     */
     event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
+
+    /**
+     * @dev Emitted when the minimum amount for partial liquidation is set.
+     * @param newAmount The new minimum amount for partial liquidation.
+     */
     event SetMinPartialLiquidationAmount(uint256 indexed newAmount);
+
+    /**
+     * @dev Emitted when the maximum Liquidation Reserve Factor (LRF) is set.
+     * @param numeratorLRF The numerator of the LRF fraction.
+     * @param denominatorLRF The denominator of the LRF fraction.
+     */
     event SetMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF);
+
+    /**
+     * @dev Emitted when the liquidator reward calculation factor is set.
+     * @param numeratorLRF The numerator of the liquidator reward calculation factor.
+     * @param denominatorLRF The denominator of the liquidator reward calculation factor.
+     */
     event SetLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF);
+
+    /**
+     * @dev Emitted when the target health factor is set.
+     * @param numeratorHF The numerator of the target health factor.
+     * @param denominatorHF The denominator of the target health factor.
+     */
     event SetTargetHealthFactor(uint8 numeratorHF, uint8 denominatorHF);
 
     /**
@@ -59,34 +100,51 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         primaryLendingPlatform = IPrimaryLendingPlatform(pit);
     }
 
+    /**
+     * @dev Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier that only allows access to accounts with the MODERATOR_ROLE.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
 
+    /**
+     * @dev Modifier that only allows access to project tokens that are listed on the PrimaryLendingPlatform.
+     * @param _projectToken The address of the project token.
+     */
     modifier isProjectTokenListed(address _projectToken) {
         require(primaryLendingPlatform.projectTokenInfo(_projectToken).isListed, "PITLiquidation: Project token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier that only allows access to lending tokens that are listed on the PrimaryLendingPlatform.
+     * @param _lendingToken The address of the lending token.
+     */
     modifier isLendingTokenListed(address _lendingToken) {
         require(primaryLendingPlatform.lendingTokenInfo(_lendingToken).isListed, "PITLiquidation: Lending token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier that only allows access to related contracts of the PrimaryLendingPlatform.
+     */
     modifier onlyRelatedContracts() {
         require(primaryLendingPlatform.getRelatedContract(msg.sender), "PITLiquidation: Caller is not related Contract");
         _;
     }
 
     /**
-     * @notice Sets the minimum partial liquidation amount.
-     * @dev Can only be called by accounts with the MODERATOR_ROLE.
+     * @dev Sets the minimum partial liquidation amount.
+     * Can only be called by accounts with the MODERATOR_ROLE.
      * @param newAmount The minimum partial liquidation amount.
      */
     function setMinPartialLiquidationAmount(uint256 newAmount) external onlyModerator {
@@ -95,10 +153,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Sets the maximum Liquidator Reward Factor (LRF).
-     * @dev Can only be called by accounts with the MODERATOR_ROLE.
-     * @param numeratorLRF The numerator for the maximum LRF.
-     * @param denominatorLRF The denominator for the maximum LRF.
+     * @dev Sets the maximum Liquidation Reserve Factor (LRF) that can be used for liquidation.
+     *
+     * Requirements:
+     * - The denominator must not be zero.
+     * - Only the moderator can call this function.
+     * @param numeratorLRF The numerator of the LRF ratio.
+     * @param denominatorLRF The denominator of the LRF ratio.
      */
     function setMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
         require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
@@ -107,10 +168,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Sets the liquidator reward calculation factor.
-     * @dev This function can only be called by an account with the MODERATOR_ROLE.
-     * @param numeratorLRF The numerator for the liquidator reward calculation factor.
-     * @param denominatorLRF The denominator for the liquidator reward calculation factor.
+     * @dev Sets the liquidator reward calculation factor.
+     *
+     * Requirements:
+     * - The caller must have the `MODERATOR_ROLE` role.
+     * - The denominatorLRF cannot be zero.
+     * @param numeratorLRF The numerator of the liquidator reward calculation factor.
+     * @param denominatorLRF The denominator of the liquidator reward calculation factor.
      */
     function setLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
         require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
@@ -119,9 +183,12 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Sets the PrimaryLendingPlatform address.
-     * @dev This function can only be called by an account with the MODERATOR_ROLE.
-     * @param newPrimaryLendingPlatform The new PrimaryLendingPlatform address.
+     * @dev Sets the address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - Only the moderator can call this function.
+     * - The new primary lending platform address must not be the zero address.
+     * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
      */
     function setPrimaryLendingPlatformAddress(address newPrimaryLendingPlatform) external onlyModerator {
         require(newPrimaryLendingPlatform != address(0), "PITLiquidation: Invalid address");
@@ -130,8 +197,11 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Sets the target health factor.
-     * @dev This function can only be called by an account with the MODERATOR_ROLE.
+     * @dev Sets the target health factor.
+     *
+     * Requirements:
+     * - Only the moderator can call this function.
+     * - The denominatorHF cannot be zero.
      * @param numeratorHF The numerator for the target health factor.
      * @param denominatorHF The denominator for the target health factor.
      */
@@ -142,23 +212,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Get the health factor of a specific account's position.
-     * @param _account The address of the account.
-     * @param _projectToken The address of the project token.
-     * @param _lendingToken The address of the lending token.
-     * @return healthFactorNumerator The numerator of the health factor.
-     * @return healthFactorDenominator The denominator of the health factor.
-     */
-    function getHf(
-        address _account,
-        address _projectToken,
-        address _lendingToken
-    ) public view returns (uint256 healthFactorNumerator, uint256 healthFactorDenominator) {
-        (healthFactorNumerator, healthFactorDenominator) = primaryLendingPlatform.healthFactor(_account, _projectToken, _lendingToken);
-    }
-
-    /**
-     * @notice Get the current health factor of a specific account's position.
+     * @dev Gets the current health factor of a specific account's position.
      * @param _account The address of the account.
      * @param _projectToken The address of the project token.
      * @param _lendingToken The address of the lending token.
@@ -174,7 +228,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Get the price of a token in USD.
+     * @dev Gets the price of a token in USD.
      * @param token The address of the token.
      * @param amount The amount of the token.
      * @return price The price of the token in USD.
@@ -184,13 +238,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Liquidates a user's position based on the specified lending token amount.
+     * @dev Internal function that allow a user to liquidate their position.
      * @param _account The user's address to liquidate.
      * @param _projectToken The project token address associated with the user's position.
      * @param _lendingToken The lending token address used for the liquidation.
      * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
      * @param liquidator The address of the liquidator (usually the msg.sender).
-     * @return projectTokenLiquidatorReceived The amount of project tokens sent to the liquidator as a result of the liquidation.
+     * @return The amount of project tokens sent to the liquidator as a result of the liquidation.
      */
     function _liquidate(
         address _account,
@@ -198,7 +252,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address _lendingToken,
         uint256 _lendingTokenAmount,
         address liquidator
-    ) internal isProjectTokenListed(_projectToken) isLendingTokenListed(_lendingToken) returns (uint256) {
+    ) internal returns (uint256) {
         require(_lendingTokenAmount > 0, "PITLiquidation: LendingTokenAmount must be greater than 0");
 
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
@@ -240,7 +294,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     ) internal returns (uint256 projectTokenToSendToLiquidator) {
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
         uint256 repaid = primaryLendingPlatform.repayFromRelatedContract(_projectToken, _lendingToken, _lendingTokenAmount, liquidator, _account);
-        
+
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
         uint256 projectTokenEvaluation = (getTokenPrice(_lendingToken, repaid) * projectTokenMultiplier) /
             getTokenPrice(_projectToken, projectTokenMultiplier);
@@ -249,12 +303,12 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Distributes the liquidation reward to the liquidator.
+     * @dev Internal function to distribute the liquidation reward to the liquidator.
      * @param _account The address of the borrower whose position is being liquidated.
      * @param _projectToken The address of the project token.
      * @param projectTokenToSendToLiquidator The amount of project tokens to be sent to the liquidator.
      * @param liquidator The address of the liquidator.
-     * @return The amount of project tokens sent to the liquidator.
+     * @return The amount of project token transferred to the liquidator.
      */
     function _distributeReward(
         address _account,
@@ -274,6 +328,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Calculates the liquidator reward factor (LRF) for a given position.
+     *
+     * Formula: LRF = (1 + (1 - HF) * k)
      * @param _account The address of the borrower whose position is being considered.
      * @param _projectToken The address of the project token.
      * @param _lendingToken The address of the lending token.
@@ -292,7 +348,10 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         } else {
             Ratio memory kf = liquidatorRewardCalcFactor;
             bool isNegativeNumerator = false;
-            (lrfNumerator, isNegativeNumerator) = _checkNegativeNumber(kf.numerator * hfDenominator + kf.denominator * hfDenominator, kf.numerator * hfNumerator);
+            (lrfNumerator, isNegativeNumerator) = _checkNegativeNumber(
+                kf.numerator * hfDenominator + kf.denominator * hfDenominator,
+                kf.numerator * hfNumerator
+            );
             if (isNegativeNumerator) {
                 lrfNumerator = 0;
             }
@@ -307,7 +366,8 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
     /**
      * @dev Calculates the maximum liquidation amount (MaxLA) for a given position.
-     * MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
+     *
+     * Formula: MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
      * @param account The address of the borrower whose position is being considered.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
@@ -355,10 +415,11 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Computes the absolute difference between two unsigned integers.
-     * @param firstNumber The first unsigned integer.
-     * @param secondNumber The second unsigned integer.
-     * @return result The absolute difference between the two input numbers.
+     * @dev Internal function to check if the difference between two numbers is negative and calculates the absolute difference.
+     * @param firstNumber The first number to compare.
+     * @param secondNumber The second number to compare.
+     * @return result The absolute difference between the two numbers.
+     * @return isNegative A boolean indicating if the difference is negative.
      */
     function _checkNegativeNumber(uint256 firstNumber, uint256 secondNumber) internal pure returns (uint256 result, bool isNegative) {
         if (firstNumber > secondNumber) {
@@ -370,11 +431,14 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Computes the minimum and maximum liquidation amount for a given account, project token, and lending token.
-     * MinLA = min(MaxLA, MPA)
-     * @param _account The account for which to compute the liquidation amount.
-     * @param _projectToken The project token for which to compute the minimum liquidation amount.
-     * @param _lendingToken The lending token for which to compute the minimum liquidation amount.
+     * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
+     *
+     * Formula: 
+     * - MinLA = min(MaxLA, MPA)
+     * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
+     * @param _account The account for which to calculate the liquidation amount.
+     * @param _projectToken The project token address.
+     * @param _lendingToken The lending token address.
      * @return maxLA The maximum liquidation amount.
      * @return minLA The minimum liquidation amount.
      */

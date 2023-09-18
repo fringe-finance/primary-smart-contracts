@@ -12,6 +12,11 @@ import "../interfaces/IPriceProviderAggregator.sol";
 import "../bToken/BLendingToken.sol";
 import "../interfaces/IPrimaryLendingPlatformLeverage.sol";
 
+/**
+ * @title PrimaryLendingPlatformV2Core.
+ * @notice Core contract for the Primary Lending Platform V2.
+ * @dev Abstract contract that defines the core functionality of the primary lending platform.
+ */
 abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
@@ -67,10 +72,33 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 accrual; // [accrual] = lendingToken
     }
 
+    /**
+     * @dev Emitted when a user deposits project tokens.
+     * @param who The address of the user who deposited the tokens.
+     * @param tokenPrj The address of the project token that was deposited.
+     * @param prjDepositAmount The amount of project tokens that were deposited.
+     * @param beneficiary The address of the beneficiary who will receive the deposited tokens.
+     */
     event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
 
+    /**
+     * @dev Emitted when a user withdraws project tokens.
+     * @param who The address of the user who withdrew the tokens.
+     * @param tokenPrj The address of the project token that was withdrawn.
+     * @param lendingToken The address of the lending token that was used as collateral.
+     * @param prjWithdrawAmount The amount of project tokens that were withdrawn.
+     * @param beneficiary The address of the beneficiary who will receive the withdrawn tokens.
+     */
     event Withdraw(address indexed who, address indexed tokenPrj, address lendingToken, uint256 prjWithdrawAmount, address indexed beneficiary);
 
+    /**
+     * @dev Emitted when a user supplies lending tokens.
+     * @param who The address of the user who supplied the tokens.
+     * @param supplyToken The address of the token that was supplied.
+     * @param supplyAmount The amount of tokens that were supplied.
+     * @param supplyBToken The address of the bToken that was received in exchange for the supplied tokens.
+     * @param amountSupplyBTokenReceived The amount of bTokens that were received in exchange for the supplied tokens.
+     */
     event Supply(
         address indexed who,
         address indexed supplyToken,
@@ -79,14 +107,48 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 amountSupplyBTokenReceived
     );
 
+    /**
+     * @dev Emitted when a user redeems bTokens for the underlying token.
+     * @param who The address of the user who redeemed the tokens.
+     * @param redeemToken The address of the token that was redeemed.
+     * @param redeemBToken The address of the bToken that was redeemed.
+     * @param redeemAmount The amount of bTokens that were redeemed.
+     */
     event Redeem(address indexed who, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmount);
 
+    /**
+     * @dev Emitted when a user redeems underlying token for the bToken.
+     * @param who The address of the user who redeemed the tokens.
+     * @param redeemToken The address of the token that was redeemed.
+     * @param redeemBToken The address of the bToken that was redeemed.
+     * @param redeemAmountUnderlying The amount of underlying tokens that were redeemed.
+     */
     event RedeemUnderlying(address indexed who, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmountUnderlying);
 
+    /**
+     * @dev Emitted when a user borrows lending tokens.
+     * @param who The address of the user who borrowed the tokens.
+     * @param borrowToken The address of the token that was borrowed.
+     * @param borrowAmount The amount of tokens that were borrowed.
+     * @param prjAddress The address of the project token that was used as collateral.
+     * @param prjAmount The amount of project tokens that were used as collateral.
+     */
     event Borrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, uint256 prjAmount);
 
+    /**
+     * @dev Emitted when a user repays borrowed lending tokens.
+     * @param who The address of the user who repaid the tokens.
+     * @param borrowToken The address of the token that was repaid.
+     * @param borrowAmount The amount of tokens that were repaid.
+     * @param prjAddress The address of the project token that was used as collateral.
+     * @param isPositionFullyRepaid A boolean indicating whether the entire borrow position was repaid.
+     */
     event RepayBorrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, address indexed prjAddress, bool isPositionFullyRepaid);
 
+    /**
+     * @dev Emitted when the moderator contract address is updated.
+     * @param newAddress The address of the new moderator contract.
+     */
     event SetModeratorContract(address indexed newAddress);
 
     /**
@@ -99,26 +161,43 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         _setupRole(MODERATOR_ROLE, msg.sender);
     }
 
+    /**
+     * @dev Modifier that allows only the admin to call the function.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PIT: Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier that requires the project token to be listed.
+     * @param projectToken The address of the project token.
+     */
     modifier isProjectTokenListed(address projectToken) {
         require(projectTokenInfo[projectToken].isListed, "PIT: Project token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier that requires the lending token to be listed.
+     * @param lendingToken The address of the lending token.
+     */
     modifier isLendingTokenListed(address lendingToken) {
         require(lendingTokenInfo[lendingToken].isListed, "PIT: Lending token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier that allows only related contracts to call the function.
+     */
     modifier onlyRelatedContracts() {
         require(isRelatedContract[msg.sender], "PIT: Caller is not related Contract");
         _;
     }
 
+    /**
+     * @dev Modifier that allows only the moderator contract to call the function.
+     */
     modifier onlyModeratorContract() {
         require(msg.sender == primaryLendingPlatformModerator, "PIT: Caller is not primaryLendingPlatformModerator");
         _;
@@ -127,7 +206,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* ADMIN CONTRACT FUNCTIONS ********************************
 
     /**
-     * @dev Sets the address of the new moderator contract by the admin.
+     * @dev Sets the address of the new moderator contract for the Primary Lending Platform.
+     *
+     * Requirements:
+     * - `newModeratorContract` cannot be the zero address.
+     * - Only the admin can call this function.
      * @param newModeratorContract The address of the new moderator contract.
      */
     function setPrimaryLendingPlatformModeratorModerator(address newModeratorContract) external onlyAdmin {
@@ -139,7 +222,10 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* MODERATOR CONTRACT FUNCTIONS ********************************
 
     /**
-     * @dev Sets the address of the new price oracle by the moderator contract.
+     * @dev Sets the price oracle contract address.
+     *
+     * Requirements:
+     * - Only the moderator contract can call this function.
      * @param newPriceOracle The address of the new price oracle contract.
      */
     function setPriceOracle(address newPriceOracle) external onlyModeratorContract {
@@ -148,6 +234,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Sets the address of the new primary index token leverage contract by the moderator contract.
+     *
+     * Requirements:
+     * - Only the moderator contract can call this function.
      * @param newPrimaryLendingPlatformLeverage The address of the new primary index token leverage contract.
      */
     function setPrimaryLendingPlatformLeverage(address newPrimaryLendingPlatformLeverage) external onlyModeratorContract {
@@ -156,18 +245,25 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Sets whether an address is a related contract or not by the moderator contract.
-     * @param relatedContract The address of the contract to be set as related.
-     * @param isRelated Boolean to indicate whether the contract is related or not.
+     * @dev Sets the related contract status for a given contract address.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * @param relatedContract The address of the contract to set the related status for.
+     * @param isRelated The related status to set for the contract.
      */
     function setRelatedContract(address relatedContract, bool isRelated) public onlyModeratorContract {
         isRelatedContract[relatedContract] = isRelated;
     }
 
     /**
-     * @dev Removes a project token from the list by the moderator contract.
-     * @param projectTokenId The ID of the project token to be removed.
-     * @param projectToken The address of the project token to be removed.
+     * @dev Removes a project token from the platform.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * - The project token must exist in the platform.
+     * @param projectTokenId The ID of the project token to remove.
+     * @param projectToken The address of the project token to remove.
      */
     function removeProjectToken(uint256 projectTokenId, address projectToken) external onlyModeratorContract {
         require(projectTokens[projectTokenId] == projectToken, "PIT: Invalid address");
@@ -177,7 +273,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Removes a lending token from the list by the moderator contract.
+     * @dev Removes a lending token from the platform.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * - The lending token address must be valid.
      * @param lendingTokenId The ID of the lending token to be removed.
      * @param lendingToken The address of the lending token to be removed.
      */
@@ -189,30 +289,39 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Sets the borrow limit per collateral by the moderator contract.
-     * @param projectToken The address of the project token.
-     * @param newBorrowLimit The new borrow limit.
+     * @dev Sets the borrow limit for a specific collateral asset.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * @param projectToken The address of the collateral asset.
+     * @param newBorrowLimit The new borrow limit for the collateral asset.
      */
     function setBorrowLimitPerCollateralAsset(address projectToken, uint256 newBorrowLimit) external onlyModeratorContract {
         borrowLimitPerCollateral[projectToken] = newBorrowLimit;
     }
 
     /**
-     * @dev Sets the borrow limit per lending asset by the moderator contract.
-     * @param lendingToken The address of the lending token.
-     * @param newBorrowLimit The new borrow limit.
+     * @dev Sets the borrow limit for a specific lending asset.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * @param lendingToken The address of the lending asset.
+     * @param newBorrowLimit The new borrow limit for the lending asset.
      */
     function setBorrowLimitPerLendingAsset(address lendingToken, uint256 newBorrowLimit) external onlyModeratorContract {
         borrowLimitPerLendingToken[lendingToken] = newBorrowLimit;
     }
 
     /**
-     * @dev Sets the parameters for a project token
-     * @param projectToken The address of the project token
-     * @param isDepositPaused The new pause status for deposit
-     * @param isWithdrawPaused The new pause status for withdrawal
-     * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio for the project token
-     * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio for the project token
+     * @dev Sets the information of a project token.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * @param projectToken The address of the project token.
+     * @param isDepositPaused A boolean indicating whether deposit is paused for the project token.
+     * @param isWithdrawPaused A boolean indicating whether withdraw is paused for the project token.
+     * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio for the project token.
+     * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio for the project token.
      */
     function setProjectTokenInfo(
         address projectToken,
@@ -232,10 +341,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Pauses or unpauses deposits and withdrawals of a project token.
+     * @dev Sets the deposit and withdraw pause status for a given project token.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
      * @param projectToken The address of the project token.
-     * @param isDepositPaused Boolean indicating whether deposits are paused or unpaused.
-     * @param isWithdrawPaused Boolean indicating whether withdrawals are paused or unpaused.
+     * @param isDepositPaused The boolean value indicating whether deposit is paused or not.
+     * @param isWithdrawPaused The boolean value indicating whether withdraw is paused or not.
      */
     function setPausedProjectToken(address projectToken, bool isDepositPaused, bool isWithdrawPaused) external onlyModeratorContract {
         projectTokenInfo[projectToken].isDepositPaused = isDepositPaused;
@@ -243,10 +355,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Sets the bLendingToken and paused status of a lending token.
+     * @dev Sets the lending token information for a given lending token.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
      * @param lendingToken The address of the lending token.
-     * @param bLendingToken The address of the bLendingToken.
-     * @param isPaused Boolean indicating whether the lending token is paused or unpaused.
+     * @param bLendingToken The address of the corresponding bLending token.
+     * @param isPaused A boolean indicating whether the lending token is paused or not.
      * @param loanToValueRatioNumerator The numerator of the loan-to-value ratio for the lending token.
      * @param loanToValueRatioDenominator The denominator of the loan-to-value ratio for the lending token.
      */
@@ -269,9 +384,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Pauses or unpauses a lending token.
+     * @dev Sets the pause status of a lending token.
+     *
+     * Requirements:
+     * - The caller must be the moderator contract.
+     * - The lending token must be listed.
      * @param lendingToken The address of the lending token.
-     * @param isPaused Boolean indicating whether the lending token is paused or unpaused.
+     * @param isPaused The pause status to be set.
      */
     function setPausedLendingToken(address lendingToken, bool isPaused) external onlyModeratorContract isLendingTokenListed(lendingToken) {
         lendingTokenInfo[lendingToken].isPaused = isPaused;
@@ -281,7 +400,17 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* Deposit FUNCTION ********************************
 
     /**
+     * @notice Deposits project tokens into the platform.
      * @dev Deposits project tokens and calculates the deposit position.
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - The project token must not be paused for deposits.
+     * - The project token amount must be greater than 0.
+     *
+     * Effects:
+     * - Transfers the project tokens from the user to the contract.
+     * - Calculates the deposit position for the user.
      * @param projectToken The address of the project token to be deposited.
      * @param projectTokenAmount The amount of project tokens to be deposited.
      */
@@ -290,11 +419,21 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Deposits project tokens on behalf of a user from a related contract and calculates the deposit position.
-     * @param projectToken The address of the project token to be deposited.
-     * @param projectTokenAmount The amount of project tokens to be deposited.
-     * @param user The address of the user who representative deposit.
-     * @param beneficiary The address of the beneficiary whose deposit position will be updated.
+     * @dev Deposits project tokens from related contracts into the platform.
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - Caller must be a related contract.
+     * - The project token must not be paused for deposits.
+     * - The project token amount must be greater than 0.
+     *
+     * Effects:
+     * - Transfers the project tokens from the user to the contract.
+     * - Calculates the deposit position for the user.
+     * @param projectToken The address of the project token being deposited.
+     * @param projectTokenAmount The amount of project tokens being deposited.
+     * @param user The address of the user depositing the tokens.
+     * @param beneficiary The address of the beneficiary receiving the tokens.
      */
     function depositFromRelatedContracts(
         address projectToken,
@@ -306,11 +445,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Transfers a given amount of a project token from a user to the contract, and calculates the deposit position and emits the Deposit event.
-     * @param projectToken The address of the project token being deposited
-     * @param projectTokenAmount The amount of project tokens being deposited
-     * @param user The address of the user depositing the project tokens
-     * @param beneficiary The address of the user who will receive the deposit position
+     * @dev Internal function to deposit project tokens into the Primary Lending Platform.
+     * @param projectToken The address of the project token being deposited.
+     * @param projectTokenAmount The amount of project tokens being deposited.
+     * @param user The address of the user depositing the tokens.
+     * @param beneficiary The address of the beneficiary receiving the deposit.
      */
     function _deposit(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal {
         require(!projectTokenInfo[projectToken].isDepositPaused, "PIT: ProjectToken is paused");
@@ -321,13 +460,21 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Decreases the deposited project token amount of the user's deposit position by the given amount,
-     * transfers the given amount of project tokens to the receiver, and returns the amount transferred.
-     * @param projectToken The address of the project token being withdrawn
-     * @param projectTokenAmount The amount of project tokens being withdrawn
-     * @param user The address of the user whose deposit position is being updated
-     * @param receiver The address of the user receiving the withdrawn project tokens
-     * @return The amount of project tokens transferred to the receiver
+     * @dev Calculates and transfers the deposit position of a user for a specific project token.
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - Called by a related contract.
+     *
+     * Effects:
+     * - Decreases the deposited project token amount in the user's deposit position.
+     * - Decreases the total deposited project token amount.
+     * - Transfers the project tokens to the receiver.
+     * @param projectToken The address of the project token.
+     * @param projectTokenAmount The amount of project token to transfer.
+     * @param user The address of the user whose deposit position is being transferred.
+     * @param receiver The address of the receiver of the project token.
+     * @return The amount of project token transferred.
      */
     function calcAndTransferDepositPosition(
         address projectToken,
@@ -342,25 +489,30 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Calculates the deposit position for a user's deposit of a given amount of a project token.
-     * @param projectToken The address of the project token being deposited
-     * @param projectTokenAmount The amount of project tokens being deposited
-     * @param user The address of the user making the deposit
+     * @dev Calculates the deposit position for a user based on the project token, project token amount and user address.
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - Called by a related contract.
+     * @param projectToken The address of the project token.
+     * @param projectTokenAmount The amount of project token.
+     * @param user The address of the user.
      */
     function calcDepositPosition(
         address projectToken,
         uint256 projectTokenAmount,
         address user
-    ) external isProjectTokenListed(projectToken) onlyRelatedContracts onlyRelatedContracts nonReentrant {
+    ) external isProjectTokenListed(projectToken) onlyRelatedContracts nonReentrant {
         _calcDepositPosition(projectToken, projectTokenAmount, user);
+        emit Deposit(user, projectToken, projectTokenAmount, user);
     }
 
     /**
-     * @dev Updates the deposit position of a user by increasing the deposited project token amount
-     * and updating the total deposited project token amount.
-     * @param projectToken The address of the project token being deposited
-     * @param projectTokenAmount The amount of project tokens being deposited
-     * @param beneficiary The address of the user whose deposit position is being updated
+     * @dev Internal function to calculate the deposit position for a given project token, project token amount and beneficiary.
+     * Increases the deposited amount for the beneficiary and project token, and updates the total deposited project token.
+     * @param projectToken The address of the project token.
+     * @param projectTokenAmount The amount of project token being deposited.
+     * @param beneficiary The address of the beneficiary receiving the deposit.
      */
     function _calcDepositPosition(address projectToken, uint256 projectTokenAmount, address beneficiary) internal {
         depositedAmount[beneficiary][projectToken] += projectTokenAmount;
@@ -370,22 +522,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* Withdraw FUNCTION ********************************
 
     /**
-     * @dev Withdraws project tokens from a user's deposit position.
-     * @param projectToken Address of the project token.
-     * @param projectTokenAmount Amount of project tokens to be withdrawn.
-     * @param user Address of the user.
-     * @param beneficiary Address of the beneficiary to receive the withdrawn tokens.
+     * @dev Internal function to withdraw deposited project tokens from the user's deposit position and transfers them to the beneficiary address.
+     * @param projectToken The address of the project token being withdrawn.
+     * @param projectTokenAmount The amount of project tokens being withdrawn.
+     * @param user The address of the user withdrawing the tokens.
+     * @param beneficiary The address where the withdrawn tokens will be transferred to.
      * @return The amount of project tokens withdrawn.
-     * Requirements:
-     ** The project token is not paused for withdrawals.
-     ** The project token amount and deposited project token amount in the user's deposit position is greater than 0.
-     ** The amount of project tokens to be withdrawn is less than or equal to the deposited project token amount in the user's deposit position.
-     ** If the project token amount is type(uint256).max, the deposited project token amount must be greater than or equal to the available collateral to withdraw. Otherwise, the project token amount cannot be greater than the deposited project token amount.
-     ** If there is an outstanding loan in the actual lending token, the withdrawable amount must not make the health factor less than 1.
-     * Effects:
-     ** Decreases the deposited project token amount in the user's deposit position.
-     ** Transfers the withdrawn project tokens to the beneficiary.
-     ** Emits a Withdraw event.
      */
     function _withdraw(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal returns (uint256) {
         require(!projectTokenInfo[projectToken].isWithdrawPaused, "PIT: ProjectToken is paused");
@@ -412,11 +554,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Calculates the collateral available for withdrawal based on the loan-to-value ratio of a specific project token.
-     * @param account Address of the user.
-     * @param projectToken Address of the project token.
-     * @param lendingToken Address of the lending token.
-     * @return collateralProjectToWithdraw The amount of collateral available for withdrawal in the project token.
+     * @dev Calculates the amount of collateral available to withdraw for a given account, project token and lending token.
+     * @param account The address of the account.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return collateralProjectToWithdraw The amount of collateral available to withdraw.
      */
     function getCollateralAvailableToWithdraw(
         address account,
@@ -443,12 +585,22 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         collateralProjectToWithdraw = collateralProjectRemaining >= amountToWithdraw ? amountToWithdraw : collateralProjectRemaining;
     }
 
-    //************* supply FUNCTION ********************************
+    //************* Supply FUNCTION ********************************
 
     /**
-     * @dev Supplies a certain amount of lending tokens to the platform.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be supplied.
+     * @notice Supplies a specified amount of a lending token to the platform.
+     * @dev Allows a user to supply a specified amount of a lending token to the platform.
+     * @param lendingToken The address of the lending token being supplied.
+     * @param lendingTokenAmount The amount of the lending token being supplied.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - The lending token is not paused.
+     * - The lending token amount is greater than 0.
+     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
+     *
+     * Effects:
+     * - Mints the corresponding bLendingTokens and credits them to the user.
      */
     function supply(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
         _supply(lendingToken, lendingTokenAmount, msg.sender);
@@ -456,6 +608,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Supplies a certain amount of lending tokens to the platform from a specific user.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - Called by a related contract.
+     * - The lending token is not paused.
+     * - The lending token amount is greater than 0.
+     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
+     *
+     * Effects:
+     * - Mints the corresponding bLendingTokens and credits them to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be supplied.
      * @param user Address of the user.
@@ -473,13 +635,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be supplied.
      * @param user Address of the user.
-     * Requirements:
-     ** The lending token is not paused.
-     ** The lending token amount is greater than 0.
-     ** Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     * Effects:
-     ** Mints the corresponding bLendingTokens and credits them to the user.
-     ** Emits a Supply event.
      */
     function _supply(address lendingToken, uint256 lendingTokenAmount, address user) internal {
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
@@ -492,10 +647,21 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         emit Supply(user, lendingToken, lendingTokenAmount, address(lendingTokenInfo[lendingToken].bLendingToken), mintedAmount);
     }
 
-    //************* redeem FUNCTION ********************************
+    //************* Redeem FUNCTION ********************************
 
     /**
-     * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to the msg.sender.
+     * @notice Redeems a specified amount of bLendingToken from the platform.
+     * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
+     *
+     * Requirements:
+     * - The lendingToken is listed.
+     * - The lending token should not be paused.
+     * - The bLendingTokenAmount should be greater than zero.
+     * - The redemption of bLendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Burns the bLendingTokens from the user.
+     * - Transfers the corresponding lending tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
      */
@@ -505,6 +671,17 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
+     *
+     * Requirements:
+     * - The lendingToken is listed.
+     _ - Called by a related contract.
+     * - The lending token should not be paused.
+     * - The bLendingTokenAmount should be greater than zero.
+     * - The redemption of bLendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Burns the bLendingTokens from the user.
+     * - Transfers the corresponding lending tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
      * @param user Address of the user.
@@ -522,11 +699,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken Address of the lending token.
      * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
      * @param user Address of the user.
-     * Requirements:
-     ** The lending token should not be paused.
-     ** The bLendingTokenAmount should be greater than zero.
-     ** The redemption of bLendingToken should not result in a redemption error.
-     ** Emits a Redeem event.
      */
     function _redeem(address lendingToken, uint256 bLendingTokenAmount, address user) internal {
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
@@ -538,10 +710,20 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         emit Redeem(user, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), bLendingTokenAmount);
     }
 
-    //************* redeemUnderlying FUNCTION ********************************
+    //************* RedeemUnderlying FUNCTION ********************************
 
     /**
-     * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to the msg.sender.
+     * @notice Redeems a specified amount of lendingToken from the platform.
+     * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to user.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - The lending token should not be paused.
+     * - The lendingTokenAmount should be greater than zero.
+     * - The redemption of lendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Transfers the corresponding underlying tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be redeemed.
      */
@@ -551,6 +733,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - Called by a related contract.
+     * - The lending token should not be paused.
+     * - The lendingTokenAmount should be greater than zero.
+     * - The redemption of lendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Transfers the corresponding underlying tokens to the user.
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be redeemed.
      * @param user Address of the user.
@@ -568,11 +760,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken Address of the lending token.
      * @param lendingTokenAmount Amount of lending tokens to be redeemed.
      * @param user Address of the user.
-     * Requirements:
-     * The lending token should not be paused.
-     * The lendingTokenAmount should be greater than zero.
-     * The redemption of lendingToken should not result in a redemption error.
-     * Emits a RedeemUnderlying event.
      */
     function _redeemUnderlying(address lendingToken, uint256 lendingTokenAmount, address user) internal {
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
@@ -584,16 +771,17 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         emit RedeemUnderlying(user, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), lendingTokenAmount);
     }
 
-    //************* borrow FUNCTION ********************************
+    //************* Borrow FUNCTION ********************************
 
     /**
-     * @dev Internal function to borrow lending tokens.
-     * @param projectToken The address of the project token being used as collateral.
-     * @param lendingToken The address of the lending token being borrowed.
-     * @param lendingTokenAmount The amount of lending tokens to be borrowed.
-     * @param user The address of the user on whose behalf the lending tokens are being borrowed.
+     * @dev Internal function to borrow `lendingTokenAmount` of `lendingToken` for `user` using `projectToken` as collateral.
+     * @param projectToken The address of the collateral token.
+     * @param lendingToken The address of the token to be borrowed.
+     * @param lendingTokenAmount The amount of `lendingToken` to be borrowed.
+     * @param user The address of the user who is borrowing.
+     * @return The amount of `lendingToken` borrowed.
      */
-    function _borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) internal {
+    function _borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) internal returns (uint256) {
         require(!primaryLendingPlatformLeverage.isLeveragePosition(user, projectToken), "PIT: Invalid position");
         require(lendingToken != address(0), "PIT: Invalid lending token");
         require(lendingTokenAmount > 0, "PIT: Invalid lending amount");
@@ -613,10 +801,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         _calcBorrowPosition(user, projectToken, lendingToken, lendingTokenAmount, _lendingToken);
 
         emit Borrow(user, lendingToken, lendingTokenAmount, projectToken, depositedAmount[user][projectToken]);
+        return lendingTokenAmount;
     }
 
     /**
      * @dev Allows a related contract to calculate the new borrow position of a user.
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - The lending token must be listed.
+     * - Called by a related contract.
      * @param borrower The address of the user for whom the borrow position is being calculated.
      * @param projectToken The address of the project token being used as collateral.
      * @param lendingToken The address of the lending token being borrowed.
@@ -631,15 +825,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address currentLendingToken
     ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
         _calcBorrowPosition(borrower, projectToken, lendingToken, lendingTokenAmount, currentLendingToken);
+        emit Borrow(borrower, lendingToken, lendingTokenAmount, projectToken, depositedAmount[borrower][projectToken]);
     }
 
     /**
-     * @dev Increase the borrower's borrow position in a given project and lending token, updating the total borrow statistics
-     * @param borrower The borrower's address
-     * @param projectToken The project token's address
-     * @param lendingToken The lending token's address
-     * @param lendingTokenAmount The amount of lending tokens to borrow
-     * @param currentLendingToken The current lending token used by the borrower for collateral
+     * @dev Increase the borrower's borrow position in a given project and lending token, updating the total borrow statistics.
+     * @param borrower The borrower's address.
+     * @param projectToken The project token's address.
+     * @param lendingToken The lending token's address.
+     * @param lendingTokenAmount The amount of lending tokens to borrow.
+     * @param currentLendingToken The current lending token used by the borrower for collateral.
      */
     function _calcBorrowPosition(
         address borrower,
@@ -679,7 +874,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 availableToBorrowInUSD = limitBorrowPerCollateral < limitBorrowPerLendingToken
             ? limitBorrowPerCollateral
             : limitBorrowPerLendingToken;
-        if (availableToBorrowInUSD > pitRemainingValue) {
+        if (availableToBorrowInUSD >= pitRemainingValue) {
             availableToBorrowInUSD = pitRemainingValue;
         }
 
@@ -687,31 +882,55 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         availableToBorrow = (availableToBorrowInUSD * (10 ** lendingTokenDecimals)) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
     }
 
-    //************* repay FUNCTION ********************************
+    //************* Repay FUNCTION ********************************
 
     /**
+     * @notice Repays a specified amount of lendingToken for a given project token and lending token.
      * @dev Allows a borrower to repay their outstanding loan for a given project token and lending token.
-     * @param projectToken The project token's address
-     * @param lendingToken The lending token's address
-     * @param lendingTokenAmount The amount of lending tokens to repay
-     * @return amount of lending tokens actually repaid
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - The lending token must be listed.
+     * - The lending amount must be greater than 0.
+     * - The borrower must have an outstanding loan for the given project and lending token before.
+     *
+     * Effects:
+     * Updates the interest in the borrower's borrow positions for the given `lendingToken`.
+     * - Repays the specified `lendingTokenAmount` towards the borrower's loan.
+     * - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
+     * @param projectToken The project token's address.
+     * @param lendingToken The lending token's address.
+     * @param lendingTokenAmount The amount of lending tokens to repay.
+     * @return amount of lending tokens actually repaid.
      */
     function repay(
         address projectToken,
         address lendingToken,
         uint256 lendingTokenAmount
-    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) returns (uint256) {
+    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant() returns (uint256) {
         return _repay(msg.sender, msg.sender, projectToken, lendingToken, lendingTokenAmount);
     }
 
     /**
      * @dev Allows a related contract to repay the outstanding loan for a given borrower's project token and lending token.
-     * @param projectToken The project token's address
-     * @param lendingToken The lending token's address
-     * @param lendingTokenAmount The amount of lending tokens to repay
-     * @param repairer The address that initiated the repair transaction
-     * @param borrower The borrower's address
-     * @return amount of lending tokens actually repaid
+     *
+     * Requirements:
+     * - The project token must be listed.
+     * - The lending token must be listed.
+     * - Called by a related contract.
+     * - The lending amount must be greater than 0.
+     * - The borrower must have an outstanding loan for the given project and lending token before.
+     *
+     * Effects:
+     * Updates the interest in the borrower's borrow positions for the given `lendingToken`.
+     * - Repays the specified `lendingTokenAmount` towards the borrower's loan.
+     * - May fully or partially repay the borrow position, depending on the repayment amount and outstanding loan.
+     * @param projectToken The project token's address.
+     * @param lendingToken The lending token's address.
+     * @param lendingTokenAmount The amount of lending tokens to repay.
+     * @param repairer The address that initiated the repair transaction.
+     * @param borrower The borrower's address.
+     * @return amount of lending tokens actually repaid.
      */
     function repayFromRelatedContract(
         address projectToken,
@@ -719,18 +938,18 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 lendingTokenAmount,
         address repairer,
         address borrower
-    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) returns (uint256) {
+    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant() returns (uint256) {
         return _repay(repairer, borrower, projectToken, lendingToken, lendingTokenAmount); // under normal conditions: repairer == borrower
     }
 
     /**
-     * @dev This function is called internally to handle the repayment of a borrower's outstanding loan.
-     * @param repairer The address that initiated the repair transaction
-     * @param borrower The borrower's address
-     * @param projectToken The project token's address
-     * @param lendingToken The lending token's address
-     * @param lendingTokenAmount The amount of lending tokens to repay
-     * @return amount of lending tokens actually repaid
+     * @dev Internal function to handle the repayment of a borrower's outstanding loan.
+     * @param repairer The address that initiated the repair transaction.
+     * @param borrower The borrower's address.
+     * @param projectToken The project token's address.
+     * @param lendingToken The lending token's address.
+     * @param lendingTokenAmount The amount of lending tokens to repay.
+     * @return amount of lending tokens actually repaid.
      */
     function _repay(
         address repairer,
@@ -775,10 +994,10 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     /**
      * @dev This function is called internally to fully repay a borrower's outstanding loan.
-     * @param borrower The borrower's address
-     * @param projectToken The project token's address
-     * @param lendingToken The lending token's address
-     * @param borrowPositionInfo The borrower's borrowing position for the given project and lending token
+     * @param borrower The borrower's address.
+     * @param projectToken The project token's address.
+     * @param lendingToken The lending token's address.
+     * @param borrowPositionInfo The borrower's borrowing position for the given project and lending token.
      * @return True.
      */
     function _repayFully(
@@ -876,12 +1095,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* VIEW FUNCTIONS ********************************
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened
+     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened.
+     *
+     * Formula: pit = $ * LVR of position.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @param lendingToken Address of the lending token.
      * @return The PIT value.
-     * Formula: pit = $ * LVR
      */
     function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
@@ -890,11 +1110,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened
+     * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened.
+     *
+     * Formula: pit = $ * LVR of project token.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @return The PIT value.
-     * Formula: pit = $ * LVR
      */
     function pitCollateral(address account, address projectToken) public view returns (uint256) {
         uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
@@ -904,21 +1125,21 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the actual lending token of a user's borrow position for a specific project token
-     * @param user The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @return actualLendingToken The address of the actual lending token
+     * @dev Returns the actual lending token of a user's borrow position for a specific project token.
+     * @param user The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @return actualLendingToken The address of the actual lending token.
      */
     function getLendingToken(address user, address projectToken) public view returns (address actualLendingToken) {
         actualLendingToken = lendingTokenPerCollateral[user][projectToken];
     }
 
     /**
-     * @dev Returns the remaining PIT (primary index token) of a user's borrow position
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return remaining The remaining PIT of the user's borrow position
+     * @dev Returns the remaining PIT (primary index token) of a user's borrow position.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return remaining The remaining PIT of the user's borrow position.
      */
     function pitRemaining(address account, address projectToken, address lendingToken) public view returns (uint256 remaining) {
         remaining = lendingToken == address(0)
@@ -927,12 +1148,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the remaining PIT (primary index token) of a user's borrow position for a specific project token and lending token
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @param pitValue The PIT of the user's borrow position
-     * @return remaining PIT of the user's borrow position
+     * @dev Internal function to return the remaining PIT (primary index token) of a user's borrow position for a specific project token and lending token.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param pitValue The PIT of the user's borrow position.
+     * @return remaining The remaining PIT of the user's borrow position.
      */
     function _pitRemaining(address account, address projectToken, address lendingToken, uint256 pitValue) internal view returns (uint256) {
         if (pitValue > 0) {
@@ -945,11 +1166,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the total outstanding amount of a user's borrow position for a specific project token and lending token
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return total outstanding amount of the user's borrow position
+     * @dev Returns the total outstanding amount of a user's borrow position for a specific project token and lending token.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return total outstanding amount of the user's borrow position.
      */
     function totalOutstanding(address account, address projectToken, address lendingToken) public view returns (uint256) {
         BorrowPosition memory borrowPositionInfo = borrowPosition[account][projectToken][lendingToken];
@@ -957,12 +1178,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the health factor of a user's borrow position for a specific project token and lending token
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return numerator The numerator of the health factor
-     * @return denominator The denominator of the health factor
+     * @dev Returns the health factor of a user's borrow position for a specific project token and lending token.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return numerator The numerator of the health factor.
+     * @return denominator The denominator of the health factor.
      */
     function healthFactor(address account, address projectToken, address lendingToken) public view returns (uint256 numerator, uint256 denominator) {
         numerator = pit(account, projectToken, lendingToken);
@@ -970,41 +1191,41 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the evaluation of a specific token amount in USD
-     * @param token The address of the token to evaluate
-     * @param tokenAmount The amount of the token to evaluate
-     * @return The evaluated token amount in USD
+     * @dev Returns the price of a specific token amount in USD.
+     * @param token The address of the token to evaluate.
+     * @param tokenAmount The amount of the token to evaluate.
+     * @return The evaluated token amount in USD.
      */
     function getTokenEvaluation(address token, uint256 tokenAmount) public view returns (uint256) {
         return priceOracle.getEvaluation(token, tokenAmount);
     }
 
     /**
-     * @dev Returns the length of the lending tokens array
-     * @return The length of the lending tokens array
+     * @dev Returns the length of the lending tokens array.
+     * @return The length of the lending tokens array.
      */
     function lendingTokensLength() public view returns (uint256) {
         return lendingTokens.length;
     }
 
     /**
-     * @dev Returns the length of the project tokens array
-     * @return The length of the project tokens array
+     * @dev Returns the length of the project tokens array.
+     * @return The length of the project tokens array.
      */
     function projectTokensLength() public view returns (uint256) {
         return projectTokens.length;
     }
 
     /**
-     * @dev Returns the details of a user's borrow position for a specific project token and lending token
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return depositedProjectTokenAmount The amount of project tokens deposited by the user
-     * @return loanBody The amount of the lending token borrowed by the user
-     * @return accrual The accrued interest of the borrow position
-     * @return healthFactorNumerator The numerator of the health factor
-     * @return healthFactorDenominator The denominator of the health factor
+     * @dev Returns the details of a user's borrow position for a specific project token and lending token.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return depositedProjectTokenAmount The amount of project tokens deposited by the user.
+     * @return loanBody The amount of the lending token borrowed by the user.
+     * @return accrual The accrued interest of the borrow position.
+     * @return healthFactorNumerator The numerator of the health factor.
+     * @return healthFactorDenominator The denominator of the health factor.
      */
     function getPosition(
         address account,
@@ -1043,10 +1264,10 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the amount of project tokens deposited by a user for a specific project token and collateral token
-     * @param projectToken The address of the project token
-     * @param user The address of the user
-     * @return amount of project tokens deposited by the user
+     * @dev Returns the amount of project tokens deposited by a user for a specific project token and collateral token.
+     * @param projectToken The address of the project token.
+     * @param user The address of the user.
+     * @return amount of project tokens deposited by the user.
      */
     function getDepositedAmount(address projectToken, address user) public view returns (uint) {
         return depositedAmount[user][projectToken];
@@ -1062,9 +1283,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Get total borrow amount in USD per collateral for a specific project token
-     * @param projectToken The address of the project token
-     * @return The total borrow amount in USD
+     * @dev Gets total borrow amount in USD per collateral for a specific project token.
+     * @param projectToken The address of the project token.
+     * @return The total borrow amount in USD.
      */
     function getTotalBorrowPerCollateral(address projectToken) public view returns (uint) {
         require(lendingTokensLength() > 0, "PIT: List lendingTokens is empty");
@@ -1079,9 +1300,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Get total borrow amount in USD for a specific lending token
-     * @param lendingToken The address of the lending token
-     * @return The total borrow amount in USD
+     * @dev Gets total borrow amount in USD for a specific lending token.
+     * @param lendingToken The address of the lending token.
+     * @return The total borrow amount in USD.
      */
     function getTotalBorrowPerLendingToken(address lendingToken) public view returns (uint) {
         uint256 amount = totalBorrowPerLendingToken[lendingToken];
@@ -1089,11 +1310,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Convert the total outstanding amount of a user's borrow position to USD
-     * @param account The address of the user account
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return The total outstanding amount in USD
+     * @dev Converts the total outstanding amount of a user's borrow position to USD.
+     * @param account The address of the user account.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return The total outstanding amount in USD.
      */
     function totalOutstandingInUSD(address account, address projectToken, address lendingToken) public view returns (uint256) {
         (, uint256 loanBody, uint256 accrual, , ) = getPosition(account, projectToken, lendingToken);
@@ -1102,11 +1323,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Get the loan to value ratio of a position taken by a project token and a lending token
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @return lvrNumerator The numerator of the loan to value ratio
-     * @return lvrDenominator The denominator of the loan to value ratio
+     * @dev Gets the loan to value ratio of a position made by a project token and a lending token.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @return lvrNumerator The numerator of the loan to value ratio.
+     * @return lvrDenominator The denominator of the loan to value ratio.
      */
     function getLoanToValueRatio(address projectToken, address lendingToken) public view returns (uint256 lvrNumerator, uint256 lvrDenominator) {
         Ratio memory lvrProjectToken = projectTokenInfo[projectToken].loanToValueRatio;

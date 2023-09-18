@@ -10,6 +10,11 @@ import "../paraswap/interfaces/IParaSwapAugustus.sol";
 import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 import "../interfaces/IPrimaryLendingPlatform.sol";
 
+/**
+ * @title PrimaryLendingPlatformLeverageCore.
+ * @notice The PrimaryLendingPlatformLeverageCore contract is the core contract for the leverage functionality of the primary lending platform.
+ * @dev Contract that allows users to leverage their positions using the exchange aggregator.
+ */
 abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
@@ -30,6 +35,18 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         MARGIN_TRADE
     }
 
+    /**
+     * @dev Emitted when a user leverages their borrowing position.
+     * @param user The address of the user who leveraged their position.
+     * @param projectToken The address of the project token being used for leverage.
+     * @param lendingToken The address of the lending token being used for leverage.
+     * @param notionalExposure The total notional exposure of the user's position.
+     * @param lendingAmount The amount of the lending token being borrowed.
+     * @param margin The margin required for the leverage.
+     * @param addingAmount The amount of the project token being added to the position.
+     * @param totalDepositedAmount The total amount of the project token deposited in the position.
+     * @param amountReceive The amount of the lending token received by the user after the leverage.
+     */
     event LeveragedBorrow(
         address user,
         address projectToken,
@@ -41,11 +58,16 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         uint256 totalDepositedAmount,
         uint256 amountReceive
     );
+
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new primary lending platform address.
+     */
     event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
 
     /**
-     * @notice Initializes the contract with the given parameters.
-     * @dev This function is called only once when deploying the contract.
+     * @dev Initializes the contract with the given parameters.
+     * This function is called only once when deploying the contract.
      * @param pit The address of the primary index token contract.
      */
     function initialize(address pit) public initializer {
@@ -56,49 +78,73 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         primaryLendingPlatform = IPrimaryLendingPlatform(pit);
     }
 
+    /**
+     * @dev Modifier to restrict access to only the contract admin.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PITLeverage: Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier to restrict access to only the contract moderator.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "PITLeverage: Caller is not the Moderator");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the given project token is listed on the primary lending platform.
+     * @param projectToken The address of the project token to check.
+     */
     modifier isProjectTokenListed(address projectToken) {
         require(primaryLendingPlatform.projectTokenInfo(projectToken).isListed, "PITLeverage: Project token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the given lending token is listed on the primary lending platform.
+     * @param lendingToken The address of the lending token to check.
+     */
     modifier isLendingTokenListed(address lendingToken) {
         require(primaryLendingPlatform.lendingTokenInfo(lendingToken).isListed, "PITLeverage: Lending token is not listed");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the caller is the primary lending platform contract.
+     */
     modifier isPrimaryLendingPlatform() {
         require(msg.sender == address(primaryLendingPlatform), "PITLeverage: Caller is not primaryLendingPlatform");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the caller is a related contract of the primary lending platform.
+     */
     modifier onlyRelatedContracts() {
         require(primaryLendingPlatform.getRelatedContract(msg.sender), "PITLeverage: Caller is not related Contract");
         _;
     }
 
     /**
-     * @notice Updates the primary index token contract address.
-     * @dev Only a moderator can call this function.
-     * @param newPrimaryLendingPlatform The new address of the primary index token contract.
+     * @dev Sets the address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - Only the moderator can call this function.
+     * - The new primary lending platform address cannot be the zero address.
+     * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
      */
     function setPrimaryLendingPlatformAddress(address newPrimaryLendingPlatform) external onlyModerator {
         require(newPrimaryLendingPlatform != address(0), "PITLeverage: Invalid address");
+        primaryLendingPlatform = IPrimaryLendingPlatform(newPrimaryLendingPlatform);
         emit SetPrimaryLendingPlatform(newPrimaryLendingPlatform);
     }
 
     /**
-     * @notice Retrieves the price of the given token in USD.
-     * @param token The address of the token to retrieve the price for.
+     * @dev Returns the price of a given token in USD.
+     * @param token The address of the token to get the price of.
      * @return price The price of the token in USD.
      */
     function getTokenPrice(address token) public view returns (uint256 price) {
@@ -107,7 +153,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Checks if the given margin, exposure, and LVR values form a valid collateralization.
+     * @dev Checks if the given margin, exposure, and LVR values form a valid collateralization.
      * @param margin The margin amount.
      * @param exp The exposure amount.
      * @param lvrNumerator The numerator of the loan-to-value ratio.
@@ -131,7 +177,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Calculates the health factor numerator and denominator based on the given parameters.
+     * @dev Calculates the health factor numerator and denominator based on the given parameters.
      * @param expAmount The exposure amount.
      * @param margin The margin amount.
      * @param borrowAmount The borrowed amount.
@@ -152,8 +198,9 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Calculates the margin amount for a given position and safety margin.
-     * Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
+     * @dev Calculates the margin amount for a given position and safety margin.
+     *
+     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param safetyMarginNumerator The numerator of the safety margin ratio.
@@ -176,7 +223,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Deletes a leverage position for a user and project token.
+     * @dev Deletes a leverage position for a user and project token.
+     * The caller must be the primary lending platform.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      */
@@ -185,8 +233,9 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-     * Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
+     * @dev Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
+     *
+     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
      * @param margin The margin amount.
@@ -207,10 +256,15 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Defers the liquidity check for a given user, project token, and lending token.
+     * @dev Internal function to defer the liquidity check for a given user, project token, and lending token.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
+     *
+     * Requirements:
+     * - `totalOutstandingInUSD` must be less than or equal to `pit`.
+     * - `newTotalBorrowPerCollateral` must be less than or equal to `borrowLimitPerCollateral`.
+     * - `newTotalBorrowPerLendingToken` must be less than or equal to `borrowLimitPerLendingToken`.
      */
     function _deferLiquidityCheck(address user, address projectToken, address lendingToken) internal view {
         uint256 pit = primaryLendingPlatform.pit(user, projectToken, lendingToken);
@@ -225,10 +279,10 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Performs a naked borrow operation for a user with the given lending token and amount.
-     * @param user The address of the user.
-     * @param lendingToken The address of the lending token.
-     * @param lendingTokenAmount The amount of lending token to be borrowed.
+     * @dev Internal function to execute a naked borrow operation, updating the interest in borrow positions for the user and calculating the borrow position.
+     * @param user The address of the user performing the borrow operation.
+     * @param lendingToken The address of the token being borrowed.
+     * @param lendingTokenAmount The amount of the token being borrowed.
      * @param projectToken The address of the project token.
      * @param currentLendingToken The address of the current lending token.
      */
@@ -246,7 +300,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Buys tokens on ParaSwap and returns the received amount.
+     * @dev Internal function to execute a buy order on the exchange aggregator contract and returns the amount of tokens received.
      * @param tokenTo The address of the token to buy.
      * @param buyCalldata The calldata required for the ParaSwap operation.
      * @return amountReceive The amount of tokens received after the ParaSwap operation.
@@ -267,7 +321,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Approves a specified amount of tokens to be transferred by the token transfer proxy.
+     * @dev Internal function to approve a specified amount of tokens to be transferred by the token transfer proxy.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
@@ -279,13 +333,13 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Collateralize a loan with the specified parameters.
+     * @notice Internal function to collateralize a loan with the specified parameters.
      * @param user The address of the user taking the loan.
      * @param projectToken The address of the project token to be collateralize.
      * @param collateralTokenCount The amount of collateral tokens being provided.
-     * @param marginCollateralCount The margin collateral amount.
-     * @return totalCollateral The total amount of collateral tokens.
-     * @return addingAmount The additional collateral amount needed.
+     * @param marginCollateralCount The amount of margin collateral being used.
+     * @return totalCollateral The total amount of collateral tokens after adding the margin collateral.
+     * @return addingAmount The amount of margin collateral being added to the collateral tokens.
      */
     function _collateralizeLoan(
         address user,
@@ -315,7 +369,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Checks if the specified user has a valid position for the given project and lending tokens.
+     * @notice Internal function to check if the specified user has a valid position for the given project and lending tokens.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
@@ -335,16 +389,14 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Executes a leveraged borrow for the borrower on the specified projectToken using the given lendingToken.
-     * @dev This function checks for a valid lending token, a valid Augustus address, calculates the lendingTokenCount, and performs a naked borrow.
-     * It also approves the token transfer proxy, buys tokens on ParaSwap, collateralize the loan, and defers liquidity check.
-     * Finally, it emits a LeveragedBorrow event.
-     * @param projectToken The address of the token being borrowed.
-     * @param lendingToken The address of the token being used as collateral.
+     * @dev Internal function to be called when a user wants to leverage their position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
-     * @param buyCalldata The calldata for the ParaSwap buy operation.
+     * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
      * @param borrower The address of the borrower who's creating the leverage position.
+     * @param leverageType The type of leverage position.
      */
     function _leveragedBorrow(
         address projectToken,
@@ -392,7 +444,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Get type of Leverage Position for given borrower and projectToken.
+     * @dev Gets type of Leverage Position for given borrower and projectToken.
      * @param borrower The address of the borrower who's creating the leverage position
      * @param projectToken The address of the token being used as collateral.
      * @return type of leverage position or max of uint8 if leverage position is not exist.

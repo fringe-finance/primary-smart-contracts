@@ -1,5 +1,5 @@
 
-const { deploymentPriceOracle } = require("./deploymentPriceProividerAggregator.js");
+const { deploymentPriceOracle } = require("./deploymentPriceProviderAggregator.js");
 
 async function main() {
     await deploymentPriceOracle();

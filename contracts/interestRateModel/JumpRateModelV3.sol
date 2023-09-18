@@ -8,17 +8,33 @@ import "./InterestRateModel.sol";
 import "../bToken/BTokenInterfaces.sol";
 
 /**
- * @title Logic for Compound's JumpRateModel Contract V2.
- * @author Compound (modified by Dharma Labs, refactored by Arr00)
- * @notice Version 2 modifies Version 1 by enabling updateable parameters.
+ * @title JumpRateModel Contract V3.
+ * @notice V3 interest rate Model.
  */
 contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgradeable {
     using SafeMath for uint;
 
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
+    /**
+     * @dev Emitted when the owner of the interest rate model is updated.
+     * @param gainPerBlock The new gainPerBlock.
+     * @param jumGainPerBlock The new jumGainPerBlock.
+     * @param targetUtil The new targetUtil.
+     */
     event NewInterestParams(uint256 gainPerBlock, uint256 jumGainPerBlock, uint256 targetUtil);
-    event NewOwner(address newOner);
+
+    /**
+     * @dev Emitted when the owner of the contract is updated.
+     * @param newOwner The address of the new owner.
+     */
+    event NewOwner(address newOwner);
+
+    /**
+     * @dev Emitted when a new interest rate is set.
+     * @param appliedBlock The block number at which the interest rate was applied.
+     * @param interestRate The new interest rate.
+     */
     event NewInterest(uint256 appliedBlock, uint256 interestRate);
 
     struct BlendingTokenInfo {
@@ -34,30 +50,40 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice The approximate number of blocks per year that is assumed by the interest rate model
+     * @dev The approximate number of blocks per year that is assumed by the interest rate model.
      */
     uint256 public blocksPerYear;
     mapping(address => BlendingTokenInfo) public blendingTokenInfo;
     mapping(address => RateInfo) public rateInfo;
     mapping(address => bool) public isBlendingTokenSupport;
 
+    /**
+     * @dev Modifier to restrict access to only the blending token contract.
+     */
     modifier onlyBlendingToken() {
         require(isBlendingTokenSupport[msg.sender], "Caller is not Blending token");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the caller is the default admin role.
+     */
     modifier onlyAdmin() {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
         _;
     }
 
+    /**
+     * @dev Modifier to check if the caller has the moderator role.
+     */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
 
     /**
-     * @notice Construct an interest rate model
+     * @dev Constructs an interest rate model.
+     * @param blocksPerYear_ Number of blocks in a year for compounding.
      */
     function initialize(uint256 blocksPerYear_) public initializer {
         __AccessControl_init();
@@ -68,10 +94,20 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
 
     //************* ADMIN FUNCTIONS ********************************
 
+    /**
+     * @dev Grants the `MODERATOR_ROLE` to a new address.
+     * The caller must have the `ADMIN_ROLE`.
+     * @param newModerator The address to grant the role to.
+     */
     function grandModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
+    /**
+     * @dev Revokes the moderator role from the specified address.
+     * The caller must have the admin role.
+     * @param moderator The address of the moderator to revoke the role from.
+     */
     function revokeModerator(address moderator) public onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
     }
@@ -79,19 +115,37 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     //************* MODERATOR FUNCTIONS ********************************
 
     /**
-     * @notice Update the parameters of the interest rate model (only callable by owner, i.e. Timelock)
-     * @param gainPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18)
-     * @param jumGainPerYear The jumGainPerBlock after hitting a specified utilization point
-     * @param targetUtil_ The utilization point at which the jump multiplier is applied
+     * @dev Updates the parameters of the interest rate model (only callable by owner, i.e. Timelock).
+     * Only the contract moderator can call this function.
+     * @param gainPerYear The rate of increase in interest rate wrt utilization (scaled by 1e18).
+     * @param jumGainPerYear The jumGainPerBlock after hitting a specified utilization point.
+     * @param targetUtil_ The utilization point at which the jump multiplier is applied.
      */
     function updateJumpRateModel(uint256 gainPerYear, uint256 jumGainPerYear, uint256 targetUtil_, address blendingToken) external onlyModerator {
         updateJumpRateModelInternal(gainPerYear, jumGainPerYear, targetUtil_, blendingToken);
     }
 
+    /**
+     * @dev Sets the number of blocks per year for the JumpRateModelV3 contract.
+     * Only the contract moderator can call this function.
+     * @param blocksPerYear_ The new number of blocks per year.
+     */
     function setBlockPerYear(uint256 blocksPerYear_) external onlyModerator {
         blocksPerYear = blocksPerYear_;
     }
 
+    /**
+     * @dev Adds support for a new blending token to the JumpRateModelV3 contract.
+     *
+     * Requirements:
+     * - `blendingToken` cannot be the zero address.
+     * - Only the contract moderator can call this function.
+     * @param blendingToken The address of the blending token to add support for.
+     * @param gainPerYear The gain per year for the blending token.
+     * @param jumGainPerYear The jump gain per year for the blending token.
+     * @param targetUtil_ The target utilization rate for the blending token.
+     * @param newMaxBorrow The new maximum borrow rate for the blending token.
+     */
     function addBLendingTokenSuport(
         address blendingToken,
         uint256 gainPerYear,
@@ -106,17 +160,42 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
         updateBlockNumber(blendingToken);
     }
 
+    /**
+     * @dev Removes blending token support for the specified blending token address.
+     *
+     * Requirements:
+     * - `_blending` cannot be the zero address.
+     * - `_blending` must be a supported blending token.
+     * @param _blending The address of the blending token to remove support for.
+     */
     function removeBLendingTokenSuport(address _blending) external onlyModerator {
         require(_blending != address(0), "JumpRateModelV3: Invalid address");
         require(isBlendingTokenSupport[_blending], "JumpRateModelV3: Not found");
         isBlendingTokenSupport[_blending] = false;
     }
 
+    /**
+     * @dev Sets the maximum borrow rate for a blending token.
+     *
+     * Requirements:
+     * - The caller must have the `onlyModerator` modifier.
+     * - The blending token must be supported by the contract.
+     * @param blendingToken The address of the blending token.
+     * @param newMaxBorrow The new maximum borrow rate to be set.
+     */
     function setMaxBorrowRate(address blendingToken, uint256 newMaxBorrow) external onlyModerator {
         require(isBlendingTokenSupport[blendingToken], "JumpRateModelV3: Not found");
         rateInfo[blendingToken].maxBorrowRate = newMaxBorrow;
     }
 
+    /**
+     * @dev Updates the block number for a given blending token.
+     *
+     * Requirements:
+     * - The caller must have the `onlyModerator` modifier.
+     * - The blending token must be supported.
+     * @param blendingToken The address of the blending token to update.
+     */
     function updateBlockNumber(address blendingToken) public onlyModerator {
         require(isBlendingTokenSupport[blendingToken], "JumpRateModelV3: Not found");
         uint256 blockNumber = BTokenInterface(blendingToken).accrualBlockNumber();
@@ -124,11 +203,11 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the utilization rate of the market: `borrows / (cash + borrows - reserves)`
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market (currently unused)
-     * @return The utilization rate as a mantissa between [0, 1e18]
+     * @dev Calculates the utilization rate of the market: `borrows / (cash + borrows - reserves)`.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market (currently unused).
+     * @return The utilization rate as a mantissa between [0, 1e18].
      */
     function utilizationRate(uint256 cash, uint256 borrows, uint256 reserves) public pure returns (uint) {
         // Utilization rate is 0 when there are no borrows
@@ -140,11 +219,11 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the change in the interest rate per block per block
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @return The change in the interest rate per block per block as a mantissa (scaled by 1e18)
+     * @dev Calculates the change in the interest rate per block per block.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market.
+     * @return The change in the interest rate per block per block as a mantissa (scaled by 1e18).
      */
     function getInterestRateChange(uint256 cash, uint256 borrows, uint256 reserves, address blendingToken) public view returns (int) {
         BlendingTokenInfo memory info = blendingTokenInfo[blendingToken];
@@ -169,17 +248,22 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
         return interestRateChange;
     }
 
+    /**
+     * @dev Calculates the number of blocks elapsed since the last accrual.
+     * @param blendingToken The address of the blending token.
+     * @return elapsedBlocks The number of elapsed blocks.
+     */
     function getElapsedBlocks(address blendingToken) internal view returns (uint256 elapsedBlocks) {
         /* Calculate the number of blocks elapsed since the last accrual */
         elapsedBlocks = getBlockNumber().sub(rateInfo[blendingToken].lastAccrualBlockNumber);
     }
 
     /**
-     * @notice Calculates the current borrow rate, with the error code expected by the market
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @return The borrow rate percentage as a mantissa (scaled by 1e18)
+     * @dev Calculates the current borrow rate, with the error code expected by the market.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market.
+     * @return The borrow rate percentage as a mantissa (scaled by 1e18).
      */
     function getBorrowRateInternal(uint256 cash, uint256 borrows, uint256 reserves, address blendingToken) internal view returns (uint) {
         RateInfo memory borrowRateInfo = rateInfo[blendingToken];
@@ -208,19 +292,19 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @dev Function to simply retrieve block number
-     *  This exists mainly for inheriting test contracts to stub this result.
+     * @dev Function to simply retrieve block number.
+     * This exists mainly for inheriting test contracts to stub this result.
      */
     function getBlockNumber() public view returns (uint) {
         return block.number;
     }
 
     /**
-     * @notice Calculates the current borrow rate per block, with the error code expected by the market
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
+     * @dev Calculates the current borrow rate per block, with the error code expected by the market.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market.
+     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18).
      */
     function storeBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public override onlyBlendingToken returns (uint) {
         RateInfo storage borrowRateInfo = rateInfo[msg.sender];
@@ -235,12 +319,12 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the current supply rate per block
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @param reserveFactorMantissa The current reserve factor for the market
-     * @return The supply rate percentage per block as a mantissa (scaled by 1e18)
+     * @dev Calculates the current supply rate per block.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market.
+     * @param reserveFactorMantissa The current reserve factor for the market.
+     * @return The supply rate percentage per block as a mantissa (scaled by 1e18).
      */
     function getSupplyRate(
         uint256 cash,
@@ -261,21 +345,21 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @notice Calculates the current borrow rate per block
-     * @param cash The amount of cash in the market
-     * @param borrows The amount of borrows in the market
-     * @param reserves The amount of reserves in the market
-     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18)
+     * @dev Calculates the current borrow rate per block.
+     * @param cash The amount of cash in the market.
+     * @param borrows The amount of borrows in the market.
+     * @param reserves The amount of reserves in the market.
+     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18).
      */
     function getBorrowRate(uint256 cash, uint256 borrows, uint256 reserves, address blendingToken) external view override returns (uint) {
         return getBorrowRateInternal(cash, borrows, reserves, blendingToken);
     }
 
     /**
-     * @notice Internal function to update the parameters of the interest rate model
-     * gainPerYear The gain factor
-     * jumGainPerYear The jump gain that only applies if Cu > Tu
-     * targetUtil_ The target utilisation rate
+     * @dev Internal function to update the parameters of the interest rate model.
+     * gainPerYear The gain factor.
+     * jumGainPerYear The jump gain that only applies if Cu > Tu.
+     * targetUtil_ The target utilization rate.
      */
     function updateJumpRateModelInternal(uint256 gainPerYear, uint256 jumGainPerYear, uint256 targetUtil_, address blendingToken) internal {
         BlendingTokenInfo storage info = blendingTokenInfo[blendingToken];

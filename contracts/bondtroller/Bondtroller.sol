@@ -11,6 +11,7 @@ import "../interfaces/IPriceProviderAggregator.sol";
 /**
  * @title Remastered from Compound's Bondtroller Contract
  * @author Bonded
+ * @dev Contract for managing the Bond market and its associated BToken contracts.
  */
 contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, ExponentialNoError, Initializable {
     /// @notice Emitted when an admin supports a market
@@ -51,6 +52,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /// @notice the address of primary index token
     address public primaryLendingPlatform;
 
+    /**
+     * @dev Initializes the Bondtroller contract by setting the admin to the sender's address and setting the pause guardian to the admin.
+     */
     function init() public initializer {
         admin = msg.sender;
         setPauseGuardian(admin);
@@ -64,6 +68,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         _;
     }
 
+    /**
+     * @dev Returns the address of the primary lending platform.
+     * @return The address of the primary lending platform.
+     */
     function getPrimaryLendingPlatformAddress() external view returns (address) {
         return primaryLendingPlatform;
     }
@@ -71,9 +79,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /*** Assets You Are In ***/
 
     /**
-     * @notice Returns the assets an account has entered
-     * @param account The address of the account to pull assets for
-     * @return A dynamic list with the assets the account has entered
+     * @dev Returns the assets an account has entered.
+     * @param account The address of the account to pull assets for.
+     * @return A dynamic list with the assets the account has entered.
      */
     function getAssetsIn(address account) external view returns (BToken[] memory) {
         BToken[] memory assetsIn = accountAssets[account];
@@ -82,15 +90,19 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Returns whether the given account is entered in the given asset
-     * @param account The address of the account to check
-     * @param bToken The bToken to check
+     * @dev Returns whether the given account is entered in the given asset.
+     * @param account The address of the account to check.
+     * @param bToken The bToken to check.
      * @return True if the account is in the asset, otherwise false.
      */
     function checkMembership(address account, BToken bToken) external view returns (bool) {
         return accountMembership[account][address(bToken)];
     }
 
+    /**
+     * @dev Changes the admin address of the Bondtroller contract.
+     * @param newAdmin The new admin address to be set.
+     */
     function changeAdmin(address newAdmin) external {
         require(msg.sender == admin && newAdmin != address(0), "Bondtroller: Invalid address");
         admin = newAdmin;
@@ -98,9 +110,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Add assets to be included in account liquidity calculation
-     * @param bTokens The list of addresses of the bToken markets to be enabled
-     * @return Success indicator for whether each corresponding market was entered
+     * @dev Add assets to be included in account liquidity calculation.
+     * @param bTokens The list of addresses of the bToken markets to be enabled.
+     * @return Success indicator for whether each corresponding market was entered.
      */
     function enterMarkets(address[] memory bTokens) public onlyPrimaryLendingPlatform returns (uint256[] memory) {
         uint256 len = bTokens.length;
@@ -116,19 +128,20 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Add asset to be included in account liquidity calculation
-     * @param bToken The address of the bToken markets to be enabled
-     * @param borrower The address of user, which enters to market
+     * @dev Allows a borrower to enter a market by adding the corresponding BToken to the market and updating the borrower's status.
+     * @param bToken The address of the BToken to add to the market.
+     * @param borrower The address of the borrower to update status for.
+     * @return An Error code indicating if the operation was successful or not.
      */
     function enterMarket(address bToken, address borrower) public onlyPrimaryLendingPlatform returns (Error) {
         return addToMarketInternal(BToken(bToken), borrower);
     }
 
     /**
-     * @notice Add the market to the borrower's "assets in" for liquidity calculations
-     * @param bToken The market to enter
-     * @param borrower The address of the account to modify
-     * @return Success indicator for whether the market was entered
+     * @dev Adds the market to the borrower's "assets in" for liquidity calculations.
+     * @param bToken The market to enter.
+     * @param borrower The address of the account to modify.
+     * @return Success indicator for whether the market was entered.
      */
     function addToMarketInternal(BToken bToken, address borrower) internal returns (Error) {
         Market storage marketToJoin = markets[address(bToken)];
@@ -157,11 +170,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Removes asset from sender's account liquidity calculation
-     * @dev Sender must not have an outstanding borrow balance in the asset,
-     *  or be providing necessary collateral for an outstanding borrow.
-     * @param cTokenAddress The address of the asset to be removed
-     * @return Whether or not the account successfully exited the market
+     * @dev Removes asset from sender's account liquidity calculation.
+     * Sender must not have an outstanding borrow balance in the asset,
+     * or be providing necessary collateral for an outstanding borrow.
+     * @param cTokenAddress The address of the asset to be removed.
+     * @return Whether or not the account successfully exited the market.
      */
     function exitMarket(address cTokenAddress) external onlyPrimaryLendingPlatform returns (uint) {
         BToken bToken = BToken(cTokenAddress);
@@ -218,11 +231,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /*** Policy Hooks ***/
 
     /**
-     * @notice Checks if the account should be allowed to mint tokens in the given market
-     * @param bToken The market to verify the mint against
-     * @param minter The account which would get the minted tokens
-     * @param mintAmount The amount of underlying being supplied to the market in exchange for tokens
-     * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
+     * @dev Checks if the account should be allowed to mint tokens in the given market.
+     * @param bToken The market to verify the mint against.
+     * @param minter The account which would get the minted tokens.
+     * @param mintAmount The amount of underlying being supplied to the market in exchange for tokens.
+     * @return 0 if the mint is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol).
      */
     function mintAllowed(address bToken, address minter, uint256 mintAmount) external view returns (uint) {
         // Shh - currently unused
@@ -249,11 +262,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Validates mint and reverts on rejection. May emit logs.
-     * @param bToken Asset being minted
-     * @param minter The address minting the tokens
-     * @param actualMintAmount The amount of the underlying asset being minted
-     * @param mintTokens The number of tokens being minted
+     * @dev Validates mint and reverts on rejection. May emit logs.
+     * @param bToken Asset being minted.
+     * @param minter The address minting the tokens.
+     * @param actualMintAmount The amount of the underlying asset being minted.
+     * @param mintTokens The number of tokens being minted.
      */
     function mintVerify(address bToken, address minter, uint256 actualMintAmount, uint256 mintTokens) external {
         // Shh - currently unused
@@ -269,11 +282,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Checks if the account should be allowed to redeem tokens in the given market
-     * @param bToken The market to verify the redeem against
-     * @param redeemer The account which would redeem the tokens
-     * @param redeemTokens The number of bTokens to exchange for the underlying asset in the market
-     * @return 0 if the redeem is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
+     * @dev Checks if the account should be allowed to redeem tokens in the given market.
+     * @param bToken The market to verify the redeem against.
+     * @param redeemer The account which would redeem the tokens.
+     * @param redeemTokens The number of bTokens to exchange for the underlying asset in the market.
+     * @return 0 if the redeem is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol).
      */
     function redeemAllowed(address bToken, address redeemer, uint256 redeemTokens) external view returns (uint) {
         // Shh - - currently unused
@@ -289,6 +302,13 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return uint256(Error.NO_ERROR);
     }
 
+    /**
+     * @dev Checks if redeeming tokens is allowed for a given bToken and redeemer.
+     * @param bToken The address of the bToken to check.
+     * @param redeemer The address of the redeemer to check.
+     * @param redeemTokens The amount of tokens to redeem.
+     * @return uint256 0 if redeeming is allowed, otherwise an error code.
+     */
     function redeemAllowedInternal(address bToken, address redeemer, uint256 redeemTokens) internal view returns (uint) {
         // Shh - currently unused
         redeemTokens;
@@ -306,11 +326,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Validates redeem and reverts on rejection. May emit logs.
-     * @param bToken Asset being redeemed
-     * @param redeemer The address redeeming the tokens
-     * @param redeemAmount The amount of the underlying asset being redeemed
-     * @param redeemTokens The number of tokens being redeemed
+     * @dev Validates redeem and reverts on rejection. May emit logs.
+     * @param bToken Asset being redeemed.
+     * @param redeemer The address redeeming the tokens.
+     * @param redeemAmount The amount of the underlying asset being redeemed.
+     * @param redeemTokens The number of tokens being redeemed.
      */
     function redeemVerify(address bToken, address redeemer, uint256 redeemAmount, uint256 redeemTokens) external pure {
         // Shh - currently unused
@@ -324,11 +344,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Checks if the account should be allowed to borrow the underlying asset of the given market
-     * @param bToken The market to verify the borrow against
-     * @param borrower The account which would borrow the asset
-     * @param borrowAmount The amount of underlying the account would borrow
-     * @return 0 if the borrow is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
+     * @dev Checks if the account should be allowed to borrow the underlying asset of the given market.
+     * @param bToken The market to verify the borrow against.
+     * @param borrower The account which would borrow the asset.
+     * @param borrowAmount The amount of underlying the account would borrow.
+     * @return 0 if the borrow is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol).
      */
     function borrowAllowed(address bToken, address borrower, uint256 borrowAmount) external returns (uint) {
         // Pausing is a very serious situation - we revert to sound the alarms
@@ -367,10 +387,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Validates borrow and reverts on rejection. May emit logs.
-     * @param bToken Asset whose underlying is being borrowed
-     * @param borrower The address borrowing the underlying
-     * @param borrowAmount The amount of the underlying asset requested to borrow
+     * @dev Validates borrow and reverts on rejection. May emit logs.
+     * @param bToken Asset whose underlying is being borrowed.
+     * @param borrower The address borrowing the underlying.
+     * @param borrowAmount The amount of the underlying asset requested to borrow.
      */
     function borrowVerify(address bToken, address borrower, uint256 borrowAmount) external {
         // Shh - currently unused
@@ -385,12 +405,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Checks if the account should be allowed to repay a borrow in the given market
-     * @param bToken The market to verify the repay against
-     * @param payer The account which would repay the asset
-     * @param borrower The account which would borrowed the asset
-     * @param repayAmount The amount of the underlying asset the account would repay
-     * @return 0 if the repay is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
+     * @dev Checks if the account should be allowed to repay a borrow in the given market.
+     * @param bToken The market to verify the repay against.
+     * @param payer The account which would repay the asset.
+     * @param borrower The account which would borrowed the asset.
+     * @param repayAmount The amount of the underlying asset the account would repay.
+     * @return 0 if the repay is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol).
      */
     function repayBorrowAllowed(address bToken, address payer, address borrower, uint256 repayAmount) external view returns (uint) {
         // Shh - currently unused
@@ -411,11 +431,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Validates repayBorrow and reverts on rejection. May emit logs.
-     * @param bToken Asset being repaid
-     * @param payer The address repaying the borrow
-     * @param borrower The address of the borrower
-     * @param actualRepayAmount The amount of underlying being repaid
+     * @dev Validates repayBorrow and reverts on rejection. May emit logs.
+     * @param bToken Asset being repaid.
+     * @param payer The address repaying the borrow.
+     * @param borrower The address of the borrower.
+     * @param actualRepayAmount The amount of underlying being repaid.
      */
     function repayBorrowVerify(address bToken, address payer, address borrower, uint256 actualRepayAmount, uint256 borrowerIndex) external {
         // Shh - currently unused
@@ -432,12 +452,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Checks if the account should be allowed to transfer tokens in the given market
-     * @param bToken The market to verify the transfer against
-     * @param src The account which sources the tokens
-     * @param dst The account which receives the tokens
-     * @param transferTokens The number of bTokens to transfer
-     * @return 0 if the transfer is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol)
+     * @dev Checks if the account should be allowed to transfer tokens in the given market.
+     * @param bToken The market to verify the transfer against.
+     * @param src The account which sources the tokens.
+     * @param dst The account which receives the tokens.
+     * @param transferTokens The number of bTokens to transfer.
+     * @return 0 if the transfer is allowed, otherwise a semi-opaque error code (See ErrorReporter.sol).
      */
     function transferAllowed(address bToken, address src, address dst, uint256 transferTokens) external returns (uint) {
         // Shh - currently unused
@@ -465,11 +485,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Validates transfer and reverts on rejection. May emit logs.
-     * @param bToken Asset being transferred
-     * @param src The account which sources the tokens
-     * @param dst The account which receives the tokens
-     * @param transferTokens The number of bTokens to transfer
+     * @dev Validates transfer and reverts on rejection. May emit logs.
+     * @param bToken Asset being transferred.
+     * @param src The account which sources the tokens.
+     * @param dst The account which receives the tokens.
+     * @param transferTokens The number of bTokens to transfer.
      */
     function transferVerify(address bToken, address src, address dst, uint256 transferTokens) external onlyPrimaryLendingPlatform {
         // Shh - currently unused
@@ -487,9 +507,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     /*** Admin Functions ***/
 
     /**
-     * @notice Sets a new price oracle for the bondtroller
-     * @dev Admin function to set a new price oracle
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev Sets a new price oracle for the bondtroller.
+     * Admin function to set a new price oracle.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function setPriceOracle(address newOracle) public returns (uint) {
         // Check caller is admin
@@ -509,6 +529,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return uint256(Error.NO_ERROR);
     }
 
+    /**
+     * @dev Sets the address of the primary lending platform.
+     * @param _newPrimaryLendingPlatform The new address of the primary lending platform.
+     * @return uint 0=success, otherwise a failure (see ErrorReporter.sol for details).
+     */
     function setPrimaryLendingPlatformAddress(address _newPrimaryLendingPlatform) external returns (uint) {
         // Check caller is admin
         if (msg.sender != admin) {
@@ -525,10 +550,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Add the market to the markets mapping and set it as listed
-     * @dev Admin function to set isListed and add support for the market
-     * @param bToken The address of the market (token) to list
-     * @return uint256 0=success, otherwise a failure. (See enum Error for details)
+     * @dev Add the market to the markets mapping and set it as listed.
+     * Admin function to set isListed and add support for the market.
+     * @param bToken The address of the market (token) to list.
+     * @return uint256 0=success, otherwise a failure. (See enum Error for details).
      */
     function supportMarket(BToken bToken) external returns (uint) {
         if (msg.sender != admin) {
@@ -551,6 +576,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return uint256(Error.NO_ERROR);
     }
 
+    /**
+     * @dev Adds a new market to the list of all markets.
+     * @param bToken The address of the BToken contract to be added.
+     */
     function _addMarketInternal(address bToken) internal {
         for (uint256 i = 0; i < allMarkets.length; i++) {
             require(allMarkets[i] != BToken(bToken), "Bondtroller: Market already added");
@@ -559,9 +588,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Set the given borrow caps for the given bToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
-     * @dev Admin or borrowCapGuardian function to set the borrow caps. A borrow cap of 0 corresponds to unlimited borrowing.
-     * @param bTokens The addresses of the markets (tokens) to change the borrow caps for
+     * @dev Sets the given borrow caps for the given bToken markets. Borrowing that brings total borrows to or above borrow cap will revert.
+     * Admin or borrowCapGuardian function to set the borrow caps. A borrow cap of 0 corresponds to unlimited borrowing.
+     * @param bTokens The addresses of the markets (tokens) to change the borrow caps for.
      * @param newBorrowCaps The new borrow cap values in underlying to be set. A value of 0 corresponds to unlimited borrowing.
      */
     function setMarketBorrowCaps(BToken[] calldata bTokens, uint256[] calldata newBorrowCaps) external {
@@ -579,8 +608,8 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Admin function to change the Borrow Cap Guardian
-     * @param newBorrowCapGuardian The address of the new Borrow Cap Guardian
+     * @dev Admin function to change the Borrow Cap Guardian.
+     * @param newBorrowCapGuardian The address of the new Borrow Cap Guardian.
      */
     function setBorrowCapGuardian(address newBorrowCapGuardian) external {
         require(msg.sender == admin, "Bondtroller: Only admin can set borrow cap guardian");
@@ -596,9 +625,9 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Admin function to change the Pause Guardian
-     * @param newPauseGuardian The address of the new Pause Guardian
-     * @return uint256 0=success, otherwise a failure. (See enum Error for details)
+     * @dev Admin function to change the Pause Guardian.
+     * @param newPauseGuardian The address of the new Pause Guardian.
+     * @return uint256 0=success, otherwise a failure. (See enum Error for details).
      */
     function setPauseGuardian(address newPauseGuardian) public returns (uint) {
         if (msg.sender != admin) {
@@ -617,6 +646,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return uint256(Error.NO_ERROR);
     }
 
+    /**
+     * @dev Pauses or unpauses minting of a specific BToken.
+     * @param bToken The address of the BToken to pause or unpause minting for.
+     * @param state The boolean state to set the minting pause status to.
+     * @return A boolean indicating whether the minting pause status was successfully set.
+     */
     function setMintPaused(BToken bToken, bool state) public returns (bool) {
         require(markets[address(bToken)].isListed, "Bondtroller: Cannot pause a market that is not listed");
         require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
@@ -627,6 +662,12 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return state;
     }
 
+    /**
+     * @dev Pauses or unpauses borrowing for a given market.
+     * @param bToken The address of the BToken to pause or unpause borrowing.
+     * @param state The boolean state to set the borrowing pause to.
+     * @return A boolean indicating whether the operation was successful.
+     */
     function setBorrowPaused(BToken bToken, bool state) public returns (bool) {
         require(markets[address(bToken)].isListed, "Bondtroller: Cannot pause a market that is not listed");
         require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
@@ -637,6 +678,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return state;
     }
 
+    /**
+     * @dev Sets the transfer pause state.
+     * @param state The new transfer pause state.
+     * @return bool Returns the new transfer pause state.
+     */
     function setTransferPaused(bool state) public returns (bool) {
         require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
         require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
@@ -646,6 +692,11 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
         return state;
     }
 
+    /**
+     * @dev Sets the state of the seizeGuardianPaused variable to the given state.
+     * @param state The new state of the seizeGuardianPaused variable.
+     * @return The new state of the seizeGuardianPaused variable.
+     */
     function setSeizePaused(bool state) public returns (bool) {
         require(msg.sender == pauseGuardian || msg.sender == admin, "Bondtroller: Only pause guardian and admin can pause");
         require(msg.sender == admin || state == true, "Bondtroller: Only admin can unpause");
@@ -656,25 +707,25 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
     }
 
     /**
-     * @notice Checks caller is admin, or this contract is becoming the new implementation
+     * @dev Checks caller is admin, or this contract is becoming the new implementation.
      */
     function adminOrInitializing() internal view returns (bool) {
         return msg.sender == admin;
     }
 
     /**
-     * @notice Return all of the markets
-     * @dev The automatic getter may be used to access an individual market.
-     * @return The list of market addresses
+     * @dev Returns all of the markets.
+     * The automatic getter may be used to access an individual market.
+     * @return The list of market addresses.
      */
     function getAllMarkets() public view returns (BToken[] memory) {
         return allMarkets;
     }
 
     /**
-     * @notice Returns true if the given bToken market has been deprecated
-     * @dev All borrows in a deprecated bToken market can be immediately liquidated
-     * @param bToken The market to check if deprecated
+     * @dev Returns true if the given bToken market has been deprecated.
+     * All borrows in a deprecated bToken market can be immediately liquidated.
+     * @param bToken The market to check if deprecated.
      */
     function isDeprecated(BToken bToken) public view returns (bool) {
         return
@@ -683,6 +734,10 @@ contract Bondtroller is BondtrollerV5Storage, BondtrollerErrorReporter, Exponent
             bToken.reserveFactorMantissa() == 1e18;
     }
 
+    /**
+     * @dev Returns the current block number.
+     * @return uint representing the current block number.
+     */
     function getBlockNumber() public view returns (uint) {
         return block.number;
     }

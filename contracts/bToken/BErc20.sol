@@ -10,14 +10,14 @@ import "./BToken.sol";
  */
 abstract contract BErc20 is BToken, BErc20Interface {
     /**
-     * @notice Initialize the new money market
-     * @param underlying_ The address of the underlying asset
-     * @param comptroller_ The address of the Comptroller
-     * @param interestRateModel_ The address of the interest rate model
-     * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18
-     * @param name_ ERC-20 name of this token
-     * @param symbol_ ERC-20 symbol of this token
-     * @param decimals_ ERC-20 decimal precision of this token
+     * @dev Initializes the new money market.
+     * @param underlying_ The address of the underlying asset.
+     * @param comptroller_ The address of the Comptroller.
+     * @param interestRateModel_ The address of the interest rate model.
+     * @param initialExchangeRateMantissa_ The initial exchange rate, scaled by 1e18.
+     * @param name_ ERC-20 name of this token.
+     * @param symbol_ ERC-20 symbol of this token.
+     * @param decimals_ ERC-20 decimal precision of this token.
      */
     function initialize(
         address underlying_,
@@ -39,8 +39,8 @@ abstract contract BErc20 is BToken, BErc20Interface {
     /*** User Interface ***/
 
     /**
-     * @notice A public function to sweep accidental ERC-20 transfers to this contract. Tokens are sent to admin (timelock)
-     * @param token The address of the ERC-20 token to sweep
+     * @dev A public function to sweep accidental ERC-20 transfers to this contract. Tokens are sent to admin (timelock).
+     * @param token The address of the ERC-20 token to sweep.
      */
     function sweepToken(EIP20NonStandardInterface token) external override {
         require(address(token) != underlying, "BErc20: Can not sweep underlying token");
@@ -49,9 +49,9 @@ abstract contract BErc20 is BToken, BErc20Interface {
     }
 
     /**
-     * @notice The sender adds to reserves.
-     * @param addAmount The amount fo underlying token to add as reserves
-     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+     * @dev The sender adds to reserves.
+     * @param addAmount The amount fo underlying token to add as reserves.
+     * @return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details).
      */
     function _addReserves(uint256 addAmount) external override returns (uint) {
         return _addReservesInternal(addAmount);
@@ -60,9 +60,9 @@ abstract contract BErc20 is BToken, BErc20Interface {
     /*** Safe Token ***/
 
     /**
-     * @notice Gets balance of this contract in terms of the underlying
-     * @dev This excludes the value of the current message, if any
-     * @return The quantity of underlying tokens owned by this contract
+     * @dev Gets balance of this contract in terms of the underlying.
+     * This excludes the value of the current message, if any.
+     * @return The quantity of underlying tokens owned by this contract.
      */
     function getCashPrior() internal view override returns (uint) {
         EIP20Interface token = EIP20Interface(underlying);

@@ -1,5 +1,7 @@
 require("dotenv").config();
-const chain = process.env.CHAIN ? "_" + process.env.CHAIN : "";
+const chainConfigs = require('../../chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
+const chain =chainConfigs.chain ? "_" +chainConfigs.chain : "";
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
 const path = require("path");
@@ -13,11 +15,7 @@ const ParaSwapAdapter_ARTIFACT = require("./artifacts/NewUniswapV2Router.json");
 const UniSwapV2Pair_ARTIFACT = require("./artifacts/UniswapV2Pair.json");
 const UniswapV2FACTORY_ARTIFACT = require("./artifacts/UniswapV2Factory.json");
 
-const {
-    INFURA_KEY,
-    CHAIN,
-    BLOCKNUMBER
-  } = process.env;
+const INFURA_KEY = process.env.INFURA_KEY;
 
 const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
@@ -45,6 +43,7 @@ describe("PrimaryLendingPlatformV2", function () {
     let plpWTGInstance;
     let plpModeratorInstance;
     let chainlinkPriceProviderInstance;
+    let uniswapPriceProviderMockInstance;
     let priceProviderAggregatorInstance;
 
     let factory;
@@ -58,13 +57,13 @@ describe("PrimaryLendingPlatformV2", function () {
     let plpModeratorAddress;
     let chainlinkPriceProviderAddress;
     let uniswapV2PriceProviderAddress;
+    let uniswapV2PriceProviderMockAddress;
     let priceProviderAggregatorAddress;
 
     let prj1;
     let prj2;
     let prj3;
-    let prj1Usdc;
-    let prj1Prj2;
+
     let wstETH;
 
     let usdc;
@@ -74,8 +73,7 @@ describe("PrimaryLendingPlatformV2", function () {
     let prj1Decimals;
     let prj2Decimals;
     let prj3Decimals;
-    let prj1UsdcDecimals;
-    let prj1Prj2Decimals;
+
     let wstEthDecimals;
 
     let usdcDecimals;
@@ -85,8 +83,6 @@ describe("PrimaryLendingPlatformV2", function () {
     let prj1Address;
     let prj2Address;
     let prj3Address;
-    let prj1UsdcAddress;
-    let prj1Prj2Address;
     let wstEthAddress;
 
     let usdcAddress;
@@ -98,21 +94,6 @@ describe("PrimaryLendingPlatformV2", function () {
     async function loadBtokenInstance(bTokenAddress, deployMaster) {
         let BToken = await hre.ethers.getContractFactory("BLendingToken");
         return BToken.attach(bTokenAddress).connect(deployMaster);
-    }
-
-    async function setHighPricePrj1() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            chainlinkPriceProviderAddress,
-            false
-        );
-    }
-    async function setLowPricePrj1() {
-        await priceProviderAggregatorInstance.setTokenAndPriceProvider(
-            prj1Address,
-            uniswapV2PriceProviderAddress,
-            false
-        );
     }
     async function impersonateAccount(account) {
         await helpers.impersonateAccount(account);
@@ -168,66 +149,15 @@ describe("PrimaryLendingPlatformV2", function () {
             poolsList
         ]);
     }
-    async function createBuyCallData(
-        tokenIn,
-        amountInMax,
-        amountOut,
-        weth,
-        pools
-    ) {
-        signers = await hre.ethers.getSigners();
-        let poolsList = new Array();
-        let tokenInNext;
-        for (let i = 0; i < pools.length; i++) {
-            let pairToken = new hre.ethers.Contract(
-                pools[i],
-                UniSwapV2Pair_ARTIFACT.abi,
-                signers[0]
-            );
-            let token0 = await pairToken.token0();
-            let token1 = await pairToken.token1();
-            let prefix;
-            if (i == 0) {
-                if (tokenIn == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            } else {
-                if (tokenInNext == token0) {
-                    prefix = "4de4";
-                    tokenInNext = token1;
-                } else {
-                    prefix = "4de5";
-                    tokenInNext = token0;
-                }
-            }
-            let convertedPool = pools[i].slice(0, 2) + prefix + pools[i].slice(2);
-            poolsList.push(convertedPool);
-        }
-
-
-        let iface = new ethers.utils.Interface(ParaSwapAdapter_ARTIFACT.abi);
-        return iface.encodeFunctionData("buyOnUniswapV2Fork", [
-            tokenIn,
-            amountInMax,
-            amountOut,
-            weth,
-            poolsList
-        ]);
-    }
     async function resetNetwork() {
         await helpers.reset(
-            `https://${CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(BLOCKNUMBER)
-        )
+            `https://${chainConfig.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(chainConfig.blockNumber)
+        );
     }
-    after(async function(){
-        await resetNetwork();
-    });
+  
     async function loadFixture() {
+        await resetNetwork();
         signers = await hre.ethers.getSigners();
         deployMaster = signers[0];
         {
@@ -243,20 +173,19 @@ describe("PrimaryLendingPlatformV2", function () {
             plpModeratorAddress = addresses.plpModerator;
             chainlinkPriceProviderAddress = addresses.chainlinkPriceProviderAddress;
             uniswapV2PriceProviderAddress = addresses.uniswapV2PriceProviderAddress;
+            uniswapV2PriceProviderMockAddress = addresses.uniswapV2PriceProviderMockAddress;
             priceProviderAggregatorAddress = addresses.priceProviderAggregatorAddress;
 
-            prj1Address = addresses.projectTokens[0];
-            prj2Address = addresses.projectTokens[1];
-            prj3Address = addresses.projectTokens[2];
-            prj1UsdcAddress = addresses.projectTokens[3];
-            prj1Prj2Address = addresses.projectTokens[4];
-            wstEthAddress = addresses.projectTokens[5];
+            prj1Address = ethers.utils.getAddress(addresses.projectTokens[0]);
+            prj2Address = ethers.utils.getAddress(addresses.projectTokens[1]);
+            prj3Address = ethers.utils.getAddress(addresses.projectTokens[2]);
 
-            usdcAddress = addresses.lendingTokens[0];
-            usbAddress = addresses.lendingTokens[1];
-            wethAddress = addresses.lendingTokens[2];
+            wstEthAddress = ethers.utils.getAddress(addresses.projectTokens[projectTokens.length - 1]);
+
+            usdcAddress = ethers.utils.getAddress(addresses.lendingTokens[0]);
+            usbAddress = ethers.utils.getAddress(addresses.lendingTokens[1]);
+            wethAddress = ethers.utils.getAddress(addresses.lendingTokens[2]);
         }
-
         {
             let PLP = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2");
             let PLPAtomicRepay = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepayment");
@@ -265,6 +194,7 @@ describe("PrimaryLendingPlatformV2", function () {
             let PLPWTG = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGateway");
             let PLPModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
             let ChainlinkPriceProvider = await hre.ethers.getContractFactory("ChainlinkPriceProvider");
+            let UniswapPriceProviderMock = await hre.ethers.getContractFactory("UniswapV2PriceProviderMock");
             let PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
 
             let MockPRJ = await hre.ethers.getContractFactory("PRJ");
@@ -279,6 +209,7 @@ describe("PrimaryLendingPlatformV2", function () {
             plpWTGInstance = PLPWTG.attach(plpWTGAddress).connect(deployMaster);
             plpModeratorInstance = PLPModerator.attach(plpModeratorAddress).connect(deployMaster);
             chainlinkPriceProviderInstance = ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
+            uniswapPriceProviderMockInstance = UniswapPriceProviderMock.attach(uniswapV2PriceProviderMockAddress).connect(deployMaster);
             priceProviderAggregatorInstance = PriceProviderAggregator.attach(priceProviderAggregatorAddress).connect(deployMaster);
 
             factory = new hre.ethers.Contract(
@@ -295,8 +226,7 @@ describe("PrimaryLendingPlatformV2", function () {
             prj1 = MockPRJ.attach(prj1Address).connect(projectTokenDeployer);
             prj2 = MockPRJ.attach(prj2Address).connect(projectTokenDeployer);
             prj3 = MockPRJ.attach(prj3Address).connect(projectTokenDeployer);
-            prj1Usdc = MockPRJ.attach(prj1UsdcAddress).connect(projectTokenDeployer);
-            prj1Prj2 = MockPRJ.attach(prj1Prj2Address).connect(projectTokenDeployer);
+
             wstETH = MockWstETH.attach(wstEthAddress).connect(projectTokenDeployer);
 
             usdc = MockToken.attach(usdcAddress).connect(usdcDeployer);
@@ -306,13 +236,26 @@ describe("PrimaryLendingPlatformV2", function () {
             prj1Decimals = await prj1.decimals();
             prj2Decimals = await prj2.decimals();
             prj3Decimals = await prj3.decimals();
-            prj1UsdcDecimals = await prj1Usdc.decimals();
-            prj1Prj2Decimals = await prj1Prj2.decimals();
+
             wstEthDecimals = await wstETH.decimals();
 
             usdcDecimals = await usdc.decimals();
             usbDecimals = await usb.decimals();
             wethDecimals = await weth.decimals();
+
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj1Address, configTesting.price.prj1);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj2Address, configTesting.price.prj2);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(prj3Address, configTesting.price.prj3);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(usdcAddress, configTesting.price.usdc);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(usbAddress, configTesting.price.usb);
+            await uniswapPriceProviderMockInstance.setTokenAndPrice(wethAddress, configTesting.price.weth);
+
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj1Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj2Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(prj3Address, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(usdcAddress, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(usbAddress, uniswapV2PriceProviderMockAddress, false);
+            await priceProviderAggregatorInstance.setTokenAndPriceProvider(wethAddress, uniswapV2PriceProviderMockAddress, false);
         }
     }
     describe("deposit", function () {
@@ -659,6 +602,17 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 usdcAddress
             );
+            {
+                await plpInstance.withdraw(
+                    projectToken,
+                    withdrawableAmount
+                );
+            }
+            withdrawableAmount = await plpInstance.getCollateralAvailableToWithdraw(
+                deployMaster.address,
+                projectToken,
+                usdcAddress
+            );
             let actualLendingToken = await plpInstance.getLendingToken(deployMaster.address, projectToken);
             expect(actualLendingToken).to.eq(usdcAddress);
             expect(withdrawableAmount).to.eq(toBN(0));
@@ -673,7 +627,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectTokenAmount
             )).to.be.revertedWith("PIT: Withdrawable amount is 0");
         });
-        it("11. Success (Single-user): Should withdraw 10 projectToken2 when withdrawableAmount >= projectTokenAmount and loanBody > 0", async function () {
+        it("11. Success (Single-user): Should withdraw available amount projectToken1 when withdrawableAmount >= projectTokenAmount and loanBody > 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -736,7 +690,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(depositedAmountAfterWithdraw).eq(depositedAmountBeforeWithdraw.sub(projectTokenAmount));
             expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(projectTokenAmount));
         });
-        it("11. Success (Multi-user): Should withdraw 10 projectToken2 when withdrawableAmount >= projectTokenAmount and loanBody > 0", async function () {
+        it("11. Success (Multi-user): Should withdraw available amount projectToken1 when withdrawableAmount >= projectTokenAmount and loanBody > 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -803,7 +757,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(projectTokenAmount));
             }
         });
-        it("12. Success (Single-user): Should withdraw 10 projectToken2 when withdrawableAmount < projectTokenAmount and loanBody > 0", async function () {
+        it("12. Success (Single-user): Should withdraw available amount projectToken1 when withdrawableAmount < projectTokenAmount and loanBody > 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -866,7 +820,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(depositedAmountAfterWithdraw).eq(depositedAmountBeforeWithdraw.sub(withdrawableAmount));
             expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(withdrawableAmount));
         });
-        it("12. Success (Multi-user): Should withdraw 10 projectToken2 when withdrawableAmount < projectTokenAmount and loanBody > 0", async function () {
+        it("12. Success (Multi-user): Should withdraw available amount projectToken1 when withdrawableAmount < projectTokenAmount and loanBody > 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -933,7 +887,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(withdrawableAmount));
             }
         });
-        it("13. Success (Single-user): Should withdraw 10 projectToken2 when withdrawableAmount >= projectTokenAmount and loanBody == 0", async function () {
+        it("13. Success (Single-user): Should withdraw available amount projectToken1 when withdrawableAmount >= projectTokenAmount and loanBody == 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -984,7 +938,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(depositedAmountAfterWithdraw).eq(depositedAmountBeforeWithdraw.sub(projectTokenAmount));
             expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(projectTokenAmount));
         });
-        it("13. Success (Multi-user): Should withdraw 10 projectToken2 when withdrawableAmount >= projectTokenAmount and loanBody == 0", async function () {
+        it("13. Success (Multi-user): Should withdraw available amount projectToken1 when withdrawableAmount >= projectTokenAmount and loanBody == 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -1039,7 +993,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(projectTokenAmount));
             }
         });
-        it("14. Success (Single-user): Should withdraw 10 projectToken2 when withdrawableAmount < projectTokenAmount and loanBody == 0", async function () {
+        it("14. Success (Single-user): Should withdraw available amount projectToken1 when withdrawableAmount < projectTokenAmount and loanBody == 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -1090,7 +1044,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(depositedAmountAfterWithdraw).eq(depositedAmountBeforeWithdraw.sub(withdrawableAmount));
             expect(totalDepositedProjectTokenAfterWithdraw).eq(totalDepositedProjectTokenBeforeWithdraw.sub(withdrawableAmount));
         });
-        it("14. Success (Multi-user): Should withdraw 10 projectToken2 when withdrawableAmount < projectTokenAmount and loanBody == 0", async function () {
+        it("14. Success (Multi-user): Should withdraw available amount projectToken1 when withdrawableAmount < projectTokenAmount and loanBody == 0", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -1788,7 +1742,7 @@ describe("PrimaryLendingPlatformV2", function () {
             )).to.be.revertedWith("PIT: No borrow position");
         });
 
-        describe("Success: Repay success cases:", async function () {
+        describe("Repay with isLeveragePosition = FALSE cases:", async function () {
             beforeEach(async function () {
                 await loadFixture();
 
@@ -2048,6 +2002,288 @@ describe("PrimaryLendingPlatformV2", function () {
                     expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
                     expect(args.borrowAmount).to.eq(repayAmount);
                     expect(args.isPositionFullyRepaid).to.eq(false);
+                });
+            });
+        });
+
+        describe("Repay with isLeveragePosition = TRUE cases:", async function () {
+
+            beforeEach(async function () {
+                
+                await loadFixture();
+                let exp;
+                let margin;
+                let buyCalldata;
+                let type = toBN(0);
+
+                {
+                    {
+                        let depositAmount = ethers.utils.parseUnits("1000", prj1Decimals);
+                        await prj1.mintTo(deployMaster.address, depositAmount.mul(10));
+                        await prj1.connect(deployMaster).approve(plpAddress, depositAmount);
+                        await plpInstance.deposit(prj1Address, depositAmount);
+                    }
+                    {
+                        let borrowLimitPerLendingToken = await plpInstance.borrowLimitPerLendingToken(usdcAddress);
+                        let lendingTokenCount = await plpLeverageInstance.calculateLendingTokenCount(usdcAddress, borrowLimitPerLendingToken);
+                        usdcAmountToMint = ethers.utils.parseUnits("100000000", usdcDecimals);
+
+                        await usdc.mint(deployMaster.address, usdcAmountToMint);
+                        let blendingToken = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                        await usdc.connect(deployMaster).approve(blendingToken, lendingTokenCount);
+                        await plpInstance.supply(usdcAddress, lendingTokenCount);
+                    }
+                }
+                let borrowUSDCAmount = ethers.utils.parseUnits("50", usdcDecimals);
+                exp = await plpInstance.getTokenEvaluation(usdcAddress, borrowUSDCAmount);
+                margin = await plpLeverageInstance.calculateMargin(prj1Address, usdcAddress, toBN(20), toBN(10), exp);
+                let addingAmount = await plpLeverageInstance.calculateAddingAmount(deployMaster.address, prj1Address, margin);
+                await prj1.connect(deployMaster).approve(plpLeverageAddress, addingAmount);
+                await usdc.connect(deployMaster).approve(plpLeverageAddress, borrowUSDCAmount);
+                buyCalldata = await createSellCallData(
+                    usdcAddress,
+                    borrowUSDCAmount,
+                    0,
+                    ethers.constants.AddressZero,
+                    [await factory.getPair(prj1Address, usdcAddress)]
+                );
+
+                await plpLeverageInstance.leveragedBorrow(
+                    prj1Address,
+                    usdcAddress,
+                    exp,
+                    margin,
+                    buyCalldata,
+                    type
+                );
+            });
+
+            describe("14. Repay with borrowPositionAmount = 1", function () {
+                it("14.1. Success: Repay with borrowBalanceStored < lendingTokenAmount", async function () {
+
+                    userAddress = deployMaster.address;
+                    bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                    bLendingTokenInstance = await MockToken.attach(bLendingTokenAddress).connect(deployMaster);
+                    bToken = await loadBtokenInstance(bLendingTokenAddress, deployMaster);
+
+                    borrowBalanceStored = await bToken.borrowBalanceStored(userAddress);
+                    repayAmount = borrowBalanceStored.add(toBN(100));
+
+                    await usdc.connect(deployMaster).approve(bLendingTokenAddress, repayAmount);
+
+                    let usdcBalanceOfUserBeforeRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenBeforeRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenBeforeRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1BeforeRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionBeforeRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionBeforeRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    let repayTx = await plpInstance.repay(prj1Address, usdcAddress, repayAmount);
+                    let receipt = await repayTx.wait();
+                    let events = receipt.events;
+                    let args;
+                    for (let i = 0; i < events.length; i++)  if (events[i]?.event == "RepayBorrow") args = events[i].args;
+
+                    let usdcBalanceOfUserAfterRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenAfterRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenAfterRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1AfterRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionAfterRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionAfterRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    expect(usdcBalanceOfUserAfterRepay).to.eq(usdcBalanceOfUserBeforeRepay.sub(args.borrowAmount));
+                    expect(usdcBalanceOfBLendingTokenAfterRepay).to.eq(usdcBalanceOfBLendingTokenBeforeRepay.add(args.borrowAmount));
+                    expect(totalBorrowedUsdcTokenAfterRepay).to.eq(totalBorrowedUsdcTokenBeforeRepay.sub(args.borrowAmount));
+                    expect(totalBorrowPrj1AfterRepay).to.eq(totalBorrowPrj1BeforeRepay.sub(args.borrowAmount));
+                    expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
+                    expect(args.borrowAmount).to.eq(borrowBalanceStored);
+                    expect(args.isPositionFullyRepaid).to.eq(true);
+                    expect(isLeveragePositionAfterRepay).to.eq(false);
+                });
+
+                it("14.2. Success: Repay with borrowBalanceStored >= lendingTokenAmount && _totalOutstanding < lendingTokenAmount", async function () {
+                    userAddress = deployMaster.address;
+                    totalOutstanding = await plpInstance.totalOutstanding(userAddress, prj1Address, usdcAddress);
+                    bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                    bLendingTokenInstance = await MockToken.attach(bLendingTokenAddress).connect(deployMaster);
+                    bToken = await loadBtokenInstance(bLendingTokenAddress, deployMaster);
+
+                    borrowBalanceStored = await bToken.borrowBalanceStored(userAddress);
+                    repayAmount = totalOutstanding.add(toBN(100));
+
+                    await usdc.connect(deployMaster).approve(bLendingTokenAddress, repayAmount);
+
+                    let usdcBalanceOfUserBeforeRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenBeforeRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenBeforeRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1BeforeRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionBeforeRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionBeforeRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    let repayTx = await plpInstance.repay(prj1Address, usdcAddress, repayAmount);
+                    let receipt = await repayTx.wait();
+                    let events = receipt.events;
+                    let args;
+                    for (let i = 0; i < events.length; i++)  if (events[i]?.event == "RepayBorrow") args = events[i].args;
+
+                    let usdcBalanceOfUserAfterRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenAfterRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenAfterRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1AfterRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionAfterRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionAfterRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    expect(usdcBalanceOfUserAfterRepay).to.eq(usdcBalanceOfUserBeforeRepay.sub(args.borrowAmount));
+                    expect(usdcBalanceOfBLendingTokenAfterRepay).to.eq(usdcBalanceOfBLendingTokenBeforeRepay.add(args.borrowAmount));
+                    expect(totalBorrowedUsdcTokenAfterRepay).to.eq(totalBorrowedUsdcTokenBeforeRepay.sub(args.borrowAmount));
+                    expect(totalBorrowPrj1AfterRepay).to.eq(totalBorrowPrj1BeforeRepay.sub(args.borrowAmount));
+                    expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
+                    expect(args.borrowAmount).to.eq(borrowBalanceStored);
+                    expect(args.isPositionFullyRepaid).to.eq(true);
+                    expect(isLeveragePositionAfterRepay).to.eq(false);
+                });
+
+                it("14.3. Success: Repay with borrowBalanceStored >= lendingTokenAmount && _totalOutstanding >= lendingTokenAmount", async function () {
+                    userAddress = deployMaster.address;
+                    totalOutstanding = await plpInstance.totalOutstanding(userAddress, prj1Address, usdcAddress);
+                    bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                    bLendingTokenInstance = await MockToken.attach(bLendingTokenAddress).connect(deployMaster);
+                    bToken = await loadBtokenInstance(bLendingTokenAddress, deployMaster);
+
+                    borrowBalanceStored = await bToken.borrowBalanceStored(userAddress);
+                    repayAmount = totalOutstanding.sub(toBN(100));
+
+                    await usdc.connect(deployMaster).approve(bLendingTokenAddress, repayAmount);
+
+                    let usdcBalanceOfUserBeforeRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenBeforeRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenBeforeRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1BeforeRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionBeforeRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionBeforeRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    let repayTx = await plpInstance.repay(prj1Address, usdcAddress, repayAmount);
+                    let receipt = await repayTx.wait();
+                    let events = receipt.events;
+                    let args;
+                    for (let i = 0; i < events.length; i++)  if (events[i]?.event == "RepayBorrow") args = events[i].args;
+
+                    let usdcBalanceOfUserAfterRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenAfterRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenAfterRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1AfterRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionAfterRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionAfterRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    expect(usdcBalanceOfUserAfterRepay).to.eq(usdcBalanceOfUserBeforeRepay.sub(args.borrowAmount));
+                    expect(usdcBalanceOfBLendingTokenAfterRepay).to.eq(usdcBalanceOfBLendingTokenBeforeRepay.add(args.borrowAmount));
+                    expect(totalBorrowedUsdcTokenAfterRepay).to.eq(totalBorrowedUsdcTokenBeforeRepay.sub(args.borrowAmount));
+                    expect(totalBorrowPrj1AfterRepay).to.eq(totalBorrowPrj1BeforeRepay.sub(args.borrowAmount));
+                    expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
+                    expect(args.borrowAmount).to.eq(repayAmount);
+                    expect(args.isPositionFullyRepaid).to.eq(false);
+                    expect(isLeveragePositionAfterRepay).to.eq(true);
+                });
+            });
+
+            describe("15. Repay with borrowPositionAmount > 1", function () {
+                beforeEach(async function () {
+                    // deposit prj2
+                    depositPrj2Amount = ethers.utils.parseUnits("100", prj2Decimals);
+                    await prj2.mintTo(deployMaster.address, depositPrj2Amount);
+                    await prj2.connect(deployMaster).approve(plpAddress, depositPrj2Amount);
+                    await plpInstance.deposit(prj2Address, depositPrj2Amount);
+
+                    // borrow prj2
+                    await plpInstance.borrow(
+                        prj2Address, usdcAddress,
+                        await plpInstance.getLendingAvailableToBorrow(deployMaster.address, prj2Address, usdcAddress)
+                    );
+                });
+
+                it("15.1. Success: Repay with _totalOutstanding < lendingTokenAmount", async function () {
+                    userAddress = deployMaster.address;
+                    totalOutstanding = await plpInstance.totalOutstanding(userAddress, prj1Address, usdcAddress);
+                    bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                    bLendingTokenInstance = await MockToken.attach(bLendingTokenAddress).connect(deployMaster);
+                    bToken = await loadBtokenInstance(bLendingTokenAddress, deployMaster);
+
+                    borrowBalanceStored = await bToken.borrowBalanceStored(userAddress);
+                    repayAmount = totalOutstanding.add(toBN(100));
+
+                    await usdc.connect(deployMaster).approve(bLendingTokenAddress, repayAmount);
+
+                    let usdcBalanceOfUserBeforeRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenBeforeRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenBeforeRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1BeforeRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionBeforeRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionBeforeRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    let repayTx = await plpInstance.repay(prj1Address, usdcAddress, repayAmount);
+                    let receipt = await repayTx.wait();
+                    let events = receipt.events;
+                    let args;
+                    for (let i = 0; i < events.length; i++)  if (events[i]?.event == "RepayBorrow") args = events[i].args;
+
+                    let usdcBalanceOfUserAfterRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenAfterRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenAfterRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1AfterRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionAfterRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionAfterRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    expect(usdcBalanceOfUserAfterRepay).to.eq(usdcBalanceOfUserBeforeRepay.sub(args.borrowAmount));
+                    expect(usdcBalanceOfBLendingTokenAfterRepay).to.eq(usdcBalanceOfBLendingTokenBeforeRepay.add(args.borrowAmount));
+                    expect(totalBorrowedUsdcTokenAfterRepay).to.eq(totalBorrowedUsdcTokenBeforeRepay.sub(args.borrowAmount));
+                    expect(totalBorrowPrj1AfterRepay).to.eq(totalBorrowPrj1BeforeRepay.sub(args.borrowAmount));
+                    expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
+                    expect(args.borrowAmount).to.eq(totalOutstanding);
+                    expect(args.isPositionFullyRepaid).to.eq(true);
+                    expect(isLeveragePositionAfterRepay).to.eq(false);
+                });
+
+                it("15.2. Success: Repay with _totalOutstanding >= lendingTokenAmount", async function () {
+
+                    userAddress = deployMaster.address;
+                    totalOutstanding = await plpInstance.totalOutstanding(userAddress, prj1Address, usdcAddress);
+                    bLendingTokenAddress = (await plpInstance.lendingTokenInfo(usdcAddress)).bLendingToken;
+                    bLendingTokenInstance = await MockToken.attach(bLendingTokenAddress).connect(deployMaster);
+                    bToken = await loadBtokenInstance(bLendingTokenAddress, deployMaster);
+
+                    borrowBalanceStored = await bToken.borrowBalanceStored(userAddress);
+                    repayAmount = totalOutstanding.sub(toBN(100));
+
+                    await usdc.connect(deployMaster).approve(bLendingTokenAddress, repayAmount);
+
+                    let usdcBalanceOfUserBeforeRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenBeforeRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenBeforeRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1BeforeRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionBeforeRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionBeforeRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    let repayTx = await plpInstance.repay(prj1Address, usdcAddress, repayAmount);
+                    let receipt = await repayTx.wait();
+                    let events = receipt.events;
+                    let args;
+                    for (let i = 0; i < events.length; i++)  if (events[i]?.event == "RepayBorrow") args = events[i].args;
+
+                    let usdcBalanceOfUserAfterRepay = await usdc.balanceOf(userAddress);
+                    let usdcBalanceOfBLendingTokenAfterRepay = await usdc.balanceOf(bLendingTokenAddress);
+                    let totalBorrowedUsdcTokenAfterRepay = await plpInstance.totalBorrowPerLendingToken(usdcAddress);
+                    let totalBorrowPrj1AfterRepay = await plpInstance.totalBorrow(prj1Address, usdcAddress);
+                    let borrowPositionAfterRepay = await plpInstance.borrowPosition(deployMaster.address, prj1Address, usdcAddress);
+                    let isLeveragePositionAfterRepay = await plpLeverageInstance.isLeveragePosition(userAddress, prj1Address);
+
+                    expect(usdcBalanceOfUserAfterRepay).to.eq(usdcBalanceOfUserBeforeRepay.sub(args.borrowAmount));
+                    expect(usdcBalanceOfBLendingTokenAfterRepay).to.eq(usdcBalanceOfBLendingTokenBeforeRepay.add(args.borrowAmount));
+                    expect(totalBorrowedUsdcTokenAfterRepay).to.eq(totalBorrowedUsdcTokenBeforeRepay.sub(args.borrowAmount));
+                    expect(totalBorrowPrj1AfterRepay).to.eq(totalBorrowPrj1BeforeRepay.sub(args.borrowAmount));
+                    expect(borrowPositionBeforeRepay.loanBody).to.eq(borrowPositionAfterRepay.loanBody.add(args.borrowAmount));
+                    expect(args.borrowAmount).to.eq(repayAmount);
+                    expect(args.isPositionFullyRepaid).to.eq(false);
+                    expect(isLeveragePositionAfterRepay).to.eq(true);
                 });
             });
         });
@@ -2328,7 +2564,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 lendingTokenAmount
             )).to.be.revertedWith("PIT: Available amount to borrow is 0");
         });
-        it("14.1. Success (Single-user): Should borrow available amount USDC when loanBody == 0 and availableToBorrow < lendingTokenAmount", async function () {
+        it("14. Success (Single-user): Should borrow available amount USDC when loanBody == 0 and availableToBorrow < lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2394,7 +2630,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(totalBorrowAfterBorrow).eq(totalBorrowBeforeBorrow.add(availableToBorrow));
             expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(availableToBorrow));
         });
-        it("14.2. Success (Multi-user): Should borrow available amount USDC when loanBody == 0 and availableToBorrow < lendingTokenAmount", async function () {
+        it("14. Success (Multi-user): Should borrow available amount USDC when loanBody == 0 and availableToBorrow < lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2464,7 +2700,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(availableToBorrow));
             }
         });
-        it("15.1. Success (Single-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow < lendingTokenAmount", async function () {
+        it("15. Success (Single-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow < lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2540,7 +2776,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(totalBorrowAfterBorrow).eq(totalBorrowBeforeBorrow.add(availableToBorrow));
             expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(availableToBorrow));
         });
-        it("15.2. Success (Multi-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow < lendingTokenAmount", async function () {
+        it("15. Success (Multi-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow < lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2620,7 +2856,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(availableToBorrow));
             }
         });
-        it("16.1. Success (Single-user): Should borrow 100 USDC when loanBody == 0 and availableToBorrow >= lendingTokenAmount", async function () {
+        it("16. Success (Single-user): Should borrow 100 USDC when loanBody == 0 and availableToBorrow >= lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2686,7 +2922,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(totalBorrowAfterBorrow).eq(totalBorrowBeforeBorrow.add(lendingTokenAmount));
             expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(lendingTokenAmount));
         });
-        it("16.2. Success (Multi-user): Should borrow 100 USDC when loanBody == 0 and availableToBorrow >= lendingTokenAmount", async function () {
+        it("16. Success (Multi-user): Should borrow 100 USDC when loanBody == 0 and availableToBorrow >= lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2756,7 +2992,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(lendingTokenAmount));
             }
         });
-        it("17.1. Success (Single-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow >= lendingTokenAmount", async function () {
+        it("17. Success (Single-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow >= lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;
@@ -2827,7 +3063,7 @@ describe("PrimaryLendingPlatformV2", function () {
             expect(totalBorrowAfterBorrow).eq(totalBorrowBeforeBorrow.add(lendingTokenAmount));
             expect(totalBorrowPerLendingTokenAfterBorrow).eq(totalBorrowPerLendingTokenBeforeBorrow.add(lendingTokenAmount));
         });
-        it("17.2. Success (Multi-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow >= lendingTokenAmount", async function () {
+        it("17. Success (Multi-user): Should borrow available amount USDC when loanBody > 0 and availableToBorrow >= lendingTokenAmount", async function () {
             await loadFixture();
 
             let projectToken = prj1.address;

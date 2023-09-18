@@ -1,11 +1,13 @@
 require("dotenv").config();
-const isZksync = Object.keys(process.env).includes('ZKSYNC');
-const chain = process.env.CHAIN ? "_" + process.env.CHAIN : "";
-const isTesting = Object.keys(process.env).includes('TESTING');
+const chainConfigs = require('../../../chain.config');
+const chainConfig = chainConfigs[chainConfigs.chain];
+const isTesting = chainConfig.isTesting;
+let chain = chainConfigs.chain && isTesting ? "_" + chainConfigs.chain : "";
+const isTestingForZksync = chainConfigs.isTestingForZksync;
+if (isTestingForZksync) chain = "_zksync_on_polygon_mainnet";
 
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
-const BN = hre.ethers.BigNumber;
 const fs = require("fs");
 const path = require("path");
 const configGeneralFile = path.join(__dirname, `../../config/${network}${chain}/config_general.json`);
@@ -28,18 +30,16 @@ const verify = async (address, constructorArguments, keyInConfig) => {
         fs.writeFileSync(path.join(verifyFilePath), JSON.stringify(verifyFile, null, 2));
     }
     console.log("Verified " + address);
-}
+};
 
 module.exports = {
 
     deploymentPrimaryLendingPlatform: async function () {
-        let network = hre.network;
-        // console.log("Network name: " + network.name);
 
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         let deployMasterAddress = deployMaster.address;
-        // console.log("DeployMaster: " + deployMasterAddress);
+
 
         // Contracts ABI
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
@@ -47,18 +47,20 @@ module.exports = {
         let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV3");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
         let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
-        let PrimaryLendingPlatformV2 = isZksync ? await hre.ethers.getContractFactory("PrimaryLendingPlatformV2Zksync")
-            : await hre.ethers.getContractFactory("PrimaryLendingPlatformV2");
-        let PrimaryLendingPlatformAtomicRepayment = isZksync ? await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepaymentZksync")
-            : await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepayment");
-        let PrimaryLendingPlatformLiquidation = isZksync ? await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidationZksync")
-            : await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidation");
-        let PrimaryLendingPlatformLeverage = isZksync ? await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverageZksync")
-            : await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverage");
-        let PrimaryLendingPlatformWrappedTokenGateway = isZksync ? await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGatewayZksync")
-            : await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGateway");
+        let PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2");
+        let PrimaryLendingPlatformAtomicRepayment = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepayment");
+        let PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidation");
+        let PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverage");
+        let PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGateway");
         let PrimaryLendingPlatformModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
 
+        if (isTestingForZksync && isTesting) {
+            PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2Zksync");
+            PrimaryLendingPlatformAtomicRepayment = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepaymentZksync");
+            PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidationZksync");
+            PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverageZksync");
+            PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGatewayZksync");
+        }
         let jumpRateModel;
         let bondtroller;
         let blending;
@@ -142,22 +144,16 @@ module.exports = {
         //config 
         let lendingTokens = blendingToken.lendingTokens;
         let initialExchangeRateMantissa = blendingToken.initialExchangeRateMantissa;
-        let reserveFactorMantissa = blendingToken.reserveFactorMantissa;
         let name = blendingToken.name;
         let symbol = blendingToken.symbol;
         let decimals = blendingToken.decimals;
         let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
         let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
 
-        let tokens = plpModeratorParams.tokens;
+        let projectTokens = plpModeratorParams.projectTokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
         let loanToValueRatioDenominator = plpModeratorParams.loanToValueRatioDenominator;
-        let liquidationTresholdFactorNumerator = plpModeratorParams.liquidationTresholdFactorNumerator;
-        let liquidationTresholdFactorDenominator = plpModeratorParams.liquidationTresholdFactorDenominator;
-        let liquidationIncentiveNumerator = plpModeratorParams.liquidationIncentiveNumerator;
-        let liquidationIncentiveDenominator = plpModeratorParams.liquidationIncentiveDenominator;
         let isPaused = plpModeratorParams.isPaused;
-        let usdc = plpModeratorParams.usdc;
         let borrowLimitPerCollateral = plpModeratorParams.borrowLimitPerCollateral;
         let borrowLimitPerLendingToken = plpModeratorParams.borrowLimitPerLendingToken;
 
@@ -173,7 +169,7 @@ module.exports = {
         let targetHFDenominator = plpLiquidationParams.targetHFDenominator;
 
         if (isTesting) {
-            console.log = function() { };
+            console.log = function () { };
             config.BLendingTokenProxies = [];
             fs.writeFileSync = function () { };
         }
@@ -585,7 +581,7 @@ module.exports = {
         if (!isMODERATOR) {
             await jumpRateModel.initialize(blocksPerYear).then(function (instance) {
                 console.log("JumpRateModel " + jumpRateModelProxyAddress + " call initialize at tx hash " + instance.hash);
-            })
+            });
         }
 
         for (var i = 0; i < BLendingTokenProxies.length; i++) {
@@ -603,7 +599,7 @@ module.exports = {
             if (blendingTokenInfo.targetUtil != targetUtil[i] || rateInfo.maxBorrowRate != newMaxBorrow[i] || gainPerBlock.toString() != blendingTokenInfo.gainPerBlock || jumGainPerBlock.toString() != blendingTokenInfo.jumGainPerBlock) {
                 await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
                     console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " with params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " at tx hash " + instance.hash);
-                })
+                });
             }
         }
 
@@ -615,7 +611,7 @@ module.exports = {
             let adminBlendingToken = await blending.admin();
             if (adminBlendingToken == ZERO_ADDRESS) {
                 let admin = deployMaster.address;
-                console.log("blending " + blending.address + " admin " + admin)
+                console.log("blending " + blending.address + " admin " + admin);
                 await blending.init(
                     lendingTokens[i],
                     bondtrollerProxyAddress,
@@ -624,7 +620,10 @@ module.exports = {
                     name[i],
                     symbol[i],
                     decimals[i],
-                    admin
+                    admin,
+                    {
+                        gasLimit: 20_000_000
+                    }
                 ).then(function () {
                     console.log("blending call init at " + blending.address);
                 });
@@ -646,7 +645,7 @@ module.exports = {
         if (!isDefaultAdminPlp) {
             await plp.initialize()
                 .then(function () {
-                    console.log("PrimaryLendingPlatformV2 call initialize at " + plp.address)
+                    console.log("PrimaryLendingPlatformV2 call initialize at " + plp.address);
                 });
         }
 
@@ -666,7 +665,7 @@ module.exports = {
         if (primaryLendingPlatform == ZERO_ADDRESS) {
             let tx = await plpModerator.initialize(primaryLendingPlatformV2ProxyAddress)
                 .then(function () {
-                    console.log("PrimaryLendingPlatformV2 call initialize at " + plpModerator.address)
+                    console.log("PrimaryLendingPlatformV2 call initialize at " + plpModerator.address);
                 });
         }
         {
@@ -678,19 +677,20 @@ module.exports = {
             }
         }
 
-        for (var i = 0; i < tokens.length; i++) {
-            let projectTokenInfo = await plp.projectTokenInfo(tokens[i]);
+        for (var i = 0; i < projectTokens.length; i++) {
+            let projectTokenInfo = await plp.projectTokenInfo(projectTokens[i]);
             if (projectTokenInfo.isListed == false
                 || projectTokenInfo.loanToValueRatio.numerator != loanToValueRatioNumerator[i]
                 || projectTokenInfo.loanToValueRatio.denominator != loanToValueRatioDenominator[i]
             ) {
                 await plpModerator.addProjectToken(
-                    tokens[i],
+                    projectTokens[i],
                     loanToValueRatioNumerator[i],
-                    loanToValueRatioDenominator[i]
+                    loanToValueRatioDenominator[i],
+                    { gasLimit: 20_000_000 }
                 ).then(function () {
-                    console.log("Added prj token: " + tokens[i] + " with:");
-                    console.log("LoanToValueRatio: ")
+                    console.log("Added prj token: " + projectTokens[i] + " with:");
+                    console.log("LoanToValueRatio: ");
                     console.log("   Numerator:   " + loanToValueRatioNumerator[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominator[i]);
                 });
@@ -714,20 +714,20 @@ module.exports = {
                     loanToValueRatioDenominatorLendingToken[i],
                 ).then(function () {
                     console.log("Added lending token: " + lendingTokens[i]);
-                    console.log("LoanToValueRatio: ")
+                    console.log("LoanToValueRatio: ");
                     console.log("   Numerator:   " + loanToValueRatioNumeratorLendingToken[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominatorLendingToken[i]);
                 });
         }
 
-        for (var i = 0; i < tokens.length; i++) {
-            let borrowLimitPerCollateralValue = await plp.borrowLimitPerCollateral(tokens[i]);
+        for (var i = 0; i < projectTokens.length; i++) {
+            let borrowLimitPerCollateralValue = await plp.borrowLimitPerCollateral(projectTokens[i]);
             if (borrowLimitPerCollateralValue.toString() != borrowLimitPerCollateral[i]) {
                 await plpModerator.setBorrowLimitPerCollateralAsset(
-                    tokens[i],
+                    projectTokens[i],
                     borrowLimitPerCollateral[i]
                 ).then(function () {
-                    console.log("PrimaryLendingPlatformV2 set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
+                    console.log("PrimaryLendingPlatformV2 set " + projectTokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
                 });
             }
         }
@@ -749,7 +749,7 @@ module.exports = {
             if (primaryLendingPlatformLeverage != primaryLendingPlatformLeverageProxyAddress) {
                 await plpModerator.setPrimaryLendingPlatformLeverage(primaryLendingPlatformLeverageProxyAddress).then(function () {
                     console.log("PrimaryLendingPlatformV2 set Leverage contract " + primaryLendingPlatformLeverageProxyAddress);
-                })
+                });
             }
         }
 
@@ -758,7 +758,7 @@ module.exports = {
             if (isRelatedContract == false) {
                 await plpModerator.addRelatedContracts(primaryLendingPlatformAtomicRepaymentProxyAddress).then(function () {
                     console.log("PrimaryLendingPlatformV2 set role for atomic repayment contract " + primaryLendingPlatformAtomicRepaymentProxyAddress);
-                })
+                });
             }
         }
 
@@ -767,7 +767,7 @@ module.exports = {
             if (isRelatedContract == false) {
                 await plpModerator.addRelatedContracts(primaryLendingPlatformLiquidationProxyAddress).then(function () {
                     console.log("PrimaryLendingPlatformV2 set role for liquidation contract " + primaryLendingPlatformLiquidationProxyAddress);
-                })
+                });
             }
         }
 
@@ -776,7 +776,7 @@ module.exports = {
             if (isRelatedContract == false) {
                 await plpModerator.addRelatedContracts(primaryLendingPlatformLeverageProxyAddress).then(function () {
                     console.log("PrimaryLendingPlatformV2 set role for Leverage contract " + primaryLendingPlatformLeverageProxyAddress);
-                })
+                });
             }
         }
 
@@ -785,7 +785,7 @@ module.exports = {
             if (isRelatedContract == false) {
                 await plpModerator.addRelatedContracts(primaryLendingPlatformWrappedTokenGatewayProxyAddress).then(function () {
                     console.log("PrimaryLendingPlatformV2 set role for Wrapped Token Gateway contract " + primaryLendingPlatformWrappedTokenGatewayProxyAddress);
-                })
+                });
             }
         }
 
@@ -796,7 +796,7 @@ module.exports = {
         if (!isModeratorLiquidation) {
             await plpLiquidation.initialize(primaryLendingPlatformV2ProxyAddress)
                 .then(function () {
-                    console.log("PrimaryLendingPlatformLiquidation call initialize at " + plpLiquidation.address)
+                    console.log("PrimaryLendingPlatformLiquidation call initialize at " + plpLiquidation.address);
                 });
         }
 
@@ -805,7 +805,7 @@ module.exports = {
             if (minPartialLiquidationAmount != minPA) {
                 await plpLiquidation.setMinPartialLiquidationAmount(minPA).then(function () {
                     console.log("PrimaryLendingPlatformLiquidation set minPA " + minPA);
-                })
+                });
             }
         }
 
@@ -814,7 +814,7 @@ module.exports = {
             if (maxLRF.numerator != maxLRFNumerator || maxLRF.denominator != maxLRFDenominator) {
                 await plpLiquidation.setMaxLRF(maxLRFNumerator, maxLRFDenominator).then(function () {
                     console.log("PrimaryLendingPlatformLiquidation set maxLRF " + maxLRFNumerator + "/" + maxLRFDenominator);
-                })
+                });
             }
         }
 
@@ -823,7 +823,7 @@ module.exports = {
             if (liquidatorRewardCalcFactor.numerator != rewardCalcFactorNumerator || liquidatorRewardCalcFactor.denominator != rewardCalcFactorDenominator) {
                 await plpLiquidation.setLiquidatorRewardCalculationFactor(rewardCalcFactorNumerator, rewardCalcFactorDenominator).then(function () {
                     console.log("PrimaryLendingPlatformLiquidation set rewardCalcFactor " + rewardCalcFactorNumerator + "/" + rewardCalcFactorDenominator);
-                })
+                });
             }
         }
 
@@ -832,7 +832,7 @@ module.exports = {
             if (targetHealthFactor.numerator != targetHFNumerator || targetHealthFactor.denominator != targetHFDenominator) {
                 await plpLiquidation.setTargetHealthFactor(targetHFNumerator, targetHFDenominator).then(function () {
                     console.log("PrimaryLendingPlatformLiquidation set targetHF " + targetHFNumerator + "/" + targetHFDenominator);
-                })
+                });
             }
         }
 
@@ -843,12 +843,13 @@ module.exports = {
         if (!isModeratorAtomic) {
             await plpAtomicRepayment.initialize(primaryLendingPlatformV2ProxyAddress)
                 .then(function () {
-                    console.log("PrimaryLendingPlatformAtomicRepayment call initialize at " + plpAtomicRepayment.address)
+                    console.log("PrimaryLendingPlatformAtomicRepayment call initialize at " + plpAtomicRepayment.address);
                 });
         }
         console.log();
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
-        if (isZksync) {
+        let currentRegistryAggregator;
+        if (isTestingForZksync && isTesting) {
             if (exchangeAggregator != currentExchangeAggregator) {
                 await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator)
                     .then(function () {
@@ -857,7 +858,7 @@ module.exports = {
                     });
             }
         } else {
-            let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
+            currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
             if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
                 await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
                     .then(function () {
@@ -868,6 +869,7 @@ module.exports = {
             }
         }
 
+
         console.log();
         console.log("***** 8. Setting PLP leverage *****");
         let moderatorRoleLeverage = await plpLeverage.MODERATOR_ROLE();
@@ -875,12 +877,12 @@ module.exports = {
         if (!isModeratorLeverage) {
             await plpLeverage.initialize(primaryLendingPlatformV2ProxyAddress)
                 .then(function () {
-                    console.log("PrimaryLendingPlatformLeverage call initialize at " + plpLeverage.address)
+                    console.log("PrimaryLendingPlatformLeverage call initialize at " + plpLeverage.address);
                 });
         }
         console.log();
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
-        if (isZksync) {
+        if (isTestingForZksync && isTesting) {
             if (exchangeAggregator != currentExchangeAggregator) {
                 await plpLeverage.setExchangeAggregator(exchangeAggregator)
                     .then(function () {
@@ -889,7 +891,7 @@ module.exports = {
                     });
             }
         } else {
-            let currentRegistryAggregator = await plpLeverage.registryAggregator();
+            currentRegistryAggregator = await plpLeverage.registryAggregator();
             if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
                 await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
                     .then(function () {
@@ -907,7 +909,7 @@ module.exports = {
         if (!isModeratorWrappedTokenGateway) {
             await plpWrappedTokenGateway.initialize(primaryLendingPlatformV2ProxyAddress, WETH, primaryLendingPlatformLiquidationProxyAddress, primaryLendingPlatformLeverageProxyAddress)
                 .then(function () {
-                    console.log("PrimaryLendingPlatformWrappedTokenGateway call initialize at " + plpWrappedTokenGateway.address)
+                    console.log("PrimaryLendingPlatformWrappedTokenGateway call initialize at " + plpWrappedTokenGateway.address);
                 });
         }
 
@@ -921,9 +923,9 @@ module.exports = {
             plpLeverageAddress: primaryLendingPlatformLeverageProxyAddress,
             plpModerator: primaryLendingPlatformModeratorProxyAddress,
             plpWrappedTokenGateway: primaryLendingPlatformWrappedTokenGatewayProxyAddress,
-            projectTokens: tokens,
+            projectTokens: projectTokens,
             lendingTokens: lendingTokens
-        }
+        };
         return addresses;
     }
 };
