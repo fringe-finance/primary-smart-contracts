@@ -99,7 +99,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * The caller must have the `ADMIN_ROLE`.
      * @param newModerator The address to grant the role to.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
@@ -146,7 +146,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * @param targetUtil_ The target utilization rate for the blending token.
      * @param newMaxBorrow The new maximum borrow rate for the blending token.
      */
-    function addBLendingTokenSuport(
+    function addBLendingTokenSupport(
         address blendingToken,
         uint256 gainPerYear,
         uint256 jumGainPerYear,
@@ -168,7 +168,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
      * - `_blending` must be a supported blending token.
      * @param _blending The address of the blending token to remove support for.
      */
-    function removeBLendingTokenSuport(address _blending) external onlyModerator {
+    function removeBLendingTokenSupport(address _blending) external onlyModerator {
         require(_blending != address(0), "JumpRateModelV3: Invalid address");
         require(isBlendingTokenSupport[_blending], "JumpRateModelV3: Not found");
         isBlendingTokenSupport[_blending] = false;
@@ -300,11 +300,11 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
     }
 
     /**
-     * @dev Calculates the current borrow rate per block, with the error code expected by the market.
-     * @param cash The amount of cash in the market.
-     * @param borrows The amount of borrows in the market.
-     * @param reserves The amount of reserves in the market.
-     * @return The borrow rate percentage per block as a mantissa (scaled by 1e18).
+     * @dev Calculates and stores the current borrow interest rate per block for the specified blending token.
+     * @param cash The total amount of cash the market has.
+     * @param borrows The total amount of borrows the market has outstanding.
+     * @param reserves The total amount of reserves the market has.
+     * @return The calculated borrow rate per block, represented as a percentage and scaled by 1e18.
      */
     function storeBorrowRate(uint256 cash, uint256 borrows, uint256 reserves) public override onlyBlendingToken returns (uint) {
         RateInfo storage borrowRateInfo = rateInfo[msg.sender];
@@ -333,7 +333,7 @@ contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgra
         uint256 reserveFactorMantissa,
         address blendingToken
     ) public view override returns (uint) {
-        /* Calculate suply rate
+        /* Calculate supply rate
          * oneMinusReserveFactor: percentage remaining after subtracting ReserveFactor
          * rateToPool = IR * oneMinusReserveFactor
          * supplyrate = Cu * rateToPool

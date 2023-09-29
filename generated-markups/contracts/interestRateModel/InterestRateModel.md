@@ -39,11 +39,12 @@ Calculates the current borrow interest rate per block.
 
 Parameters:
 
-| Name     | Type    | Description                                               |
-| :------- | :------ | :-------------------------------------------------------- |
-| cash     | uint256 | The total amount of cash the market has.                  |
-| borrows  | uint256 | The total amount of borrows the market has outstanding.   |
-| reserves | uint256 | The total amount of reserves the market has.              |
+| Name          | Type    | Description                                                        |
+| :------------ | :------ | :----------------------------------------------------------------- |
+| cash          | uint256 | The total amount of cash the market has.                           |
+| borrows       | uint256 | The total amount of borrows the market has outstanding.            |
+| reserves      | uint256 | The total amount of reserves the market has.                       |
+| blendingToken | address | The address of the blending token used for interest calculation.   |
 
 
 Return values:
@@ -69,12 +70,13 @@ Calculates the current supply interest rate per block.
 
 Parameters:
 
-| Name                  | Type    | Description                                               |
-| :-------------------- | :------ | :-------------------------------------------------------- |
-| cash                  | uint256 | The total amount of cash the market has.                  |
-| borrows               | uint256 | The total amount of borrows the market has outstanding.   |
-| reserves              | uint256 | The total amount of reserves the market has.              |
-| reserveFactorMantissa | uint256 | The current reserve factor the market has.                |
+| Name                  | Type    | Description                                                        |
+| :-------------------- | :------ | :----------------------------------------------------------------- |
+| cash                  | uint256 | The total amount of cash the market has.                           |
+| borrows               | uint256 | The total amount of borrows the market has outstanding.            |
+| reserves              | uint256 | The total amount of reserves the market has.                       |
+| reserveFactorMantissa | uint256 | The current reserve factor the market has.                         |
+| blendingToken         | address | The address of the blending token used for interest calculation.   |
 
 
 Return values:
@@ -93,7 +95,7 @@ function storeBorrowRate(
 ) external virtual returns (uint256)
 ```
 
-Calculates the current borrow interest rate per block.
+Calculates and stores the current borrow interest rate per block for the specified blending token.
 
 
 Parameters:
@@ -107,6 +109,6 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                                                      |
-| :--- | :------ | :--------------------------------------------------------------- |
-| [0]  | uint256 | The borrow rate per block (as a percentage, and scaled by 1e18). |
+| Name | Type    | Description                                                                           |
+| :--- | :------ | :------------------------------------------------------------------------------------ |
+| [0]  | uint256 | The calculated borrow rate per block, represented as a percentage and scaled by 1e18. |

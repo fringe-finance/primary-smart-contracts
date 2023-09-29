@@ -399,10 +399,10 @@ function initialize() public initializer
 ```
 
 Initializes the contract and sets the name, symbol, and default roles.
-### setPrimaryLendingPlatformModeratorModerator (0xa0290239)
+### setPrimaryLendingPlatformModerator (0x4123cf11)
 
 ```solidity
-function setPrimaryLendingPlatformModeratorModerator(
+function setPrimaryLendingPlatformModerator(
     address newModeratorContract
 ) external onlyAdmin
 ```
@@ -852,7 +852,16 @@ Parameters:
 | Name               | Type    | Description                                                                                                                                                                                                                                                                                                                                                  |
 | :----------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | lendingToken       | address | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                             |
-| lendingTokenAmount | uint256 | The amount of the lending token being supplied.  Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0.  Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
+| lendingTokenAmount | uint256 | The amount of the lending token being supplied.
+ 
+ Requirements:
+ - The lending token is listed.
+ - The lending token is not paused.
+ - The lending token amount is greater than 0.
+ - Minting the bLendingTokens is successful and the minted amount is greater than 0.
+ 
+ Effects:
+ - Mints the corresponding bLendingTokens and credits them to the user. |
 
 ### supplyFromRelatedContract (0xb3c38b6e)
 

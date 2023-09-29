@@ -36,7 +36,7 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @dev Emitted when the moderator role is granted to a new account.
      * @param newModerator The address to which moderator role is granted.
      */
-    event GrandModeratorRole(address indexed newModerator);
+    event GrantModeratorRole(address indexed newModerator);
 
     /**
      * @dev Emitted when the moderator role is revoked from an account.
@@ -97,9 +97,9 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @dev Grants the moderator role to a new address.
      * @param newModerator The address of the new moderator.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(newModerator);
+        emit GrantModeratorRole(newModerator);
     }
 
     /**
@@ -175,8 +175,6 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external payable override {
         uint256 lenPriceId = priceIds.length;
 
-        require(lenPriceId == updateData.length, "PythPriceProvider: Mismatched array sizes!");
-
         for (uint256 i = 0; i < lenPriceId; i++) {
             bytes32 priceId = priceIds[i];
 
@@ -190,6 +188,23 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
                 break;
             }
         }
+    }
+
+    /**
+     * @dev Returns the latest price of a given token in USD after update price.
+     * @param token The address of the token to get the price of.
+     * @param updateData The updateData provided by PythNetwork.
+     * @return priceMantissa The price of the token in USD, represented as a mantissa.
+     * @return priceDecimals The number of decimal places in the price of the token.
+     */
+    function getUpdatedPrice(
+        address token,
+        bytes[] calldata updateData
+    ) external payable override returns (uint256 priceMantissa, uint8 priceDecimals) {
+        if (updateData.length > 0) {
+            IPyth(pythOracle).updatePriceFeeds{value: msg.value}(updateData);
+        }
+        return getPrice(token);    
     }
 
     /****************** View functions ****************** */

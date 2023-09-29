@@ -26,13 +26,15 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
 
     address[] public aggregatorPath;
 
+    mapping(address => uint256) public timeOuts; // address of aggregatorPath => timeout of aggregatorPath
+
     uint256 internal constant PRECISION = 10 ** 18;
 
     /**
      * @dev Emitted when the moderator role is granted to a new account.
      * @param newModerator The address to which moderator role is granted.
      */
-    event GrandModeratorRole(address indexed newModerator);
+    event GrantModeratorRole(address indexed newModerator);
 
     /**
      * @dev Emitted when the moderator role is revoked from an account.
@@ -46,6 +48,13 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @param aggregatorPath The array of aggregator addresses to get the price feed for wstETH in USD.
      */
     event SetTokenAndAggregator(address indexed token, address[] aggregatorPath);
+
+    /**
+     * @dev Emitted when the time out for a Chainlink aggregator path is set.
+     * @param aggregatorPath The address of the Chainlink aggregator path.
+     * @param newTimeOut The new time out value in seconds.
+     */
+    event SetTimeOut(address indexed aggregatorPath, uint256 newTimeOut);
 
     /**
      * @dev Initializes the wstETH price provider contract with the given wstETH address and aggregator path.
@@ -84,9 +93,9 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @dev Grants the moderator role to a new address.
      * @param newModerator The address of the new moderator.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(newModerator);
+        emit GrantModeratorRole(newModerator);
     }
 
     /**
@@ -109,26 +118,27 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @param _aggregatorPath The new aggregator path to be added.
      */
     function addAggregatorPath(address[] memory _aggregatorPath) public onlyModerator {
-        require(_aggregatorPath.length <= MAX_PRICE_PATH_LENGTH, "ChainlinkPriceProvider: Too long path");
+        require(_aggregatorPath.length <= MAX_PRICE_PATH_LENGTH, "WstETHPriceProvider: Too long path");
         aggregatorPath = _aggregatorPath;
         emit SetTokenAndAggregator(wstETH, aggregatorPath);
     }
 
-    /****************** View functions ****************** */
-
     /**
-     * @dev Checks if a token is listed on the price provider.
-     * @param token The address of the token to check.
-     * @return A boolean indicating whether the token is listed or not.
+     * @notice Sets the timeout value corresponding to the aggregatorPath.
+     * @dev Example: ETH/USD have a new answer is written when the off-chain data moves more than the
+     *      0.5% deviation threshold or 3600 seconds have passed since the last answer was written on-chain.
+     *      So, the timeOut value for each aggregator will be equal to the heartbeat threshold value plus a
+     *      period of time to make the transaction update the price, that time period can be 60s or a little more.
+     * @param aggregatorPath_ The address of chainlink aggregator contract.
+     * @param newTimeOut It is the amount of time it takes for a new round of aggregation to start after a specified
+     * amount of time since the last update plus a period of time waiting for new price update transactions to execute.
      */
-    function isListed(address token) public view override returns (bool) {
-        require(token == wstETH, "ChainlinkPriceProvider: Invalid token");
-        if (wstETH != address(0) && aggregatorPath[0] != address(0)) {
-            return true;
-        } else {
-            return false;
-        }
+    function setTimeOut(address aggregatorPath_, uint256 newTimeOut) external onlyModerator {
+        require(aggregatorPath_ != address(0), "WstETHPriceProvider: Invalid aggregatorPath!");
+        timeOuts[aggregatorPath_] = newTimeOut;
+        emit SetTimeOut(aggregatorPath_, newTimeOut);
     }
+    /****************** View functions ****************** */
 
     /**
      * @dev Checks if the given token is active.
@@ -136,8 +146,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @return A boolean indicating whether the token is active or not.
      */
     function isActive(address token) public view override returns (bool) {
-        require(token == wstETH, "ChainlinkPriceProvider: Invalid token");
-        if (wstETH != address(0) && aggregatorPath[0] != address(0)) {
+        if (token == wstETH && wstETH != address(0) && aggregatorPath[0] != address(0)) {
             return true;
         } else {
             return false;
@@ -148,15 +157,19 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @dev Returns the price of stETH in USD.
      * @return priceMantissa The price of stETH in USD as a mantissa value.
      */
-    function getPriceSTETH() public view returns (uint256 priceMantissa) {
+     function getPriceSTETH() public view returns (uint256 priceMantissa) {
         address[] memory _aggregatorPath = aggregatorPath;
         priceMantissa = 1;
         uint256 priceDecimals = 0;
         for (uint8 i = 0; i < _aggregatorPath.length; i++) {
-            priceMantissa *= AggregatorV3Interface(_aggregatorPath[i]).latestAnswer(); // earn price
+            priceMantissa *= getLatestPrice(_aggregatorPath[i]); // earn price
             priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals(); // earn price decimals
         }
-        priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        if (priceDecimals >= usdDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        } else {
+            priceMantissa *= 10 ** (usdDecimals - priceDecimals);
+        }
     }
 
     /**
@@ -166,7 +179,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @return priceDecimals The number of decimals in the USD price.
      */
     function getPrice(address token) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
-        require(token == wstETH, "Invalid token");
+        require(isActive(token), "WstETHPriceProvider: Token is not active!");
         uint256 wstETHToStETH = IWstETH(wstETH).stEthPerToken(); // 1wstETH = stETH
         assert(wstETHToStETH > 0);
         uint256 stETHToUSD = getPriceSTETH();
@@ -193,5 +206,19 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      */
     function getPriceDecimals() public view override returns (uint8) {
         return usdDecimals;
+    }
+    
+    /**
+     * @dev Returns the latest price after performing sanity check and staleness check.
+     * @param aggregatorPath_ The address of chainlink aggregator contract.
+     * @return The latest price (answer).
+     */
+    function getLatestPrice(address aggregatorPath_) public view virtual returns (uint256) {
+        (uint80 roundId, int256 answer, , /*uint256 startedAt*/ uint256 updatedAt /*uint80 answeredInRound*/, ) = AggregatorV3Interface(
+            aggregatorPath_
+        ).latestRoundData();
+        require(roundId != 0 && answer >= 0 && updatedAt != 0 && updatedAt <= block.timestamp, "WstETHPriceProvider: Fetched data is invalid!");
+        require(block.timestamp - updatedAt <= timeOuts[aggregatorPath_], "WstETHPriceProvider: price is too old!");
+        return uint256(answer);
     }
 }

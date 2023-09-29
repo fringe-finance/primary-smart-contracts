@@ -79,7 +79,8 @@ Parameters:
 
 | Name  | Type    | Description                                                                |
 | :---- | :------ | :------------------------------------------------------------------------- |
-| owner | address | The address from which the balance will be retrieved return The `balance` |
+| owner | address | The address from which the balance will be retrieved
+ return The `balance` |
 
 ### transfer (0xa9059cbb)
 
@@ -95,7 +96,8 @@ Parameters:
 | Name   | Type    | Description                                                                    |
 | :----- | :------ | :----------------------------------------------------------------------------- |
 | dst    | address | The address of the destination account                                         |
-| amount | uint256 | The number of tokens to transfer return Whether or not the transfer succeeded |
+| amount | uint256 | The number of tokens to transfer
+ return Whether or not the transfer succeeded |
 
 ### transferFrom (0x23b872dd)
 
@@ -116,7 +118,8 @@ Parameters:
 | :----- | :------ | :----------------------------------------------------------------------------- |
 | src    | address | The address of the source account                                              |
 | dst    | address | The address of the destination account                                         |
-| amount | uint256 | The number of tokens to transfer return Whether or not the transfer succeeded |
+| amount | uint256 | The number of tokens to transfer
+ return Whether or not the transfer succeeded |
 
 ### approve (0x095ea7b3)
 
@@ -138,7 +141,8 @@ Parameters:
 | Name    | Type    | Description                                                                                              |
 | :------ | :------ | :------------------------------------------------------------------------------------------------------- |
 | spender | address | The address of the account which may transfer tokens                                                     |
-| amount  | uint256 | The number of tokens that are approved (-1 means infinite) return Whether or not the approval succeeded |
+| amount  | uint256 | The number of tokens that are approved (-1 means infinite)
+ return Whether or not the approval succeeded |
 
 ### allowance (0xdd62ed3e)
 
@@ -157,4 +161,5 @@ Parameters:
 | Name    | Type    | Description                                                                                                               |
 | :------ | :------ | :------------------------------------------------------------------------------------------------------------------------ |
 | owner   | address | The address of the account which owns the tokens to be spent                                                              |
-| spender | address | The address of the account which may transfer tokens return The number of tokens allowed to be spent (-1 means infinite) |
+| spender | address | The address of the account which may transfer tokens
+ return The number of tokens allowed to be spent (-1 means infinite) |

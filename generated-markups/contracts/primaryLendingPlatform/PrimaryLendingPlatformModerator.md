@@ -158,10 +158,10 @@ Parameters:
 | lvrNumerator   | uint8   | The numerator of the loan-to-value ratio.   |
 | lvrDenominator | uint8   | The denominator of the loan-to-value ratio. |
 
-### GrandModerator
+### GrantModerator
 
 ```solidity
-event GrandModerator(address indexed moderator)
+event GrantModerator(address indexed moderator)
 ```
 
 Emitted when a moderator is granted access to the platform.
@@ -329,10 +329,10 @@ Parameters:
 | :--- | :------ | :-------------------------------------- |
 | pit  | address | The address of the primary index token. |
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) external onlyAdmin
+function grantModerator(address newModerator) external onlyAdmin
 ```
 
 Grants the moderator role to a new address.
@@ -429,7 +429,16 @@ Parameters:
 | :-------------------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | projectToken                | address | The address of the project token to be added.                                                                                                                                                                                                                                                                                                                      |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio.                                                                                                                                                                                                                                                                                                                          |
-| loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio.  Requirements: - The project token address must not be the zero address. - Only the admin can call this function.  Effects: - Adds the project token to the platform. - Sets the loan-to-value ratio for the project token. - Sets the pause status for deposit and withdrawal of the project token to false. |
+| loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio.
+ 
+ Requirements:
+ - The project token address must not be the zero address.
+ - Only the admin can call this function.
+ 
+ Effects:
+ - Adds the project token to the platform.
+ - Sets the loan-to-value ratio for the project token.
+ - Sets the pause status for deposit and withdrawal of the project token to false. |
 
 ### removeProjectToken (0xcb69ae80)
 
@@ -449,7 +458,12 @@ Parameters:
 
 | Name           | Type    | Description                                                                                                                                                                                                                |
 | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| projectTokenId | uint256 | The ID of the project token to be removed.  Requirements: - The caller must be an admin. - The project token must be listed on the primary lending platform. - The total deposited project token amount must be zero. |
+| projectTokenId | uint256 | The ID of the project token to be removed.
+ 
+ Requirements:
+ - The caller must be an admin.
+ - The project token must be listed on the primary lending platform.
+ - The total deposited project token amount must be zero. |
 
 ### addLendingToken (0x1d0957e9)
 
@@ -474,7 +488,16 @@ Parameters:
 | bLendingToken               | address | The address of the corresponding bLending token.                                                                                                                                                                                                                                                                                                                                  |
 | isPaused                    | bool    | A boolean indicating whether the lending token is paused or not.                                                                                                                                                                                                                                                                                                                  |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio for the lending token.                                                                                                                                                                                                                                                                                                                   |
-| loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the lending token.  Requirements: - The lending token address and bLending token address must not be zero. - Only the admin can call this function.  Effects: - Adds the lending token to the platform. - Sets the loan-to-value ratio for the lending token. - Sets the pause status for borrowing of the lending token. |
+| loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the lending token.
+ 
+ Requirements:
+ - The lending token address and bLending token address must not be zero.
+ - Only the admin can call this function.
+ 
+ Effects:
+ - Adds the lending token to the platform.
+ - Sets the loan-to-value ratio for the lending token.
+ - Sets the pause status for borrowing of the lending token. |
 
 ### removeLendingToken (0xe032563a)
 
@@ -494,7 +517,12 @@ Parameters:
 
 | Name           | Type    | Description                                                                                                                                                                                                                          |
 | :------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| lendingTokenId | uint256 | The ID of the lending token to be removed.  Requirements: - The caller must have admin role. - The lending token must be listed in the primary lending platform. - There must be no borrow of the lending token in any project. |
+| lendingTokenId | uint256 | The ID of the lending token to be removed.
+ 
+ Requirements:
+ - The caller must have admin role.
+ - The lending token must be listed in the primary lending platform.
+ - There must be no borrow of the lending token in any project. |
 
 ### setPrimaryLendingPlatformLeverage (0xa1ab5419)
 

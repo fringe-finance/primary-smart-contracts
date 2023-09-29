@@ -33,7 +33,7 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
         uint8 pairAssetDecimals; // decimals of second token in pair with token
     }
 
-    event GrandModeratorRole(address indexed newModerator);
+    event GrantModeratorRole(address indexed newModerator);
     event RevokeModeratorRole(address indexed moderator);
     event SetTokenAndPrice(address indexed token, uint256 price);
     event ChangeActive(address indexed token, bool active);
@@ -57,9 +57,9 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
 
     /****************** Admin functions ****************** */
 
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(newModerator);
+        emit GrantModeratorRole(newModerator);
     }
 
     function revokeModerator(address moderator) public onlyAdmin {

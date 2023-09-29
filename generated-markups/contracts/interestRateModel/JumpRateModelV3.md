@@ -165,10 +165,10 @@ Parameters:
 | :------------- | :------ | :------------------------------------------ |
 | blocksPerYear_ | uint256 | Number of blocks in a year for compounding. |
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the `MODERATOR_ROLE` to a new address.
@@ -236,10 +236,10 @@ Parameters:
 | :------------- | :------ | :--------------------------------- |
 | blocksPerYear_ | uint256 | The new number of blocks per year. |
 
-### addBLendingTokenSuport (0x9c59d8ec)
+### addBLendingTokenSupport (0xf9828944)
 
 ```solidity
-function addBLendingTokenSuport(
+function addBLendingTokenSupport(
     address blendingToken,
     uint256 gainPerYear,
     uint256 jumGainPerYear,
@@ -265,10 +265,10 @@ Parameters:
 | targetUtil_    | uint256 | The target utilization rate for the blending token.     |
 | newMaxBorrow   | uint256 | The new maximum borrow rate for the blending token.     |
 
-### removeBLendingTokenSuport (0x3fddd839)
+### removeBLendingTokenSupport (0xff60fb68)
 
 ```solidity
-function removeBLendingTokenSuport(address _blending) external onlyModerator
+function removeBLendingTokenSupport(address _blending) external onlyModerator
 ```
 
 Removes blending token support for the specified blending token address.
@@ -401,23 +401,23 @@ function storeBorrowRate(
 ) public override onlyBlendingToken returns (uint256)
 ```
 
-Calculates the current borrow rate per block, with the error code expected by the market.
+Calculates and stores the current borrow interest rate per block for the specified blending token.
 
 
 Parameters:
 
-| Name     | Type    | Description                             |
-| :------- | :------ | :-------------------------------------- |
-| cash     | uint256 | The amount of cash in the market.       |
-| borrows  | uint256 | The amount of borrows in the market.    |
-| reserves | uint256 | The amount of reserves in the market.   |
+| Name     | Type    | Description                                               |
+| :------- | :------ | :-------------------------------------------------------- |
+| cash     | uint256 | The total amount of cash the market has.                  |
+| borrows  | uint256 | The total amount of borrows the market has outstanding.   |
+| reserves | uint256 | The total amount of reserves the market has.              |
 
 
 Return values:
 
-| Name | Type    | Description                                                          |
-| :--- | :------ | :------------------------------------------------------------------- |
-| [0]  | uint256 | The borrow rate percentage per block as a mantissa (scaled by 1e18). |
+| Name | Type    | Description                                                                           |
+| :--- | :------ | :------------------------------------------------------------------------------------ |
+| [0]  | uint256 | The calculated borrow rate per block, represented as a percentage and scaled by 1e18. |
 
 ### getSupplyRate (0x32dc9b1c)
 

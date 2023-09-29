@@ -84,7 +84,7 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
      * @dev Emitted when a moderator is granted access to the platform.
      * @param moderator The address of the moderator.
      */
-    event GrandModerator(address indexed moderator);
+    event GrantModerator(address indexed moderator);
 
     /**
      * @dev Emitted when a moderator's access to the platform is revoked.
@@ -171,10 +171,10 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
      * - The new moderator address must not be the zero address.
      * @param newModerator The address of the new moderator.
      */
-    function grandModerator(address newModerator) external onlyAdmin {
+    function grantModerator(address newModerator) external onlyAdmin {
         require(newModerator != address(0), "PITModerator: Invalid address");
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModerator(newModerator);
+        emit GrantModerator(newModerator);
     }
 
     /**

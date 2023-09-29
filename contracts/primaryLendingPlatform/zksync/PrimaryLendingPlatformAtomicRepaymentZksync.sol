@@ -112,13 +112,14 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
     }
 
     /**
-     * @dev Internal function to approve a specified amount of tokens to be transferred by the exchange aggregator contract.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
     function _approveTokenTransfer(address token, uint256 tokenAmount) internal override {
-        if (ERC20Upgradeable(token).allowance(address(this), exchangeAggregator) <= tokenAmount) {
-            ERC20Upgradeable(token).safeApprove(exchangeAggregator, type(uint256).max);
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
         }
     }
 }

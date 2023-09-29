@@ -9,22 +9,38 @@
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [
-              "0xed9f4c37094ded8a681e0Ffcc9F5a7ee5247001a",
-              "0xccc70874548F12320DB34b1f36343C5afc5484e4",
-              "0xFee9CFE582C501234C8ac18b01EA3F3199f4efB8",
-              "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
+                "0xed9f4c37094ded8a681e0Ffcc9F5a7ee5247001a",
+                "0xccc70874548F12320DB34b1f36343C5afc5484e4",
+                "0xFee9CFE582C501234C8ac18b01EA3F3199f4efB8",
+                "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"
             ],
             "chainlinkAggregatorV3": [
-              ["0x48731cF7e84dc94C5f84577882c14Be11a5B7456"],
-              ["0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7"],
-              ["0x0d79df66BE487753B02D015Fb622DED7f0E9798d"],
-              ["0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"]
+                [
+                    "0x48731cF7e84dc94C5f84577882c14Be11a5B7456"
+                ],
+                [
+                    "0xAb5c49580294Aff77670F839ea425f5b78ab3Ae7"
+                ],
+                [
+                    "0x0d79df66BE487753B02D015Fb622DED7f0E9798d"
+                ],
+                [
+                    "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+                ]
             ],
             "timeOuts": [
-              ["86400"],
-              ["86400"],
-              ["86400"],
-              ["86400"]
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ]
             ]
         },
         "Uniswap": {
@@ -50,8 +66,10 @@
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [
-                "0x779877A7B0D9E8603169DdbD7836e478b4624789",
-                "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e"
+                "0xA39434A63A52E749F02807ae27335515BA4b07F7"
+            ],
+            "timeOuts": [
+                "180"
             ]
         },
         "wstETH": "0x60f7eE4835269d08d8E3Dd42EeD551688f18b8F7",
@@ -112,11 +130,6 @@
             "10000000000000000000",
             "10000000000000000000"
         ],
-        "reserveFactorMantissa": [
-            "50000000000000000",
-            "70000000000000000",
-            "100000000000000000"
-        ],
         "lendingTokens": [
             "0xccc70874548F12320DB34b1f36343C5afc5484e4",
             "0xFee9CFE582C501234C8ac18b01EA3F3199f4efB8",
@@ -148,7 +161,7 @@
             "10"
         ]
     },
-      "jumRateModel": {
+    "jumRateModel": {
         "gainPerYear": [
             "47564697600",
             "47564697600",
@@ -171,7 +184,7 @@
         ],
         "blocksPerYear": "2102400"
     },
-      "plpLiquidationParams": {
+    "plpLiquidationParams": {
         "minPA": "1000000",
         "maxLRFNumerator": "115",
         "maxLRFDenominator": "100",
@@ -179,5 +192,5 @@
         "rewardCalcFactorDenominator": "1",
         "targetHFNumerator": "1",
         "targetHFDenominator": "1"
-      }
-  }
+    }
+}

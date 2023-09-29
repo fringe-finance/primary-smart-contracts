@@ -6,7 +6,6 @@ import "../bToken/BToken.sol";
 import "../util/ErrorReporter.sol";
 import "../util/ExponentialNoError.sol";
 import "./BondtrollerStorage.sol";
-import "../interfaces/IPriceProviderAggregator.sol";
 
 /**
  * @title Remastered from Compound's Bondtroller Contract

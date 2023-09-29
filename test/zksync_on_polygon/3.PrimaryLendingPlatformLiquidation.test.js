@@ -1,6 +1,4 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
 const hre = require("hardhat");
 const { deployment } = require("../../scripts/deployPLP_V2/deploymentPLP");
 const { ethers } = require("ethers");
@@ -94,8 +92,8 @@ describe("PrimaryLendingPlatformLiquidation", function () {
 
     async function resetNetwork() {
         await helpers.reset(
-            `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(chainConfig.blockNumber)
+            `https://${process.env.CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(process.env.BLOCK_NUMBER)
         );
     }
     async function loadFixture() {

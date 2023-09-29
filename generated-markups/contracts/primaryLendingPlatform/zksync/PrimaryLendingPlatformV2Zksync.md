@@ -67,6 +67,7 @@ function withdrawFromRelatedContracts(
     external
     payable
     isProjectTokenListed(projectToken)
+    onlyRelatedContracts
     nonReentrant
     returns (uint256)
 ```

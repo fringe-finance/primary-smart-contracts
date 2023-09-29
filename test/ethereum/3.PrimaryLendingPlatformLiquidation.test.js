@@ -1,9 +1,8 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const chain =chainConfigs.chain ? "_" +chainConfigs.chain : "";
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
+let chain = process.env.CHAIN && network == 'hardhat' ? "_" + process.env.CHAIN : "";
+
 const path = require("path");
 const configTestingFile = path.join(__dirname, `../../scripts/config/${network}${chain}/config_testing.json`);
 const configTesting = require(configTestingFile);
@@ -11,9 +10,7 @@ const { deployment } = require("../../scripts/deployPLP_V2/deploymentPLP");
 const { ethers } = require("ethers");
 const { expect } = require("chai");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
-const ParaSwapAdapter_ARTIFACT = require("./artifacts/NewUniswapV2Router.json");
-const UniSwapV2Pair_ARTIFACT = require("./artifacts/UniswapV2Pair.json");
-const UniswapV2FACTORY_ARTIFACT = require("./artifacts/UniswapV2Factory.json");
+const UniswapV2FACTORY_ARTIFACT = require("./artifacts-for-testing/UniswapV2Factory.json");
 const INFURA_KEY = process.env.INFURA_KEY;
 const toBN = (num) => hre.ethers.BigNumber.from(num);
 
@@ -126,10 +123,9 @@ describe("PrimaryLendingPlatformLiquidation", function () {
     }
 
     async function resetNetwork() {
-        console.log(`https://${chainConfig.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`)
         await helpers.reset(
-            `https://${chainConfig.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(chainConfig.blockNumber)
+            `https://${process.env.CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(process.env.BLOCK_NUMBER)
         );
     }
     async function loadFixture() {

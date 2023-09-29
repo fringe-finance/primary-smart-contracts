@@ -57,7 +57,8 @@
       "tokensUseLPProvider": []
     },
     "wstETHProvider": {
-      "wstETHAggregatorPath": []
+      "wstETHAggregatorPath": [],
+      "timeOuts": []
     },
     "wstETH": "0x1B5AdE7927F798171F34e94a143113443ec46435",
     "usdc": "0x7B9985adBc2629d3e80C18397837A967399E8EAd",
@@ -113,11 +114,6 @@
       "10000000000000000000",
       "10000000000000000000",
       "10000000000000000000"
-    ],
-    "reserveFactorMantissa": [
-      "50000000000000000",
-      "70000000000000000",
-      "100000000000000000"
     ],
     "lendingTokens": [
       "0x7B9985adBc2629d3e80C18397837A967399E8EAd",

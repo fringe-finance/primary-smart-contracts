@@ -67,14 +67,6 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
         _;
     }
 
-    /**
-     * @dev Modifier to check if the caller has the moderator role.
-     */
-    modifier onlyModerator() {
-        require(hasRole(MODERATOR_ROLE, msg.sender), "msg.sender not moderator");
-        _;
-    }
-
     /********************** ADMIN FUNCTIONS ********************** */
 
     /**
@@ -91,7 +83,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
      * @dev Grants the `MODERATOR_ROLE` to a new address.
      * @param newModerator The address to grant the `MODERATOR_ROLE` to.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
     }
 
@@ -245,7 +237,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
         /* Calculate the current borrow interest rate */
         uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior, address(this));
-        // require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
         /* Calculate the number of blocks elapsed since the last accrual */
         (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);

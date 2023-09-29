@@ -26,10 +26,10 @@ struct BackendMetadata {
 
 ## Events info
 
-### GrandTrustedBackendRole
+### GrantTrustedBackendRole
 
 ```solidity
-event GrandTrustedBackendRole(address indexed newTrustedBackend)
+event GrantTrustedBackendRole(address indexed newTrustedBackend)
 ```
 
 Emitted when the trusted backend role is granted to a new trusted backend.
@@ -144,10 +144,10 @@ function initialize() public initializer
 ```
 
 Initializes the contract by setting up the access control roles and the number of decimals for the USD price.
-### grandTrustedBackendRole (0x6058bde5)
+### grantTrustedBackendRole (0x5585d4de)
 
 ```solidity
-function grandTrustedBackendRole(address newTrustedBackend) public onlyAdmin
+function grantTrustedBackendRole(address newTrustedBackend) public onlyAdmin
 ```
 
 Grants the TRUSTED_BACKEND_ROLE to a new trusted backend address.

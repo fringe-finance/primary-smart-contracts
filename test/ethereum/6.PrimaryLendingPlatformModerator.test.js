@@ -1,19 +1,16 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const chain =chainConfigs.chain ? "_" +chainConfigs.chain : "";
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
+let chain = process.env.CHAIN && network == 'hardhat' ? "_" + process.env.CHAIN : "";
+
 const path = require("path");
 const configTestingFile = path.join(__dirname, `../../scripts/config/${network}${chain}/config_testing.json`);
 const configTesting = require(configTestingFile);
 const { deployment } = require("../../scripts/deployPLP_V2/deploymentPLP");
 const { ethers } = require("ethers");
-const { expect, util } = require("chai");
+const { expect } = require("chai");
 const helpers = require("@nomicfoundation/hardhat-network-helpers");
-const ParaSwapAdapter_ARTIFACT = require("./artifacts/NewUniswapV2Router.json");
-const UniSwapV2Pair_ARTIFACT = require("./artifacts/UniswapV2Pair.json");
-const UniswapV2FACTORY_ARTIFACT = require("./artifacts/UniswapV2Factory.json");
+const UniswapV2FACTORY_ARTIFACT = require("./artifacts-for-testing/UniswapV2Factory.json");
 const toBN = (num) => hre.ethers.BigNumber.from(num);
 
 describe("PrimaryLendingPlatformModerator", function () {
@@ -212,31 +209,31 @@ describe("PrimaryLendingPlatformModerator", function () {
             MODERATOR_BYTES_32 = await plpModeratorInstance.MODERATOR_ROLE();
         });
 
-        describe("grandModerator", async function () {
+        describe("grantModerator", async function () {
             before(async function () {
                 await loadFixture();
             });
 
             it('1. Failure: Should revert when sender is not admin', async () => {
-                await expect(plpModeratorInstance.connect(firstSigner).grandModerator(firstSignerAddress))
+                await expect(plpModeratorInstance.connect(firstSigner).grantModerator(firstSignerAddress))
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
             it('2.1. Failure: Should throw error when newModerator is invalid address', async () => {
                 newModerator = "Not address";
-                expect(plpModeratorInstance.grandModerator(newModerator))
+                expect(plpModeratorInstance.grantModerator(newModerator))
                     .to.throw;
             });
 
             it('2.2. Failure: Should revert when newModerator is address zero', async () => {
                 newModerator = ethers.constants.AddressZero;
-                await expect(plpModeratorInstance.grandModerator(newModerator))
+                await expect(plpModeratorInstance.grantModerator(newModerator))
                     .to.be.revertedWith("PITModerator: Invalid address");
             });
 
             it('3. Success: Should grant the moderator role to newModerator successfully', async () => {
-                await expect(plpModeratorInstance.grandModerator(firstSignerAddress))
-                    .to.be.emit(plpModeratorInstance, "GrandModerator").withArgs(firstSignerAddress);
+                await expect(plpModeratorInstance.grantModerator(firstSignerAddress))
+                    .to.be.emit(plpModeratorInstance, "GrantModerator").withArgs(firstSignerAddress);
 
                 expect(await plpModeratorInstance.hasRole(MODERATOR_BYTES_32, firstSignerAddress)).to.be.equal(true);
             });
@@ -265,7 +262,7 @@ describe("PrimaryLendingPlatformModerator", function () {
             });
 
             it('3. Success: Should revoke moderator successfully', async () => {
-                await plpModeratorInstance.grandModerator(firstSignerAddress);
+                await plpModeratorInstance.grantModerator(firstSignerAddress);
 
                 await expect(plpModeratorInstance.revokeModerator(firstSignerAddress))
                     .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);

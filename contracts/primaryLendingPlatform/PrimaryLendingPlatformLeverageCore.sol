@@ -163,7 +163,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     function isValidCollateralization(uint256 margin, uint256 exp, uint256 lvrNumerator, uint256 lvrDenominator) public pure returns (bool isValid) {
         uint256 ratioNumerator = (margin + exp) * lvrNumerator;
         uint256 ratioDenominator = exp * lvrDenominator;
-        isValid = ratioNumerator > ratioDenominator ? true : false;
+        isValid = ratioNumerator > ratioDenominator;
     }
 
     /**
@@ -321,14 +321,15 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @dev Internal function to approve a specified amount of tokens to be transferred by the token transfer proxy.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
     function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
-        if (ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy) <= tokenAmount) {
-            ERC20Upgradeable(token).safeApprove(tokenTransferProxy, type(uint256).max);
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(tokenTransferProxy, tokenAmount - allowanceAmount);
         }
     }
 

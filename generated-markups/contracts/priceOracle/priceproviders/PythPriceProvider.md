@@ -28,10 +28,10 @@ struct PythMetadata {
 
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 Emitted when the moderator role is granted to a new account.
@@ -183,10 +183,10 @@ function initialize() public initializer
 ```
 
 Initializes the contract by setting up the access control roles and default values for tokenDecimals and validTimePeriod.
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the moderator role to a new address.
@@ -305,6 +305,37 @@ Parameters:
 | :--------- | :-------- | :-------------------------------------- |
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
+
+### getUpdatedPrice (0xe8ad2b23)
+
+```solidity
+function getUpdatedPrice(
+    address token,
+    bytes[] calldata updateData
+)
+    external
+    payable
+    override
+    returns (uint256 priceMantissa, uint8 priceDecimals)
+```
+
+Returns the latest price of a given token in USD after update price.
+
+
+Parameters:
+
+| Name       | Type    | Description                                     |
+| :--------- | :------ | :---------------------------------------------- |
+| token      | address | The address of the token to get the price of.   |
+| updateData | bytes[] | The updateData provided by PythNetwork.         |
+
+
+Return values:
+
+| Name          | Type    | Description                                                 |
+| :------------ | :------ | :---------------------------------------------------------- |
+| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
+| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
 
 ### isListed (0xf794062e)
 

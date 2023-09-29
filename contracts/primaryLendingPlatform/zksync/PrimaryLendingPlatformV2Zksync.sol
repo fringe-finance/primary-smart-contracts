@@ -69,7 +69,7 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         address beneficiary,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable isProjectTokenListed(projectToken) nonReentrant returns (uint256) {
+    ) external payable isProjectTokenListed(projectToken) onlyRelatedContracts nonReentrant returns (uint256) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return _withdraw(projectToken, projectTokenAmount, user, beneficiary);
     }

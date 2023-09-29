@@ -26,10 +26,10 @@ struct ChainlinkMetadata {
 
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 Emitted when the moderator role is granted to a new address.
@@ -177,10 +177,10 @@ function initialize() public initializer
 Initializes the contract by setting up the access control roles and assigning them to the contract deployer.
 The `DEFAULT_ADMIN_ROLE` and `MODERATOR_ROLE` roles are set up with the contract deployer as the initial role bearer.
 `usdDecimals` is set to 6.
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the moderator role to a new address.
@@ -229,7 +229,8 @@ Parameters:
 | Name           | Type    | Description                                                                                                                                                                                                   |
 | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | aggregatorPath | address | The address of chainlink aggregator contract.                                                                                                                                                                 |
-| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
+| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified
+ amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
 
 ### setTokenAndAggregator (0xedc607b0)
 

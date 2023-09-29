@@ -28,7 +28,7 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
      * @dev Emitted when the trusted backend role is granted to a new trusted backend.
      * @param newTrustedBackend The address of the new trusted backend.
      */
-    event GrandTrustedBackendRole(address indexed newTrustedBackend);
+    event GrantTrustedBackendRole(address indexed newTrustedBackend);
 
     /**
      * @dev Emitted when the trusted backend role is revoked from a trusted backend.
@@ -82,9 +82,9 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
      * @dev Grants the TRUSTED_BACKEND_ROLE to a new trusted backend address.
      * @param newTrustedBackend The address of the new trusted backend.
      */
-    function grandTrustedBackendRole(address newTrustedBackend) public onlyAdmin {
+    function grantTrustedBackendRole(address newTrustedBackend) public onlyAdmin {
         grantRole(TRUSTED_BACKEND_ROLE, newTrustedBackend);
-        emit GrandTrustedBackendRole(newTrustedBackend);
+        emit GrantTrustedBackendRole(newTrustedBackend);
     }
 
     /**

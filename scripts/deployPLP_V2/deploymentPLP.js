@@ -1,9 +1,6 @@
-const hre = require("hardhat");
-const BN = hre.ethers.BigNumber;
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const isTesting = chainConfig.isTesting;
+const isTesting = Object.keys(process.env).includes('TESTING');
+
 
 
 module.exports = {
@@ -88,6 +85,7 @@ module.exports = {
             return addresses;
         } else {
             console.log(addresses);
+            console.log("<========================== DONE! ==========================>");
         }
     }
 

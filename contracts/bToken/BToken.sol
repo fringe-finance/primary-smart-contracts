@@ -416,7 +416,7 @@ abstract contract BToken is BTokenInterface, Exponential, TokenErrorReporter {
         /* Calculate the current borrow interest rate */
         interestRateModel.storeBorrowRate(cashPrior, borrowsPrior, reservesPrior);
         uint256 borrowRateMantissa = interestRateModel.getBorrowRate(cashPrior, borrowsPrior, reservesPrior, address(this));
-        // require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
+        require(borrowRateMantissa <= borrowRateMaxMantissa, "borrow rate is absurdly high");
 
         /* Calculate the number of blocks elapsed since the last accrual */
         (MathError mathErr, uint256 blockDelta) = subUInt(currentBlockNumber, accrualBlockNumberPrior);
