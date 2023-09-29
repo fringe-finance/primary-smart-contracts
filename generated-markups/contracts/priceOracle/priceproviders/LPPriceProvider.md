@@ -28,10 +28,10 @@ struct LPMetadata {
 
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 Emitted when the moderator role is granted to a new account.
@@ -140,10 +140,10 @@ function initialize() public initializer
 ```
 
 Initializes the LPPriceProvider contract by setting up the access control roles and the number of decimals for the USD price.
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the MODERATOR_ROLE to a new address.

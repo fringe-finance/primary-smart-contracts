@@ -1,6 +1,4 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
 const hre = require("hardhat");
 const path = require("path");
 const configTestingFile = path.join(__dirname, `../../scripts/config/hardhat_zksync_on_polygon_mainnet/config_testing.json`);
@@ -86,8 +84,8 @@ describe("PrimaryLendingPlatformModerator", function () {
 
     async function resetNetwork() {
         await helpers.reset(
-            `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(chainConfig.blockNumber)
+            `https://${process.env.CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(process.env.BLOCK_NUMBER)
         );
     }
     async function loadFixture() {
@@ -194,31 +192,31 @@ describe("PrimaryLendingPlatformModerator", function () {
             MODERATOR_BYTES_32 = await plpModeratorInstance.MODERATOR_ROLE();
         });
 
-        describe("grandModerator", async function () {
+        describe("grantModerator", async function () {
             before(async function () {
                 await loadFixture();
             });
 
             it('1. Failure: Should revert when sender is not admin', async () => {
-                await expect(plpModeratorInstance.connect(firstSigner).grandModerator(firstSignerAddress))
+                await expect(plpModeratorInstance.connect(firstSigner).grantModerator(firstSignerAddress))
                     .to.be.revertedWith("PITModerator: Caller is not the Admin'");
             });
 
             it('2.1. Failure: Should throw error when newModerator is invalid address', async () => {
                 newModerator = "Not address";
-                expect(plpModeratorInstance.grandModerator(newModerator))
+                expect(plpModeratorInstance.grantModerator(newModerator))
                     .to.throw;
             });
 
             it('2.2. Failure: Should revert when newModerator is address zero', async () => {
                 newModerator = ethers.constants.AddressZero;
-                await expect(plpModeratorInstance.grandModerator(newModerator))
+                await expect(plpModeratorInstance.grantModerator(newModerator))
                     .to.be.revertedWith("PITModerator: Invalid address");
             });
 
             it('3. Success: Should grant the moderator role to newModerator successfully', async () => {
-                await expect(plpModeratorInstance.grandModerator(firstSignerAddress))
-                    .to.be.emit(plpModeratorInstance, "GrandModerator").withArgs(firstSignerAddress);
+                await expect(plpModeratorInstance.grantModerator(firstSignerAddress))
+                    .to.be.emit(plpModeratorInstance, "GrantModerator").withArgs(firstSignerAddress);
 
                 expect(await plpModeratorInstance.hasRole(MODERATOR_BYTES_32, firstSignerAddress)).to.be.equal(true);
             });
@@ -247,7 +245,7 @@ describe("PrimaryLendingPlatformModerator", function () {
             });
 
             it('3. Success: Should revoke moderator successfully', async () => {
-                await plpModeratorInstance.grandModerator(firstSignerAddress);
+                await plpModeratorInstance.grantModerator(firstSignerAddress);
 
                 await expect(plpModeratorInstance.revokeModerator(firstSignerAddress))
                     .to.be.emit(plpModeratorInstance, "RevokeModerator").withArgs(firstSignerAddress);

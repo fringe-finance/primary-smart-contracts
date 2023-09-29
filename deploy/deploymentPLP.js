@@ -1,9 +1,6 @@
 require("dotenv").config();
-const chainConfigs = require('../chain.config');
 const { deploymentMockToken } = require("./deploymentMockToken");
-const chainConfig = chainConfigs[chainConfigs.chain];
-const isTesting = chainConfig.isTesting;
-
+const isTesting = Object.keys(process.env).includes('TESTING');
 
 module.exports = {
 
@@ -87,7 +84,6 @@ module.exports = {
             lendingTokens: lendingTokens,
             jumpRateModelAddress: jumpRateModelAddress
         };
-        return addresses;
         if (isTesting) {
             return addresses;
         } else {

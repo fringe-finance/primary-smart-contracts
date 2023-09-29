@@ -23,7 +23,8 @@
             "tokensUseLPProvider": []
         },
         "wstETHProvider": {
-            "wstETHAggregatorPath": []
+            "wstETHAggregatorPath": [],
+            "timeOuts": []
         },
         "wstETH": "",
         "usdc": "",
@@ -43,7 +44,6 @@
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
-        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],

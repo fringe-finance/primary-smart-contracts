@@ -186,7 +186,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
 
         uint256 afterLendingBalance = ERC20Upgradeable(lendingToken).balanceOf(address(this));
         if (afterLendingBalance > 0) {
-            ERC20Upgradeable(lendingToken).transfer(msg.sender, afterLendingBalance);
+            ERC20Upgradeable(lendingToken).safeTransfer(msg.sender, afterLendingBalance);
         }
 
         if (amountReceive < totalOutStanding) {
@@ -197,14 +197,15 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Internal function to approve a specified amount of tokens to be transferred by the token transfer proxy.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
     function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
-        if (ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy) <= tokenAmount) {
-            ERC20Upgradeable(token).safeApprove(tokenTransferProxy, type(uint256).max);
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(tokenTransferProxy, tokenAmount - allowanceAmount);
         }
     }
 

@@ -33,7 +33,9 @@ Parameters:
 | Name       | Type    | Description                                                                                                                                                             |
 | :--------- | :------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | minter     | address | the address of account which earn liquidity                                                                                                                             |
-| mintAmount | uint256 | The amount of the underlying asset to supply to minter return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details) return uint256 minted amount |
+| mintAmount | uint256 | The amount of the underlying asset to supply to minter
+ return uint256 0=success, otherwise a failure (see ErrorReporter.sol for details)
+ return uint256 minted amount |
 
 ### redeemTo (0x2f7605fb)
 

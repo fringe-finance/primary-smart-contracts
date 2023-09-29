@@ -1,14 +1,13 @@
 require("dotenv").config();
-const chainConfigs = require('../../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const isTesting = chainConfig.isTesting;
-const isTestingForZksync = chainConfigs.isTestingForZksync;
-let chain = chainConfigs.chain && isTesting ? "_" + chainConfigs.chain : "";
-const isLayer2 = chainConfig.isLayer2;
-if (isTestingForZksync) chain = "_zksync_on_polygon_mainnet";
-
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
+
+const isTesting = Object.keys(process.env).includes('TESTING');
+const isTestingForZksync = Object.keys(process.env).includes('TESTING_FOR_ZKSYNC');
+let chain = process.env.CHAIN && network == 'hardhat' ? "_" + process.env.CHAIN : "";
+const isLayer2 = Object.keys(process.env).includes('LAYER2');
+if (isTestingForZksync) chain = "_zksync_on_polygon_mainnet";
+
 const fs = require("fs");
 const path = require("path");
 const configGeneralFile = path.join(__dirname, `../../config/${network}${chain}/config_general.json`);
@@ -39,13 +38,9 @@ module.exports = {
         //declare parameters
 
         let network = hre.network;
-        // console.log("Network name: " + network.name);
-
         let signers = await hre.ethers.getSigners();
+
         let deployMaster = signers[0];
-
-        // console.log("DeployMaster: " + deployMaster.address);
-
         let deployMasterAddress = deployMaster.address;
 
         // Contracts ABI
@@ -103,6 +98,7 @@ module.exports = {
         let tokensUseBackendProvider = BackendProvider.tokensUseBackendProvider;
         let tokensUseLPProvider = LPProvider.tokensUseLPProvider;
         let wstETHAggregatorPath = wstETHProvider.wstETHAggregatorPath;
+        let timeOutsWstETHAggregatorPath = wstETHProvider.timeOuts;
 
         const {
             PRIMARY_PROXY_ADMIN,
@@ -129,7 +125,7 @@ module.exports = {
         let priceProviderAggregatorAddress = isTesting ? "" : PriceProviderAggregatorProxy;
         let backendPriceProviderAddress = isTesting ? "" : BackendPriceProviderProxy;
         let uniswapV2PriceProviderAddress = isTesting ? "" : UniswapV2PriceProviderProxy;
-        let uniswapV2PriceProviderMockAddress;
+        let uniswapV2PriceProviderMockAddress = "";
         let lpPriceProviderAddress = isTesting ? "" : LPPriceProviderProxy;
         let wstETHPriceProviderAddress = isTesting ? "" : wstETHPriceProviderProxy;
 
@@ -138,7 +134,7 @@ module.exports = {
         let chainlinkPriceProviderLogicAddress = isTesting ? "" : ChainlinkPriceProviderLogic;
         let priceProviderAggregatorLogicAddress = isTesting ? "" : PriceProviderAggregatorLogic;
         let uniswapV2PriceProviderLogicAddress = isTesting ? "" : UniswapV2PriceProviderLogic;
-        let uniswapV2PriceProviderMockLogicAddress;
+        let uniswapV2PriceProviderMockLogicAddress = "";
         let lpPriceProviderLogicAddress = isTesting ? "" : LPPriceProviderLogic;
         let wstETHPriceProviderLogicAddress = isTesting ? "" : wstETHPriceProviderLogic;
 
@@ -153,13 +149,15 @@ module.exports = {
         PriceProviderAggregator = tokensUsePyth.length > 0 ? await hre.ethers.getContractFactory("PriceProviderAggregatorPyth")
             : await hre.ethers.getContractFactory("PriceProviderAggregator");
         LPPriceProvider = await hre.ethers.getContractFactory("LPPriceProvider");
-        WstETHPriceProvider = await hre.ethers.getContractFactory("wstETHPriceProvider");
+        WstETHPriceProvider = isLayer2 ? await hre.ethers.getContractFactory("wstETHPriceProviderL2") : await hre.ethers.getContractFactory("wstETHPriceProvider");
 
-        let logFunc = console.log;
         if (isTesting) {
             console.log = function () { };
             fs.writeFileSync = function () { };
         }
+
+        console.log("Network name: " + network.name);
+        console.log("DeployMaster: " + deployMaster.address);
         //====================================================
         //deploy proxy admin
 
@@ -478,7 +476,7 @@ module.exports = {
                 let moderatorRole = await uniswapV2PriceProviderMock.MODERATOR_ROLE();
                 let isModeratorRole = await uniswapV2PriceProviderMock.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await uniswapV2PriceProviderMock.grandModerator(priceProviderAggregatorAddress);
+                    await uniswapV2PriceProviderMock.grantModerator(priceProviderAggregatorAddress);
                 }
             }
         }
@@ -513,10 +511,10 @@ module.exports = {
                 let moderatorRole = await pythPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await pythPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await pythPriceProvider.grandModerator(priceProviderAggregatorAddress)
+                    await pythPriceProvider.grantModerator(priceProviderAggregatorAddress)
                         .then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
-                            console.log("PythPriceProvider " + pythPriceProvider.address + " granded moderator " + priceProviderAggregatorAddress);
+                            console.log("PythPriceProvider " + pythPriceProvider.address + " granted moderator " + priceProviderAggregatorAddress);
                         });
                 }
             }
@@ -564,10 +562,10 @@ module.exports = {
                 let moderatorRole = await chainlinkPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await chainlinkPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await chainlinkPriceProvider.grandModerator(priceProviderAggregatorAddress)
+                    await chainlinkPriceProvider.grantModerator(priceProviderAggregatorAddress)
                         .then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
-                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granded moderator " + priceProviderAggregatorAddress);
+                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granted moderator " + priceProviderAggregatorAddress);
                         });
                 }
             }
@@ -640,7 +638,7 @@ module.exports = {
                 let moderatorRole = await backendPriceProvider.TRUSTED_BACKEND_ROLE();
                 let isModeratorRole = await backendPriceProvider.hasRole(moderatorRole, deployMasterAddress);
                 if (!isModeratorRole) {
-                    await backendPriceProvider.grandTrustedBackendRole(deployMasterAddress)
+                    await backendPriceProvider.grantTrustedBackendRole(deployMasterAddress)
                         .then(function (instance) {
                             console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend " + deployMasterAddress + " at tx hash: " + instance.hash);
                         });
@@ -676,8 +674,8 @@ module.exports = {
                 let moderatorRole = await uniswapV2PriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await uniswapV2PriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await uniswapV2PriceProvider.grandModerator(priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("UniswapV2PriceProvider granded moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
+                    await uniswapV2PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                        console.log("UniswapV2PriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
                     });
                 }
             }
@@ -711,8 +709,8 @@ module.exports = {
                 let moderatorRole = await lpPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await lpPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await lpPriceProvider.grandModerator(priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("lpPriceProvider granded moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
+                    await lpPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                        console.log("lpPriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
                     });
                 }
             }
@@ -744,8 +742,8 @@ module.exports = {
                 let moderatorRole = await wstETHPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await wstETHPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await wstETHPriceProvider.grandModerator(priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("wstETHPriceProvider granded moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
+                    await wstETHPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                        console.log("wstETHPriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
                     });
                 }
             }
@@ -753,6 +751,42 @@ module.exports = {
                 await wstETHPriceProvider.addAggregatorPath(wstETHAggregatorPath).then(function (instance) {
                     console.log("wstETHPriceProvider add AggregatorPath: " + wstETHAggregatorPath + " at tx hash " + instance.hash);
                 });
+            }
+
+            if (sequencerUptimeFeed) {
+                let currentSequencerUptimeFeed = await wstETHPriceProvider.sequencerUptimeFeed();
+                if (sequencerUptimeFeed != currentSequencerUptimeFeed) {
+                    await wstETHPriceProvider.setSequencerUptimeFeed(
+                        sequencerUptimeFeed
+                    ).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider " + wstETHPriceProvider.address + " set sequencerUptimeFeed: " + sequencerUptimeFeed);
+                    });
+                }
+                let currentGracePeriodTime = await wstETHPriceProvider.gracePeriodTime();
+                if (gracePeriodTime != currentGracePeriodTime) {
+                    await wstETHPriceProvider.setGracePeriodTime(
+                        gracePeriodTime
+                    ).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider " + wstETHPriceProvider.address + " set gracePeriodTime: " + gracePeriodTime);
+                    });
+                }
+            }
+
+            for (var i = 0; i < wstETHAggregatorPath.length; i++) {
+                let timeOut = await wstETHPriceProvider.timeOuts(wstETHAggregatorPath[i]);
+                if (timeOut != timeOutsWstETHAggregatorPath[i]) {
+                    await wstETHPriceProvider.setTimeOut(
+                        wstETHAggregatorPath[i],
+                        timeOutsWstETHAggregatorPath[i]
+                    ).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider " + wstETHPriceProvider.address + " set timeout with parameters: ");
+                        console.log("   aggregator: " + wstETHAggregatorPath[i]);
+                        console.log("   timeout: " + timeOutsWstETHAggregatorPath[i]);
+                    });
+                }
             }
         }
 
@@ -772,8 +806,8 @@ module.exports = {
             let moderatorRole = await priceProviderAggregator.MODERATOR_ROLE();
             let isModeratorRole = await priceProviderAggregator.hasRole(moderatorRole, deployMasterAddress);
             if (!isModeratorRole) {
-                await priceProviderAggregator.grandModerator(deployMasterAddress).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granded moderator " + deployMasterAddress + " at tx hash: " + instance.hash);
+                await priceProviderAggregator.grantModerator(deployMasterAddress).then(function (instance) {
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granted moderator " + deployMasterAddress + " at tx hash: " + instance.hash);
                 });
             }
         }

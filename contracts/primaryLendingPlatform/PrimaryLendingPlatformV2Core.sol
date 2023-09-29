@@ -213,7 +213,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * - Only the admin can call this function.
      * @param newModeratorContract The address of the new moderator contract.
      */
-    function setPrimaryLendingPlatformModeratorModerator(address newModeratorContract) external onlyAdmin {
+    function setPrimaryLendingPlatformModerator(address newModeratorContract) external onlyAdmin {
         require(newModeratorContract != address(0), "PIT: Invalid address");
         primaryLendingPlatformModerator = newModeratorContract;
         emit SetModeratorContract(newModeratorContract);
@@ -267,7 +267,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      */
     function removeProjectToken(uint256 projectTokenId, address projectToken) external onlyModeratorContract {
         require(projectTokens[projectTokenId] == projectToken, "PIT: Invalid address");
-        delete projectTokenInfo[projectToken];
+        projectTokenInfo[projectToken].isListed = false;
         projectTokens[projectTokenId] = projectTokens[projectTokens.length - 1];
         projectTokens.pop();
     }
@@ -283,7 +283,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      */
     function removeLendingToken(uint256 lendingTokenId, address lendingToken) external onlyModeratorContract {
         require(lendingTokens[lendingTokenId] == lendingToken, "PIT: Invalid address");
-        delete lendingTokenInfo[lendingToken];
+        lendingTokenInfo[lendingToken].isListed = false;
         lendingTokens[lendingTokenId] = lendingTokens[lendingTokens.length - 1];
         lendingTokens.pop();
     }
@@ -570,14 +570,14 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
         uint256 depositRemaining = pitRemaining(account, projectToken, lendingToken);
+
+        uint256 projectTokenPrice = getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals());
         uint256 collateralProjectRemaining = (depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals())) /
-            getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) /
-            lvrNumerator;
+            projectTokenPrice / lvrNumerator;
 
         uint256 outstandingInUSD = totalOutstandingInUSD(account, projectToken, lendingToken);
         uint256 depositedAmountSatisfyHF = (outstandingInUSD * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals())) /
-            getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals()) /
-            lvrNumerator;
+            projectTokenPrice / lvrNumerator;
         uint256 amountToWithdraw = depositedProjectTokenAmount > depositedAmountSatisfyHF
             ? depositedProjectTokenAmount - depositedAmountSatisfyHF
             : 0;
@@ -640,11 +640,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
         require(lendingTokenAmount > 0, "PIT: LendingTokenAmount==0");
 
-        (uint256 mintError, uint256 mintedAmount) = lendingTokenInfo[lendingToken].bLendingToken.mintTo(user, lendingTokenAmount);
+        BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
+        (uint256 mintError, uint256 mintedAmount) = bLendingToken.mintTo(user, lendingTokenAmount);
         require(mintError == 0, "PIT: MintError!=0");
         require(mintedAmount > 0, "PIT: MintedAmount==0");
 
-        emit Supply(user, lendingToken, lendingTokenAmount, address(lendingTokenInfo[lendingToken].bLendingToken), mintedAmount);
+        emit Supply(user, lendingToken, lendingTokenAmount, address(bLendingToken), mintedAmount);
     }
 
     //************* Redeem FUNCTION ********************************
@@ -704,10 +705,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
         require(bLendingTokenAmount > 0, "PIT: BLendingTokenAmount==0");
 
-        uint256 redeemError = lendingTokenInfo[lendingToken].bLendingToken.redeemTo(user, bLendingTokenAmount);
+        BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
+        uint256 redeemError = bLendingToken.redeemTo(user, bLendingTokenAmount);
         require(redeemError == 0, "PIT: RedeemError!=0. redeem>=supply.");
 
-        emit Redeem(user, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), bLendingTokenAmount);
+        emit Redeem(user, lendingToken, address(bLendingToken), bLendingTokenAmount);
     }
 
     //************* RedeemUnderlying FUNCTION ********************************
@@ -765,10 +767,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
         require(lendingTokenAmount > 0, "PIT: LendingTokenAmount==0");
 
-        uint256 redeemUnderlyingError = lendingTokenInfo[lendingToken].bLendingToken.redeemUnderlyingTo(user, lendingTokenAmount);
+        BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
+        uint256 redeemUnderlyingError = bLendingToken.redeemUnderlyingTo(user, lendingTokenAmount);
         require(redeemUnderlyingError == 0, "PIT:Redeem>=supply");
 
-        emit RedeemUnderlying(user, lendingToken, address(lendingTokenInfo[lendingToken].bLendingToken), lendingTokenAmount);
+        emit RedeemUnderlying(user, lendingToken, address(bLendingToken), lendingTokenAmount);
     }
 
     //************* Borrow FUNCTION ********************************
@@ -1006,8 +1009,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address lendingToken,
         BorrowPosition storage borrowPositionInfo
     ) internal returns (bool) {
-        totalBorrow[projectToken][lendingToken] -= borrowPositionInfo.loanBody;
-        totalBorrowPerLendingToken[lendingToken] -= borrowPositionInfo.loanBody;
+        uint256 loanBody = borrowPositionInfo.loanBody;
+        totalBorrow[projectToken][lendingToken] -= loanBody;
+        totalBorrowPerLendingToken[lendingToken] -= loanBody;
         borrowPositionInfo.loanBody = 0;
         borrowPositionInfo.accrual = 0;
         delete lendingTokenPerCollateral[borrower][projectToken];
@@ -1068,7 +1072,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     function updateInterestInBorrowPositions(address account, address lendingToken) public {
         uint256 cumulativeLoanBody = 0;
         uint256 cumulativeTotalOutstanding = 0;
-        for (uint256 i = 0; i < projectTokens.length; i++) {
+        uint256 prjTokensLength = projectTokens.length;
+        for (uint256 i = 0; i < prjTokensLength; i++) {
             BorrowPosition memory borrowPositionInfo = borrowPosition[account][projectTokens[i]][lendingToken];
             if (borrowPositionInfo.loanBody > 0) {
                 cumulativeLoanBody += borrowPositionInfo.loanBody;
@@ -1082,7 +1087,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         if (currentBorrowBalance >= cumulativeTotalOutstanding) {
             uint256 estimatedAccrual = currentBorrowBalance - cumulativeTotalOutstanding;
             BorrowPosition memory borrowPositionInfo;
-            for (uint256 i = 0; i < projectTokens.length; i++) {
+            for (uint256 i = 0; i < prjTokensLength; i++) {
                 borrowPositionInfo = borrowPosition[account][projectTokens[i]][lendingToken];
                 if (borrowPositionInfo.loanBody > 0) {
                     borrowPositionInfo.accrual += (estimatedAccrual * borrowPositionInfo.loanBody) / cumulativeLoanBody;

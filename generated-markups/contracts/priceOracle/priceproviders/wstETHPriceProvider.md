@@ -16,10 +16,10 @@ Price provider that uses chainlink
 This contract is used to get the price of wstETH in USD.
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 Emitted when the moderator role is granted to a new account.
@@ -61,6 +61,22 @@ Parameters:
 | :------------- | :-------- | :------------------------------------------------------------------------- |
 | token          | address   | The address of the wstETH token contract.                                  |
 | aggregatorPath | address[] | The array of aggregator addresses to get the price feed for wstETH in USD. |
+
+### SetTimeOut
+
+```solidity
+event SetTimeOut(address indexed aggregatorPath, uint256 newTimeOut)
+```
+
+Emitted when the time out for a Chainlink aggregator path is set.
+
+
+Parameters:
+
+| Name           | Type    | Description                                     |
+| :------------- | :------ | :---------------------------------------------- |
+| aggregatorPath | address | The address of the Chainlink aggregator path.   |
+| newTimeOut     | uint256 | The new time out value in seconds.              |
 
 ## Constants info
 
@@ -108,6 +124,13 @@ address[] aggregatorPath
 ```
 
 
+### timeOuts (0x2a6377a9)
+
+```solidity
+mapping(address => uint256) timeOuts
+```
+
+
 ## Modifiers info
 
 ### onlyAdmin
@@ -146,10 +169,10 @@ Parameters:
 | _wstETH         | address   | The address of the wstETH token contract.                                  |
 | _aggregatorPath | address[] | The array of aggregator addresses to get the price feed for wstETH in USD. |
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the moderator role to a new address.
@@ -197,27 +220,30 @@ Parameters:
 | :-------------- | :-------- | :----------------------------------- |
 | _aggregatorPath | address[] | The new aggregator path to be added. |
 
-### isListed (0xf794062e)
+### setTimeOut (0x60c74154)
 
 ```solidity
-function isListed(address token) public view override returns (bool)
+function setTimeOut(
+    address aggregatorPath_,
+    uint256 newTimeOut
+) external onlyModerator
 ```
 
-Checks if a token is listed on the price provider.
+Sets the timeout value corresponding to the aggregatorPath.
+
+Example: ETH/USD have a new answer is written when the off-chain data moves more than the
+0.5% deviation threshold or 3600 seconds have passed since the last answer was written on-chain.
+So, the timeOut value for each aggregator will be equal to the heartbeat threshold value plus a
+period of time to make the transaction update the price, that time period can be 60s or a little more.
 
 
 Parameters:
 
-| Name  | Type    | Description                          |
-| :---- | :------ | :----------------------------------- |
-| token | address | The address of the token to check.   |
-
-
-Return values:
-
-| Name | Type | Description                                              |
-| :--- | :--- | :------------------------------------------------------- |
-| [0]  | bool | A boolean indicating whether the token is listed or not. |
+| Name            | Type    | Description                                                                                                                                                                                                   |
+| :-------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| aggregatorPath_ | address | The address of chainlink aggregator contract.                                                                                                                                                                 |
+| newTimeOut      | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified
+ amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
 
 ### isActive (0x9f8a13d7)
 
@@ -321,3 +347,27 @@ Return values:
 | Name | Type  | Description                                    |
 | :--- | :---- | :--------------------------------------------- |
 | [0]  | uint8 | The number of decimals used for the USD price. |
+
+### getLatestPrice (0x16345f18)
+
+```solidity
+function getLatestPrice(
+    address aggregatorPath_
+) public view virtual returns (uint256)
+```
+
+Returns the latest price after performing sanity check and staleness check.
+
+
+Parameters:
+
+| Name            | Type    | Description                                     |
+| :-------------- | :------ | :---------------------------------------------- |
+| aggregatorPath_ | address | The address of chainlink aggregator contract.   |
+
+
+Return values:
+
+| Name | Type    | Description                |
+| :--- | :------ | :------------------------- |
+| [0]  | uint256 | The latest price (answer). |

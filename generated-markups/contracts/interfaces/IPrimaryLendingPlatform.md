@@ -1093,7 +1093,8 @@ Return values:
 
 | Name | Type    | Description                            |
 | :--- | :------ | :------------------------------------- |
-| [0]  | uint256 | The PIT value. Formula: pit = $ * LVR |
+| [0]  | uint256 | The PIT value.
+ Formula: pit = $ * LVR |
 
 ### pitCollateral (0x1893be9f)
 
@@ -1119,7 +1120,8 @@ Return values:
 
 | Name | Type    | Description                            |
 | :--- | :------ | :------------------------------------- |
-| [0]  | uint256 | The PIT value. Formula: pit = $ * LVR |
+| [0]  | uint256 | The PIT value.
+ Formula: pit = $ * LVR |
 
 ### getLendingToken (0x2ce36230)
 
@@ -1488,7 +1490,8 @@ Return values:
 
 | Name | Type    | Description                            |
 | :--- | :------ | :------------------------------------- |
-| [0]  | uint256 | The PIT value. Formula: pit = $ * LVR |
+| [0]  | uint256 | The PIT value.
+ Formula: pit = $ * LVR |
 
 ### pitCollateralWithUpdatePrices (0x902b6286)
 
@@ -1518,7 +1521,8 @@ Return values:
 
 | Name | Type    | Description                            |
 | :--- | :------ | :------------------------------------- |
-| [0]  | uint256 | The PIT value. Formula: pit = $ * LVR |
+| [0]  | uint256 | The PIT value.
+ Formula: pit = $ * LVR |
 
 ### pitRemainingWithUpdatePrices (0xe662d5c5)
 

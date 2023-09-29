@@ -64,13 +64,6 @@ modifier onlyPrimaryLendingPlatform()
 ```
 
 Modifier to restrict access to functions that can only be called by the primary lending platform.
-### onlyModerator
-
-```solidity
-modifier onlyModerator()
-```
-
-Modifier to check if the caller has the moderator role.
 ## Functions info
 
 ### init (0x4703d19c)
@@ -121,10 +114,10 @@ Parameters:
 | :---------------------- | :------ | :----------------------------------------------------- |
 | _primaryLendingPlatform | address | The address of the primary lending platform to be set. |
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the `MODERATOR_ROLE` to a new address.

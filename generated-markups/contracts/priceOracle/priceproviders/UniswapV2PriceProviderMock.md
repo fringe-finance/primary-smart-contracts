@@ -40,10 +40,10 @@ struct UniswapV2Metadata {
 
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 
@@ -132,10 +132,10 @@ function initialize() public initializer
 ```
 
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 

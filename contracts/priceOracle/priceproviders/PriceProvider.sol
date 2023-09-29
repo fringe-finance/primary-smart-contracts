@@ -13,9 +13,30 @@ abstract contract PriceProvider {
      */
     function changeActive(address token, bool active) public virtual {}
 
+    /**
+     * @dev Performs a price update if the price is no longer valid.
+     * @param priceIds The priceIds need to update.
+     * @param updateData The updateData provided by PythNetwork.
+     */
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external virtual payable {
         priceIds; updateData;
         revert("PriceProvider: UpdatePrices is forbidden");
+    }
+
+    /**
+     * @dev Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
+     * @param token The address of the token to get the price of.
+     * @param updateData The updateData provided by PythNetwork.
+     * @return priceMantissa The price of the token in USD, represented as a mantissa.
+     * @return priceDecimals The number of decimal places in the price of the token.
+     */
+    function getUpdatedPrice(
+        address token,
+        bytes[] calldata updateData
+    ) external payable virtual returns (uint256 priceMantissa, uint8 priceDecimals){
+        token; updateData;
+        priceMantissa; priceDecimals;
+        revert("PriceProvider: getUpdatedPrice is forbidden");
     }
 
     /****************** view functions ****************** */

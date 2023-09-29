@@ -114,7 +114,8 @@ Parameters:
 | Name    | Type    | Description                                                                          |
 | :------ | :------ | :----------------------------------------------------------------------------------- |
 | spender | address | The address of the account which may transfer tokens                                 |
-| amount  | uint256 | The number of tokens that are approved return Whether or not the approval succeeded |
+| amount  | uint256 | The number of tokens that are approved
+ return Whether or not the approval succeeded |
 
 ### allowance (0xdd62ed3e)
 
@@ -133,4 +134,5 @@ Parameters:
 | Name    | Type    | Description                                                                                           |
 | :------ | :------ | :---------------------------------------------------------------------------------------------------- |
 | owner   | address | The address of the account which owns the tokens to be spent                                          |
-| spender | address | The address of the account which may transfer tokens return The number of tokens allowed to be spent |
+| spender | address | The address of the account which may transfer tokens
+ return The number of tokens allowed to be spent |

@@ -1,6 +1,4 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
 const hre = require("hardhat");
 const { deployment } = require("../../scripts/deployPLP_V2/deploymentPLP");
 const { ethers } = require("ethers");
@@ -11,7 +9,7 @@ const { getPriceFeedsUpdateData } = require("./utils/utilities");
 
 const fs = require("fs");
 const path = require("path");
-const OOEJson = require("./artifacts/OpenOceanExchange.json");
+const OOEJson = require("./artifacts-for-testing/OpenOceanExchange.json");
 const configGeneralFile = path.join(__dirname, `../../scripts/config/hardhat_zksync_on_polygon_mainnet/config_general.json`);
 const configGeneral = require(configGeneralFile);
 const configTestingFile = path.join(__dirname, `../../scripts/config/hardhat_zksync_on_polygon_mainnet/config_testing.json`);
@@ -116,8 +114,8 @@ describe("PrimaryLendingPlatformWrappedTokenGateway", function () {
 
     async function resetNetwork() {
         await helpers.reset(
-            `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-            Number(chainConfig.blockNumber)
+            `https://${process.env.CHAIN.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+            Number(process.env.BLOCK_NUMBER)
         );
     }
     async function loadFixture() {

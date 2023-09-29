@@ -15,8 +15,6 @@ require("hardhat-tracer");
 require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 
-const chainConfigs = require('./chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
 
 const {
   INFURA_KEY,
@@ -27,15 +25,7 @@ const {
   ARBISCAN_API_KEY,
   ZKSYNCSCAN_API_KEY
 } = process.env;
-const isZksync = chainConfigs.isZksync;
-const isTestingForZksync = chainConfigs.isTestingForZksync;
-console.log({ "chain": chainConfigs.chain });
-console.log({ 
-  chainConfig,
-  isTestingForZksync,
-  isZksync
- });
-
+const isZksync = Object.keys(process.env).includes('ZKSYNC');
 let hardhatConfig;
 if (isZksync) {
   hardhatConfig = {
@@ -46,6 +36,12 @@ if (isZksync) {
     },
     defaultNetwork: "goerli",
     networks: {
+      mainnet: {
+        url: "https://mainnet.era.zksync.io",
+        ethNetwork: "mainnet",
+        zksync: true,
+        verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification'
+      },
       goerli: {
         url: "https://zksync2-testnet.zksync.dev",
         ethNetwork: "goerli",
@@ -85,8 +81,8 @@ if (isZksync) {
 
       hardhat: {
         forking: {
-          url: `https://${chainConfigs.chain.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
-          blockNumber: Number(chainConfig.blockNumber)
+          url: `https://${process.env.CHAIN?.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+          blockNumber: Number(process.env.BLOCK_NUMBER)
         },
         allowUnlimitedContractSize: true
       },
@@ -95,23 +91,23 @@ if (isZksync) {
         url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
         allowUnlimitedContractSize: false,
         timeout: 99999999,
-        accounts: [PRIVATE_KEY],
+        accounts: [PRIVATE_KEY]
       },
 
       polygon_mainnet: {
         url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: [PRIVATE_KEY],
+        accounts: [PRIVATE_KEY]
       },
 
       arbitrum_mainnet: {
         url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: [PRIVATE_KEY],
+        accounts: [PRIVATE_KEY]
       },
 
       optimism_mainnet: {
         url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`,
         network_id: 420,
-        accounts: [PRIVATE_KEY],
+        accounts: [PRIVATE_KEY]
       },
 
       polygon_mumbai: {
@@ -120,21 +116,19 @@ if (isZksync) {
       },
       optimism_goerli: {
         url: `https://optimism-goerli.infura.io/v3/${INFURA_KEY}`,
-        // network_id: 420,
         accounts: [PRIVATE_KEY],
         timeout: 99999999,
-        gasPrice: 1_500_000_000, // 500 gwei
+        gasPrice: 1_500_000_000
       },
 
       ethereum_goerli: {
         url: "https://rpc.ankr.com/eth_goerli",
         timeout: 99999999,
-        accounts: [PRIVATE_KEY],
-        network_id: 5,
+        accounts: [PRIVATE_KEY]
       },
       arbitrum_goerli: {
         url: "https://goerli-rollup.arbitrum.io/rpc",
-        accounts: [PRIVATE_KEY],
+        accounts: [PRIVATE_KEY]
       },
     },
     gasReporter: {

@@ -32,7 +32,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
      * @dev Emitted when the moderator role is granted to a new address.
      * @param newModerator The address of the new moderator.
      */
-    event GrandModeratorRole(address indexed newModerator);
+    event GrantModeratorRole(address indexed newModerator);
 
     /**
      * @dev Emitted when the moderator role is revoked from an address.
@@ -95,9 +95,9 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
      * @dev Grants the moderator role to a new address.
      * @param newModerator The address of the new moderator.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(newModerator);
+        emit GrantModeratorRole(newModerator);
     }
 
     /**

@@ -28,10 +28,10 @@ struct PriceProviderInfo {
 
 ## Events info
 
-### GrandModeratorRole
+### GrantModeratorRole
 
 ```solidity
-event GrandModeratorRole(address indexed newModerator)
+event GrantModeratorRole(address indexed newModerator)
 ```
 
 Emitted when the moderator role is granted to a new account.
@@ -142,10 +142,10 @@ function initialize() public initializer
 This function should only be called once during contract deployment.
 Initializes the contract by setting up the access control roles and assigning the default and moderator roles to the contract deployer.
 
-### grandModerator (0x04ebc8b1)
+### grantModerator (0x6981c7ae)
 
 ```solidity
-function grandModerator(address newModerator) public onlyAdmin
+function grantModerator(address newModerator) public onlyAdmin
 ```
 
 Grants the moderator role to a new address.
@@ -196,7 +196,8 @@ Parameters:
 | :------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------ |
 | token               | address | the address of token.                                                                                                     |
 | priceProvider       | address | the address of price provider. Should implement the interface of `PriceProvider`.                                         |
-| hasFunctionWithSign | bool    | true - if price provider has function with signatures. false - if price provider does not have function with signatures. |
+| hasFunctionWithSign | bool    | true - if price provider has function with signatures.
+ false - if price provider does not have function with signatures. |
 
 ### changeActive (0x3651084e)
 

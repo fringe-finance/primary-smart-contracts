@@ -32,7 +32,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      * @dev Emitted when the moderator role is granted to a new account.
      * @param newModerator The address to which moderator role is granted.
      */
-    event GrandModeratorRole(address indexed newModerator);
+    event GrantModeratorRole(address indexed newModerator);
 
     /**
      * @dev Emitted when the moderator role is revoked from an account.
@@ -87,9 +87,9 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      * Caller must be the admin.
      * @param newModerator The address to grant the role to.
      */
-    function grandModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) public onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
-        emit GrandModeratorRole(newModerator);
+        emit GrantModeratorRole(newModerator);
     }
 
     /**
@@ -190,11 +190,22 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         LPMetadata memory metadata = lpMetadata[lpToken];
         address token0 = IUniswapV2Pair(lpToken).token0();
         address token1 = IUniswapV2Pair(lpToken).token1();
-        (uint256 priceMantissa0, ) = PriceProvider(metadata.base).getPrice(token0);
-        P0x112 = priceMantissa0.mul(uint256(2 ** 112));
+        P0x112 = _convertToUSD(metadata.base, token0);
+        P1x112 = _convertToUSD(metadata.base, token1);
+    }
 
-        (uint256 priceMantissa1, ) = PriceProvider(metadata.base).getPrice(token1);
-        P1x112 = priceMantissa1.mul(uint256(2 ** 112));
+    /**
+     * @dev Converts the given price to USD.
+     * @param priceBase The address of the price provider.
+     * @param token The address of the token to convert.
+     * @return The price of the token in USD, represented as a mantissa.
+     */
+    function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
+        (uint256 priceMantissa, uint8 priceDecimals) = PriceProvider(priceBase).getPrice(token);
+        priceMantissa = priceDecimals >= usdDecimals
+            ? priceMantissa / (10 ** (priceDecimals - usdDecimals))
+            : priceMantissa / (10 ** (usdDecimals - priceDecimals));
+        return priceMantissa.mul(uint256(2 ** 112));
     }
 
     /**

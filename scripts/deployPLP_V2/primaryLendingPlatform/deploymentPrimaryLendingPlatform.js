@@ -1,13 +1,12 @@
 require("dotenv").config();
-const chainConfigs = require('../../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const isTesting = chainConfig.isTesting;
-let chain = chainConfigs.chain && isTesting ? "_" + chainConfigs.chain : "";
-const isTestingForZksync = chainConfigs.isTestingForZksync;
-if (isTestingForZksync) chain = "_zksync_on_polygon_mainnet";
-
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
+
+const isTesting = Object.keys(process.env).includes('TESTING');
+const isTestingForZksync = Object.keys(process.env).includes('TESTING_FOR_ZKSYNC');
+let chain = process.env.CHAIN && network == 'hardhat' ? "_" + process.env.CHAIN : "";
+if (isTestingForZksync) chain = "_zksync_on_polygon_mainnet";
+
 const fs = require("fs");
 const path = require("path");
 const configGeneralFile = path.join(__dirname, `../../config/${network}${chain}/config_general.json`);
@@ -36,6 +35,7 @@ module.exports = {
 
     deploymentPrimaryLendingPlatform: async function () {
 
+        let network = hre.network;
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         let deployMasterAddress = deployMaster.address;
@@ -173,6 +173,9 @@ module.exports = {
             config.BLendingTokenProxies = [];
             fs.writeFileSync = function () { };
         }
+
+        console.log("Network name: " + network.name);
+        console.log("DeployMaster: " + deployMaster.address);
         //====================================================
         //deploy proxy admin
 
@@ -597,8 +600,8 @@ module.exports = {
             let jumGainPerBlock = jumGainPerYearValue.div(blocksPerYearValue);
 
             if (blendingTokenInfo.targetUtil != targetUtil[i] || rateInfo.maxBorrowRate != newMaxBorrow[i] || gainPerBlock.toString() != blendingTokenInfo.gainPerBlock || jumGainPerBlock.toString() != blendingTokenInfo.jumGainPerBlock) {
-                await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
-                    console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " with params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " at tx hash " + instance.hash);
+                await jumpRateModel.addBLendingTokenSupport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
+                    console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Support " + BLendingTokenProxies[i] + " with params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " at tx hash " + instance.hash);
                 });
             }
         }
@@ -652,7 +655,7 @@ module.exports = {
         {
             let plpModerator = await plp.primaryLendingPlatformModerator();
             if (plpModerator != primaryLendingPlatformModeratorProxyAddress) {
-                await plp.setPrimaryLendingPlatformModeratorModerator(primaryLendingPlatformModeratorProxyAddress)
+                await plp.setPrimaryLendingPlatformModerator(primaryLendingPlatformModeratorProxyAddress)
                     .then(function () {
                         console.log("PrimaryLendingPlatformV2 set moderator contract: " + primaryLendingPlatformModeratorProxyAddress);
                     });

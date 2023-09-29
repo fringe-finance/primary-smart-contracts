@@ -33,7 +33,8 @@ Parameters:
 | :------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------ |
 | token               | address | the address of token.                                                                                                     |
 | priceProvider       | address | the address of price provider. Should implement the interface of `PriceProvider`.                                         |
-| hasFunctionWithSign | bool    | true - if price provider has function with signatures. false - if price provider does not have function with signatures. |
+| hasFunctionWithSign | bool    | true - if price provider has function with signatures.
+ false - if price provider does not have function with signatures. |
 
 ### changeActive (0x3651084e)
 

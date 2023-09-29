@@ -44,6 +44,24 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
+     * @dev Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
+     * @param token The address of the token to get the price of.
+     * @param updateData The updateData provided by PythNetwork.
+     * @return priceMantissa The price of the token in USD, represented as a mantissa.
+     * @return priceDecimals The number of decimal places in the price of the token.
+     */
+    function getUpdatedPrice(
+        address token,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 priceMantissa, uint8 priceDecimals) {
+        if (tokenPriceProvider[token].priceProvider == pythPriceProvider) {
+            return PriceProvider(pythPriceProvider).getUpdatedPrice{ value: msg.value }(token, updateData);    
+        } else {
+            return getPrice(token);
+        }
+    }
+
+    /**
      * @dev Returns the priceId array to update the price before expiration and the update fee.
      * @param token The address array of tokens needs to check if the price is about to expire.
      * @param timeBeforeExpiration Time before expiration.

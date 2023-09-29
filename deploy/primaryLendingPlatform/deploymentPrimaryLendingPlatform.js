@@ -1,7 +1,5 @@
 require("dotenv").config();
-const chainConfigs = require('../../chain.config');
-const chainConfig = chainConfigs[chainConfigs.chain];
-const isTesting = chainConfig.isTesting;
+const isTesting = Object.keys(process.env).includes('TESTING');
 
 const hre = require("hardhat");
 const network = hre.hardhatArguments.network;
@@ -37,9 +35,10 @@ module.exports = {
             case "goerli":
                 provider = new Provider("https://zksync2-testnet.zksync.dev");
                 break;
-            case "fork_mainnet":
+            case "fork":
                 provider = new Provider("http://127.0.0.1:8011");
             default:
+                provider = new Provider("https://mainnet.era.zksync.io");
                 break;
         }
         const wallet = new Wallet(process.env.PRIVATE_KEY).connect(provider);
@@ -171,6 +170,9 @@ module.exports = {
             config.BLendingTokenProxies = [];
             fs.writeFileSync = function () { };
         }
+
+        console.log("Network name: " + network.name);
+        console.log("DeployMaster: " + deployMasterAddress);
         //====================================================
         //deploy proxy admin
 
