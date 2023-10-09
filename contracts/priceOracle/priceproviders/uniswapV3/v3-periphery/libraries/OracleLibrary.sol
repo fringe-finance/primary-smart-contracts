@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-import '../../../utils/Math.sol';
-import '../../v3-core/libraries/TickMath.sol';
-import '../../v3-core/interfaces/IUniswapV3Pool.sol';
+import "@openzeppelin/contracts/utils/math/Math.sol";
+import "../../v3-core/libraries/TickMath.sol";
+import "../../v3-core/interfaces/IUniswapV3Pool.sol";
 
 /// @title Oracle library
 /// @notice Provides functions to integrate with V3 pool oracle

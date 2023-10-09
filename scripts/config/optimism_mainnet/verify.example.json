@@ -1,5 +1,9 @@
 {
   "PRIMARY_PROXY_ADMIN": true,
+  "PriceOracleLogic": true,
+  "PriceOracleProxy": true,
+  "PythPriceProviderLogic": true,
+  "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
   "ChainlinkPriceProviderProxy": true,
   "BackendPriceProviderLogic": true,
@@ -28,6 +32,6 @@
   "PrimaryIndexTokenWrappedTokenGatewayProxy": true,
   "PrimaryIndexTokenLeverageLogic": true,
   "PrimaryIndexTokenLeverageProxy": true,
-  "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV3PriceProviderLogic": true,
+  "UniswapV3PriceProviderProxy": true
 }

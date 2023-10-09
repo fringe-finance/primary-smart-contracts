@@ -1,32 +1,61 @@
 {
     "priceOracle": {
-        "tokensUseUniswap": [],
-        "uniswapPairs": [],
-        "tokensUseChainlink": [],
-        "chainlinkAggregatorV3": [],
-        "tokensUseBackendProvider": [],
-        "tokensUseLPProvider": [],
-        "wstETHAggregatorPath": [],
+        "priceProcessingOracle": {
+            "volatilityCapFixedPercent": "",
+            "minSampleInterval": "",
+            "logMaturingAge": "",
+            "longTWAPperiod": "",
+            "twapEnabledForAsset": [[]]
+        },
+        "Pyth": {
+            "pythOracle": "",
+            "tokensUsePyth": [],
+            "priceIdPath": []
+        },
+        "Chainlink": {
+            "sequencerUptimeFeed": "",
+            "gracePeriodTime": "",
+            "tokensUseChainlink": [],
+            "chainlinkAggregatorV3": [
+                []
+            ],
+            "timeOuts": [
+                []
+            ]
+        },
+        "Uniswap": {
+            "pricePointTWAPperiod": "",
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "BackendProvider": {
+            "tokensUseBackendProvider": []
+        },
+        "LPProvider": {
+            "tokensUseLPProvider": []
+        },
+        "wstETHProvider": {
+            "wstETHAggregatorPath": [],
+            "timeOuts": []
+        },
         "wstETH": "",
         "usdc": "",
         "WETH": ""
     },
-    "pitModeratorParams": {
-        "tokens": [],
+    "exchangeAggregatorParams": {
+        "exchangeAggregator": "",
+        "registryAggregator": ""
+    },
+    "plpModeratorParams": {
+        "projectTokens": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
-        "liquidationTresholdFactorNumerator": [],
-        "liquidationTresholdFactorDenominator": [],
-        "liquidationIncentiveNumerator": [],
-        "liquidationIncentiveDenominator": [],
         "isPaused": false,
         "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": [],
-        "usdc": ""
+        "borrowLimitPerLendingToken": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
-        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
@@ -41,11 +70,7 @@
         "newMaxBorrow": [],
         "blocksPerYear": ""
     },
-    "pitAtomicRepaymentParams": {
-        "augustusParaswap": "",
-        "AUGUSTUS_REGISTRY": ""
-    },
-    "pitLiquidationParams": {
+    "plpLiquidationParams": {
         "minPA": "",
         "maxLRFNumerator": "",
         "maxLRFDenominator": "",

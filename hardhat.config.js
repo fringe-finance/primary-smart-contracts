@@ -9,21 +9,23 @@ require("@matterlabs/hardhat-zksync-verify");
 require("hardhat-gas-reporter");
 require("solidity-coverage");
 require("solidity-docgen");
-
+require("@solarity/hardhat-markup");
+require('hardhat-output-validator');
+require("hardhat-tracer");
+require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
+
 
 const {
   INFURA_KEY,
-  MNEMONIC,
+  PRIVATE_KEY,
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
   OPTIMISM_API_KEY,
   ARBISCAN_API_KEY,
   ZKSYNCSCAN_API_KEY
 } = process.env;
-
 const isZksync = Object.keys(process.env).includes('ZKSYNC');
-console.log("isZksync", isZksync)
 let hardhatConfig;
 if (isZksync) {
   hardhatConfig = {
@@ -32,23 +34,31 @@ if (isZksync) {
       compilerSource: "binary",
       settings: {},
     },
-    defaultNetwork: "zkSyncTestnet",
+    defaultNetwork: "goerli",
     networks: {
-      hardhat: {
-        zksync: false,
+      mainnet: {
+        url: "https://mainnet.era.zksync.io",
+        ethNetwork: "mainnet",
+        zksync: true,
+        verifyURL: 'https://zksync2-mainnet-explorer.zksync.io/contract_verification'
       },
-      zkSyncTestnet: {
+      goerli: {
         url: "https://zksync2-testnet.zksync.dev",
         ethNetwork: "goerli",
         zksync: true,
         verifyURL: 'https://zksync2-testnet-explorer.zksync.dev/contract_verification'
       },
+      fork_mainnet: {
+        url: "http://127.0.0.1:8011",
+        ethNetwork: "mainnet",
+        zksync: true
+      }
     },
     etherscan: {
       apiKey: ZKSYNCSCAN_API_KEY
     },
     solidity: {
-      version: "0.8.9",
+      version: "0.8.19",
     },
   };
 } else {
@@ -57,7 +67,7 @@ if (isZksync) {
     solidity: {
       compilers: [
         {
-          version: "0.8.9",
+          version: "0.8.19",
           settings: {
             optimizer: {
               enabled: true,
@@ -68,63 +78,57 @@ if (isZksync) {
       ],
     },
     networks: {
+
       hardhat: {
         forking: {
-          url: `https://rinkeby.infura.io/v3/${INFURA_KEY}`,
+          url: `https://${process.env.CHAIN?.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+          blockNumber: Number(process.env.BLOCK_NUMBER)
         },
-        allowUnlimitedContractSize: false,
-        timeout: 99999999,
-        blockGasLimit: 100_000_000,
-        gas: 100_000_000,
-        gasMultiplier: 1,
-        gasPrice: 500_000_000_000, // 500 gwei
-        accounts: { mnemonic: MNEMONIC },
+        allowUnlimitedContractSize: true
       },
 
       ethereum_mainnet: {
         url: `https://mainnet.infura.io/v3/${INFURA_KEY}`,
         allowUnlimitedContractSize: false,
         timeout: 99999999,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY]
       },
 
       polygon_mainnet: {
         url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY]
       },
 
       arbitrum_mainnet: {
         url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY]
       },
 
       optimism_mainnet: {
         url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`,
         network_id: 420,
-        accounts: { mnemonic: MNEMONIC },
+        accounts: [PRIVATE_KEY]
       },
 
       polygon_mumbai: {
-        url: `https://polygon-mumbai.g.alchemy.com/v2/TKx07_zc9Tc0kUIUJo-4dtbSi4n-oXQ4`,
-        accounts: { mnemonic: MNEMONIC },
+        url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
+        accounts: [PRIVATE_KEY]
       },
       optimism_goerli: {
-        url: `https://goerli.optimism.io`,
-        network_id: 420,
-        accounts: { mnemonic: MNEMONIC },
+        url: `https://optimism-goerli.infura.io/v3/${INFURA_KEY}`,
+        accounts: [PRIVATE_KEY],
         timeout: 99999999,
-        gasPrice: 500_000_000, // 500 gwei
+        gasPrice: 1_500_000_000
       },
 
       ethereum_goerli: {
-        url: "https://rpc.ankr.com/eth_goerli",
+        url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
-        accounts: { mnemonic: MNEMONIC },
-        network_id: 5,
+        accounts: [PRIVATE_KEY]
       },
       arbitrum_goerli: {
-        url: "https://goerli-rollup.arbitrum.io/rpc",
-        accounts: { mnemonic: MNEMONIC },
+        url: `https://arbitrum-goerli.infura.io/v3/${INFURA_KEY}`,
+        accounts: [PRIVATE_KEY]
       },
     },
     gasReporter: {
@@ -145,7 +149,6 @@ if (isZksync) {
         optimisticEthereum: OPTIMISM_API_KEY,
         optimisticGoerli: OPTIMISM_API_KEY,
       },
-
     },
     contractSizer: {
       alphaSort: true,
@@ -164,6 +167,29 @@ if (isZksync) {
       runOnCompile: false,
       debugMode: false,
     },
+    markup: {
+      outdir: "./generated-markups",
+      onlyFiles: [
+        "contracts",
+      ],
+      skipFiles: [],
+      noCompile: false,
+      verbose: false,
+    },
+    // outputValidator: {
+    //   runOnCompile: true,
+    //   errorMode: true,
+    //   checks: {
+    //     title: "error",
+    //     details: "error",
+    //     params: "error",
+    //     returns: "error",
+    //     compilationWarnings: "warning",
+    //     variables: false,
+    //     events: true,
+    //   },
+    //   include: [],
+    // },
   };
 }
 

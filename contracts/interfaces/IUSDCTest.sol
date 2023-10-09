@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
-interface IUSDCTest{
-
-     /**
+interface IUSDCTest {
+    /**
      * @dev Returns the name of the token.
      */
     function name() external view returns (string memory);
@@ -14,7 +13,7 @@ interface IUSDCTest{
      */
     function symbol() external view returns (string memory);
 
-    /** 
+    /**
      * @dev Returns the number of decimals used to get its user representation.
      * For example, if `decimals` equals `2`, a balance of `505` tokens should
      * be displayed to a user as `5,05` (`505 / 10 ** 2`).
@@ -85,13 +84,13 @@ interface IUSDCTest{
     function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
     /**
-     *@dev mints Project tokens to msg.sender 
+     *@dev mints Project tokens to msg.sender
      *@param amount - the amount of project tokens to mint
      */
     function mint(uint256 amount) external;
 
     /**
-     *@dev mints Project tokens to `to` 
+     *@dev mints Project tokens to `to`
      *@param to - address of user that receive the Project Token
      *@param amount - the amount of project tokens to mint
      */

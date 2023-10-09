@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity >=0.8.0;
+pragma solidity 0.8.19;
 
 import "./IUniswapV2Pair.sol";
 
@@ -87,6 +87,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `+` operator.
      *
+     *
      * Requirements:
      *
      * - Addition cannot overflow.
@@ -100,6 +101,7 @@ library SafeMath {
      * overflow (when the result is negative).
      *
      * Counterpart to Solidity's `-` operator.
+     *
      *
      * Requirements:
      *
@@ -115,6 +117,7 @@ library SafeMath {
      *
      * Counterpart to Solidity's `*` operator.
      *
+     *
      * Requirements:
      *
      * - Multiplication cannot overflow.
@@ -128,6 +131,7 @@ library SafeMath {
      * division by zero. The result is rounded towards zero.
      *
      * Counterpart to Solidity's `/` operator.
+     *
      *
      * Requirements:
      *
@@ -145,6 +149,7 @@ library SafeMath {
      * opcode (which leaves remaining gas untouched) while Solidity uses an
      * invalid opcode to revert (consuming all remaining gas).
      *
+     *
      * Requirements:
      *
      * - The divisor cannot be zero.
@@ -161,6 +166,7 @@ library SafeMath {
      * message unnecessarily. For custom revert reasons use {trySub}.
      *
      * Counterpart to Solidity's `-` operator.
+     *
      *
      * Requirements:
      *
@@ -184,6 +190,7 @@ library SafeMath {
      * Counterpart to Solidity's `/` operator. Note: this function uses a
      * `revert` opcode (which leaves remaining gas untouched) while Solidity
      * uses an invalid opcode to revert (consuming all remaining gas).
+     *
      *
      * Requirements:
      *
@@ -210,6 +217,7 @@ library SafeMath {
      * Counterpart to Solidity's `%` operator. This function uses a `revert`
      * opcode (which leaves remaining gas untouched) while Solidity uses an
      * invalid opcode to revert (consuming all remaining gas).
+     *
      *
      * Requirements:
      *

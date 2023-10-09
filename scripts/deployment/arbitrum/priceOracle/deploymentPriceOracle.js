@@ -245,7 +245,7 @@ module.exports = {
                 console.log("ChainlinkPriceProvider initialized at " + chainlinkPriceProviderAddress);
             });
 
-            await chainlinkPriceProvider.grandModerator(priceProviderAggregatorAddress)
+            await chainlinkPriceProvider.grantModerator(priceProviderAggregatorAddress)
             .then(function(instance){
                 console.log("\nTransaction hash: " + instance.hash)
                 console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granded moderator " + priceProviderAggregatorAddress);
@@ -298,7 +298,7 @@ module.exports = {
                 console.log("UniswapV2PriceProvider initialized at "+ uniswapV2PriceProviderAddress + " at tx hash " + instance.hash);
             });
     
-            await uniswapV2PriceProvider.grandModerator(priceProviderAggregatorAddress).then(function(instance){
+            await uniswapV2PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function(instance){
                 console.log("UniswapV2PriceProvider granded moderator "+ priceProviderAggregatorAddress + " at tx hash " + instance.hash);
             });
         }
@@ -319,7 +319,7 @@ module.exports = {
                 console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
             });
     
-            await priceProviderAggregator.grandModerator(deployMasterAddress).then(function(instance){
+            await priceProviderAggregator.grantModerator(deployMasterAddress).then(function(instance){
                 console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granded moderator " + deployMasterAddress + " at tx hash: " + instance.hash);
             });
     

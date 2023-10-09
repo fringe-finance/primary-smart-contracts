@@ -1,0 +1,475 @@
+{
+    "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapFixedPercent": "1000",
+            "minSampleInterval": "1800",
+            "logMaturingAge": "3600",
+            "longTWAPperiod": "86400",
+            "twapEnabledForAsset": [
+                [
+                    "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+                    true
+                ],
+                [
+                    "0x8b21e9b7daf2c4325bf3d18c1beb79a347fe902a",
+                    true
+                ],
+                [
+                    "0xdb4ea87ff83eb1c80b8976fc47731da6a31d35e5",
+                    true
+                ],
+                [
+                    "0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1",
+                    true
+                ],
+                [
+                    "0x73cb180bf0521828d8849bc8CF2B920918e23032",
+                    true
+                ],
+                [
+                    "0x8ae125e8653821e851f12a49f7765db9a9ce7384",
+                    true
+                ],
+                [
+                    "0x47536f17f4ff30e64a96a7555826b8f9e66ec468",
+                    true
+                ],
+                [
+                    "0xc40f949f8a4e094d1b49a23ea9241d289b7b2819",
+                    true
+                ],
+                [
+                    "0x1db2466d9f5e10d7090e7152b68d62703a2245f0",
+                    true
+                ],
+                [
+                    "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",
+                    true
+                ],
+                [
+                    "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+                    true
+                ],
+                [
+                    "0x4200000000000000000000000000000000000006",
+                    true
+                ],
+                [
+                    "0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b",
+                    true
+                ],
+                [
+                    "0xcdb4bb51801a1f399d4402c61bc098a72c382e65",
+                    true
+                ],
+                [
+                    "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+                    true
+                ],
+                [
+                    "0x6806411765Af15Bddd26f8f544A34cC40cb9838B",
+                    true
+                ],
+                [
+                    "0x9Bcef72be871e61ED4fBbc7630889beE758eb81D",
+                    true
+                ],
+                [
+                    "0x97513e975a7fa9072c72c92d8000b0db90b163c5",
+                    true
+                ],
+                [
+                    "0xFdb794692724153d1488CcdBE0C56c252596735F",
+                    true
+                ],
+                [
+                    "0xdFA46478F9e5EA86d57387849598dbFB2e964b02",
+                    true
+                ]
+            ]
+        },
+        "Pyth": {
+            "pythOracle": "",
+            "tokensUsePyth": [],
+            "priceIdPath": []
+        },
+        "Chainlink": {
+            "sequencerUptimeFeed": "0x371EAD81c9102C9BF4874A9075FFFf170F2Ee389",
+            "gracePeriodTime": "3600",
+            "tokensUseChainlink": [
+                "0x8b21e9b7daf2c4325bf3d18c1beb79a347fe902a",
+                "0xdb4ea87ff83eb1c80b8976fc47731da6a31d35e5",
+                "0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1",
+                "0x73cb180bf0521828d8849bc8CF2B920918e23032",
+                "0x8ae125e8653821e851f12a49f7765db9a9ce7384",
+                "0x47536f17f4ff30e64a96a7555826b8f9e66ec468",
+                "0xc40f949f8a4e094d1b49a23ea9241d289b7b2819",
+                "0x1db2466d9f5e10d7090e7152b68d62703a2245f0",
+                "0x50c5725949a6f0c72e6c4a641f24049a917db0cb",
+                "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+                "0x4200000000000000000000000000000000000006",
+                "0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b",
+                "0xcdb4bb51801a1f399d4402c61bc098a72c382e65",
+                "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+                "0x6806411765Af15Bddd26f8f544A34cC40cb9838B",
+                "0x9Bcef72be871e61ED4fBbc7630889beE758eb81D",
+                "0x97513e975a7fa9072c72c92d8000b0db90b163c5",
+                "0xFdb794692724153d1488CcdBE0C56c252596735F",
+                "0xdFA46478F9e5EA86d57387849598dbFB2e964b02"
+            ],
+            "chainlinkAggregatorV3": [
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ],
+                [
+                    "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+                ]
+            ],
+            "timeOuts": [
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ],
+                [
+                    "86400"
+                ]
+            ]
+        },
+        "Uniswap": {
+            "pricePointTWAPperiod": "",
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "BackendProvider": {
+            "tokensUseBackendProvider": []
+        },
+        "LPProvider": {
+            "tokensUseLPProvider": []
+        },
+        "wstETHProvider": {
+            "wstETHAggregatorPath": [
+                "0x9fCe737834500045FB07AD158991BCAC3b05D5A6"
+            ],
+            "timeOuts": [
+                "86400"
+            ]
+        },
+        "wstETH": "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+        "usdc": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+        "WETH": "0x4200000000000000000000000000000000000006"
+    },
+    "exchangeAggregatorParams": {
+        "exchangeAggregator": "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57",
+        "registryAggregator": "0x6e7bE86000dF697facF4396efD2aE2C322165dC3"
+    },
+    "plpModeratorParams": {
+        "projectTokens": [
+            "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+            "0x8b21e9b7daf2c4325bf3d18c1beb79a347fe902a",
+            "0xdb4ea87ff83eb1c80b8976fc47731da6a31d35e5",
+            "0xdc6ff44d5d932cbd77b52e5612ba0529dc6226f1",
+            "0x73cb180bf0521828d8849bc8CF2B920918e23032",
+            "0x8ae125e8653821e851f12a49f7765db9a9ce7384",
+            "0x47536f17f4ff30e64a96a7555826b8f9e66ec468",
+            "0xc40f949f8a4e094d1b49a23ea9241d289b7b2819",
+            "0x1db2466d9f5e10d7090e7152b68d62703a2245f0",
+            "0x50c5725949a6f0c72e6c4a641f24049a917db0cb"
+        ],
+        "loanToValueRatioNumerator": [
+            "6",
+            "6",
+            "6",
+            "9",
+            "9",
+            "6",
+            "6",
+            "6",
+            "6",
+            "6"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10"
+        ],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000"
+        ],
+        "borrowLimitPerLendingToken": [
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000",
+            "1000000000000"
+        ]
+    },
+    "blendingToken": {
+        "initialExchangeRateMantissa": [
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000",
+            "10000000000000000000"
+        ],
+        "lendingTokens": [
+            "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+            "0x4200000000000000000000000000000000000006",
+            "0xb0b195aefa3650a6908f15cdac7d92f8a5791b0b",
+            "0xcdb4bb51801a1f399d4402c61bc098a72c382e65",
+            "0x1f32b1c2345538c0c6f582fcb022739c4a194ebb",
+            "0x6806411765Af15Bddd26f8f544A34cC40cb9838B",
+            "0x9Bcef72be871e61ED4fBbc7630889beE758eb81D",
+            "0x97513e975a7fa9072c72c92d8000b0db90b163c5",
+            "0xFdb794692724153d1488CcdBE0C56c252596735F",
+            "0xdFA46478F9e5EA86d57387849598dbFB2e964b02"
+        ],
+        "symbol": [
+            "fUSDC",
+            "fWETH",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest"
+        ],
+        "decimals": [
+            "6",
+            "18",
+            "18",
+            "18",
+            "18",
+            "18",
+            "18",
+            "18",
+            "18",
+            "18"
+        ],
+        "name": [
+            "fUSDC",
+            "fWETH",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest",
+            "fTest"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9",
+            "9",
+            "9",
+            "9",
+            "9",
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10",
+            "10"
+        ]
+    },
+    "jumRateModel": {
+        "gainPerYear": [
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600"
+        ],
+        "jumGainPerYear": [
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000"
+        ],
+        "targetUtil": [
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000"
+        ],
+        "newMaxBorrow": [
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000"
+        ],
+        "blocksPerYear": "2102400"
+    },
+    "plpLiquidationParams": {
+        "minPA": "1000000",
+        "maxLRFNumerator": "115",
+        "maxLRFDenominator": "100",
+        "rewardCalcFactorNumerator": "1",
+        "rewardCalcFactorDenominator": "1",
+        "targetHFNumerator": "1",
+        "targetHFDenominator": "1"
+    }
+}
