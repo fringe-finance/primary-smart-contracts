@@ -5,14 +5,18 @@ interface IPriceProviderAggregator {
 
     /****************** Moderator functions ****************** */
 
+    struct PriceProviderInfo {
+        address priceProvider;
+        uint8 priceDecimals;
+    }
+
     /**
      * @dev Sets price provider to `token` and its corresponding price provider.
      * @param token the address of token.
      * @param priceProvider the address of price provider. Should implement the interface of `PriceProvider`.
-     * @param hasFunctionWithSign true - if price provider has function with signatures.
-     *                            false - if price provider does not have function with signatures.
+     * @param priceDecimals the decimals of token price.
      */
-    function setTokenAndPriceProvider(address token, address priceProvider, bool hasFunctionWithSign) external;
+    function setTokenAndPriceProvider(address token, address priceProvider, uint8 priceDecimals) external;
 
     /**
      * @dev Allows the moderator to change the active status of a price provider for a specific token.
@@ -47,7 +51,7 @@ interface IPriceProviderAggregator {
      * @dev Returns priceProvider address.
      * @param token The address of token which address of priceProvider is to return.
      */
-    function tokenPriceProvider(address token) external view returns(address); 
+    function tokenPriceProvider(address token) external view returns(PriceProviderInfo memory); 
     /**
      * @dev Returns the most recent TWAP price of a token.
      * @param token The address of the token.

@@ -188,7 +188,7 @@
     },
     "Uniswap": {
       "pricePointTWAPperiod": "",
-            "tokensUseUniswap": [],
+      "tokensUseUniswap": [],
       "uniswapPairs": []
     },
     "BackendProvider": {
@@ -200,6 +200,26 @@
     "wstETHProvider": {
       "wstETHAggregatorPath": [],
       "timeOuts": []
+    },
+    "priceDecimals": {
+      "0x5fE58d975604E6aF62328d9E505181B94Fc0718C": "18",
+      "0x5756a28e2aae01f600fc2c01358395f5c1f8ad3a": "18",
+      "0xfc7e56298657b002b3e656400e746b7212912757": "18",
+      "0x240f765af2273b0cab6caff2880d6d8f8b285fa4": "18",
+      "0xBBeB516fb02a01611cBBE0453Fe3c580D7281011": "18",
+      "0x787c09494ec8bcb24dcaf8659e7d5d69979ee508": "18",
+      "0xC8Ac6191CDc9c7bF846AD6b52aaAA7a0757eE305": "18",
+      "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4": "18",
+      "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C": "18",
+      "0x2039bb4116B4EFc145Ec4f0e2eA75012D6C0f181": "18",
+      "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91": "18",
+      "0x47260090ce5e83454d5f05a0abbb2c953835f777": "18",
+      "0x8E86e46278518EFc1C5CEd245cBA2C7e3ef11557": "18",
+      "0x503234F203fC7Eb888EEC8513210612a43Cf6115": "18",
+      "0xdd9f72afED3631a6C85b5369D84875e6c42f1827": "18",
+      "0xf6d9a093a1c69a152d87e269a7d909e9d76b1815": "18",
+      "0xbe9f8c0d6f0fd7e46cdacca340747ea2f247991d": "18",
+      "0x16a9494e257703797d747540f01683952547ee5b": "18"
     },
     "wstETH": "0x5fE58d975604E6aF62328d9E505181B94Fc0718C",
     "usdc": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",

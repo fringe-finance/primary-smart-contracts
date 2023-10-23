@@ -71,6 +71,16 @@
                 "180"
             ]
         },
+        "priceDecimals": {
+            "0x359d51f1164478C776dC8A71458c7570fC8b6D9D": "18",
+            "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E": "18",
+            "0x802B13F8A025357E5560D0FbEAbF7960114b36be": "18",
+            "0x969883C417688D5846BEa78700702A23febC8e88": "18",
+            "0x543f08E7108CF023dee9F6290a383a8D1B3Db092": "18",
+            "0x9c3c9283d3e44854697cd22d3faa240cfb032889": "18",
+            "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da": "18",
+            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB": "18"
+        },
         "wstETH": "0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F",
         "usdc": "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
         "WETH": "0x9c3c9283d3e44854697cd22d3faa240cfb032889"

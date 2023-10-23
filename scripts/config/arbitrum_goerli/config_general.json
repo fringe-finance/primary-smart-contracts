@@ -78,6 +78,15 @@
                 "86400"
             ]
         },
+        "priceDecimals": {
+            "0xA0126016B2cFcAf60df67579C81F68C02bc237d8": "18",
+            "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7": "18",
+            "0x2fCabB640BDc5E23dD469f2b8F625236d063456c": "18",
+            "0x55f88B32D47f7BA13e969749e1D6fc3aba691914": "18",
+            "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126": "18",
+            "0xD20ee3d5c9EE0924429268d994149963ded6c72A": "18",
+            "0x5ecf82A8e520f1c280694AfBe639ebD06A7dE249": "18"
+        },
         "wstETH": "0x55f88B32D47f7BA13e969749e1D6fc3aba691914",
         "usdc": "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
         "WETH": "0x5ecf82A8e520f1c280694AfBe639ebD06A7dE249"

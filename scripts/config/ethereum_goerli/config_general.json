@@ -79,6 +79,15 @@
                 "86460"
             ]
         },
+        "priceDecimals": {
+            "0xed9f4c37094ded8a681e0Ffcc9F5a7ee5247001a": "18",
+            "0x96Dc1F009f9e01D15B87f78795B538E5827F365E": "18",
+            "0x78d1F8C7Bc0794d59C50Abc4f5e74c47b212F402": "18",
+            "0x60f7eE4835269d08d8E3Dd42EeD551688f18b8F7": "18",
+            "0xccc70874548F12320DB34b1f36343C5afc5484e4": "18",
+            "0xFee9CFE582C501234C8ac18b01EA3F3199f4efB8": "18",
+            "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6": "18"
+        },
         "wstETH": "0x60f7eE4835269d08d8E3Dd42EeD551688f18b8F7",
         "usdc": "0xccc70874548F12320DB34b1f36343C5afc5484e4",
         "WETH": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6"

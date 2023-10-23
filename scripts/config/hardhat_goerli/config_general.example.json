@@ -33,7 +33,8 @@
       "wstETHProvider": {
           "wstETHAggregatorPath": []
       },
-      "wstETH": "",
+      "priceDecimals": {},
+        "wstETH": "",
       "usdc": "",
       "WETH": ""
   },

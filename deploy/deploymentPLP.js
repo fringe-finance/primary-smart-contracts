@@ -14,11 +14,14 @@ module.exports = {
 
         //contracts addresses
         let proxyAdminAddress;
+        let priceOracleAddress;
         let backendPriceProviderAddress;
         let chainlinkPriceProviderAddress;
         let uniswapV2PriceProviderAddress;
         let uniswapV2PriceProviderMockAddress;
         let priceProviderAggregatorAddress;
+        let pythPriceProviderAddress;
+        let mutePriceProviderAddress;
 
         let bondtrollerAddress;
         let blendingAddress;
@@ -31,10 +34,12 @@ module.exports = {
         let priceOracleAddresses = await deploymentPriceProviderAggregator();
         console.log({ priceOracleAddresses });
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
+        priceOracleAddress = priceOracleAddresses.priceOracleAddress;
         pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress,
         chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
         backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
         uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
+        mutePriceProviderAddress =  priceOracleAddresses.mutePriceProviderAddress;
         uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
@@ -66,10 +71,12 @@ module.exports = {
 
         let addresses = {
             proxyAdminAddress: proxyAdminAddress,
+            priceOracleAddress: priceOracleAddress,
             pythPriceProviderAddress: pythPriceProviderAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
             backendPriceProviderAddress: backendPriceProviderAddress,
             uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
+            mutePriceProviderAddress: mutePriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
             priceProviderAggregatorAddress: priceProviderAggregatorAddress,
             bondtrollerAddress: bondtrollerAddress,

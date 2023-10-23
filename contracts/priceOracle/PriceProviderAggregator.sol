@@ -26,7 +26,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     struct PriceProviderInfo {
         address priceProvider;
-        bool hasSignedFunction;
+        uint8 priceDecimals;
     }
 
     /**
@@ -46,7 +46,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @param token The address of the token whose price provider is set.
      * @param priceProvider The address of the price provider.
      */
-    event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider);
+    event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider, uint8 indexed priceDecimals);
 
     /**
      * @dev Emitted when the priceOracle is set.
@@ -128,16 +128,17 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * - `priceProvider` cannot be the zero address.
      * @param token the address of token.
      * @param priceProvider the address of price provider. Should implement the interface of `PriceProvider`.
-     * @param hasFunctionWithSign true - if price provider has function with signatures.
-     *                            false - if price provider does not have function with signatures.
+     * @param priceDecimals the decimals of token price.
      */
-    function setTokenAndPriceProvider(address token, address priceProvider, bool hasFunctionWithSign) public onlyModerator {
+    function setTokenAndPriceProvider(address token, address priceProvider, uint8 priceDecimals) public onlyModerator {
         require(token != address(0), "PriceProviderAggregator: Invalid token");
         require(priceProvider != address(0), "PriceProviderAggregator: Invalid priceProvider");
         PriceProviderInfo storage priceProviderInfo = tokenPriceProvider[token];
         priceProviderInfo.priceProvider = priceProvider;
-        priceProviderInfo.hasSignedFunction = hasFunctionWithSign;
-        emit SetTokenAndPriceProvider(token, priceProvider);
+        if (priceProviderInfo.priceDecimals == 0) {
+            priceProviderInfo.priceDecimals = priceDecimals;
+        }
+        emit SetTokenAndPriceProvider(token, priceProvider, priceProviderInfo.priceDecimals);
     }
 
     /**

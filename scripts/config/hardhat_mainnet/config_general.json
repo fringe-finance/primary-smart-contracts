@@ -255,6 +255,28 @@
                 "86400"
             ]
         },
+        "priceDecimals": {
+            "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0": "18",
+            "0x4b9278b94a1112cad404048903b8d343a810b07e": "18",
+            "0x88df592f8eb5d7bd38bfef7deb0fbc02cf3778a0": "18",
+            "0xfe67a4450907459c3e1fff623aa927dd4e28c67a": "18",
+            "0x01e87d74b11f656a673a3e7c441425816213eb0c": "18",
+            "0x0001a500a6b18995b03f44bb040a5ffc28e45cb0": "18",
+            "0x808507121b80c02388fad14726482e061b8da827": "18",
+            "0x5de8ab7e27f6e7a1fff3e5b337584aa43961beef": "18",
+            "0x3231cb76718cdef2155fc47b5286d82e6eda273f": "18",
+            "0x1a7e4e63778b4f12a199c062f3efdd288afcbce8": "18",
+            "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48": "18",
+            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2": "18",
+            "0xa35b1b31ce002fbf2058d22f30f95d405200a15b": "18",
+            "0x14778860e937f509e651192a90589de711fb88a9": "18",
+            "0x856c4efb76c1d1ae02e20ceb03a2a6a08b0b8dc3": "18",
+            "0xc5f0f7b66764f6ec8c8dff7ba683102295e16409": "18",
+            "0x1936c91190e901b7dd55229a574ae22b58ff498a": "18",
+            "0xf819d9cb1c2a819fd991781a822de3ca8607c3c9": "18",
+            "0xb478c6245e3d85d6ec3486b62ea872128d562541": "18",
+            "0x68a47fe1cf42eba4a030a10cd4d6a1031ca3ca0a": "18"
+        },
         "wstETH": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
         "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
         "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"

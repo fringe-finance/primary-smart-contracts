@@ -85,7 +85,6 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
     }
 
     struct PriceInfo {
-        uint8 priceDecimals;
         uint32 timestamp;
         uint256 collateralPrice;
         uint256 capitalPrice;
@@ -93,8 +92,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
 
     event PriceUpdated(
         address indexed token, 
-        uint8 priceDecimals, 
-        uint32 currentTime, 
+        uint32 currentTime,
         uint256 twapCollateralPrice, 
         uint256 twapCapitalPrice
     );
@@ -279,7 +277,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         uint256 twapCapitalPrice = 0;
 
         uint32 currentTime = uint32(block.timestamp);
-        (uint256 reportedPrice, uint8 priceDecimals) = getReportedPrice(token);
+        uint256 reportedPrice = getReportedPrice(token);
         uint256 governedPrice = _applyVolatilityCap(token, reportedPrice, currentTime);
 
         if (!priceProviderAggregator.twapEnabledForAsset(token)) {
@@ -292,12 +290,11 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         }
         priceInfo[token] = PriceInfo({
             timestamp: currentTime,
-            priceDecimals: priceDecimals,
             collateralPrice: twapCollateralPrice,
             capitalPrice: twapCapitalPrice
         });
 
-        emit PriceUpdated(token, priceDecimals, currentTime, twapCollateralPrice, twapCapitalPrice);
+        emit PriceUpdated(token, currentTime, twapCollateralPrice, twapCapitalPrice);
     }
 
     /**
@@ -310,7 +307,16 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      */
     function getMostTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
         PriceInfo memory info = priceInfo[token];
-        return (info.priceDecimals, info.timestamp, info.collateralPrice, info.capitalPrice);
+        return (getTokenPriceDecimals(token), info.timestamp, info.collateralPrice, info.capitalPrice);
+    }
+
+    /**
+     * @dev Returns the decimals price of the token.
+     * @param token The address of the token.
+     * @return priceDecimals The decimals price of the token.
+     */
+    function getTokenPriceDecimals(address token) public view returns(uint8 priceDecimals){
+        return priceProviderAggregator.tokenPriceProvider(token).priceDecimals;
     }
 
     /**
@@ -322,8 +328,9 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      */
     function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
         PriceInfo memory info = priceInfo[token];
-        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice, info.priceDecimals);
-        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice, info.priceDecimals);
+        uint8 priceDecimals = getTokenPriceDecimals(token);
+        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice, priceDecimals);
+        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice, priceDecimals);
     }
 
     /**
@@ -331,8 +338,12 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      * @notice price = priceMantissa / (10 ** priceDecimals)
      * @param token the address of token which price is to return
      */
-    function getReportedPrice(address token) public view returns(uint256 priceMantissa, uint8 priceDecimals){
-        return PriceProvider(priceProviderAggregator.tokenPriceProvider(token)).getPrice(token);
+    function getReportedPrice(address token) public view returns(uint256 priceMantissa) {
+        (uint256 reportedPrice, uint8 priceDecimals) = PriceProvider(priceProviderAggregator.tokenPriceProvider(token).priceProvider).getPrice(token);
+        uint8 calculatedPriceDecimals = getTokenPriceDecimals(token);
+        priceMantissa = priceDecimals >= calculatedPriceDecimals
+            ? reportedPrice / (10 ** (priceDecimals - calculatedPriceDecimals))
+            : reportedPrice / (10 ** (calculatedPriceDecimals - priceDecimals));
     }
     
     /**

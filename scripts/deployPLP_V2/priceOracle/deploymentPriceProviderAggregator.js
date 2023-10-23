@@ -84,7 +84,8 @@ module.exports = {
             BackendProvider,
             LPProvider,
             wstETHProvider,
-            wstETH
+            wstETH,
+            priceDecimals
         } = priceOracle;
         let volatilityCapFixedPercent = priceProcessingOracle.volatilityCapFixedPercent;
         let minSampleInterval = priceProcessingOracle.minSampleInterval;
@@ -973,7 +974,7 @@ module.exports = {
         for (var i = 0; i < tokensUseChainlink.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseChainlink[i]);
             if (tokenPriceProvider.priceProvider != chainlinkPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress, false).then(function (instance) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress, priceDecimals[tokensUseChainlink[i]]).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseChainlink[i] + " with priceOracle " + chainlinkPriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
@@ -982,7 +983,7 @@ module.exports = {
         for (var i = 0; i < tokensUseUniswap.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseUniswap[i]);
             if (tokenPriceProvider.priceProvider != uniswapV3PriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswap[i], uniswapV3PriceProviderAddress, false).then(function (instance) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswap[i], uniswapV3PriceProviderAddress, priceDecimals[tokensUseUniswap[i]]).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseUniswap[i] + " with priceOracle " + uniswapV3PriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
@@ -991,7 +992,7 @@ module.exports = {
         for (var i = 0; i < tokensUseLPProvider.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseLPProvider[i]);
             if (tokenPriceProvider.priceProvider != lpPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseLPProvider[i], lpPriceProviderAddress, false).then(function (instance) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseLPProvider[i], lpPriceProviderAddress, priceDecimals[tokensUseLPProvider[i]]).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseLPProvider[i] + " with priceOracle " + lpPriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
@@ -1000,7 +1001,7 @@ module.exports = {
         for (var i = 0; i < tokensUsePyth.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUsePyth[i]);
             if (tokenPriceProvider.priceProvider != pythPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUsePyth[i], pythPriceProviderAddress, false).then(function (instance) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUsePyth[i], pythPriceProviderAddress, priceDecimals[tokensUsePyth[i]]).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUsePyth[i] + " with priceOracle " + pythPriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
@@ -1024,7 +1025,7 @@ module.exports = {
         if (wstETHPriceProviderAddress) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(wstETH);
             if (tokenPriceProvider.priceProvider != wstETHPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(wstETH, wstETHPriceProviderAddress, false).then(function (instance) {
+                await priceProviderAggregator.setTokenAndPriceProvider(wstETH, wstETHPriceProviderAddress, priceDecimals[wstETH]).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + wstETH + " with priceOracle " + wstETHPriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
