@@ -1,37 +1,21 @@
 {
   "priceOracle": {
     "Pyth": {
-      "pythOracle": "0xf087c864AEccFb6A2Bf1Af6A0382B0d0f6c5D834",
+      "pythOracle": "0xC38B1dd611889Abc95d4E0a472A667c3671c08DE",
       "tokensUsePyth": [
-        "0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021",
-        "0x26b368C3Ed16313eBd6660b72d8e4439a697Cb0B",
-        "0x094499Df5ee555fFc33aF07862e43c90E6FEe501",
-        "0x5fE58d975604E6aF62328d9E505181B94Fc0718C",
-        "0xb76eD02Dea1ba444609602BE5D587c4bFfd67153",
-        "0xf2FcC18ED5072b48C0a076693eCa72fE840b3981",
-        "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91"
+        "0x105F493d2E5a97d2D2A08A0a9840756cfb5ca6d5",
+        "0xd9Ee4c1e04059D4B0dd02b747282511bEE4E5fB5",
+        "0x07Be8e54B19f3e6B11a7823de46d044688bbB8B5"
       ],
       "priceIdPath": [
         [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
+          "0x41f3625971ca2ed2263e78573fe5ce23e13d2558ed3f2e47ab0f84fb9e7ae722"
         ],
         [
-          "0x93da3352f9f1d105fdfe4971cfa80e9dd777bfc5d0f683ebb6e1294b92137bb7"
+          "0xca80ba6dc32e08d06f1aa886011eed1d77c77be9eb761cc10d72b7d0a2fd57a6"
         ],
         [
-          "0x8e860fb74e60e5736b455d82f60b3728049c348e94961add5f961b02fdee2535"
-        ],
-        [
-          "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
-        ],
-        [
-          "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a"
-        ],
-        [
-          "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43"
-        ],
-        [
-          "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace"
+          "0xf9c0172ba10dfa4d19088d94f5bf61d3b54d5bd7483a322a982e1373ee8ea31b"
         ]
       ]
     },
@@ -51,8 +35,20 @@
       "uniswapPairs": []
     },
     "Mute": {
-      "tokensUseMute": [],
-      "mutePairs": []
+      "tokensUseMute": [
+        "0x54ae494D82DB98c2cF1614Ad5989596822F646b4",
+        "0xcE3576ecF5512024De902c2Fcacc84Ff6cE8eAc9",
+        "0x7f72EeAbc2560EE9DfE2a842123e63DbF0df1484",
+        "0xe3C2bF97dB7694B5f99A362b1e5d24d7906214a7",
+        "0x9361A8Fc091A280a6D221D14b15828730bAbf560"
+      ],
+      "mutePairs": [
+        "0x957341435d43cAbE74c7Edd64eC31fFa672C1b57",
+        "0x0ae580D7b21051c443fFD0dc3F5d7c52e21B30b7",
+        "0xE405852cC98b54f734cF4dd69379b28ca2813F7B",
+        "0x633bf050C2737A2fB5b0F36b31C960943E4b0e80",
+        "0x4fF97E9ECbaC5806FF23bA84b94250240e69de80"
+      ]
     },
     "BackendProvider": {
       "tokensUseBackendProvider": []
@@ -64,43 +60,66 @@
       "wstETHAggregatorPath": [],
       "timeOuts": []
     },
-    "wstETH": "0x5fE58d975604E6aF62328d9E505181B94Fc0718C",
-    "usdc": "0xb76eD02Dea1ba444609602BE5D587c4bFfd67153",
-    "WETH": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91"
+    "wstETH": "0x07Be8e54B19f3e6B11a7823de46d044688bbB8B5",
+    "usdc": "0x105F493d2E5a97d2D2A08A0a9840756cfb5ca6d5",
+    "WETH": "0x294cB514815CAEd9557e6bAA2947d6Cf0733f014"
   },
   "exchangeAggregatorParams": {
-    "exchangeAggregator": "0x36A1aCbbCAfca2468b85011DDD16E7Cb4d673230",
+    "exchangeAggregator": "",
     "registryAggregator": ""
   },
   "plpModeratorParams": {
     "tokens": [
-      "0x4B5DF730c2e6b28E17013A1485E5d9BC41Efe021",
-      "0x26b368C3Ed16313eBd6660b72d8e4439a697Cb0B",
-      "0x094499Df5ee555fFc33aF07862e43c90E6FEe501",
-      "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91"
+      "0x54ae494D82DB98c2cF1614Ad5989596822F646b4",
+      "0xcE3576ecF5512024De902c2Fcacc84Ff6cE8eAc9",
+      "0x7f72EeAbc2560EE9DfE2a842123e63DbF0df1484",
+      "0xe3C2bF97dB7694B5f99A362b1e5d24d7906214a7",
+      "0x07Be8e54B19f3e6B11a7823de46d044688bbB8B5"
     ],
     "loanToValueRatioNumerator": [
       "6",
       "6",
       "6",
       "9",
-      "9",
-      "6",
-      "6"
+      "9"
     ],
     "loanToValueRatioDenominator": [
       "10",
       "10",
       "10",
       "10",
-      "10",
-      "10",
       "10"
+    ],
+    "liquidationTresholdFactorNumerator": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "liquidationTresholdFactorDenominator": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "liquidationIncentiveNumerator": [
+      "115",
+      "115",
+      "115",
+      "115",
+      "115"
+    ],
+    "liquidationIncentiveDenominator": [
+      "100",
+      "100",
+      "100",
+      "100",
+      "100"
     ],
     "isPaused": false,
     "borrowLimitPerCollateral": [
-      "1000000000000",
-      "1000000000000",
       "1000000000000",
       "1000000000000",
       "1000000000000",
@@ -111,8 +130,7 @@
       "1000000000000",
       "1000000000000",
       "1000000000000"
-    ],
-    "usdc": "0xb76eD02Dea1ba444609602BE5D587c4bFfd67153"
+    ]
   },
   "blendingToken": {
     "initialExchangeRateMantissa": [
@@ -120,10 +138,15 @@
       "10000000000000000000",
       "10000000000000000000"
     ],
+    "reserveFactorMantissa": [
+      "50000000000000000",
+      "70000000000000000",
+      "100000000000000000"
+    ],
     "lendingTokens": [
-      "0xb76eD02Dea1ba444609602BE5D587c4bFfd67153",
-      "0xf2FcC18ED5072b48C0a076693eCa72fE840b3981",
-      "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91"
+      "0x105F493d2E5a97d2D2A08A0a9840756cfb5ca6d5",
+      "0x9361A8Fc091A280a6D221D14b15828730bAbf560",
+      "0x294cB514815CAEd9557e6bAA2947d6Cf0733f014"
     ],
     "symbol": [
       "fUSDC",

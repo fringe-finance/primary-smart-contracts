@@ -32,7 +32,5 @@
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": "",
-  "MutePriceProviderLogic": "",
-  "MutePriceProviderProxy": ""
+  "UniswapV2PriceProviderProxy": ""
 }

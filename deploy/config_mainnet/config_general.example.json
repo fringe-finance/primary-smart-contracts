@@ -9,12 +9,20 @@
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [],
-            "chainlinkAggregatorV3": [[]],
-            "timeOuts": [[]]
+            "chainlinkAggregatorV3": [
+                []
+            ],
+            "timeOuts": [
+                []
+            ]
         },
         "Uniswap": {
             "tokensUseUniswap": [],
             "uniswapPairs": []
+        },
+        "Mute": {
+            "tokensUseMute": [],
+            "mutePairs": []
         },
         "BackendProvider": {
             "tokensUseBackendProvider": []
@@ -36,29 +44,30 @@
     },
     "plpModeratorParams": {
         "projectTokens": [],
-          "loanToValueRatioNumerator": [],
-          "loanToValueRatioDenominator": [],
-          "isPaused": false,
-          "borrowLimitPerCollateral": [],
-          "borrowLimitPerLendingToken": []
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [],
+        "borrowLimitPerLendingToken": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": []
-      },
-      "jumRateModel": {
+    },
+    "jumRateModel": {
         "gainPerYear": [],
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
-        "blocksPerYear": "15768000"
-      },
-      "plpLiquidationParams": {
+        "blocksPerYear": "30660000"
+    },
+    "plpLiquidationParams": {
         "minPA": "",
         "maxLRFNumerator": "",
         "maxLRFDenominator": "",
@@ -66,5 +75,5 @@
         "rewardCalcFactorDenominator": "",
         "targetHFNumerator": "",
         "targetHFDenominator": ""
-      }
+    }
 }

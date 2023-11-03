@@ -8,19 +8,19 @@ const configAddress = require(configAddressFile);
 const toBN = (num) => BN.from(num);
 
 module.exports = {
-   
-    deploymentPriceOracle : async function () {
 
-    //====================================================
-    //declare parametrs
+    deploymentPriceOracle: async function () {
+
+        //====================================================
+        //declare parametrs
 
         let network = await hre.network;
-        console.log("Network name: "+network.name);
-       
+        console.log("Network name: " + network.name);
+
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
 
-        console.log("DeployMaster: "+deployMaster.address);
+        console.log("DeployMaster: " + deployMaster.address);
 
         let deployMasterAddress = deployMaster.address;
 
@@ -31,7 +31,7 @@ module.exports = {
         let BackendPriceProvider;
         let UniswapV2PriceProvider;
         let PriceProviderAggregator;
- 
+
 
         //instances of contracts
         let proxyAdmin;
@@ -41,8 +41,8 @@ module.exports = {
         let priceProviderAggregator;
 
 
-    //====================================================
-    //initialize deploy parametrs
+        //====================================================
+        //initialize deploy parametrs
 
         ProxyAdmin = await hre.ethers.getContractFactory("ProxyAdmin");
         TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
@@ -50,7 +50,7 @@ module.exports = {
         BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
         UniswapV2PriceProvider = await hre.ethers.getContractFactory("UniswapV2PriceProvider");
         PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregator");
-      
+
         const {
             priceOracle
         } = config;
@@ -73,7 +73,7 @@ module.exports = {
         let backendPriceProviderAddress = BackendPriceProviderProxy;
         let uniswapV2PriceProviderAddress = UniswapV2PriceProviderProxy;
 
-        let backendPriceProviderLogicAddress = BackendPriceProviderLogic
+        let backendPriceProviderLogicAddress = BackendPriceProviderLogic;
         let chainlinkPriceProviderLogicAddress = ChainlinkPriceProviderLogic;
         let priceProviderAggregatorLogicAddress = PriceProviderAggregatorLogic;
         let uniswapV2PriceProviderLogicAddress = UniswapV2PriceProviderLogic;
@@ -87,135 +87,135 @@ module.exports = {
 
 
 
-    //====================================================
-    //deploy proxy admin
+        //====================================================
+        //deploy proxy admin
 
         console.log();
         console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        if(!proxyAdminAddress){
+        if (!proxyAdminAddress) {
             proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-            await proxyAdmin.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await proxyAdmin.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 proxyAdminAddress = instance.address;
                 config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
 
-    //====================================================
-    //deploy chainlinkPriceProvider
+        //====================================================
+        //deploy chainlinkPriceProvider
         console.log();
         console.log("***** CHAINLINK PRICE PROVIDER DEPLOYMENT *****");
 
-        if(!chainlinkPriceProviderLogicAddress) {
+        if (!chainlinkPriceProviderLogicAddress) {
             chainlinkPriceProvider = await ChainlinkPriceProvider.connect(deployMaster).deploy();
-            await chainlinkPriceProvider.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await chainlinkPriceProvider.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 chainlinkPriceProviderLogicAddress = instance.address;
                 config.ChainlinkPriceProviderLogic = chainlinkPriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ChainlinkPriceProvider masterCopy address: " + chainlinkPriceProviderLogicAddress);
 
-        if(!chainlinkPriceProviderAddress) {
+        if (!chainlinkPriceProviderAddress) {
             let chainlinkPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
                 chainlinkPriceProviderLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
-            await chainlinkPriceProviderProxy.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await chainlinkPriceProviderProxy.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 chainlinkPriceProviderAddress = instance.address;
                 config.ChainlinkPriceProviderProxy = chainlinkPriceProviderAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("ChainlinkPriceProvider proxy address: " + chainlinkPriceProviderAddress);
 
-    //====================================================
-    //deploy backendPriceProvider
+        //====================================================
+        //deploy backendPriceProvider
         console.log();
         console.log("***** BACKEND PRICE PROVIDER DEPLOYMENT *****");
 
-        if(!backendPriceProviderLogicAddress){
+        if (!backendPriceProviderLogicAddress) {
             backendPriceProvider = await BackendPriceProvider.connect(deployMaster).deploy();
-            await backendPriceProvider.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await backendPriceProvider.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 backendPriceProviderLogicAddress = instance.address;
                 config.BackendPriceProviderLogic = backendPriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("BackendPriceProvider masterCopy address: " + backendPriceProviderLogicAddress);
 
-        if(!backendPriceProviderAddress){
+        if (!backendPriceProviderAddress) {
             let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
                 backendPriceProviderMasterCopyAddress,
                 proxyAdminAddress,
                 "0x"
             );
-            await backendPriceProviderProxy.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await backendPriceProviderProxy.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 backendPriceProviderAddress = instance.address;
                 config.BackendPriceProviderProxy = backendPriceProviderAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 2));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("BackendPriceProvider proxy address: " + backendPriceProviderAddress);
-       
+
         let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
             backendPriceProviderMasterCopyAddress,
             proxyAdminAddress,
             "0x"
         );
-        await backendPriceProviderProxy.deployed().then(function(instance){
-            console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+        await backendPriceProviderProxy.deployed().then(function (instance) {
+            console.log("\nTransaction hash: " + instance.deployTransaction.hash);
             console.log("BackendPriceProvider proxy address: " + instance.address);
         });
         let backendPriceProviderProxyAddress = backendPriceProviderProxy.address;
         backendPriceProviderAddress = backendPriceProviderProxyAddress;
 
-    //=========================
-    //deploy uniswapV2PriceProvider 
+        //=========================
+        //deploy uniswapV2PriceProvider 
         console.log();
         console.log("***** UNISWAPV2 PRICE PROVIDER DEPLOYMENT *****");
 
-        if(!uniswapV2PriceProviderLogicAddress) {
+        if (!uniswapV2PriceProviderLogicAddress) {
             uniswapV2PriceProvider = await UniswapV2PriceProvider.connect(deployMaster).deploy();
-            await uniswapV2PriceProvider.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await uniswapV2PriceProvider.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 uniswapV2PriceProviderLogicAddress = instance.address;
                 config.UniswapV2PriceProviderLogic = uniswapV2PriceProviderLogicAddress;
-                fs.writeFileSync(path.join(__dirname,  configFile), JSON.stringify(config, null, 3));
+                fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 3));
             });
         }
         console.log("UniswapV2PriceProvider masterCopy address: " + uniswapV2PriceProviderLogicAddress);
 
-        if(!uniswapV2PriceProviderAddress){
+        if (!uniswapV2PriceProviderAddress) {
             let uniswapV2PriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
                 uniswapV2PriceProviderMasterCopyAddress,
                 proxyAdminAddress,
                 "0x"
             );
-            await uniswapV2PriceProviderProxy.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await uniswapV2PriceProviderProxy.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 uniswapV2PriceProviderAddress = instance.address;
                 config.UniswapV3PriceProviderProxy = uniswapV2PriceProviderAddress;
                 fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
             });
         }
         console.log("UniswapV2PriceProvider proxy address: " + uniswapV2PriceProviderAddress);
-    //=========================
-    //deploy PriceProviderAggregator
+        //=========================
+        //deploy PriceProviderAggregator
         console.log();
         console.log("***** USB PRICE ORACLE DEPLOYMENT *****");
 
-        if(!priceProviderAggregatorLogicAddress){
+        if (!priceProviderAggregatorLogicAddress) {
             priceProviderAggregator = await PriceProviderAggregator.connect(deployMaster).deploy();
-            await priceProviderAggregator.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await priceProviderAggregator.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 priceProviderAggregatorLogicAddress = instance.address;
                 config.PriceProviderAggregatorLogic = priceProviderAggregatorLogicAddress;
                 fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
@@ -223,14 +223,14 @@ module.exports = {
         }
         console.log("PriceProviderAggregator masterCopy address: " + priceProviderAggregatorLogicAddress);
 
-        if(!priceProviderAggregatorAddress){
+        if (!priceProviderAggregatorAddress) {
             let usbPriceOracleProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
                 usbPriceOracleMasterCopyAddress,
                 proxyAdminAddress,
                 "0x"
             );
-            await usbPriceOracleProxy.deployed().then(function(instance){
-                console.log("\nTransaction hash: " + instance.deployTransaction.hash)
+            await usbPriceOracleProxy.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 priceProviderAggregatorAddress = instance.address;
                 config.PriceProviderAggregatorProxy = priceProviderAggregatorAddress;
                 fs.writeFileSync(path.join(__dirname, configFile), JSON.stringify(config, null, 2));
@@ -239,40 +239,40 @@ module.exports = {
 
         console.log("PriceProviderAggregator proxy address: " + priceProviderAggregatorAddress);
 
-    //====================================================
-    //setting params
+        //====================================================
+        //setting params
 
         chainlinkPriceProvider = await ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
         backendPriceProvider = await BackendPriceProvider.attach(backendPriceProviderAddress).connect(deployMaster);
         uniswapV2PriceProvider = await UniswapV2PriceProvider.attach(uniswapV2PriceProviderAddress).connect(deployMaster);
         priceProviderAggregator = await PriceProviderAggregator.attach(priceProviderAggregatorAddress).connect(deployMaster);
-    
+
         //==============================
         //set chainlinkPriceProvider
         console.log();
         console.log("***** SETTING CHAINLINK PRICE PROVIDER *****");
         let usdDecimal = await priceProviderAggregator.usdDecimals();
-        if(usdDecimal == 0){
+        if (usdDecimal == 0) {
             await chainlinkPriceProvider.initialize()
-            .then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("ChainlinkPriceProvider initialized at " + chainlinkPriceProviderAddress);
-            });
+                .then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("ChainlinkPriceProvider initialized at " + chainlinkPriceProviderAddress);
+                });
 
-            await chainlinkPriceProvider.grandModerator(priceProviderAggregatorAddress)
-            .then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granded moderator " + priceProviderAggregatorAddress);
-            });
+            await chainlinkPriceProvider.grantModerator(priceProviderAggregatorAddress)
+                .then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granded moderator " + priceProviderAggregatorAddress);
+                });
 
             for (var i = 0; i < tokensUseChainlink.length; i++) {
                 await chainlinkPriceProvider.setTokenAndAggregator(
                     tokensUseChainlink[i],
                     [chainlinkAggregatorV3[i]]
-                ).then(function(instance){
-                    console.log("\nTransaction hash: " + instance.hash)
-                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ")
-                    console.log("   token: " + tokensUseChainlink[i])
+                ).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
+                    console.log("   token: " + tokensUseChainlink[i]);
                     console.log("   aggregator path: " + [chainlinkAggregatorV3[i]]);
                 });
             }
@@ -282,29 +282,29 @@ module.exports = {
         console.log();
         console.log("***** SETTING BACKEND PRICE PROVIDER *****");
         usdDecimal = await backendPriceProvider.usdDecimals();
-        if(usdDecimal == 0) {
+        if (usdDecimal == 0) {
             await backendPriceProvider.initialize()
-            .then(function(instance){
-                console.log("BackendPriceProvider " + backendPriceProviderAddress + " initialized at tx hash: " + instance.hash);
-            });
+                .then(function (instance) {
+                    console.log("BackendPriceProvider " + backendPriceProviderAddress + " initialized at tx hash: " + instance.hash);
+                });
 
             await backendPriceProvider.grandTrustedBackendRole(deployMasterAddress)
-            .then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash) 
-                console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend "+ deployMasterAddress);
-            });
+                .then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend " + deployMasterAddress);
+                });
 
             await backendPriceProvider.grandTrustedBackendRole(deployMasterAddress)
-            .then(function(instance){
-                console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend "+ deployMasterAddress + " at tx hash: " + instance.hash);
-            });
+                .then(function (instance) {
+                    console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend " + deployMasterAddress + " at tx hash: " + instance.hash);
+                });
 
-            for(var i = 0; i < tokensUseBackendProvider.length; i++){
-                await backendPriceProvider.setToken(tokensUseBackendProvider[i]).then(function(instance){
-                    console.log("BackendPriceProvider " + backendPriceProvider.address + " set token "+ tokensUseBackendProvider[i] + "at tx hash: " + instance.hash);
+            for (var i = 0; i < tokensUseBackendProvider.length; i++) {
+                await backendPriceProvider.setToken(tokensUseBackendProvider[i]).then(function (instance) {
+                    console.log("BackendPriceProvider " + backendPriceProvider.address + " set token " + tokensUseBackendProvider[i] + "at tx hash: " + instance.hash);
                 });
             }
-        }    
+        }
 
         //==============================
         //set uniswapV2PriceProvider
@@ -313,19 +313,19 @@ module.exports = {
 
         usdDecimal = await uniswapV2PriceProvider.getPriceDecimals();
 
-        if(usdDecimal == 0){
-            await uniswapV2PriceProvider.initialize().then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("UniswapV2PriceProvider initialized at "+ uniswapV2PriceProviderAddress);
+        if (usdDecimal == 0) {
+            await uniswapV2PriceProvider.initialize().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.hash);
+                console.log("UniswapV2PriceProvider initialized at " + uniswapV2PriceProviderAddress);
             });
-    
-            await uniswapV2PriceProvider.grandModerator(priceProviderAggregatorAddress).then(function(instance){
-                console.log("\nTransaction hash: " + instance.hash)
-                console.log("UniswapV2PriceProvider granded moderator "+priceProviderAggregatorAddress);
+
+            await uniswapV2PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                console.log("\nTransaction hash: " + instance.hash);
+                console.log("UniswapV2PriceProvider granded moderator " + priceProviderAggregatorAddress);
             });
-    
+
             for (var i = 0; i < tokenUseUniswap.length; i++) {
-                await uniswapV2PriceProvider.setTokenAndPair(tokenUseUniswap[i], uniswapPairs[i]).then(function(instance){
+                await uniswapV2PriceProvider.setTokenAndPair(tokenUseUniswap[i], uniswapPairs[i]).then(function (instance) {
                     console.log("UniswapV3PriceProvider  set token " + tokenUseUniswap[i] + " and pair " + uniswapPairs[i] + " at tx hash: " + instance.hash);
                 });
             }
@@ -336,36 +336,36 @@ module.exports = {
         console.log();
         console.log("***** SETTING USB PRICE ORACLE *****");
         usdDecimal = await priceProviderAggregator.usdDecimals();
-        if(usdDecimal == 0) {
-            await priceProviderAggregator.initialize().then(function(instance){
+        if (usdDecimal == 0) {
+            await priceProviderAggregator.initialize().then(function (instance) {
                 console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
             });
-    
-            await priceProviderAggregator.grandModerator(deployMasterAddress).then(function(instance){
+
+            await priceProviderAggregator.grantModerator(deployMasterAddress).then(function (instance) {
                 console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granded moderator " + deployMasterAddress + " at tx hash: " + instance.hash);
             });
-    
-            for (var i = 0; i < tokensUseChainlink.length; i++) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress, false).then(function(instance){
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token "+ tokensUseChainlink[i] + " with priceOracle " + chainlinkPriceProviderAddress + " at tx hash: " + instance.hash);
-                });
-            }
-    
-            for (var i = 0; i < tokensUseUniswap.length; i++) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokenUseUniswap[i], uniswapV2PriceProviderAddress, false).then(function(instance){
 
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token "+ tokenUseUniswap[i] + " with priceOracle " + uniswapV2PriceProviderAddress + " at tx hash: " + instance.hash);
+            for (var i = 0; i < tokensUseChainlink.length; i++) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress, false).then(function (instance) {
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseChainlink[i] + " with priceOracle " + chainlinkPriceProviderAddress + " at tx hash: " + instance.hash);
+                });
+            }
+
+            for (var i = 0; i < tokensUseUniswap.length; i++) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokenUseUniswap[i], uniswapV2PriceProviderAddress, false).then(function (instance) {
+
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokenUseUniswap[i] + " with priceOracle " + uniswapV2PriceProviderAddress + " at tx hash: " + instance.hash);
                 });
             }
         }
-        
+
         let addresses = {
-            proxyAdminAddress : proxyAdminAddress,
-            chainlinkPriceProviderAddress : chainlinkPriceProviderAddress,
-            backendPriceProviderAddress : backendPriceProviderAddress,
-            uniswapV2PriceProviderAddress : uniswapV2PriceProviderAddress,
-            priceProviderAggregatorAddress : priceProviderAggregatorAddress,
-        }
+            proxyAdminAddress: proxyAdminAddress,
+            chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
+            backendPriceProviderAddress: backendPriceProviderAddress,
+            uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
+            priceProviderAggregatorAddress: priceProviderAggregatorAddress,
+        };
 
         console.log(addresses);
 

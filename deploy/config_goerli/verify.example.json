@@ -31,5 +31,7 @@
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV2PriceProviderProxy": true,
+  "MutePriceProviderLogic": true,
+  "MutePriceProviderProxy": true
 }

@@ -122,7 +122,7 @@ if (isZksync) {
       },
 
       ethereum_goerli: {
-        url: "https://rpc.ankr.com/eth_goerli",
+        url:  `https://goerli.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
         accounts: [PRIVATE_KEY]
       },

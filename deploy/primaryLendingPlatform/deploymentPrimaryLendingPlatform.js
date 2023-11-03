@@ -35,15 +35,14 @@ module.exports = {
             case "goerli":
                 provider = new Provider("https://zksync2-testnet.zksync.dev");
                 break;
-            case "fork":
-                provider = new Provider("http://127.0.0.1:8011");
-            default:
+            case "mainnet":
                 provider = new Provider("https://mainnet.era.zksync.io");
+            default:
+                provider = new Provider("http://127.0.0.1:8011");
                 break;
         }
         const wallet = new Wallet(process.env.PRIVATE_KEY).connect(provider);
         const deployer = new Deployer(hre, wallet);
-
         const deployMasterAddress = wallet.address;
 
         // Contracts ABI
@@ -171,7 +170,7 @@ module.exports = {
             fs.writeFileSync = function () { };
         }
 
-        console.log("Network name: " + network.name);
+        console.log("Network name: zksync " + network);
         console.log("DeployMaster: " + deployMasterAddress);
         //====================================================
         //deploy proxy admin
@@ -575,7 +574,7 @@ module.exports = {
             let jumGainPerBlock = jumGainPerYearValue.div(blocksPerYearValue);
 
             if (blendingTokenInfo.targetUtil != targetUtil[i] || rateInfo.maxBorrowRate != newMaxBorrow[i] || gainPerBlock.toString() != blendingTokenInfo.gainPerBlock || jumGainPerBlock.toString() != blendingTokenInfo.jumGainPerBlock) {
-                await jumpRateModel.addBLendingTokenSuport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
+                await jumpRateModel.addBLendingTokenSupport(BLendingTokenProxies[i], gainPerYear[i], jumGainPerYear[i], targetUtil[i], newMaxBorrow[i]).then(function (instance) {
                     console.log("JumpRateModel " + jumpRateModelProxyAddress + " add BLendingToken Suport " + BLendingTokenProxies[i] + " with params: " + gainPerYear[i] + ", " + jumGainPerYear[i] + ", " + targetUtil[i] + " at tx hash " + instance.hash);
                 });
             }
@@ -627,7 +626,7 @@ module.exports = {
         {
             let plpModerator = await plp.primaryLendingPlatformModerator();
             if (plpModerator != primaryLendingPlatformModeratorProxyAddress) {
-                await plp.setPrimaryLendingPlatformModeratorModerator(primaryLendingPlatformModeratorProxyAddress)
+                await plp.setPrimaryLendingPlatformModerator(primaryLendingPlatformModeratorProxyAddress)
                     .then(function () {
                         console.log("PrimaryLendingPlatformV2 set moderator contract: " + primaryLendingPlatformModeratorProxyAddress);
                     });

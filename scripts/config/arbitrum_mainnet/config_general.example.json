@@ -60,7 +60,7 @@
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
-        "blocksPerYear": ""
+        "blocksPerYear": "122640000"
     },
     "plpLiquidationParams": {
         "minPA": "",
