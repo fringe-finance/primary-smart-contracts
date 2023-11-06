@@ -70,7 +70,7 @@
     "coverage:v2:fork-arbitrum-goerli": "cross-env SOURCE=hardhat_arbitrum_goerli yarn reset-config && cross-env CHAIN=arbitrum_goerli BLOCK_NUMBER=37650000 LAYER2=true TESTING=true npx hardhat coverage --network hardhat --testfiles \"test/ethereum/*.js\"",
     "coverage:v2:fork-polygon-zksync": "cross-env SOURCE=hardhat_zksync_on_polygon_mainnet yarn reset-config && cross-env CHAIN=polygon_mainnet BLOCK_NUMBER=47250000 TESTING=true TESTING_FOR_ZKSYNC=true npx hardhat coverage --network hardhat --testfiles \"test/zksync_on_polygon/*.js\""
   },
-  "author": "locnguyenLotussoft <loc.nguyen@lotussoft.vn>",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "@chainlink/contracts": "^0.2.2",
@@ -121,6 +121,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "zksync-web3": "^0.14.3"
-  },
-  "repository": "https://locnguyenLotussoft@bitbucket.org/lotus-soft/plp-smart-contracts.git"
+  }
 }

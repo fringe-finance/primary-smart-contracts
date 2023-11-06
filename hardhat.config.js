@@ -168,7 +168,7 @@ if (isZksync) {
       debugMode: false,
     },
     markup: {
-      outdir: "./generated-markups",
+      outdir: "./docs",
       onlyFiles: [
         "contracts",
       ],
