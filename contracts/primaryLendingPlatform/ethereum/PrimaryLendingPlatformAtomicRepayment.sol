@@ -8,33 +8,6 @@ import "../PrimaryLendingPlatformAtomicRepaymentCore.sol";
  * @dev Contract that allows users to repay loans atomically using the Augustus Paraswap exchange aggregator. Inherit from PrimaryLendingPlatformAtomicRepaymentCore.
  */
 contract PrimaryLendingPlatformAtomicRepayment is PrimaryLendingPlatformAtomicRepaymentCore {
-    address public registryAggregator;
-
-    /**
-     * @dev Emitted when the Augustus Paraswap exchange aggregator and registry aggregator addresses are set.
-     * @param exchangeAggregator The address of the Augustus Paraswap exchange aggregator.
-     * @param registryAggregator The address of the Augustus Paraswap registry aggregator.
-     */
-    event SetAugustusParaswap(address indexed exchangeAggregator, address indexed registryAggregator);
-
-    /**
-     * @dev Updates the Exchange Aggregator contract and registry contract addresses.
-     *
-     * Requirements:
-     * - The caller must be the moderator.
-     * - `exchangeAggregatorAddress` must not be the zero address.
-     * - `registryAggregatorAddress` must not be the zero address.
-     * - `registryAggregatorAddress` must be a valid Augustus contract.
-     * @param exchangeAggregatorAddress The new address of the Exchange Aggregator contract.
-     * @param registryAggregatorAddress The new address of the Aggregator registry contract.
-     */
-    function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
-        require(exchangeAggregatorAddress != address(0) && registryAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
-        require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-        exchangeAggregator = exchangeAggregatorAddress;
-        registryAggregator = registryAggregatorAddress;
-        emit SetAugustusParaswap(exchangeAggregatorAddress, registryAggregatorAddress);
-    }
 
     /**
      * @notice Repays a loan atomically using the given project token as collateral.
