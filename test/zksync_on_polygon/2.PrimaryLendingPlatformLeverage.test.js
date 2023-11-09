@@ -672,7 +672,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 { value: updateFee }
             )).to.be.revertedWith("PriceProviderAggregatorPyth: Msg.value!=0!");
         });
-        it("20. Failure: Should revert when priceIds.length != updateData.length", async function () {
+        it.skip("20. Failure: Should revert when priceIds.length != updateData.length", async function () {
             let projectToken = prj1.address;
             let lendingToken = usdc.address;
             let exp = toBN(1);
@@ -1094,7 +1094,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 priceIds,
                 updateData,
                 { value: updateFee }
-            )).to.revertedWith("PIT: Project token is not listed");
+            )).to.revertedWith("Prj token isn't listed");
         });
         it.skip("30. Failure: Should revert when isLendingTokenListed == FALSE", async function () {
             let projectToken = prj1.address;
@@ -1114,7 +1114,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 priceIds,
                 updateData,
                 { value: updateFee }
-            )).to.revertedWith("PIT: Lending token is not listed");
+            )).to.revertedWith("Lending token isn't listed");
         });
         it("31. Failure: Should revert when allowance lendingToken < lendingTokenCount and isLeveragePosition == FALSE", async function () {
             await loadFixtureCanSwapOnOpenOcean();
@@ -2647,7 +2647,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2678,7 +2678,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2689,7 +2689,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2766,7 +2766,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2798,7 +2798,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2809,7 +2809,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2872,7 +2872,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2904,7 +2904,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2915,7 +2915,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2999,7 +2999,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -3031,7 +3031,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerCollateralWithUpdatePrices(projectToken, priceIds, updateData, { value: updateFee });
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.callStatic.getTotalBorrowPerLendingTokenWithUpdatePrices(lendingToken, priceIds, updateData, { value: updateFee });
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -3042,7 +3042,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));

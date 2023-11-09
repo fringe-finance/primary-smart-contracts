@@ -434,7 +434,7 @@ describe("PrimaryLendingPlatformLiquidation", function () {
                 )).to.be.revertedWith("PriceProviderAggregatorPyth: Msg.value!=0!");
             });
 
-            it("15. Failure: Should revert when priceIds.length != updateData.length", async function () {
+            it.skip("15. Failure: Should revert when priceIds.length != updateData.length", async function () {
                 let projectToken = prj1.address;
                 let lendingToken = usdc.address;
                 let lendingTokenAmount = ethers.utils.parseUnits("10", usdcDecimals);

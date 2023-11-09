@@ -155,6 +155,10 @@ module.exports = {
         let borrowLimitPerLendingToken = plpModeratorParams.borrowLimitPerLendingToken;
 
         let exchangeAggregator = exchangeAggregatorParams.exchangeAggregator;
+        let registryAggregator = exchangeAggregatorParams.registryAggregator;
+        if (!registryAggregator) {
+            registryAggregator = ZERO_ADDRESS;
+        }
 
         let minPA = plpLiquidationParams.minPA;
         let maxLRFNumerator = plpLiquidationParams.maxLRFNumerator;
@@ -821,11 +825,13 @@ module.exports = {
         }
         console.log();
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
-        if (exchangeAggregator != currentExchangeAggregator && exchangeAggregator) {
-            await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator)
+        let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
+        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+            await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
                 .then(function () {
                     console.log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator at:");
                     console.log("ExchangeAggregator: " + exchangeAggregator);
+                    console.log("RegistryAggregator: " + registryAggregator);
                 });
         }
 
@@ -842,11 +848,13 @@ module.exports = {
         }
         console.log();
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
-        if (exchangeAggregator != currentExchangeAggregator && exchangeAggregator) {
-            await plpLeverage.setExchangeAggregator(exchangeAggregator,)
+        currentRegistryAggregator = await plpLeverage.registryAggregator();
+        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+            await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
                 .then(function () {
                     console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator at:");
                     console.log("ExchangeAggregator: " + exchangeAggregator);
+                    console.log("RegistryAggregator: " + registryAggregator);
                 });
         }
 

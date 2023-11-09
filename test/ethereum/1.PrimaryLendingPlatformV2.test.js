@@ -318,7 +318,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.deposit(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: Project token is not listed");
+            )).to.be.revertedWith("Prj token isn't listed");
 
         });
         it("7. Failure: Should revert when isDepositPaused == TRUE", async function () {
@@ -334,7 +334,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.deposit(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: ProjectToken is paused");
+            )).to.be.revertedWith("Token is paused");
 
             await plpModeratorInstance.setPausedProjectToken(
                 projectToken,
@@ -349,7 +349,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.deposit(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: ProjectTokenAmount==0");
+            )).to.be.revertedWith("Invalid amount");
         });
         it("9. Failure: Should revert when allowance < projectTokenAmount", async function () {
             let projectToken = prj1.address;
@@ -519,7 +519,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.withdraw(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: Project token is not listed");
+            )).to.be.revertedWith("Prj token isn't listed");
         });
         it("7. Failure: Should revert when isWithdrawPaused == TRUE", async function () {
             let projectToken = prj1.address;
@@ -534,7 +534,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.withdraw(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: ProjectToken is paused");
+            )).to.be.revertedWith("Token is paused");
 
             await plpModeratorInstance.setPausedProjectToken(
                 projectToken,
@@ -549,7 +549,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.withdraw(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: Invalid PRJ token amount or depositPosition doesn't exist");
+            )).to.be.revertedWith("Invalid amount or deposit doesn't exist");
         });
         it("9. Failure: Should revert when depositedProjectTokenAmount == 0", async function () {
             await loadFixture();
@@ -562,7 +562,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.withdraw(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: Invalid PRJ token amount or depositPosition doesn't exist");
+            )).to.be.revertedWith("Invalid amount or deposit doesn't exist");
         });
         it("10. Failure: Should revert when withdrawableAmount == 0", async function () {
             await loadFixture();
@@ -624,7 +624,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.withdraw(
                 projectToken,
                 projectTokenAmount
-            )).to.be.revertedWith("PIT: Withdrawable amount is 0");
+            )).to.be.revertedWith("Withdrawable amount is 0");
         });
         it("11. Success (Single-user): Should withdraw available amount projectToken1 when withdrawableAmount >= projectTokenAmount and loanBody > 0", async function () {
             await loadFixture();
@@ -1178,7 +1178,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.supply(
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is not listed");
+            )).to.be.revertedWith("Lending token isn't listed");
         });
 
         it("7. Failure: Should revert when isPaused == TRUE", async function () {
@@ -1193,7 +1193,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.supply(
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is paused");
+            )).to.be.revertedWith("Token is paused");
 
             await plpModeratorInstance.setPausedLendingToken(
                 lendingToken,
@@ -1208,7 +1208,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.supply(
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: LendingTokenAmount==0");
+            )).to.be.revertedWith("Invalid amount");
         });
 
         it("9. Failure: Should revert when balance < lendingTokenAmount", async function () {
@@ -1359,7 +1359,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeem(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is not listed");
+            )).to.be.revertedWith("Lending token isn't listed");
         });
 
         it("7. Failure: Should revert when isPaused == TRUE", async function () {
@@ -1374,7 +1374,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeem(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is paused");
+            )).to.be.revertedWith("Token is paused");
 
             await plpModeratorInstance.setPausedLendingToken(
                 lendingToken,
@@ -1389,7 +1389,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeem(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: BLendingTokenAmount==0");
+            )).to.be.revertedWith("BLendingTokenAmount==0");
         });
 
         it("9. Failure: Should revert when usdc balance of bLendingToken < bLendingTokenAmount", async function () {
@@ -1405,7 +1405,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeem(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: RedeemError!=0. redeem>=supply.");
+            )).to.be.revertedWith("RedeemError!=0. redeem>=supply.");
         });
 
         it("10. Success: Should redeem success usdc token", async function () {
@@ -1511,7 +1511,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeemUnderlying(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is not listed");
+            )).to.be.revertedWith("Lending token isn't listed");
         });
 
         it("7. Failure: Should revert when isPaused == TRUE", async function () {
@@ -1526,7 +1526,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeemUnderlying(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is paused");
+            )).to.be.revertedWith("Token is paused");
 
             await plpModeratorInstance.setPausedLendingToken(
                 lendingToken,
@@ -1541,7 +1541,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeemUnderlying(
                 lendingToken,
                 bLendingTokenAmount
-            )).to.be.revertedWith("PIT: LendingTokenAmount==0");
+            )).to.be.revertedWith("Invalid amount");
         });
 
         it("9. Failure: Should revert when usdc balance of bLendingToken < lendingTokenAmount", async function () {
@@ -1553,7 +1553,7 @@ describe("PrimaryLendingPlatformV2", function () {
             await expect(plpInstance.redeemUnderlying(
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT:Redeem>=supply");
+            )).to.be.revertedWith("Redeem>=supply");
         });
 
         it("10. Success: Should redeemUnderlying success usdc token", async function () {
@@ -1688,7 +1688,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectTokenAddress,
                 lendingTokenAddress,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Project token is not listed");
+            )).to.be.revertedWith("Prj token isn't listed");
         });
 
         it("8. Failure: Should revert when isLendingTokenListed == FALSE", async function () {
@@ -1700,7 +1700,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectTokenAddress,
                 lendingTokenAddress,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is not listed");
+            )).to.be.revertedWith("Lending token isn't listed");
         });
 
         it("9. Failure: Should revert when lendingTokenAmount = 0", async function () {
@@ -1712,7 +1712,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectTokenAddress,
                 lendingTokenAddress,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: LendingTokenAmount==0");
+            )).to.be.revertedWith("Invalid amount");
         });
 
         it("10. Failure: Should revert when borrowPositionAmount == 0", async function () {
@@ -1722,7 +1722,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 prj1Address,
                 usdcAddress,
                 repayAmount
-            )).to.be.revertedWith("PIT: No borrow position");
+            )).to.be.revertedWith("No borrow position");
         });
 
         it("11. Failure: Should revert when _borrowPosition.loanBody == 0", async function () {
@@ -1738,7 +1738,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 prj1Address,
                 usdcAddress,
                 repayAmount
-            )).to.be.revertedWith("PIT: No borrow position");
+            )).to.be.revertedWith("No borrow position");
         });
 
         describe("Repay with isLeveragePosition = FALSE cases:", async function () {
@@ -2372,7 +2372,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Project token is not listed");
+            )).to.be.revertedWith("Prj token isn't listed");
         });
         it("8. Failure: Should revert when isLendingTokenListed == FALSE", async function () {
             let projectToken = prj1.address;
@@ -2383,7 +2383,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Lending token is not listed");
+            )).to.be.revertedWith("Lending token isn't listed");
         });
         it("9. Failure: Should revert when isLeveragePosition == TRUE", async function () {
             let projectToken = prj1.address;
@@ -2435,7 +2435,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Invalid position");
+            )).to.be.revertedWith("Invalid position");
         });
         it("10. Failure: Should revert when lendingTokenAmount == 0", async function () {
             await loadFixture();
@@ -2448,7 +2448,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Invalid lending amount");
+            )).to.be.revertedWith("Invalid lending amount");
         });
         it("11. Failure: Should revert when lendingToken != actualLendingToken", async function () {
             let projectToken = prj1.address;
@@ -2484,7 +2484,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Invalid lending token");
+            )).to.be.revertedWith("Invalid lending token");
         });
         it("12. Failure: Should revert when availableToBorrow == 0 and loanBody == 0", async function () {
             await loadFixture();
@@ -2509,7 +2509,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Available amount to borrow is 0");
+            )).to.be.revertedWith("Available amount to borrow is 0");
         });
         it("13. Failure: Should revert when availableToBorrow == 0 and loanBody > 0", async function () {
             await loadFixture();
@@ -2561,7 +2561,7 @@ describe("PrimaryLendingPlatformV2", function () {
                 projectToken,
                 lendingToken,
                 lendingTokenAmount
-            )).to.be.revertedWith("PIT: Available amount to borrow is 0");
+            )).to.be.revertedWith("Available amount to borrow is 0");
         });
         it("14. Success (Single-user): Should borrow available amount USDC when loanBody == 0 and availableToBorrow < lendingTokenAmount", async function () {
             await loadFixture();
