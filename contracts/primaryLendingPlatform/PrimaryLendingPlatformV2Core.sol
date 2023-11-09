@@ -1337,7 +1337,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     function getLoanToValueRatio(address projectToken, address lendingToken) public view returns (uint256 lvrNumerator, uint256 lvrDenominator) {
         Ratio memory lvrProjectToken = projectTokenInfo[projectToken].loanToValueRatio;
         Ratio memory lvrLendingToken = lendingTokenInfo[lendingToken].loanToValueRatio;
-        lvrNumerator = lvrProjectToken.numerator * lvrLendingToken.numerator;
-        lvrDenominator = lvrProjectToken.denominator * lvrLendingToken.denominator;
+        lvrNumerator = uint256(lvrProjectToken.numerator) * uint256(lvrLendingToken.numerator);
+        lvrDenominator = uint256(lvrProjectToken.denominator) * uint256(lvrLendingToken.denominator);
     }
 }
