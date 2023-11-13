@@ -15,6 +15,22 @@ Core contract for the atomic repayment functionality for the PrimaryLendingPlatf
 Abstract contract that implements the atomic repayment core functionality for the PrimaryLendingPlatform contract.
 ## Events info
 
+### SetExchangeAggregator
+
+```solidity
+event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator)
+```
+
+Emitted when the exchange aggregator and registry aggregator addresses are set.
+
+
+Parameters:
+
+| Name               | Type    | Description                               |
+| :----------------- | :------ | :---------------------------------------- |
+| exchangeAggregator | address | The address of the exchange aggregator.   |
+| registryAggregator | address | The address of the registry aggregator.   |
+
 ### SetPrimaryLendingPlatform
 
 ```solidity
@@ -74,6 +90,13 @@ address exchangeAggregator
 ```
 
 
+### registryAggregator (0xf38cb29a)
+
+```solidity
+address registryAggregator
+```
+
+
 ## Modifiers info
 
 ### onlyAdmin
@@ -121,6 +144,30 @@ Parameters:
 | Name | Type    | Description                                         |
 | :--- | :------ | :-------------------------------------------------- |
 | pit  | address | The address of the PrimaryLendingPlatform contract. |
+
+### setExchangeAggregator (0x3c4841b4)
+
+```solidity
+function setExchangeAggregator(
+    address exchangeAggregatorAddress,
+    address registryAggregatorAddress
+) external onlyModerator
+```
+
+Updates the Exchange Aggregator contract and registry contract addresses.
+
+Requirements:
+- The caller must be the moderator.
+- `exchangeAggregatorAddress` must not be the zero address.
+- `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+
+
+Parameters:
+
+| Name                      | Type    | Description                                            |
+| :------------------------ | :------ | :----------------------------------------------------- |
+| exchangeAggregatorAddress | address | The new address of the Exchange Aggregator contract.   |
+| registryAggregatorAddress | address | The new address of the Aggregator registry contract.   |
 
 ### setPrimaryLendingPlatform (0xe801734a)
 

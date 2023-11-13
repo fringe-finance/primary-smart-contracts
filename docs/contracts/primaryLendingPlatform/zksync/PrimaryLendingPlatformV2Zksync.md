@@ -207,40 +207,6 @@ Return values:
 | :--- | :------ | :-------------------------------- |
 | [0]  | uint256 | amount of lending tokens borrowed |
 
-### pitWithUpdatePrices (0x865529ef)
-
-```solidity
-function pitWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Returns the PIT (primary index token) value for a given account and position after a position is opened after updating related token's prices.
-
-Formula: pit = $ * LVR of position.
-
-
-Parameters:
-
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| account      | address   | Address of the account.                                          |
-| projectToken | address   | Address of the project token.                                    |
-| lendingToken | address   | Address of the lending token.                                    |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
-
-
-Return values:
-
-| Name | Type    | Description    |
-| :--- | :------ | :------------- |
-| [0]  | uint256 | The PIT value. |
-
 ### pitCollateralWithUpdatePrices (0x902b6286)
 
 ```solidity
@@ -304,39 +270,6 @@ Return values:
 | Name | Type    | Description                                      |
 | :--- | :------ | :----------------------------------------------- |
 | [0]  | uint256 | The remaining PIT of the user's borrow position. |
-
-### healthFactorWithUpdatePrices (0x52deb767)
-
-```solidity
-function healthFactorWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256 numerator, uint256 denominator)
-```
-
-Returns the health factor of a user's borrow position for a specific project token and lending token after updating related token's prices.
-
-
-Parameters:
-
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| account      | address   | The address of the user's borrow position.                       |
-| projectToken | address   | The address of the project token.                                |
-| lendingToken | address   | The address of the lending token.                                |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
-
-
-Return values:
-
-| Name        | Type    | Description                           |
-| :---------- | :------ | :------------------------------------ |
-| numerator   | uint256 | The numerator of the health factor.   |
-| denominator | uint256 | The denominator of the health factor. |
 
 ### getTokenEvaluationWithUpdatePrices (0x4d247b46)
 
@@ -440,66 +373,6 @@ Return values:
 | Name | Type    | Description                     |
 | :--- | :------ | :------------------------------ |
 | [0]  | uint256 | The total borrow amount in USD. |
-
-### getTotalBorrowPerCollateralWithUpdatePrices (0x22d44652)
-
-```solidity
-function getTotalBorrowPerCollateralWithUpdatePrices(
-    address projectToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Gets total borrow amount in USD per collateral for a specific project token after updating related token's prices.
-
-
-Parameters:
-
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| projectToken | address   | The address of the project token.                                |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
-
-
-Return values:
-
-| Name | Type    | Description                     |
-| :--- | :------ | :------------------------------ |
-| [0]  | uint256 | The total borrow amount in USD. |
-
-### totalOutstandingInUSDWithUpdatePrices (0x010faf17)
-
-```solidity
-function totalOutstandingInUSDWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Converts the total outstanding amount of a user's borrow position to USD after updating related token's prices.
-
-
-Parameters:
-
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| account      | address   | The address of the user account.                                 |
-| projectToken | address   | The address of the project token                                 |
-| lendingToken | address   | The address of the lending token.                                |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
-
-
-Return values:
-
-| Name | Type    | Description                          |
-| :--- | :------ | :----------------------------------- |
-| [0]  | uint256 | The total outstanding amount in USD. |
 
 ### getCollateralAvailableToWithdrawWithUpdatePrices (0x45f0219c)
 

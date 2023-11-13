@@ -13,59 +13,7 @@ contract PrimaryLendingPlatformLeverage is PrimaryLendingPlatformLeverageCore
 The PrimaryLendingPlatformAtomicRepayment contract is the contract that allows users to open leveraged positions.
 
 Contract that allows users to open leveraged positions using the Augustus Paraswap exchange aggregator. Inherit from PrimaryLendingPlatformLeverageCore.
-## Events info
-
-### SetAugustusParaswap
-
-```solidity
-event SetAugustusParaswap(address indexed exchangeAggregator, address indexed registryAggregator)
-```
-
-Emitted when the Augustus Paraswap exchange aggregator and registry aggregator addresses are set.
-
-
-Parameters:
-
-| Name               | Type    | Description                                                 |
-| :----------------- | :------ | :---------------------------------------------------------- |
-| exchangeAggregator | address | The address of the Augustus Paraswap exchange aggregator.   |
-| registryAggregator | address | The address of the Augustus Paraswap registry aggregator.   |
-
-## State variables info
-
-### registryAggregator (0xf38cb29a)
-
-```solidity
-address registryAggregator
-```
-
-
 ## Functions info
-
-### setExchangeAggregator (0x3c4841b4)
-
-```solidity
-function setExchangeAggregator(
-    address exchangeAggregatorAddress,
-    address registryAggregatorAddress
-) external onlyModerator
-```
-
-Updates the Exchange Aggregator contract and registry contract addresses.
-
-Requirements:
-- The caller must be the moderator.
-- `exchangeAggregatorAddress` must not be the zero address.
-- `registryAggregatorAddress` must not be the zero address.
-- `registryAggregatorAddress` must be a valid Augustus contract.
-
-
-Parameters:
-
-| Name                      | Type    | Description                                            |
-| :------------------------ | :------ | :----------------------------------------------------- |
-| exchangeAggregatorAddress | address | The new address of the Exchange Aggregator contract.   |
-| registryAggregatorAddress | address | The new address of the Aggregator registry contract.   |
 
 ### leveragedBorrow (0xf5800f1b)
 

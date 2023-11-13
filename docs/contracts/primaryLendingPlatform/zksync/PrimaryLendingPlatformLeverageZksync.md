@@ -13,45 +13,7 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
 The PrimaryLendingPlatformLeverageZksync contract is the contract that allows users to open leveraged positions for zksync network.
 
 Contract that allows users to open leveraged positions using the OpenOcean exchange aggregator. Inherit from PrimaryLendingPlatformLeverageCore.
-## Events info
-
-### SetOpenOceanExchangeProxy
-
-```solidity
-event SetOpenOceanExchangeProxy(address indexed newOpenOceanExchangeProxy)
-```
-
-Emitted when the address of the OpenOceanExchangeProxy contract is set.
-
-
-Parameters:
-
-| Name                      | Type    | Description                                             |
-| :------------------------ | :------ | :------------------------------------------------------ |
-| newOpenOceanExchangeProxy | address | The address of the new OpenOceanExchangeProxy contract. |
-
 ## Functions info
-
-### setExchangeAggregator (0x873e2a1b)
-
-```solidity
-function setExchangeAggregator(
-    address exchangeAggregatorAddress
-) external onlyModerator
-```
-
-Sets the address of the exchange aggregator contract.
-
-Requirements:
-- Only the moderator can call this function.
-- The exchange aggregator address must not be the zero address.
-
-
-Parameters:
-
-| Name                      | Type    | Description                                      |
-| :------------------------ | :------ | :----------------------------------------------- |
-| exchangeAggregatorAddress | address | The address of the exchange aggregator contract. |
 
 ### leveragedBorrow (0x104daaf9)
 

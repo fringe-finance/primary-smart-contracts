@@ -1457,38 +1457,6 @@ Return values:
 | lvrNumerator   | uint256 | The numerator of the loan to value ratio   |
 | lvrDenominator | uint256 | The denominator of the loan to value ratio |
 
-### pitWithUpdatePrices (0x865529ef)
-
-```solidity
-function pitWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Returns the PIT (primary index token) value for a given account and position after a position is opened after update price.
-
-
-Parameters:
-
-| Name         | Type      | Description                               |
-| :----------- | :-------- | :---------------------------------------- |
-| account      | address   | Address of the account.                   |
-| projectToken | address   | Address of the project token.             |
-| lendingToken | address   | Address of the lending token.             |
-| priceIds     | bytes32[] | The priceIds need to update.              |
-| updateData   | bytes[]   | The updateData provided by PythNetwork.   |
-
-
-Return values:
-
-| Name | Type    | Description                            |
-| :--- | :------ | :------------------------------------- |
-| [0]  | uint256 | The PIT value. Formula: pit = $ * LVR |
-
 ### pitCollateralWithUpdatePrices (0x902b6286)
 
 ```solidity
@@ -1582,39 +1550,6 @@ Return values:
 | Name | Type    | Description                                                         |
 | :--- | :------ | :------------------------------------------------------------------ |
 | [0]  | uint256 | remaining The estimated remaining PIT of the user's borrow position |
-
-### healthFactorWithUpdatePrices (0x52deb767)
-
-```solidity
-function healthFactorWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256 numerator, uint256 denominator)
-```
-
-Returns the health factor of a user's borrow position for a specific project token and lending token after update price
-
-
-Parameters:
-
-| Name         | Type      | Description                                 |
-| :----------- | :-------- | :------------------------------------------ |
-| account      | address   | The address of the user's borrow position   |
-| projectToken | address   | The address of the project token            |
-| lendingToken | address   | The address of the lending token            |
-| priceIds     | bytes32[] | The priceIds need to update.                |
-| updateData   | bytes[]   | The updateData provided by PythNetwork.     |
-
-
-Return values:
-
-| Name        | Type    | Description                          |
-| :---------- | :------ | :----------------------------------- |
-| numerator   | uint256 | The numerator of the health factor   |
-| denominator | uint256 | The denominator of the health factor |
 
 ### getTokenEvaluationWithUpdatePrices (0x4d247b46)
 
@@ -1718,66 +1653,6 @@ Return values:
 | Name | Type    | Description                    |
 | :--- | :------ | :----------------------------- |
 | [0]  | uint256 | The total borrow amount in USD |
-
-### getTotalBorrowPerCollateralWithUpdatePrices (0x22d44652)
-
-```solidity
-function getTotalBorrowPerCollateralWithUpdatePrices(
-    address projectToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Get total borrow amount in USD per collateral for a specific project token after update price.
-
-
-Parameters:
-
-| Name         | Type      | Description                               |
-| :----------- | :-------- | :---------------------------------------- |
-| projectToken | address   | The address of the project token          |
-| priceIds     | bytes32[] | The priceIds need to update.              |
-| updateData   | bytes[]   | The updateData provided by PythNetwork.   |
-
-
-Return values:
-
-| Name | Type    | Description                    |
-| :--- | :------ | :----------------------------- |
-| [0]  | uint256 | The total borrow amount in USD |
-
-### totalOutstandingInUSDWithUpdatePrices (0x010faf17)
-
-```solidity
-function totalOutstandingInUSDWithUpdatePrices(
-    address account,
-    address projectToken,
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Convert the total outstanding amount of a user's borrow position to USD after update price.
-
-
-Parameters:
-
-| Name         | Type      | Description                               |
-| :----------- | :-------- | :---------------------------------------- |
-| account      | address   | The address of the user account           |
-| projectToken | address   | The address of the project token          |
-| lendingToken | address   | The address of the lending token          |
-| priceIds     | bytes32[] | The priceIds need to update.              |
-| updateData   | bytes[]   | The updateData provided by PythNetwork.   |
-
-
-Return values:
-
-| Name | Type    | Description                         |
-| :--- | :------ | :---------------------------------- |
-| [0]  | uint256 | The total outstanding amount in USD |
 
 ### totalEstimatedOutstandingInUSDWithUpdatePrices (0x7b78a351)
 
