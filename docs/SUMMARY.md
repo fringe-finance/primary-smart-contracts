@@ -100,3 +100,4 @@
     * [interfaces](contracts/paraswap/interfaces/README.md)
       * [IParaSwapAugustus](contracts/paraswap/interfaces/IParaSwapAugustus.md)
       * [IParaSwapAugustusRegistry](contracts/paraswap/interfaces/IParaSwapAugustusRegistry.md)
+* [Contract addresses](contract-addresses.md)
