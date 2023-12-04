@@ -7,51 +7,51 @@ const config = require(configFile);
 
 let {
   PRIMARY_PROXY_ADMIN,
-  PrimaryIndexTokenLogic,
-  PrimaryIndexTokenProxy
+  PrimaryLendingPlatformV2Logic,
+  PrimaryLendingPlatformV2Proxy
 } = config;
 
 let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
-let primaryIndexTokenLogicAddress = PrimaryIndexTokenLogic;
-let primaryIndexTokenProxyAddress = PrimaryIndexTokenProxy;
+let primaryLendingPlatformV2LogicAddress = PrimaryLendingPlatformV2Logic;
+let primaryLendingPlatformV2ProxyAddress = PrimaryLendingPlatformV2Proxy;
 
 module.exports = {
-  upgradePrimaryIndexToken: async function () {
+  upgradePrimaryLendingPlatform: async function () {
 
     let signers = await hre.ethers.getSigners();
     let deployMaster = signers[0];
     console.log("DeployMaster: " + deployMaster.address);
 
     let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-    let PrimaryIndexToken = await hre.ethers.getContractFactory("PrimaryIndexToken");
+    let PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2Zksync");
 
-    if (!primaryIndexTokenLogicAddress) {
-      pit = await PrimaryIndexToken.connect(deployMaster).deploy();
-      await pit.deployed().then(function (instance) {
-        primaryIndexTokenLogicAddress = instance.address;
-        config.PrimaryIndexTokenLogic = primaryIndexTokenLogicAddress;
+    if (!primaryLendingPlatformV2LogicAddress) {
+      plp = await PrimaryLendingPlatformV2.connect(deployMaster).deploy();
+      await plp.deployed().then(function (instance) {
+        primaryLendingPlatformV2LogicAddress = instance.address;
+        config.PrimaryLendingPlatformV2Logic = primaryLendingPlatformV2LogicAddress;
         fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
       });
     }
-    console.log("PrimaryIndexToken masterCopy address: " + primaryIndexTokenLogicAddress);
+    console.log("PrimaryLendingPlatform masterCopy address: " + primaryLendingPlatformV2LogicAddress);
 
     let proxyAdmin = await ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
     let upgradeData = await proxyAdmin.upgradeData(
-      primaryIndexTokenProxyAddress
+      primaryLendingPlatformV2ProxyAddress
     );
     let appendTimestamp = Number(upgradeData.appendTimestamp)
     if (appendTimestamp == 0) {
       await proxyAdmin
         .appendUpgrade(
-          primaryIndexTokenProxyAddress,
-          primaryIndexTokenLogicAddress
+          primaryLendingPlatformV2ProxyAddress,
+          primaryLendingPlatformV2LogicAddress
         )
         .then(function (instance) {
           console.log(
             "ProxyAdmin appendUpgrade " +
-            primaryIndexTokenProxyAddress +
+            primaryLendingPlatformV2ProxyAddress +
             " to " +
-            primaryIndexTokenLogicAddress
+            primaryLendingPlatformV2LogicAddress
           );
           return instance;
         });
@@ -60,13 +60,13 @@ module.exports = {
       let delayPeriod = Number(upgradeData.delayPeriod);
       if (appendTimestamp + delayPeriod <= timeStamp) {
         await proxyAdmin
-          .upgrade(primaryIndexTokenProxyAddress, primaryIndexTokenLogicAddress)
+          .upgrade(primaryLendingPlatformV2ProxyAddress, primaryLendingPlatformV2LogicAddress)
           .then(function (instance) {
             console.log(
               "ProxyAdmin upgraded " +
-              primaryIndexTokenProxyAddress +
+              primaryLendingPlatformV2ProxyAddress +
               " to " +
-              primaryIndexTokenLogicAddress
+              primaryLendingPlatformV2LogicAddress
             );
             return instance;
           });

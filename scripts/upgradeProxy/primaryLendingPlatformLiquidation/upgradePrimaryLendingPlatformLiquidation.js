@@ -7,51 +7,51 @@ const config = require(configFile);
 
 let {
     PRIMARY_PROXY_ADMIN,
-    PrimaryIndexTokenAtomicRepaymentLogic,
-    PrimaryIndexTokenAtomicRepaymentProxy
+    PrimaryLendingPlatformLiquidationLogic,
+    PrimaryLendingPlatformLiquidationProxy,
 } = config;
 
 let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
-let primaryIndexTokenAtomicRepaymentLogicAddress = PrimaryIndexTokenAtomicRepaymentLogic;
-let primaryIndexTokenAtomicRepaymentProxyAddress = PrimaryIndexTokenAtomicRepaymentProxy;
+let primaryLendingPlatformLiquidationLogicAddress = PrimaryLendingPlatformLiquidationLogic;
+let primaryLendingPlatformLiquidationProxyAddress = PrimaryLendingPlatformLiquidationProxy;
 
 module.exports = {
-    upgradePrimaryIndexTokenAtomicRepayment: async function () {
+    upgradePrimaryLendingPlatformLiquidation: async function () {
 
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         console.log("DeployMaster: " + deployMaster.address);
 
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-        let PrimaryIndexTokenAtomicRepayment = await hre.ethers.getContractFactory("PrimaryIndexTokenAtomicRepayment");
+        let PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidation");
 
-        if (!primaryIndexTokenAtomicRepaymentLogicAddress) {
-            pitAtomicRepayment = await PrimaryIndexTokenAtomicRepayment.connect(deployMaster).deploy();
-            await pitAtomicRepayment.deployed().then(function (instance) {
-                primaryIndexTokenAtomicRepaymentLogicAddress = instance.address;
-                config.PrimaryIndexTokenAtomicRepaymentLogic = primaryIndexTokenAtomicRepaymentLogicAddress;
+        if (!primaryLendingPlatformLiquidationLogicAddress) {
+            plpLiquidation = await PrimaryLendingPlatformLiquidation.connect(deployMaster).deploy();
+            await plpLiquidation.deployed().then(function (instance) {
+                primaryLendingPlatformLiquidationLogicAddress = instance.address;
+                config.PrimaryLendingPlatformLiquidationLogic = primaryLendingPlatformLiquidationLogicAddress;
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
-        console.log("PrimaryIndexTokenAtomicRepayment masterCopy address: " + primaryIndexTokenAtomicRepaymentLogicAddress);
+        console.log("PrimaryLendingPlatformLiquidation masterCopy address: " + primaryLendingPlatformLiquidationLogicAddress);
 
         let proxyAdmin = await ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         let upgradeData = await proxyAdmin.upgradeData(
-            primaryIndexTokenAtomicRepaymentProxyAddress
+            primaryLendingPlatformLiquidationProxyAddress
         );
         let appendTimestamp = Number(upgradeData.appendTimestamp);
         if (appendTimestamp == 0) {
             await proxyAdmin
                 .appendUpgrade(
-                    primaryIndexTokenAtomicRepaymentProxyAddress,
-                    primaryIndexTokenAtomicRepaymentLogicAddress
+                    primaryLendingPlatformLiquidationProxyAddress,
+                    primaryLendingPlatformLiquidationLogicAddress
                 )
                 .then(function (instance) {
                     console.log(
                         "ProxyAdmin appendUpgrade " +
-                        primaryIndexTokenAtomicRepaymentProxyAddress +
+                        primaryLendingPlatformLiquidationProxyAddress +
                         " to " +
-                        primaryIndexTokenAtomicRepaymentLogicAddress
+                        primaryLendingPlatformLiquidationLogicAddress
                     );
                     return instance;
                 });
@@ -60,13 +60,13 @@ module.exports = {
             let delayPeriod = Number(upgradeData.delayPeriod);
             if (appendTimestamp + delayPeriod <= timeStamp) {
                 await proxyAdmin
-                    .upgrade(primaryIndexTokenAtomicRepaymentProxyAddress, primaryIndexTokenAtomicRepaymentLogicAddress)
+                    .upgrade(primaryLendingPlatformLiquidationProxyAddress, primaryLendingPlatformLiquidationLogicAddress)
                     .then(function (instance) {
                         console.log(
                             "ProxyAdmin upgraded " +
-                            primaryIndexTokenAtomicRepaymentProxyAddress +
+                            primaryLendingPlatformLiquidationProxyAddress +
                             " to " +
-                            primaryIndexTokenAtomicRepaymentLogicAddress
+                            primaryLendingPlatformLiquidationLogicAddress
                         );
                         return instance;
                     });
