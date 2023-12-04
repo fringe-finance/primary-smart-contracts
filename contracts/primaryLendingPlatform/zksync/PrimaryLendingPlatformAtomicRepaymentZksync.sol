@@ -12,26 +12,6 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     /**
-     * @dev Emitted when the address of the OpenOceanExchangeProxy contract is set.
-     * @param newOpenOceanExchangeProxy The address of the new OpenOceanExchangeProxy contract.
-     */
-    event SetOpenOceanExchangeProxy(address indexed newOpenOceanExchangeProxy);
-
-    /**
-     * @dev Sets the address of the exchange aggregator contract.
-     *
-     * Requirements:
-     * - Only the moderator can call this function.
-     * - The exchange aggregator address must not be the zero address.
-     * @param exchangeAggregatorAddress The address of the exchange aggregator contract.
-     */
-    function setExchangeAggregator(address exchangeAggregatorAddress) external onlyModerator {
-        require(exchangeAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
-        exchangeAggregator = exchangeAggregatorAddress;
-        emit SetOpenOceanExchangeProxy(exchangeAggregatorAddress);
-    }
-
-    /**
      * @notice Repays a loan atomically using the given project token as collateral.
      * @dev Repays the loan in a single atomic transaction and update related token's prices.
      *
@@ -69,17 +49,5 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
     ) external payable nonReentrant {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
         _repayAtomic(prjToken, collateralAmount, buyCalldata, isRepayFully);
-    }
-
-    /**
-     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
-     * @param token The address of the ERC20 token to be approved.
-     * @param tokenAmount The amount of tokens to be approved for transfer.
-     */
-    function _approveTokenTransfer(address token, uint256 tokenAmount) internal override {
-        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
-        if (allowanceAmount < tokenAmount) {
-            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
-        }
     }
 }

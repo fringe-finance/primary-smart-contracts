@@ -73,7 +73,9 @@ module.exports = {
         //initialize deploy parametrs
 
         const {
-            priceOracle
+            priceOracle,
+            plpModeratorParams,
+            blendingToken
         } = configGeneral;
 
         const {
@@ -108,6 +110,9 @@ module.exports = {
         let tokensUseLPProvider = LPProvider.tokensUseLPProvider;
         let wstETHAggregatorPath = wstETHProvider.wstETHAggregatorPath;
         let timeOutsWstETHAggregatorPath = wstETHProvider.timeOuts;
+
+        let projectTokens = plpModeratorParams.projectTokens;
+        let lendingTokens = blendingToken.lendingTokens;
 
         const {
             PRIMARY_PROXY_ADMIN,
@@ -600,6 +605,19 @@ module.exports = {
                         console.log("priceOracleProvider set longTWAPperiod: " + longTWAPperiod);
                     });
                 }
+
+                {
+                    const listToken = projectTokens.concat(lendingTokens);
+                    for (let i = 0; i < listToken.length; i++) {
+                        let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
+                        if (currentPrice.timestamp.toString() === "0") {
+                            await priceOracleProvider.updateFinalPrices(listToken[i]).then(function (instance) {
+                                console.log("PriceOracleProvider " + priceOracleProvider.address + " updateFinalPrices at tx hash: " + instance.hash);
+                                console.log("Token: " + listToken[i]);
+                            });
+                        }
+                    }
+                }
             }
         }
         // ====================== set pythPriceProvider =============================
@@ -794,7 +812,7 @@ module.exports = {
             {
                 let currentPricePointTWAPperiod = await uniswapV3PriceProvider.pricePointTWAPperiod();
                 if (pricePointTWAPperiod != currentPricePointTWAPperiod) {
-                    await uniswapV3PriceProvider.setPricePointTWAPperiod(pricePointTWAPperiod).then(function(instance){
+                    await uniswapV3PriceProvider.setPricePointTWAPperiod(pricePointTWAPperiod).then(function (instance) {
                         console.log("UniswapV3PriceProvider set pricePointTWAPperiod: " + pricePointTWAPperiod + " at tx hash " + instance.hash);
                     });
                 }
@@ -936,10 +954,9 @@ module.exports = {
         //==============================
         //set priceProviderAggregator
         console.log();
-        console.log("***** SETTING USB PRICE ORACLE *****");
-        let adminRole = await priceProviderAggregator.DEFAULT_ADMIN_ROLE();
-        let isAdminRole = await priceProviderAggregator.hasRole(adminRole, deployMasterAddress);
-        if (!isAdminRole) {
+        console.log("***** SETTING PROVIDER AGGREGATOR *****");
+        usdDecimal = await priceProviderAggregator.usdDecimals();
+        if (usdDecimal == 0) {
             await priceProviderAggregator.initialize().then(function (instance) {
                 console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
             });

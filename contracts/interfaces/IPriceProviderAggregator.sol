@@ -55,21 +55,23 @@ interface IPriceProviderAggregator {
     /**
      * @dev Returns the most recent TWAP price of a token.
      * @param token The address of the token.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return priceDecimals The decimals of the price.
      * @return timestamp The last updated timestamp of the price.
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getPrice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
+    function getPrice(address token, bool useForLiquidate) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
 
     /**
      * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @param tokenAmount the amount of token to evaluate
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
+    function getEvaluation(address token, uint256 tokenAmount, bool useForLiquidate) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
 
     /**
      * @dev returns the price of token multiplied by 10 ** priceDecimals given by price provider.

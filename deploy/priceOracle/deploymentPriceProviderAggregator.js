@@ -903,10 +903,9 @@ module.exports = {
         //==============================
         //set priceProviderAggregator
         console.log();
-        console.log("***** SETTING USB PRICE ORACLE *****");
-        let adminRole = await priceProviderAggregator.DEFAULT_ADMIN_ROLE();
-        let isAdminRole = await priceProviderAggregator.hasRole(adminRole, deployMasterAddress);
-        if (!isAdminRole) {
+        console.log("***** SETTING PROVIDER AGGREGATOR *****");
+        usdDecimal = await priceProviderAggregator.usdDecimals();
+        if (usdDecimal == 0) {
             await priceProviderAggregator.initialize().then(function (instance) {
                 console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
             });

@@ -55,7 +55,7 @@ yarn
 
 ### 2.2 Setup config general
 
-The configuration information is stored in the `scripts/config/` folder. This folder contains subfolders that correspond to the networks used for testing and deploy. 
+The configuration information is stored in the `scripts/config/` folder for ethereum networks and in the `deploy/config_*/` folder for zksync network. This folder contains subfolders that correspond to the networks used for testing and deploy. 
 
 Each subfolder contains:
 

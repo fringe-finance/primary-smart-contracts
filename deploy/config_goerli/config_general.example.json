@@ -1,5 +1,12 @@
 {
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapFixedPercent": "",
+            "minSampleInterval": "",
+            "logMaturingAge": "",
+            "longTWAPperiod": "",
+            "twapEnabledForAsset": [[]]
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
@@ -9,14 +16,11 @@
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [],
-            "chainlinkAggregatorV3": [
-                []
-            ],
-            "timeOuts": [
-                []
-            ]
+            "chainlinkAggregatorV3": [[]],
+            "timeOuts": [[]]
         },
         "Uniswap": {
+            "pricePointTWAPperiod": "",
             "tokensUseUniswap": [],
             "uniswapPairs": []
         },
@@ -45,30 +49,29 @@
     },
     "plpModeratorParams": {
         "projectTokens": [],
-        "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": [],
-        "isPaused": false,
-        "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": []
+          "loanToValueRatioNumerator": [],
+          "loanToValueRatioDenominator": [],
+          "isPaused": false,
+          "borrowLimitPerCollateral": [],
+          "borrowLimitPerLendingToken": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
-        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": []
-    },
-    "jumRateModel": {
+      },
+      "jumRateModel": {
         "gainPerYear": [],
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
         "blocksPerYear": ""
-    },
-    "plpLiquidationParams": {
+      },
+      "plpLiquidationParams": {
         "minPA": "",
         "maxLRFNumerator": "",
         "maxLRFDenominator": "",
@@ -76,5 +79,5 @@
         "rewardCalcFactorDenominator": "",
         "targetHFNumerator": "",
         "targetHFDenominator": ""
-    }
+      }
 }

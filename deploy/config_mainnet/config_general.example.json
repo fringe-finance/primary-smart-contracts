@@ -24,6 +24,10 @@
             "tokensUseUniswap": [],
             "uniswapPairs": []
         },
+        "Mute": {
+            "tokensUseMute": [],
+            "mutePairs": []
+        },
         "BackendProvider": {
             "tokensUseBackendProvider": []
         },

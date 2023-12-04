@@ -66,7 +66,7 @@ interface IPriceOracle {
     * @dev Calculates the final TWAP prices of a token.
     * @param token The address of the token.
     */
-    function updateFinalPrices(address token) external ;
+    function updateFinalPrices(address token) external;
 
     /**
      * @dev Returns the most recent TWAP price of a token.
@@ -79,6 +79,16 @@ interface IPriceOracle {
     function getMostTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
 
     /**
+     * @dev Returns the non-TWAP price of a token.
+     * @param token The address of the token.
+     * @return priceDecimals The decimals of the price.
+     * @return timestamp The last updated timestamp of the price.
+     * @return collateralPrice The collateral price of the token.
+     * @return capitalPrice The capital price of the token.
+     */
+    function getNonTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
+    
+    /**
      * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
@@ -87,6 +97,15 @@ interface IPriceOracle {
      */
     function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
 
+    /**
+     * @dev returns the non-TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getNonTWAPEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
+    
     /**
      * @dev returns tuple (priceMantissa, priceDecimals)
      * @notice price = priceMantissa / (10 ** priceDecimals)

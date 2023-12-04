@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
  * @dev Contract that provides the functionality for upgrading the proxy contracts. Inherit from ProxyAdmin.
  */
 contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
-    uint256 public constant minimumDelayPeriod = 0 days;
+    uint256 public constant minimumDelayPeriod = 1 days;
 
     uint256 public delayPeriod;
 
@@ -49,7 +49,7 @@ contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin {
     event Upgrade(address indexed proxy, uint256 upgradeTimestamp, address oldImplementation, address newImplementation);
 
     constructor() {
-        delayPeriod = 0 days;
+        delayPeriod = 7 days;
     }
 
     /**

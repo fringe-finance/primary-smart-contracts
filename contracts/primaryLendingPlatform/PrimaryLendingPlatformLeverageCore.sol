@@ -23,6 +23,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     mapping(address => mapping(address => bool)) public isLeveragePosition;
     IPrimaryLendingPlatform public primaryLendingPlatform;
     address public exchangeAggregator;
+    address public registryAggregator;
 
     mapping(address => mapping(address => LeverageType)) public typeOfLeveragePosition;
 
@@ -35,6 +36,14 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         AMPLIFY,
         MARGIN_TRADE
     }
+
+    
+    /**
+     * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
+     * @param exchangeAggregator The address of the exchange aggregator.
+     * @param registryAggregator The address of the registry aggregator.
+     */
+    event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator);
 
     /**
      * @dev Emitted when a user leverages their borrowing position.
@@ -130,6 +139,26 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
+     * @dev Updates the Exchange Aggregator contract and registry contract addresses.
+     *
+     * Requirements:
+     * - The caller must be the moderator.
+     * - `exchangeAggregatorAddress` must not be the zero address.
+     * - `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+     * @param exchangeAggregatorAddress The new address of the Exchange Aggregator contract.
+     * @param registryAggregatorAddress The new address of the Aggregator registry contract.
+     */
+    function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
+        require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
+        if (registryAggregatorAddress != address(0)) {
+            require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
+            registryAggregator = registryAggregatorAddress;
+        }
+        exchangeAggregator = exchangeAggregatorAddress;
+        emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
+    }
+
+    /**
      * @dev Sets the address of the primary lending platform contract.
      *
      * Requirements:
@@ -151,7 +180,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      */
     function getTokenPrice(address token) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
         uint256 tokenMultiplier = 10 ** ERC20Upgradeable(token).decimals();
-        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
+        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier, false);
     }
 
     /**
@@ -254,7 +283,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         uint256 exp
     ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
+        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin, false);
         safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
         safetyMarginDenominator = (exp * lvrDenominator);
     }
@@ -271,8 +300,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * - `newTotalBorrowPerLendingToken` must be less than or equal to `borrowLimitPerLendingToken`.
      */
     function _deferLiquidityCheck(address user, address projectToken, address lendingToken) internal view {
-        uint256 pit = primaryLendingPlatform.pit(user, projectToken, lendingToken);
-        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(user, projectToken, lendingToken);
+        uint256 pit = primaryLendingPlatform.pit(user, projectToken, lendingToken, false);
+        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(user, projectToken, lendingToken, false);
         uint256 newTotalBorrowPerCollateral = primaryLendingPlatform.getTotalBorrowPerCollateral(projectToken);
         uint256 borrowLimitPerCollateral = primaryLendingPlatform.borrowLimitPerCollateral(projectToken);
         uint256 newTotalBorrowPerLendingToken = primaryLendingPlatform.getTotalBorrowPerLendingToken(lendingToken);
@@ -325,11 +354,37 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the exchange aggregator.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
-    function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal {
+        require(exchangeAggregator != address(0), "PrimaryLendingPlatformLeverage: Exchange aggregator not set");
+        if (registryAggregator != address(0)) {
+            _approveTokenTransferPara(token, tokenAmount);
+        } else {
+            _approveTokenTransferOO(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the Open Ocean exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferOO(address token, uint256 tokenAmount) internal {
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the ParaSwap exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferPara(address token, uint256 tokenAmount) internal {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
         uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
         if (allowanceAmount < tokenAmount) {
@@ -384,7 +439,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, , ) = primaryLendingPlatform.getPosition(
             user,
             projectToken,
-            lendingToken
+            lendingToken,
+            false
         );
         require(
             (!isLeveragePosition[user][projectToken] && loanBody == 0 && accrual == 0) || isLeveragePosition[user][projectToken],
@@ -414,11 +470,11 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     ) internal {
         require(notionalExposure > 0, "PITLeverage: Invalid amount");
         address currentLendingToken = primaryLendingPlatform.getLendingToken(borrower, projectToken);
-
+        
         if (currentLendingToken != address(0)) {
             require(lendingToken == currentLendingToken, "PITLeverage: Invalid lending token");
         }
-
+        
         address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(projectToken, lendingToken, true);
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
 

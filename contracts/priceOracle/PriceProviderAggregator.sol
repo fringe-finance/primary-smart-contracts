@@ -15,7 +15,10 @@ import "../interfaces/IPriceOracle.sol";
 contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
+    uint8 public usdDecimals;
+
     IPriceOracle public priceOracle;
+
     /**
      * @notice Employ TWAP price processing or non-TWAP price processing.
      * Mapping address of token => enabled TWAP for this token.
@@ -76,6 +79,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
+        usdDecimals = 6;
     }
 
     
@@ -197,27 +201,37 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @dev Returns the most recent TWAP price of a token.
+     * @dev Returns the most recent TWAP price or non-TWAP price of a token.
      * 
      * Formula: price = priceMantissa / (10 ** priceDecimals)
      * @param token The address of the token.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return priceDecimals The decimals of the price.
      * @return timestamp The last updated timestamp of the price.
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getPrice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
-        return priceOracle.getMostTWAPprice(token);
+    function getPrice(address token, bool useForLiquidate) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        if (useForLiquidate) {
+            return priceOracle.getNonTWAPprice(token);
+        } else {
+            return priceOracle.getMostTWAPprice(token);
+        }
     }
 
     /**
-     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
+     * @dev returns the most TWAP price or non-TWAP price in USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
-        return priceOracle.getEvaluation(token, tokenAmount);
+    function getEvaluation(address token, uint256 tokenAmount, bool useForLiquidate) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
+        if (useForLiquidate) {
+            return priceOracle.getNonTWAPEvaluation(token, tokenAmount);
+        } else {
+            return priceOracle.getEvaluation(token, tokenAmount);
+        }
     }
 }

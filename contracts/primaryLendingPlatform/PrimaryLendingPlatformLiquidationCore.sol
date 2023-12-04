@@ -225,7 +225,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address _projectToken,
         address _lendingToken
     ) public view returns (uint256 healthFactorNumerator, uint256 healthFactorDenominator) {
-        (, , , healthFactorNumerator, healthFactorDenominator) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken);
+        (, , , healthFactorNumerator, healthFactorDenominator) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken, true);
     }
 
     /**
@@ -236,7 +236,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 	 * @return capitalPrice The price of the token in USD.
      */
     function getTokenPrice(address token, uint256 amount) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
-        return primaryLendingPlatform.getTokenEvaluation(token, amount);
+        return primaryLendingPlatform.getTokenEvaluation(token, amount, true);
     }
 
     /**
@@ -256,9 +256,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address liquidator
     ) internal returns (uint256) {
         
-        address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(_projectToken, _lendingToken, false);
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
-
         require(_lendingTokenAmount > 0, "PITLiquidation: LendingTokenAmount must be greater than 0");
 
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
@@ -266,7 +263,14 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
         // under normal conditions: liquidator == msg.sender
         (uint256 maxLA, uint256 minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
-        require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PITLiquidation: Invalid amount");
+        uint256 excessAmount = 0;
+        if (minLA != maxLA) {
+            require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PITLiquidation: Invalid amount when minLA != maxLA");
+        } else {
+            require(_lendingTokenAmount >= minLA, "PITLiquidation: Invalid amount when minLA == maxLA");
+            excessAmount = _lendingTokenAmount - maxLA;
+            _lendingTokenAmount = maxLA;
+        }
 
         uint256 projectTokenToSendToLiquidator = _getProjectTokenToSendToLiquidator(
             _account,
@@ -278,6 +282,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
 
         uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenToSendToLiquidator, liquidator);
 
+        if (excessAmount > 0) {
+            ERC20Upgradeable(_lendingToken).safeTransfer(liquidator, excessAmount);
+        }
         emit Liquidate(liquidator, _account, _lendingToken, _projectToken, projectTokenToSendToLiquidator);
         return projectTokenLiquidatorReceived;
     }
@@ -384,7 +391,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @return maxLA The maximum liquidation amount in the lending token.
      */
     function getMaxLiquidationAmount(address account, address projectToken, address lendingToken) public view returns (uint256 maxLA) {
-        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(account, projectToken, lendingToken);
+        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(account, projectToken, lendingToken, true);
         if (totalOutstandingInUSD == 0) return 0;
 
         (uint256 depositedProjectTokenAmountInUSD, ) = getTokenPrice(projectToken, primaryLendingPlatform.getDepositedAmount(projectToken, account));

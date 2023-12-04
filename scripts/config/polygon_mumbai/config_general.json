@@ -6,58 +6,32 @@
             "logMaturingAge": "3600",
             "longTWAPperiod": "86400",
             "twapEnabledForAsset": [
-                ["0x359d51f1164478C776dC8A71458c7570fC8b6D9D", true],
-                ["0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da", true],
-                ["0x9c3c9283d3e44854697cd22d3faa240cfb032889", true],
-                ["0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E", true],
-                ["0x802B13F8A025357E5560D0FbEAbF7960114b36be", true],
-                ["0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB", true],
-                ["0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F", true]
+                ["0x3cb302c4A80A2560050F65d552B1daD272f82d9a", true],
+                ["0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E", true]
             ]
         },
         "Pyth": {
-            "pythOracle": "",
-            "tokensUsePyth": [],
-            "priceIdPath": []
+            "pythOracle": "0xFC6bd9F9f0c6481c6Af3A7Eb46b296A5B85ed379",
+            "tokensUsePyth": [
+                "0x3cb302c4A80A2560050F65d552B1daD272f82d9a",
+                "0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E"
+            ],
+            "priceIdPath": [
+                ["0x2b9ab1e972a281585084148ba1389800799bd4be63b957507db1349314e47445"],
+                ["0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a"]
+            ]
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
-            "tokensUseChainlink": [
-                "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
-                "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
-            ],
-            "chainlinkAggregatorV3": [
-                [
-                    "0x572dDec9087154dC5dfBB1546Bb62713147e0Ab0"
-                ],
-                [
-                    "0xd0D5e3DB44DE05E9F294BB0a3bEEaF030DE24Ada"
-                ]
-            ],
-            "timeOuts": [
-                [
-                    "86400"
-                ],
-                [
-                    "86400"
-                ]
-            ]
+            "tokensUseChainlink": [],
+            "chainlinkAggregatorV3": [[]],
+            "timeOuts": [[]]
         },
         "Uniswap": {
-            "pricePointTWAPperiod": "10",
-            "tokensUseUniswap": [
-                "0x359d51f1164478C776dC8A71458c7570fC8b6D9D",
-                "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E",
-                "0x802B13F8A025357E5560D0FbEAbF7960114b36be",
-                "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB"
-            ],
-            "uniswapPairs": [
-                "0xc97271a7cdfC4A95502cfC67C325becb3764b374",
-                "0xFfA06A798F22210708F38976D3Eb5b38a77494B3",
-                "0x549033eFa8C98c05187ace660C578C28B6bc664E",
-                "0x2f29792212CF54CB03bA880C90788a617ebCda79"
-            ]
+            "pricePointTWAPperiod": "",
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
         },
         "BackendProvider": {
             "tokensUseBackendProvider": []
@@ -67,25 +41,16 @@
             ]
         },
         "wstETHProvider": {
-            "wstETHAggregatorPath": [
-                "0x007A22900a3B98143368Bd5906f8E17e9867581b"
-            ],
-            "timeOuts": [
-                "86400"
-            ]
+            "wstETHAggregatorPath": [],
+            "timeOuts": []
         },
         "priceDecimals": {
-            "0x359d51f1164478C776dC8A71458c7570fC8b6D9D": "18",
-            "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E": "18",
-            "0x802B13F8A025357E5560D0FbEAbF7960114b36be": "18",
-            "0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F": "18",
-            "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da": "18",
-            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB": "18",
-            "0x9c3c9283d3e44854697cd22d3faa240cfb032889": "18"
+            "0x3cb302c4A80A2560050F65d552B1daD272f82d9a": "18",
+            "0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E": "18"
         },
-        "wstETH": "0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F",
-        "usdc": "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
-        "WETH": "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+        "wstETH": "",
+        "usdc": "0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E",
+        "WETH": "0x9c3C9283D3e44854697Cd22D3Faa240Cfb032889"
     },
     "exchangeAggregatorParams": {
         "exchangeAggregator": "0xFFA9325eaa84a092e90cFeff398b98cC39FB0f51",
@@ -93,10 +58,7 @@
     },
     "plpModeratorParams": {
         "projectTokens": [
-            "0x359d51f1164478C776dC8A71458c7570fC8b6D9D",
-            "0x6e59c4a1eD72A9F5bFd12d9f2b172Cc91fcDB97E",
-            "0x802B13F8A025357E5560D0FbEAbF7960114b36be",
-            "0xe04605d0799C8C9DE943A057cCF5649Ca77E2D4F"
+            "0x3cb302c4A80A2560050F65d552B1daD272f82d9a"
         ],
         "loanToValueRatioNumerator": [
             "6",
@@ -136,9 +98,7 @@
             "10000000000000000000"
         ],
         "lendingTokens": [
-            "0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da",
-            "0x7753fDDC734229e3fd184D0ce3DA5B897801a7DB",
-            "0x9c3c9283d3e44854697cd22d3faa240cfb032889"
+            "0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E"
         ],
         "symbol": [
             "fUSDC",
@@ -197,5 +157,8 @@
         "rewardCalcFactorDenominator": "1",
         "targetHFNumerator": "1",
         "targetHFDenominator": "1"
+    },
+    "liquidationBot": {
+        "uniswapV2Factory": "0x5757371414417b8c6caad45baef941abc7d3ab32"
     }
 }

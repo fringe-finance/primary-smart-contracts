@@ -284,7 +284,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
             (twapCollateralPrice, twapCapitalPrice) = (governedPrice, governedPrice);
         } else {
             _updateAccumLogs(token, governedPrice, currentTime);
-            _updateAccumLogOldestIndex(token);
+            _updateAccumLogOldestIndex(token, currentTime);
             uint256 longTWAPprice = _deriveLongTWAPprice(token, currentTime);
             (twapCollateralPrice, twapCapitalPrice) = longTWAPprice == 0 ? (governedPrice, governedPrice) : _deriveFinalPrices(governedPrice, longTWAPprice);
         }
@@ -311,6 +311,21 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
     }
 
     /**
+     * @dev Returns the non-TWAP price of a token.
+     * @param token The address of the token.
+     * @return priceDecimals The decimals of the price.
+     * @return timestamp The last updated timestamp of the price.
+     * @return collateralPrice The collateral price of the token.
+     * @return capitalPrice The capital price of the token.
+     */
+    function getNonTWAPprice(address token) public view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        uint256 reportedPrice = getReportedPrice(token);
+        uint32 currentTime = uint32(block.timestamp);
+        uint256 governedPrice = _calcGovernedPrice(mostGovernedPrice[token], reportedPrice, currentTime);
+        return (getTokenPriceDecimals(token), currentTime, governedPrice, governedPrice);
+    }
+
+    /**
      * @dev Returns the decimals price of the token.
      * @param token The address of the token.
      * @return priceDecimals The decimals price of the token.
@@ -334,6 +349,20 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
     }
 
     /**
+     * @dev returns the non-TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getNonTWAPEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation) { 
+        (uint8 priceDecimals, , uint256 collateralPrice, uint256 capitalPrice) = getNonTWAPprice(token);
+        collateralEvaluation = _calEvaluation(token, tokenAmount, collateralPrice, priceDecimals);
+        capitalEvaluation = _calEvaluation(token, tokenAmount, capitalPrice, priceDecimals);
+    }
+
+
+    /**
      * @dev returns tuple (priceMantissa, priceDecimals)
      * @notice price = priceMantissa / (10 ** priceDecimals)
      * @param token the address of token which price is to return
@@ -343,7 +372,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         uint8 calculatedPriceDecimals = getTokenPriceDecimals(token);
         priceMantissa = priceDecimals >= calculatedPriceDecimals
             ? reportedPrice / (10 ** (priceDecimals - calculatedPriceDecimals))
-            : reportedPrice / (10 ** (calculatedPriceDecimals - priceDecimals));
+            : reportedPrice * (10 ** (calculatedPriceDecimals - priceDecimals));
     }
     
     /**
@@ -400,6 +429,23 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
     */
     function _applyVolatilityCap(address token, uint256 reportedPrice, uint32 currentTime) private returns(uint256 governedPrice) {
         GovernedPrice storage mostGovernedPriceInfo = mostGovernedPrice[token];
+        governedPrice = _calcGovernedPrice(mostGovernedPriceInfo, reportedPrice, currentTime);
+        mostGovernedPriceInfo.price = governedPrice;
+        mostGovernedPriceInfo.timestamp = currentTime;
+    }
+ 
+    /**
+    * @notice Calculates the governed price of the token based on the most recent governed price, reported price, and current time.
+    * @param mostGovernedPriceInfo The most recent governed price.
+    * @param reportedPrice The reported price of the token.
+    * @param currentTime The current time.
+    * @return governedPrice The governed price of the token.
+    */
+    function  _calcGovernedPrice(
+        GovernedPrice memory mostGovernedPriceInfo,
+        uint256 reportedPrice,
+        uint32 currentTime
+    ) internal view returns (uint256 governedPrice) {
         if (mostGovernedPriceInfo.timestamp == 0) {
             governedPrice = reportedPrice;
         } else {
@@ -412,8 +458,6 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
                 governedPrice = actualPriceVariance < allowedPriceVariance ? reportedPrice : mostGovernedPriceInfo.price + allowedPriceVariance;
             }
         }
-        mostGovernedPriceInfo.price = governedPrice;
-        mostGovernedPriceInfo.timestamp = currentTime;
     }
 
     /**
@@ -485,15 +529,15 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      * @dev Update the accumLog index with the oldest age not older than longTWAPPeriod.
      * @param token The address of the token.
      */
-    function _updateAccumLogOldestIndex(address token) internal {
+    function _updateAccumLogOldestIndex(address token, uint32 currentTime) internal {
         uint256 accumLogsLength = longTWAPaccumLogs[token].length;
-        uint256 newestLogAge = block.timestamp - longTWAPaccumLogs[token][accumLogsLength - 1].timestamp;
+        uint256 newestLogAge = currentTime - longTWAPaccumLogs[token][accumLogsLength - 1].timestamp;
             
         if (newestLogAge >= longTWAPperiod) {
             _accumLogOldestIndex = accumLogsLength - 1;
         } else {
             for (uint256 i = _accumLogOldestIndex; i < accumLogsLength; i++) {
-                uint256 accumLogAge = block.timestamp - longTWAPaccumLogs[token][i].timestamp;
+                uint256 accumLogAge = currentTime - longTWAPaccumLogs[token][i].timestamp;
                 if (accumLogAge > longTWAPperiod) {
                     continue;
                 } else {

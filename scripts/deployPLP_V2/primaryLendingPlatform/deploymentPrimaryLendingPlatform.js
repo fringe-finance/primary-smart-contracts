@@ -16,6 +16,8 @@ let config = require(configFile);
 const verifyFilePath = path.join(__dirname, `../../config/${network}${chain}/verify.json`);
 const verifyFile = require(verifyFilePath);
 
+
+
 const verify = async (address, constructorArguments, keyInConfig) => {
     console.log("Verifying " + address);
     if (!verifyFile[keyInConfig]) {
@@ -38,6 +40,14 @@ module.exports = {
         let deployMaster = signers[0];
         let deployMasterAddress = deployMaster.address;
 
+        const {
+            priceOracle,
+            plpModeratorParams,
+            blendingToken,
+            jumRateModel,
+            exchangeAggregatorParams,
+            plpLiquidationParams
+        } = configGeneral;
 
         // Contracts ABI
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
@@ -45,20 +55,13 @@ module.exports = {
         let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV3");
         let Bondtroller = await hre.ethers.getContractFactory("Bondtroller");
         let BLendingToken = await hre.ethers.getContractFactory("BLendingToken");
-        let PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2");
-        let PrimaryLendingPlatformAtomicRepayment = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepayment");
-        let PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidation");
-        let PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverage");
-        let PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGateway");
+        let PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2Zksync");
+        let PrimaryLendingPlatformAtomicRepayment = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepaymentZksync");
+        let PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidationZksync");
+        let PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverageZksync");
+        let PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGatewayZksync");
         let PrimaryLendingPlatformModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
 
-        if (isTestingForZksync && isTesting) {
-            PrimaryLendingPlatformV2 = await hre.ethers.getContractFactory("PrimaryLendingPlatformV2Zksync");
-            PrimaryLendingPlatformAtomicRepayment = await hre.ethers.getContractFactory("PrimaryLendingPlatformAtomicRepaymentZksync");
-            PrimaryLendingPlatformLiquidation = await hre.ethers.getContractFactory("PrimaryLendingPlatformLiquidationZksync");
-            PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverageZksync");
-            PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGatewayZksync");
-        }
         let jumpRateModel;
         let bondtroller;
         let blending;
@@ -68,15 +71,6 @@ module.exports = {
         let plpLeverage;
         let plpModerator;
         let plpWrappedTokenGateway;
-
-        const {
-            priceOracle,
-            plpModeratorParams,
-            blendingToken,
-            jumRateModel,
-            exchangeAggregatorParams,
-            plpLiquidationParams
-        } = configGeneral;
 
         const {
             PRIMARY_PROXY_ADMIN,
@@ -157,6 +151,9 @@ module.exports = {
 
         let exchangeAggregator = exchangeAggregatorParams.exchangeAggregator;
         let registryAggregator = exchangeAggregatorParams.registryAggregator;
+        if (!registryAggregator) {
+            registryAggregator = ZERO_ADDRESS;
+        }
 
         let minPA = plpLiquidationParams.minPA;
         let maxLRFNumerator = plpLiquidationParams.maxLRFNumerator;
@@ -845,25 +842,14 @@ module.exports = {
         }
         console.log();
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
-        let currentRegistryAggregator;
-        if (isTestingForZksync && isTesting) {
-            if (exchangeAggregator != currentExchangeAggregator) {
-                await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator)
-                    .then(function () {
-                        console.log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator at:");
-                        console.log("ExchangeAggregator: " + exchangeAggregator);
-                    });
-            }
-        } else {
-            currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
-            if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
-                await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function () {
-                        console.log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator at:");
-                        console.log("ExchangeAggregator: " + exchangeAggregator);
-                        console.log("registryAggregator: " + registryAggregator);
-                    });
-            }
+        let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
+        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+            await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function () {
+                    console.log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator at:");
+                    console.log("ExchangeAggregator: " + exchangeAggregator);
+                    console.log("RegistryAggregator: " + registryAggregator);
+                });
         }
 
 
@@ -879,24 +865,14 @@ module.exports = {
         }
         console.log();
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
-        if (isTestingForZksync && isTesting) {
-            if (exchangeAggregator != currentExchangeAggregator) {
-                await plpLeverage.setExchangeAggregator(exchangeAggregator)
-                    .then(function () {
-                        console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator at:");
-                        console.log("ExchangeAggregator: " + exchangeAggregator);
-                    });
-            }
-        } else {
-            currentRegistryAggregator = await plpLeverage.registryAggregator();
-            if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
-                await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function () {
-                        console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator at:");
-                        console.log("ExchangeAggregator: " + exchangeAggregator);
-                        console.log("registryAggregator: " + registryAggregator);
-                    });
-            }
+        currentRegistryAggregator = await plpLeverage.registryAggregator();
+        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+            await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function () {
+                    console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator at:");
+                    console.log("ExchangeAggregator: " + exchangeAggregator);
+                    console.log("RegistryAggregator: " + registryAggregator);
+                });
         }
 
         console.log();

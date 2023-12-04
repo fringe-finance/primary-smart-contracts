@@ -148,4 +148,107 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return _borrow(projectToken, lendingToken, lendingTokenAmount, user);
     }
+
+    /**
+     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened after updating related token's prices.
+     *
+     * Formula: pit = $ * LVR of position.
+     * @param account Address of the account.
+     * @param projectToken Address of the project token.
+     * @param lendingToken Address of the lending token.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return The PIT value.
+     */
+    function pitWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        bool useForLiquidate,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return pit(account, projectToken, lendingToken, useForLiquidate);
+    }
+
+    /**
+     * @dev Returns the evaluation of a specific token amount in USD after updating related token's prices.
+     * @param token The address of the token to evaluate.
+     * @param tokenAmount The amount of the token to evaluate.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getTokenEvaluationWithUpdatePrices(
+        address token,
+        uint256 tokenAmount,
+        bool useForLiquidate,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return getTokenEvaluation(token, tokenAmount, useForLiquidate);
+    }
+
+    /**
+     * @dev Returns the details of a user's borrow position for a specific project token and lending token after updating related token's prices.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return depositedProjectTokenAmount The amount of project tokens deposited by the user.
+     * @return loanBody The amount of the lending token borrowed by the user.
+     * @return accrual The accrued interest of the borrow position.
+     * @return healthFactorNumerator The numerator of the health factor.
+     * @return healthFactorDenominator The denominator of the health factor.
+     */
+    function getPositionWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        bool useForLiquidate,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    )
+        external
+        payable
+        returns (
+            uint256 depositedProjectTokenAmount,
+            uint256 loanBody,
+            uint256 accrual,
+            uint256 healthFactorNumerator,
+            uint256 healthFactorDenominator
+        )
+    {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return getPosition(account, projectToken, lendingToken, useForLiquidate);
+    }
+
+    /**
+     * @dev Converts the total outstanding amount of a user's borrow position to USD after updating related token's prices.
+     * @param account The address of the user account.
+     * @param projectToken The address of the project token
+     * @param lendingToken The address of the lending token.
+     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return The total outstanding amount in USD.
+     */
+    function totalOutstandingInUSDWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        bool useForLiquidate,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return totalOutstandingInUSD(account, projectToken, lendingToken, useForLiquidate);
+    }
 }
