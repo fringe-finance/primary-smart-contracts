@@ -143,7 +143,8 @@
             "10",
             "10",
             "10"
-        ]
+        ],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [

@@ -53,7 +53,8 @@
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [],

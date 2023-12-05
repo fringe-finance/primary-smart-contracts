@@ -50,6 +50,7 @@ module.exports = {
         } = configGeneral;
 
         // Contracts ABI
+        let ERC20 = await hre.ethers.getContractFactory("ERC20");
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
         let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
         let JumpRateModel = await hre.ethers.getContractFactory("JumpRateModelV3");
@@ -151,6 +152,7 @@ module.exports = {
         let decimals = blendingToken.decimals;
         let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
         let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
+        let initialSupplyAmount = blendingToken.initialSupplyAmount;
 
         let projectTokens = plpModeratorParams.projectTokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
@@ -899,7 +901,45 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 6. Setting PLP Liquidation *****");
+        console.log("***** 6. Initially supply BLending token *****");
+        if (initialSupplyAmount.length != 0) {
+            for (var i = 0; i < lendingTokens.length; i++) {
+                blending = BLendingToken.attach(blendingTokenProxyAddresses[i]).connect(deployMaster);
+
+                let totalSupply = await blending.totalSupply();
+                let totalSupplyValue = ethers.BigNumber.from(totalSupply.toString());
+
+                let initialSupplyValue = initialSupplyAmount[i] == "" ? ethers.BigNumber.from(0) : ethers.BigNumber.from(initialSupplyAmount[i].toString());
+                if (initialSupplyValue.gt(ethers.BigNumber.from(0)) && totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                    let lendingToken = ERC20.attach(lendingTokens[i]).connect(deployMaster);
+
+                    let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
+                    let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
+                    if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
+                        console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
+                        return;
+                    } else {
+                        let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
+                        let allowanceValue = ethers.BigNumber.from(allowance.toString());
+
+                        let approveAmount = allowanceValue.lt(initialSupplyValue) ? initialSupplyValue.sub(allowanceValue) : ethers.BigNumber.from(0);
+                        await lendingToken.approve(blending.address, approveAmount).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("Approve " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                        });
+
+                        await plp.supply(lendingTokens[i], initialSupplyAmount[i]).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("Supply " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                        });
+                    }
+                }
+            }
+        }
+
+
+        console.log();
+        console.log("***** 7. Setting PLP Liquidation *****");
         {
             let moderatorRoleLiquidation = await plpLiquidationImplementation.MODERATOR_ROLE();
             let isModeratorLiquidation = await plpLiquidationImplementation.hasRole(moderatorRoleLiquidation, deployMasterAddress);
@@ -965,7 +1005,7 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 7. Setting PLP atomic repayment *****");
+        console.log("***** 8. Setting PLP atomic repayment *****");
         {
             let moderatorRoleAtomic = await plpAtomicRepaymentImplementation.MODERATOR_ROLE();
             let isModeratorAtomic = await plpAtomicRepaymentImplementation.hasRole(moderatorRoleAtomic, deployMasterAddress);
@@ -989,7 +1029,6 @@ module.exports = {
                     });
             }
         }
-        console.log();
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
         let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
         if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
@@ -1004,8 +1043,8 @@ module.exports = {
 
 
         console.log();
-        console.log("***** 8. Setting PLP leverage *****");
-        
+        console.log("***** 9. Setting PLP leverage *****");
+
         {
             let moderatorRoleLeverage = await plpLeverageImplementation.MODERATOR_ROLE();
             let isModeratorLeverage = await plpLeverageImplementation.hasRole(moderatorRoleLeverage, deployMasterAddress);
@@ -1029,22 +1068,21 @@ module.exports = {
                     });
             }
         }
-        console.log();
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
         currentRegistryAggregator = await plpLeverage.registryAggregator();
         if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
             await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
-            .then(function (instance) {
-                console.log("\nTransaction hash: " + instance.hash);
-                console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
-                console.log("ExchangeAggregator: " + exchangeAggregator);
-                console.log("RegistryAggregator: " + registryAggregator);
-            });
+                .then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
+                    console.log("ExchangeAggregator: " + exchangeAggregator);
+                    console.log("RegistryAggregator: " + registryAggregator);
+                });
         }
 
         console.log();
-        console.log("***** 9. Setting PLP Wrapped Token Gateway *****");
-        
+        console.log("***** 10. Setting PLP Wrapped Token Gateway *****");
+
         {
             let moderatorRoleWrappedTokenGateway = await plpWrappedTokenGatewayImplementation.MODERATOR_ROLE();
             let isModeratorWrappedTokenGateway = await plpWrappedTokenGatewayImplementation.hasRole(moderatorRoleWrappedTokenGateway, deployMasterAddress);

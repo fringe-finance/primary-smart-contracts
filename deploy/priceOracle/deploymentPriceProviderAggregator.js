@@ -132,8 +132,8 @@ module.exports = {
             LPPriceProviderProxy,
             wstETHPriceProviderLogic,
             wstETHPriceProviderProxy,
-            mutePriceProviderLogic,
-            mutePriceProviderProxy
+            MutePriceProviderLogic,
+            MutePriceProviderProxy
         } = configs;
 
         //contracts addresses
@@ -146,7 +146,7 @@ module.exports = {
         let uniswapV2PriceProviderMockAddress = "";
         let lpPriceProviderAddress = isTesting ? "" : LPPriceProviderProxy;
         let wstETHPriceProviderAddress = isTesting ? "" : wstETHPriceProviderProxy;
-        let mutePriceProviderAddress = isTesting ? "" : mutePriceProviderProxy;
+        let mutePriceProviderAddress = isTesting ? "" : MutePriceProviderProxy;
 
         let backendPriceProviderLogicAddress = isTesting ? "" : BackendPriceProviderLogic;
         let pythPriceProviderLogicAddress = isTesting ? "" : PythPriceProviderLogic;
@@ -156,7 +156,7 @@ module.exports = {
         let uniswapV2PriceProviderMockLogicAddress = "";
         let lpPriceProviderLogicAddress = isTesting ? "" : LPPriceProviderLogic;
         let wstETHPriceProviderLogicAddress = isTesting ? "" : wstETHPriceProviderLogic;
-        let mutePriceProviderLogicAddress = isTesting ? "" : mutePriceProviderLogic;
+        let mutePriceProviderLogicAddress = isTesting ? "" : MutePriceProviderLogic;
 
         ProxyAdmin = await deployer.loadArtifact("PrimaryLendingPlatformProxyAdmin");
         TransparentUpgradeableProxy = await deployer.loadArtifact("TransparentUpgradeableProxy");
@@ -219,7 +219,7 @@ module.exports = {
                 configs.PythPriceProviderProxy = pythPriceProviderAddress = pythPriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`PythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
+            console.log(`\nPythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
             await verify(pythPriceProviderAddress, [
                 pythPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -247,7 +247,7 @@ module.exports = {
                 configs.MutePriceProviderProxy = mutePriceProviderAddress = mutePriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`MutePriceProvider was deployed at: ${mutePriceProviderAddress}`);
+            console.log(`\nMutePriceProvider was deployed at: ${mutePriceProviderAddress}`);
             await verify(mutePriceProviderAddress, [
                 mutePriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -274,7 +274,7 @@ module.exports = {
                 configs.ChainlinkPriceProviderProxy = chainlinkPriceProviderAddress = chainlinkPriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`ChainlinkPriceProvider was deployed at: ${chainlinkPriceProviderAddress}`);
+            console.log(`\nChainlinkPriceProvider was deployed at: ${chainlinkPriceProviderAddress}`);
             await verify(chainlinkPriceProviderAddress, [
                 chainlinkPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -303,7 +303,7 @@ module.exports = {
                 configs.BackendPriceProviderProxy = backendPriceProviderAddress = backendPriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`BackendPriceProvider was deployed at: ${backendPriceProviderAddress}`);
+            console.log(`\nBackendPriceProvider was deployed at: ${backendPriceProviderAddress}`);
             await verify(backendPriceProviderAddress, [
                 backendPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -331,7 +331,7 @@ module.exports = {
                 configs.UniswapV2PriceProviderProxy = uniswapV2PriceProviderAddress = uniswapV2PriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`UniswapV2PriceProvider was deployed at: ${uniswapV2PriceProviderAddress}`);
+            console.log(`\nUniswapV2PriceProvider was deployed at: ${uniswapV2PriceProviderAddress}`);
             await verify(uniswapV2PriceProviderAddress, [
                 uniswapV2PriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -359,7 +359,7 @@ module.exports = {
                 configs.LPPriceProviderProxy = lpPriceProviderAddress = lpPriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`lpPriceProvider was deployed at: ${lpPriceProviderAddress}`);
+            console.log(`\nlpPriceProvider was deployed at: ${lpPriceProviderAddress}`);
             await verify(lpPriceProviderAddress, [
                 lpPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -387,7 +387,7 @@ module.exports = {
                 configs.wstETHPriceProviderProxy = wstETHPriceProviderAddress = wstETHPriceProviderProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`wstETHPriceProvider was deployed at: ${wstETHPriceProviderAddress}`);
+            console.log(`\nwstETHPriceProvider was deployed at: ${wstETHPriceProviderAddress}`);
             await verify(wstETHPriceProviderAddress, [
                 wstETHPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -414,7 +414,7 @@ module.exports = {
             configs.PriceProviderAggregatorProxy = priceProviderAggregatorAddress = priceProviderAggregatorProxy.address;
             fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
         }
-        console.log(`PriceProviderAggregator was deployed at: ${priceProviderAggregatorAddress}`);
+        console.log(`\nPriceProviderAggregator was deployed at: ${priceProviderAggregatorAddress}`);
         await verify(priceProviderAggregatorAddress, [
             priceProviderAggregatorLogicAddress,
             proxyAdminAddress,
@@ -441,7 +441,7 @@ module.exports = {
                 configs.UniswapV2PriceProviderMockProxy = uniswapV2PriceProviderMockAddress = uniswapV2PriceProviderMockProxy.address;
                 fs.writeFileSync(configFile, JSON.stringify(configs, null, 2));
             }
-            console.log(`UniswapV2PriceProviderMock was deployed at: ${uniswapV2PriceProviderMockAddress}`);
+            console.log(`\nUniswapV2PriceProviderMock was deployed at: ${uniswapV2PriceProviderMockAddress}`);
             await verify(uniswapV2PriceProviderMockAddress, [
                 uniswapV2PriceProviderMockLogicAddress,
                 proxyAdminAddress,

@@ -46,6 +46,7 @@ module.exports = {
         const deployMasterAddress = wallet.address;
 
         // Contracts ABI
+        let ERC20Proxy = await deployer.loadArtifact("ERC20");
         let ProxyAdmin = await deployer.loadArtifact("PrimaryLendingPlatformProxyAdmin");
         let TransparentUpgradeableProxy = await deployer.loadArtifact("TransparentUpgradeableProxy");
         let JumpRateModel = await deployer.loadArtifact("JumpRateModelV3");
@@ -156,6 +157,7 @@ module.exports = {
         let decimals = blendingToken.decimals;
         let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
         let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
+        let initialSupplyAmount = blendingToken.initialSupplyAmount;
 
         let tokens = plpModeratorParams.tokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
@@ -188,7 +190,6 @@ module.exports = {
         console.log("DeployMaster: " + deployMasterAddress);
         //====================================================
         //deploy proxy admin
-
         console.log();
         console.log("***** PROXY ADMIN DEPLOYMENT *****");
         if (!proxyAdminAddress) {
@@ -226,7 +227,7 @@ module.exports = {
             if (!isTesting) config.BondtrollerProxy = bondtrollerProxyAddress;
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
-        console.log("Bondtroller proxy address: " + bondtrollerProxyAddress);
+        console.log("\nBondtroller proxy address: " + bondtrollerProxyAddress);
         await verify(bondtrollerProxyAddress, [
             bondtrollerLogicAddress,
             proxyAdminAddress,
@@ -258,7 +259,7 @@ module.exports = {
             if (!isTesting) config.JumpRateModelProxy = jumpRateModelProxyAddress;
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
-        console.log("JumpRateModel proxy address: " + jumpRateModelProxyAddress);
+        console.log("\nJumpRateModel proxy address: " + jumpRateModelProxyAddress);
         await verify(jumpRateModelProxyAddress, [
             jumpRateModelLogicAddress,
             proxyAdminAddress,
@@ -294,7 +295,7 @@ module.exports = {
         if (!isTesting) config.BLendingTokenProxies = blendingTokenProxyAddresses;
         fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
 
-        console.log("BLendingToken proxy address: " + blendingTokenProxyAddresses);
+        console.log("\nBLendingToken proxy address: " + blendingTokenProxyAddresses);
         await verify(blendingTokenProxyAddresses[0], [
             blendingTokenLogicAddress,
             proxyAdminAddress,
@@ -329,7 +330,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformV2 proxy address: " + primaryLendingPlatformV2ProxyAddress);
+        console.log("\nPrimaryLendingPlatformV2 proxy address: " + primaryLendingPlatformV2ProxyAddress);
         await verify(primaryLendingPlatformV2ProxyAddress, [
             primaryLendingPlatformV2LogicAddress,
             proxyAdminAddress,
@@ -364,7 +365,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformModerator proxy address: " + primaryLendingPlatformModeratorProxyAddress);
+        console.log("\nPrimaryLendingPlatformModerator proxy address: " + primaryLendingPlatformModeratorProxyAddress);
         await verify(primaryLendingPlatformModeratorProxyAddress, [
             primaryLendingPlatformModeratorLogicAddress,
             proxyAdminAddress,
@@ -400,7 +401,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformLiquidation proxy address: " + primaryLendingPlatformLiquidationProxyAddress);
+        console.log("\nPrimaryLendingPlatformLiquidation proxy address: " + primaryLendingPlatformLiquidationProxyAddress);
         await verify(primaryLendingPlatformLiquidationProxyAddress, [
             primaryLendingPlatformLiquidationLogicAddress,
             proxyAdminAddress,
@@ -435,7 +436,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformAtomicRepayment proxy address: " + primaryLendingPlatformAtomicRepaymentProxyAddress);
+        console.log("\nPrimaryLendingPlatformAtomicRepayment proxy address: " + primaryLendingPlatformAtomicRepaymentProxyAddress);
         await verify(primaryLendingPlatformAtomicRepaymentProxyAddress, [
             primaryLendingPlatformAtomicRepaymentLogicAddress,
             proxyAdminAddress,
@@ -470,7 +471,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformLeverage proxy address: " + primaryLendingPlatformLeverageProxyAddress);
+        console.log("\nPrimaryLendingPlatformLeverage proxy address: " + primaryLendingPlatformLeverageProxyAddress);
         await verify(primaryLendingPlatformLeverageProxyAddress, [
             primaryLendingPlatformLeverageLogicAddress,
             proxyAdminAddress,
@@ -505,7 +506,7 @@ module.exports = {
             fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
         }
 
-        console.log("PrimaryLendingPlatformWrappedTokenGateway proxy address: " + PrimaryLendingPlatformWrappedTokenGatewayProxy);
+        console.log("\nPrimaryLendingPlatformWrappedTokenGateway proxy address: " + PrimaryLendingPlatformWrappedTokenGatewayProxy);
         await verify(PrimaryLendingPlatformWrappedTokenGatewayProxy, [
             primaryLendingPlatformWrappedTokenGatewayLogicAddress,
             proxyAdminAddress,
@@ -517,6 +518,7 @@ module.exports = {
         //setting params
 
         //instances of contracts
+        let erc20Interface = new ethers.utils.Interface(ERC20Proxy.abi);
         let bondtrollerInterface = new ethers.utils.Interface(Bondtroller.abi);
         let jumpRateModelInterface = new ethers.utils.Interface(JumpRateModel.abi);
         let blendingInterface = new ethers.utils.Interface(BLendingToken.abi);
@@ -881,7 +883,45 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 6. Setting PLP Liquidation *****");
+        console.log("***** 6. Initially supply BLending token *****");
+        if (initialSupplyAmount.length != 0) {
+            for (var i = 0; i < lendingTokens.length; i++) {
+                let blending = new ethers.Contract(blendingTokenProxyAddresses[i], blendingInterface, wallet);
+
+                let totalSupply = await blending.totalSupply();
+                let totalSupplyValue = ethers.BigNumber.from(totalSupply.toString());
+
+                let initialSupplyValue = initialSupplyAmount[i] == "" ? ethers.BigNumber.from(0) : ethers.BigNumber.from(initialSupplyAmount[i].toString());
+                if (initialSupplyValue.gt(ethers.BigNumber.from(0)) && totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                    let lendingToken = new ethers.Contract(lendingTokens[i], erc20Interface, wallet);
+
+
+                    let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
+                    let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
+                    if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
+                        console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
+                        return;
+                    } else {
+                        let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
+                        let allowanceValue = ethers.BigNumber.from(allowance.toString());
+
+                        let approveAmount = allowanceValue.lt(initialSupplyValue) ? initialSupplyValue.sub(allowanceValue) : ethers.BigNumber.from(0);
+                        await lendingToken.approve(blending.address, approveAmount).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("Approve " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                        });
+
+                        await plp.supply(lendingTokens[i], initialSupplyAmount[i]).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("Supply " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                        });
+                    }
+                }
+            }
+        }
+
+        console.log();
+        console.log("***** 7. Setting PLP Liquidation *****");
 
         {
             let moderatorRoleLiquidation = await plpLiquidationImplementation.MODERATOR_ROLE();
@@ -948,7 +988,7 @@ module.exports = {
         }
 
         console.log();
-        console.log("***** 7. Setting PLP atomic repayment *****");
+        console.log("***** 8. Setting PLP atomic repayment *****");
 
         {
             let moderatorRoleAtomic = await plpAtomicRepaymentImplementation.MODERATOR_ROLE();
@@ -973,7 +1013,6 @@ module.exports = {
                     });
             }
         }
-        console.log();
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
         let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
         if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
@@ -988,7 +1027,7 @@ module.exports = {
 
 
         console.log();
-        console.log("***** 8. Setting PLP leverage *****");
+        console.log("***** 9. Setting PLP leverage *****");
 
         {
             let moderatorRoleLeverage = await plpLeverageImplementation.MODERATOR_ROLE();
@@ -1013,7 +1052,6 @@ module.exports = {
                     });
             }
         }
-        console.log();
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
         currentRegistryAggregator = await plpLeverage.registryAggregator();
         if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
@@ -1028,7 +1066,7 @@ module.exports = {
 
 
         console.log();
-        console.log("***** 9. Setting PLP Wrapped Token Gateway *****");
+        console.log("***** 10. Setting PLP Wrapped Token Gateway *****");
 
         {
             let moderatorRoleWrappedTokenGateway = await plpWrappedTokenGatewayImplementation.MODERATOR_ROLE();
