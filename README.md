@@ -53,7 +53,7 @@ yarn
 
 ### 2.2 Setup config general
 
-The configuration information is stored in the `scripts/config/` folder for ethereum networks and in the `deploy/config_*/` folder for zksync network. This folder contains subfolders that correspond to the networks used for testing and deploy.
+The configuration information is stored in the `scripts/config/{network}_{chain}` folder for ethereum networks and in the `deploy/config_{chain}` folder for zksync network. This folder contains subfolders that correspond to the networks used for testing and deploy.
 
 Each subfolder contains:
 
@@ -188,7 +188,7 @@ Each subfolder contains:
 This is an example of the `config_general.json` file used to deploy to the `Arbitrum Goerli` network.
 
 ```
-//file: /hardhat_arbitrum_goerli/config_gerenal.json
+//file: ./scripts/config/arbitrum_goerli/config_gerenal.json
 
 {
     "priceOracle": {
