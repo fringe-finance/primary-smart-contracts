@@ -43,6 +43,7 @@
   },
   "blendingToken": {
       "initialExchangeRateMantissa": [],
+      "reserveFactorMantissa": [],
       "lendingTokens": [],
       "symbol": [],
       "decimals": [],

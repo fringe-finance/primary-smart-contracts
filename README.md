@@ -140,6 +140,9 @@ Each subfolder contains:
         "initialExchangeRateMantissa": [], // ExchangeRate Mantissa value corresponding
                                            // each token in the lendingTokens list.
 
+        "reserveFactorMantissa": [],       // ReserveFactor Mantissa value corresponding
+                                           // each token in the lendingTokens list.
+
         "lendingTokens": [],               // List of address lending tokens.
 
         "symbol": [],                      // List of symbol bLendingToken corresponding
@@ -300,6 +303,11 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
           "10000000000000000000",
           "10000000000000000000",
           "10000000000000000000"
+      ],
+      "reserveFactorMantissa": [
+          "50000000000000000",
+          "70000000000000000",
+          "100000000000000000"
       ],
       "lendingTokens": [
           "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",

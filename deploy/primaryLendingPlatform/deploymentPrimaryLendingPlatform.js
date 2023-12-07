@@ -158,6 +158,7 @@ module.exports = {
         let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
         let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
         let initialSupplyAmount = blendingToken.initialSupplyAmount;
+        let reserveFactorMantissa = blendingToken.reserveFactorMantissa;
 
         let tokens = plpModeratorParams.tokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
@@ -680,6 +681,17 @@ module.exports = {
                     console.log("Blending token call initialize at " + blending.address);
                 });
             }
+
+            {
+                let reserveFactor = await blending.reserveFactorMantissa();
+                if (reserveFactor != reserveFactorMantissa[i] && reserveFactorMantissa[i] != "") {
+                    await blending._setReserveFactor(reserveFactorMantissa[i]).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("blending set reserve factor " + reserveFactorMantissa[i]);
+                    });
+                }
+            }
+
             {
                 let plpAddress = await blending.primaryLendingPlatform();
                 if (plpAddress != primaryLendingPlatformV2ProxyAddress) {
@@ -904,16 +916,16 @@ module.exports = {
                     } else {
                         let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
                         let allowanceValue = ethers.BigNumber.from(allowance.toString());
+                        if (allowanceValue.lt(initialSupplyValue)) {
+                            const tx = await lendingToken.approve(blending.address, initialSupplyValue);
+                            console.log("\nTransaction hash: " + tx.hash);
+                            console.log("Approve " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                            await tx.wait(10);
+                        }
 
-                        let approveAmount = allowanceValue.lt(initialSupplyValue) ? initialSupplyValue.sub(allowanceValue) : ethers.BigNumber.from(0);
-                        await lendingToken.approve(blending.address, approveAmount).then(function (instance) {
+                        await plp.supply(lendingTokens[i], initialSupplyValue).then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
-                            console.log("Approve " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
-                        });
-
-                        await plp.supply(lendingTokens[i], initialSupplyAmount[i]).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("Supply " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                            console.log("Supply " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
                         });
                     }
                 }

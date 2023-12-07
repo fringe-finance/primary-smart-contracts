@@ -214,7 +214,7 @@ module.exports = {
                     fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
                 });
             }
-            console.log(`PythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
+            console.log(`\nPythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
             await verify(pythPriceProviderAddress, [
                 pythPriceProviderLogicAddress,
                 proxyAdminAddress,
