@@ -228,7 +228,8 @@ Parameters:
 | Name           | Type    | Description                                                                                                                                                                                                   |
 | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | aggregatorPath | address | The address of chainlink aggregator contract.                                                                                                                                                                 |
-| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
+| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified
+ amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
 
 ### setTokenAndAggregator (0xedc607b0)
 
@@ -396,3 +397,27 @@ Return values:
 | Name | Type  | Description                                |
 | :--- | :---- | :----------------------------------------- |
 | [0]  | uint8 | The number of decimals used for the price. |
+
+### getChainlinkMetadata (0xd718fc11)
+
+```solidity
+function getChainlinkMetadata(
+    address token
+) public view returns (ChainlinkPriceProvider.ChainlinkMetadata memory)
+```
+
+Returns the metadata set up for token.
+
+
+Parameters:
+
+| Name  | Type    | Description                 |
+| :---- | :------ | :-------------------------- |
+| token | address | The address of the token.   |
+
+
+Return values:
+
+| Name | Type                                            | Description                                                                                                                           |
+| :--- | :---------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------ |
+| [0]  | struct ChainlinkPriceProvider.ChainlinkMetadata | metadata The metadata includes active status of token and array of Chainlink aggregator addresses used to get the price of the token. |

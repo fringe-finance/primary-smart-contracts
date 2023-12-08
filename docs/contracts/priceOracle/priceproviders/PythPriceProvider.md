@@ -504,3 +504,27 @@ Return values:
 | :-------- | :-------- | :--------------------------------------------- |
 | priceIds  | bytes32[] | The priceId array needs to update the price.   |
 | updateFee | uint256   | The update fee.                                |
+
+### getPythMetadata (0xed043fa8)
+
+```solidity
+function getPythMetadata(
+    address token
+) public view returns (PythPriceProvider.PythMetadata memory)
+```
+
+Returns the metadata set up for token.
+
+
+Parameters:
+
+| Name  | Type    | Description                 |
+| :---- | :------ | :-------------------------- |
+| token | address | The address of the token.   |
+
+
+Return values:
+
+| Name | Type                                  | Description                                                                                                                    |
+| :--- | :------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+| [0]  | struct PythPriceProvider.PythMetadata | metadata The metadata includes active status of token and array of bytes32 representing the path to the token's price Pyth ID. |
