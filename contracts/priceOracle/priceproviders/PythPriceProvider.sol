@@ -383,6 +383,16 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes active status of token and array of bytes32 representing the path to the token's price Pyth ID.
+     */
+    function getPythMetadata(address token) public view returns (PythMetadata memory) {
+        PythMetadata memory metadata = pythMetadata[token];
+        return metadata;
+    }
+
+    /**
      * @dev Calculates the absolute difference between two unsigned integers.
      * @param x The first unsigned integer.
      * @param y The second unsigned integer.

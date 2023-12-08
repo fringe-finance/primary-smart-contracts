@@ -240,4 +240,14 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     function getPriceDecimals() public view override returns (uint8) {
         return usdDecimals;
     }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes active status of token and array of Chainlink aggregator addresses used to get the price of the token.
+     */
+    function getChainlinkMetadata(address token) public view returns (ChainlinkMetadata memory) {
+        ChainlinkMetadata memory metadata = chainlinkMetadata[token];
+        return metadata;
+    }
 }
