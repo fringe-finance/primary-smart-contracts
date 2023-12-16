@@ -922,27 +922,52 @@ module.exports = {
                 let totalSupplyValue = ethers.BigNumber.from(totalSupply.toString());
 
                 let initialSupplyValue = initialSupplyAmount[i] == "" ? ethers.BigNumber.from(0) : ethers.BigNumber.from(initialSupplyAmount[i].toString());
-                if (initialSupplyValue.gt(ethers.BigNumber.from(0)) && totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                if (initialSupplyValue.gt(ethers.BigNumber.from(0))) {
                     let lendingToken = ERC20.attach(lendingTokens[i]).connect(deployMaster);
 
-                    let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
-                    let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
-                    if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
-                        console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
-                        return;
-                    } else {
-                        let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
-                        let allowanceValue = ethers.BigNumber.from(allowance.toString());
-                        if (allowanceValue.lt(initialSupplyValue)) {
-                            const tx = await lendingToken.approve(blending.address, initialSupplyValue);
-                            console.log("\nTransaction hash: " + tx.hash);
-                            console.log("Approve " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
-                            await tx.wait(10);
-                        }
+                    if (totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                        let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
+                        let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
+                        if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
+                            console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
+                            return;
+                        } else {
+                            let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
+                            let allowanceValue = ethers.BigNumber.from(allowance.toString());
+                            if (allowanceValue.lt(initialSupplyValue)) {
+                                const tx = await lendingToken.approve(blending.address, initialSupplyValue);
+                                console.log("\nTransaction hash: " + tx.hash);
+                                console.log("Approve " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                                await tx.wait(10);
+                            }
 
-                        await plp.supply(lendingTokens[i], initialSupplyValue).then(function (instance) {
+                            await plp.supply(lendingTokens[i], initialSupplyValue).then(function (instance) {
+                                console.log("\nTransaction hash: " + instance.hash);
+                                console.log("Supply " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                            });
+                        }
+                    }
+
+                    let blendingTokenBalanceOfAddress0x0 = await blending.balanceOf(ZERO_ADDRESS);
+                    let blendingTokenBalanceOfAddress0x0Value = ethers.BigNumber.from(blendingTokenBalanceOfAddress0x0.toString());
+                    if (blendingTokenBalanceOfAddress0x0Value.eq(ethers.BigNumber.from(0))) {
+                        let exchangeRate = await blending.exchangeRateStored();
+                        let exchangeRateValue = ethers.BigNumber.from(exchangeRate.toString());
+
+                        let blendingTokenDecimals = await blending.decimals();
+                        let blendingTokenDecimalsValue = ethers.BigNumber.from(blendingTokenDecimals.toString());
+
+                        let lendingTokenDecimals = await lendingToken.decimals();
+                        let lendingTokenDecimalsValue = ethers.BigNumber.from(lendingTokenDecimals.toString());
+
+                        let blendingTokenBurnValue = initialSupplyValue
+                            .mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18)))
+                            .div(exchangeRateValue)
+                            .mul(ethers.BigNumber.from(10).pow(blendingTokenDecimalsValue))
+                            .div(ethers.BigNumber.from(10).pow(lendingTokenDecimalsValue));
+                        await blending.transfer(ZERO_ADDRESS, blendingTokenBurnValue).then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
-                            console.log("Supply " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                            console.log("Burn " + blendingTokenBurnValue + " " + blendingTokenProxyAddresses[i] + " to " + ZERO_ADDRESS);
                         });
                     }
                 }
