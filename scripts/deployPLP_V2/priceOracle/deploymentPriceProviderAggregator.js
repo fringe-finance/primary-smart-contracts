@@ -30,6 +30,54 @@ const verify = async (address, constructorArguments, keyInConfig) => {
     console.log("Verified " + address);
 };
 
+const upgrade = async (proxyAdmin, implementationInstance, proxyInstance) => {
+    const currentImplementation = await proxyAdmin.getProxyImplementation(proxyInstance.address);
+    console.log("Current proxy: " + proxyInstance.address);
+    console.log("Current implementation: " + currentImplementation);
+    console.log("Expected implementation: " + implementationInstance.address);
+    console.log();
+    if (currentImplementation != implementationInstance.address) {
+        const upgradeData = await proxyAdmin.upgradeData(proxyInstance.address);
+        const appendTimestamp = Number(upgradeData.appendTimestamp);
+        if (appendTimestamp == 0) {
+            await proxyAdmin.appendUpgrade(proxyInstance.address, implementationInstance.address)
+                .then(function (instance) {
+                    console.log("[Appending upgrade] ");
+                    console.log("Transaction hash: " + instance.hash);
+                    console.log("ProxyAdmin appendUpgrade implementation " + implementationInstance.address + " to proxy " + proxyInstance.address);
+                });
+        } else {
+            let timeStamp = (await hre.ethers.provider.getBlock("latest")).timestamp;
+            let delayPeriod = Number(upgradeData.delayPeriod);
+            if (timeStamp >= appendTimestamp + delayPeriod) {
+                await proxyAdmin.upgrade(proxyInstance.address, implementationInstance.address)
+                    .then(function (instance) {
+                        if (upgradeData.newImplementation != implementationInstance.address) {
+                            console.log("[Canceling upgrade]");
+                            console.log("Upgrade implementation in queue " + upgradeData.newImplementation + " is different from expected implementation " + implementationInstance.address);
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("ProxyAdmin canceled upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        } else {
+                            console.log("[Upgrading] ");
+                            console.log("ProxyAdmin upgraded implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        }
+                    });
+            } else {
+                console.log("[Delaying upgrade]");
+                console.log("In delay period to upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                console.log("AppendTimestamp: ", appendTimestamp);
+                console.log("Delay time: ", delayPeriod);
+                console.log("Current: ", timeStamp);
+                console.log("Can upgrade at: ", appendTimestamp + delayPeriod);
+                console.log("Need to wait another: " + (appendTimestamp + delayPeriod - timeStamp) + "seconds");
+                console.log();
+            }
+        }
+    } else {
+        console.log("Current implementation is synced with expected implementation " + implementationInstance.address);
+    }
+};
+
 module.exports = {
 
     deploymentPriceOracle: async function () {
@@ -491,6 +539,7 @@ module.exports = {
         //====================================================
         //setting params
 
+        proxyAdmin = ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         pythPriceProvider = PythPriceProvider.attach(pythPriceProviderAddress).connect(deployMaster);
         chainlinkPriceProvider = ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
         backendPriceProvider = BackendPriceProvider.attach(backendPriceProviderAddress).connect(deployMaster);
@@ -506,6 +555,56 @@ module.exports = {
         lpPriceProviderImplementation = LPPriceProvider.attach(lpPriceProviderLogicAddress).connect(deployMaster);
         wstETHPriceProviderImplementation = WstETHPriceProvider.attach(wstETHPriceProviderLogicAddress).connect(deployMaster);
         priceProviderAggregatorImplementation = PriceProviderAggregator.attach(priceProviderAggregatorLogicAddress).connect(deployMaster);
+
+        //==============================
+        // ====================== upgrade pythPriceProvider =============================
+        if (pythPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING PYTH PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, pythPriceProviderImplementation, pythPriceProvider);
+        }
+
+        // ====================== upgrade chainlinkPriceProvider =============================
+        if (chainlinkPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING CHAINLINK PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, chainlinkPriceProviderImplementation, chainlinkPriceProvider);
+        }
+
+        // ====================== upgrade backendPriceProvider =============================
+        if (backendPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING BACKEND PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, backendPriceProviderImplementation, backendPriceProvider);
+        }
+
+        // ====================== upgrade uniswapV2PriceProvider =============================
+        if (uniswapV2PriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING UNISWAPV2 PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, uniswapV2PriceProviderImplementation, uniswapV2PriceProvider);
+        }
+
+        // ====================== upgrade lpPriceProvider =============================
+        if (lpPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING LP PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, lpPriceProviderImplementation, lpPriceProvider);
+        }
+
+        // ====================== upgrade wstETHPriceProvider =============================
+        if (wstETHPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING WSTETH PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, wstETHPriceProviderImplementation, wstETHPriceProvider);
+        }
+
+        // ====================== upgrade priceProviderAggregator =============================
+        if (priceProviderAggregatorAddress) {
+            console.log();
+            console.log("***** UPGRADING PRICE PROVIDER AGGREGATOR *****");
+            await upgrade(proxyAdmin, priceProviderAggregatorImplementation, priceProviderAggregator);
+        }
 
         //==============================
         // ====================== set pythPriceProvider =============================
