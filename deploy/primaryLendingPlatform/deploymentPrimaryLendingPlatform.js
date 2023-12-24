@@ -85,6 +85,7 @@ module.exports = {
                 break;
             case "mainnet":
                 provider = new Provider("https://mainnet.era.zksync.io");
+                break;
             default:
                 provider = new Provider("http://127.0.0.1:8011");
                 break;
@@ -207,7 +208,7 @@ module.exports = {
         let initialSupplyAmount = blendingToken.initialSupplyAmount;
         let reserveFactorMantissa = blendingToken.reserveFactorMantissa;
 
-        let tokens = plpModeratorParams.tokens;
+        let projectTokens = plpModeratorParams.projectTokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
         let loanToValueRatioDenominator = plpModeratorParams.loanToValueRatioDenominator;
         let isPaused = plpModeratorParams.isPaused;
@@ -879,19 +880,19 @@ module.exports = {
             }
         }
 
-        for (var i = 0; i < tokens.length; i++) {
-            let projectTokenInfo = await plp.projectTokenInfo(tokens[i]);
+        for (var i = 0; i < projectTokens.length; i++) {
+            let projectTokenInfo = await plp.projectTokenInfo(projectTokens[i]);
             if (projectTokenInfo.isListed == false
                 || projectTokenInfo.loanToValueRatio.numerator != loanToValueRatioNumerator[i]
                 || projectTokenInfo.loanToValueRatio.denominator != loanToValueRatioDenominator[i]
             ) {
                 await plpModerator.addProjectToken(
-                    tokens[i],
+                    projectTokens[i],
                     loanToValueRatioNumerator[i],
                     loanToValueRatioDenominator[i]
                 ).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
-                    console.log("Added prj token " + tokens[i]);
+                    console.log("Added prj token " + projectTokens[i]);
                     console.log("LoanToValueRatio: ");
                     console.log("   Numerator:   " + loanToValueRatioNumerator[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominator[i]);
@@ -907,11 +908,11 @@ module.exports = {
             }
 
             for (var i = 0; i < projectTokensListSnapshot.length; i++) {
-                for (var j = 0; j < tokens.length; j++) {
-                    if (projectTokensListSnapshot[i] == tokens[j]) {
+                for (var j = 0; j < projectTokens.length; j++) {
+                    if (projectTokensListSnapshot[i] == projectTokens[j]) {
                         break;
                     }
-                    if (j == tokens.length - 1) {
+                    if (j == projectTokens.length - 1) {
                         const tokensLength = await plp.projectTokensLength();
                         for (var index = 0; index < tokensLength; index++) {
                             const token = await plp.projectTokens(index);
@@ -1012,15 +1013,15 @@ module.exports = {
 
         }
 
-        for (var i = 0; i < tokens.length; i++) {
-            let borrowLimitPerCollateralValue = await plp.borrowLimitPerCollateral(tokens[i]);
+        for (var i = 0; i < projectTokens.length; i++) {
+            let borrowLimitPerCollateralValue = await plp.borrowLimitPerCollateral(projectTokens[i]);
             if (borrowLimitPerCollateralValue.toString() != borrowLimitPerCollateral[i]) {
                 await plpModerator.setBorrowLimitPerCollateralAsset(
-                    tokens[i],
+                    projectTokens[i],
                     borrowLimitPerCollateral[i]
                 ).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
-                    console.log("PrimaryLendingPlatformV2 set " + tokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
+                    console.log("PrimaryLendingPlatformV2 set " + projectTokens[i] + " borrow limit " + borrowLimitPerCollateral[i]);
                 });
             }
         }
@@ -1344,7 +1345,7 @@ module.exports = {
             plpLeverageAddress: primaryLendingPlatformLeverageProxyAddress,
             plpModerator: primaryLendingPlatformModeratorProxyAddress,
             plpWrappedTokenGateway: primaryLendingPlatformWrappedTokenGatewayProxyAddress,
-            projectTokens: tokens,
+            projectTokens: projectTokens,
             lendingTokens: lendingTokens
         };
         return addresses;

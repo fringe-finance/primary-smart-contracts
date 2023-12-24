@@ -69,7 +69,7 @@
     "registryAggregator": ""
   },
   "plpModeratorParams": {
-    "tokens": [
+    "projectTokens": [
       "0x54ae494D82DB98c2cF1614Ad5989596822F646b4",
       "0xcE3576ecF5512024De902c2Fcacc84Ff6cE8eAc9",
       "0x7f72EeAbc2560EE9DfE2a842123e63DbF0df1484",

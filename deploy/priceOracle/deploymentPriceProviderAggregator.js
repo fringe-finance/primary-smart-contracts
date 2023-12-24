@@ -89,6 +89,7 @@ module.exports = {
                 break;
             case "mainnet":
                 provider = new Provider("https://mainnet.era.zksync.io");
+                break;
             default:
                 provider = new Provider("http://127.0.0.1:8011");
                 break;
