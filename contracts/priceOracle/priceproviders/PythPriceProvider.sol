@@ -19,7 +19,7 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
 
     uint8 public constant MAX_LENGTH_PRICE_ID_PATH = 5;
 
-    uint8 public tokenDecimals;
+    uint8 public tokenDecimals = 6;
 
     address public pythOracle;
 
@@ -71,7 +71,7 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        tokenDecimals = 8;
+        tokenDecimals = 6;
         validTimePeriod = 60;
     }
 
