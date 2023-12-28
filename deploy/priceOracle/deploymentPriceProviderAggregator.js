@@ -599,6 +599,18 @@ module.exports = {
             }
 
             {
+                const tokenDecimal = await pythPriceProvider.tokenDecimals();
+                const currentImplementation = await proxyAdmin.getProxyImplementation(pythPriceProvider.address);
+                if (tokenDecimal != 6 && currentImplementation == pythPriceProviderLogicAddress) {
+                    await pythPriceProvider.setTokenDecimals(6)
+                        .then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("PythPriceProvider " + pythPriceProvider.address + " set tokenDecimals: 6");
+                        });
+                }
+            }
+
+            {
                 let moderatorRole = await pythPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await pythPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {

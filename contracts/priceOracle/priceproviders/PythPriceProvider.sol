@@ -19,7 +19,7 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
 
     uint8 public constant MAX_LENGTH_PRICE_ID_PATH = 5;
 
-    uint8 public tokenDecimals = 6;
+    uint8 public tokenDecimals;
 
     address public pythOracle;
 
@@ -63,6 +63,12 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @param active The new active status of the token.
      */
     event ChangeActive(address indexed token, bool active);
+
+    /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
 
     /**
      * @dev Initializes the contract by setting up the access control roles and default values for tokenDecimals and validTimePeriod.
@@ -112,6 +118,16 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /****************** Moderator functions ****************** */
+
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
 
     /**
      * @notice Sets token and priceIdPath.
