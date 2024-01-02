@@ -29,12 +29,19 @@ contract PrimaryLendingPlatformAtomicRepayment is PrimaryLendingPlatformAtomicRe
      * - Repays the lending token amount to the primary lending platform contract.
      * - Transfers the remaining lending token amount to the user.
      * - Defers the liquidity check for the user, project token, and lending token.
-     * @param prjToken The address of the project token.
-     * @param collateralAmount The amount of collateral to be repaid.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the project token.
      * @param isRepayFully A boolean indicating whether to fully repay the loan or not.
+     * @param lendingTokenType The type of the lending token, indicating whether it's an ERC20 token, ERC4626 token, or LP token.
      */
-    function repayAtomic(address prjToken, uint256 collateralAmount, bytes memory buyCalldata, bool isRepayFully) external nonReentrant {
-        _repayAtomic(prjToken, collateralAmount, buyCalldata, isRepayFully);
+    function repayAtomic(
+        Asset.Info memory prjInfo, 
+        uint256 collateralAmount,
+        bytes[] memory buyCalldata, 
+        bool isRepayFully,
+        Asset.Type lendingTokenType    
+    ) external nonReentrant {
+        _repayAtomic(prjInfo, collateralAmount, buyCalldata, isRepayFully, lendingTokenType);
     }
 }

@@ -29,22 +29,22 @@ contract PrimaryLendingPlatformLeverage is PrimaryLendingPlatformLeverageCore {
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
      * @param leverageType The type of leverage position.
      */
     function leveragedBorrow(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 notionalExposure,
         uint256 marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         uint8 leverageType
     ) public nonReentrant {
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
     }
 
     /**
@@ -66,8 +66,8 @@ contract PrimaryLendingPlatformLeverage is PrimaryLendingPlatformLeverageCore {
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
@@ -75,14 +75,14 @@ contract PrimaryLendingPlatformLeverage is PrimaryLendingPlatformLeverageCore {
      * @param leverageType The type of leverage position.
      */
     function leveragedBorrowFromRelatedContract(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 notionalExposure,
         uint256 marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         address borrower,
         uint8 leverageType
     ) public nonReentrant onlyRelatedContracts {
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
     }
 }

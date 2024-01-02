@@ -1,34 +1,34 @@
 
-const { upgradePrimaryIndexToken } = require("./primaryIndexToken/upgradePrimaryIndexToken.js");
-const {upgradePrimaryIndexTokenModerator} = require("./primaryIndexTokenModerator/upgradePrimaryIndexTokenModerator.js");
-const { upgradePrimaryIndexTokenAtomicRepayment } = require("./primaryIndexTokenAtomicRepayment/upgradePrimaryIndexTokenAtomicRepayment.js");
-const { upgradePrimaryIndexTokenLeverage } = require("./primaryIndexTokenLeverage/upgradePrimaryIndexTokenLeverage.js");
-const { upgradePrimaryIndexTokenLiquidation } = require("./primaryIndexTokenLiquidation/upgradePrimaryIndexTokenLiquidation.js");
-const { upgradePrimaryIndexTokenWrappedTokenGateway } = require("./primaryIndexTokenWrappedTokenGateway/upgradePrimaryIndexTokenWrappedTokenGateway.js");
+const { upgradePrimaryLendingPlatform } = require("./primaryLendingPlatform/upgradePrimaryLendingPlatform.js");
+const {upgradePrimaryLendingPlatformModerator} = require("./primaryLendingPlatformModerator/upgradePrimaryLendingPlatformModerator.js");
+const { upgradePrimaryLendingPlatformAtomicRepayment } = require("./primaryLendingPlatformAtomicRepayment/upgradePrimaryLendingPlatformAtomicRepayment.js");
+const { upgradePrimaryLendingPlatformLeverage } = require("./primaryLendingPlatformLeverage/upgradePrimaryLendingPlatformLeverage.js");
+const { upgradePrimaryLendingPlatformLiquidation } = require("./primaryLendingPlatformLiquidation/upgradePrimaryLendingPlatformLiquidation.js");
+const { upgradePrimaryLendingPlatformWrappedTokenGateway } = require("./primaryLendingPlatformWrappedTokenGateway/upgradePrimaryLendingPlatformWrappedTokenGateway.js");
 
 async function main() {
-    console.log("***** PRIMARY INDEX TOKEN DEPLOYMENT *****");
-    await upgradePrimaryIndexToken();
+    console.log("***** PRIMARY LENDING PLATFORM DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatform();
 
     console.log();
-    console.log("***** PRIMARY INDEX TOKEN MODERATOR DEPLOYMENT *****");
-    await upgradePrimaryIndexTokenModerator();
+    console.log("***** PRIMARY LENDING PLATFORM MODERATOR DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatformModerator();
 
     console.log();
-    console.log("***** PRIMARY INDEX TOKEN ATOMIC REPAYMENT DEPLOYMENT *****");
-    await upgradePrimaryIndexTokenAtomicRepayment();
+    console.log("***** PRIMARY LENDING PLATFORM ATOMIC REPAYMENT DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatformAtomicRepayment();
 
     console.log();
-    console.log("***** PRIMARY INDEX TOKEN LEVERAGE DEPLOYMENT *****");
-    await upgradePrimaryIndexTokenLeverage();
+    console.log("***** PRIMARY LENDING PLATFORM LEVERAGE DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatformLeverage();
 
     console.log();
-    console.log("***** PRIMARY INDEX TOKEN LIQUIDATION DEPLOYMENT *****");
-    await upgradePrimaryIndexTokenLiquidation();
+    console.log("***** PRIMARY LENDING PLATFORM LIQUIDATION DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatformLiquidation();
 
     console.log();
-    console.log("***** PRIMARY INDEX TOKEN WRAPPED TOKEN GATEWAY DEPLOYMENT *****");
-    await upgradePrimaryIndexTokenWrappedTokenGateway();
+    console.log("***** PRIMARY LENDING PLATFORM WRAPPED TOKEN GATEWAY DEPLOYMENT *****");
+    await upgradePrimaryLendingPlatformWrappedTokenGateway();
 }
 
 main().catch((error) => {

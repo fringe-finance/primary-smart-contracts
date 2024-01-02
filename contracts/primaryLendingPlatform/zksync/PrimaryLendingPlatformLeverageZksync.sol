@@ -32,8 +32,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
@@ -42,17 +42,17 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function leveragedBorrow(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint notionalExposure,
         uint marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         uint8 leverageType,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
     }
 
     /**
@@ -75,8 +75,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token the user wants to invest in.
-     * @param lendingToken The address of the lending token used for collateral.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The notional exposure of the user's investment.
      * @param marginCollateralAmount The amount of collateral to be deposited by the user.
      * @param buyCalldata The calldata used for buying the project token on the DEX.
@@ -86,18 +86,18 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function leveragedBorrowFromRelatedContract(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint notionalExposure,
         uint marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         address borrower,
         uint8 leverageType,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant onlyRelatedContracts {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
     }
 
     /**

@@ -142,6 +142,11 @@
             "10",
             "10",
             "10"
+        ],
+        "initialSupplyAmount": [
+            "1000000",
+            "",
+            ""
         ]
     },
     "jumRateModel": {

@@ -65,7 +65,7 @@
     "WETH": "0x294cB514815CAEd9557e6bAA2947d6Cf0733f014"
   },
   "exchangeAggregatorParams": {
-    "exchangeAggregator": "",
+    "exchangeAggregator": "0x54ae494D82DB98c2cF1614Ad5989596822F646b4",
     "registryAggregator": ""
   },
   "plpModeratorParams": {
@@ -172,7 +172,8 @@
       "10",
       "10",
       "10"
-    ]
+    ],
+    "initialSupplyAmount": []
   },
   "jumRateModel": {
     "gainPerYear": [
