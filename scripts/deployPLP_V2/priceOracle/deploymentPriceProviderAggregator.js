@@ -1052,12 +1052,14 @@ module.exports = {
         {
             if (pythPriceProviderAddress) {
                 const currentImplementation = await proxyAdmin.getProxyImplementation(priceProviderAggregator.address);
-                let currentPythPriceProvider = await priceProviderAggregator.pythPriceProvider();
-                if (currentImplementation == priceProviderAggregatorLogicAddress && currentPythPriceProvider != pythPriceProviderAddress) {
-                    await priceProviderAggregator.setPythPriceProvider(pythPriceProviderAddress).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set pythPriceProviderAddress " + pythPriceProviderAddress);
-                    });
+                if (currentImplementation == priceProviderAggregatorLogicAddress) {
+                    let currentPythPriceProvider = await priceProviderAggregator.pythPriceProvider();
+                    if (currentPythPriceProvider != pythPriceProviderAddress) {
+                        await priceProviderAggregator.setPythPriceProvider(pythPriceProviderAddress).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set pythPriceProviderAddress " + pythPriceProviderAddress);
+                        });
+                    }
                 }
             }
         }
