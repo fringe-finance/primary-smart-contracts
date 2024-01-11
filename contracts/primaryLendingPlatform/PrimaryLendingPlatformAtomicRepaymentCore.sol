@@ -25,6 +25,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     address public exchangeAggregator;
     address public registryAggregator;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -194,7 +196,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjToken, collateralAmount, msg.sender, address(this));
 
-        _approveTokenTransfer(prjToken, collateralAmount);
+        uint256 approvalAmount = (collateralAmount * (10000 + BUFFER_PERCENTAGE)) / 10000;
+        _approveTokenTransfer(prjToken, approvalAmount);
 
         uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
         (uint256 amountSold, uint256 amountReceive) = _buyOnExchangeAggregator(prjToken, lendingToken, buyCalldata);

@@ -26,6 +26,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     mapping(address => mapping(address => LeverageType)) public typeOfLeveragePosition;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     struct Ratio {
         uint8 numerator;
         uint8 denominator;
@@ -35,8 +37,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         AMPLIFY,
         MARGIN_TRADE
     }
-
     
+
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -474,7 +476,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
         _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
 
-        _approveTokenTransfer(lendingToken, lendingTokenCount);
+        uint256 approvalAmount = (lendingTokenCount * (10000 + BUFFER_PERCENTAGE)) / 10000;
+        _approveTokenTransfer(lendingToken, approvalAmount);
 
         uint256 amountReceive = _buyOnExchangeAggregator(projectToken, buyCalldata);
 
