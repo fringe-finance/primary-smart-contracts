@@ -65,13 +65,19 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     event ChangeActive(address indexed token, bool active);
 
     /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
      * @dev Initializes the contract by setting up the access control roles and default values for tokenDecimals and validTimePeriod.
      */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        tokenDecimals = 8;
+        tokenDecimals = 6;
         validTimePeriod = 60;
     }
 
@@ -112,6 +118,16 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /****************** Moderator functions ****************** */
+
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
 
     /**
      * @notice Sets token and priceIdPath.
@@ -380,6 +396,16 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
             priceIds[i] = priceIdNeedUpdate[i];
         }
         updateFee = IPyth(pythOracle).singleUpdateFeeInWei() * cntTokenNeedUpdate;
+    }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes active status of token and array of bytes32 representing the path to the token's price Pyth ID.
+     */
+    function getPythMetadata(address token) public view returns (PythMetadata memory) {
+        PythMetadata memory metadata = pythMetadata[token];
+        return metadata;
     }
 
     /**

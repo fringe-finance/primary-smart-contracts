@@ -48,12 +48,14 @@
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [],

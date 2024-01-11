@@ -7,51 +7,51 @@ const config = require(configFile);
 
 let {
     PRIMARY_PROXY_ADMIN,
-    PrimaryIndexTokenModeratorLogic,
-    PrimaryIndexTokenModeratorProxy,
+    PrimaryLendingPlatformModeratorLogic,
+    PrimaryLendingPlatformModeratorProxy,
 } = config;
 
 let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
-let primaryIndexTokenModeratorLogicAddress = PrimaryIndexTokenModeratorLogic;
-let primaryIndexTokenModeratorProxyAddress = PrimaryIndexTokenModeratorProxy;
+let primaryLendingPlatformModeratorLogicAddress = PrimaryLendingPlatformModeratorLogic;
+let primaryLendingPlatformModeratorProxyAddress = PrimaryLendingPlatformModeratorProxy;
 
 module.exports = {
-    upgradePrimaryIndexTokenModerator: async function () {
+    upgradePrimaryLendingPlatformModerator: async function () {
 
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         console.log("DeployMaster: " + deployMaster.address);
 
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-        let PrimaryIndexTokenModerator = await hre.ethers.getContractFactory("PrimaryIndexTokenModerator");
+        let PrimaryLendingPlatformModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
 
-        if (!primaryIndexTokenModeratorLogicAddress) {
-            pitModerator = await PrimaryIndexTokenModerator.connect(deployMaster).deploy();
-            await pitModerator.deployed().then(function (instance) {
-                primaryIndexTokenModeratorLogicAddress = instance.address;
-                config.PrimaryIndexTokenModeratorLogic = primaryIndexTokenModeratorLogicAddress;
+        if (!primaryLendingPlatformModeratorLogicAddress) {
+            plpModerator = await PrimaryLendingPlatformModerator.connect(deployMaster).deploy();
+            await plpModerator.deployed().then(function (instance) {
+                primaryLendingPlatformModeratorLogicAddress = instance.address;
+                config.PrimaryLendingPlatformModeratorLogic = primaryLendingPlatformModeratorLogicAddress;
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
-        console.log("PrimaryIndexTokenModerator masterCopy address: " + primaryIndexTokenModeratorLogicAddress);
+        console.log("PrimaryLendingPlatformModerator masterCopy address: " + primaryLendingPlatformModeratorLogicAddress);
 
         let proxyAdmin = await ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         let upgradeData = await proxyAdmin.upgradeData(
-            primaryIndexTokenModeratorProxyAddress
+            primaryLendingPlatformModeratorProxyAddress
         );
         let appendTimestamp = Number(upgradeData.appendTimestamp)
         if (appendTimestamp == 0) {
             await proxyAdmin
                 .appendUpgrade(
-                    primaryIndexTokenModeratorProxyAddress,
-                    primaryIndexTokenModeratorLogicAddress
+                    primaryLendingPlatformModeratorProxyAddress,
+                    primaryLendingPlatformModeratorLogicAddress
                 )
                 .then(function (instance) {
                     console.log(
                         "ProxyAdmin appendUpgrade " +
-                        primaryIndexTokenModeratorProxyAddress +
+                        primaryLendingPlatformModeratorProxyAddress +
                         " to " +
-                        primaryIndexTokenModeratorLogicAddress
+                        primaryLendingPlatformModeratorLogicAddress
                     );
                     return instance;
                 });
@@ -60,13 +60,13 @@ module.exports = {
             let delayPeriod = Number(upgradeData.delayPeriod);
             if (appendTimestamp + delayPeriod <= timeStamp) {
                 await proxyAdmin
-                    .upgrade(primaryIndexTokenModeratorProxyAddress, primaryIndexTokenModeratorLogicAddress)
+                    .upgrade(primaryLendingPlatformModeratorProxyAddress, primaryLendingPlatformModeratorLogicAddress)
                     .then(function (instance) {
                         console.log(
                             "ProxyAdmin upgraded " +
-                            primaryIndexTokenModeratorProxyAddress +
+                            primaryLendingPlatformModeratorProxyAddress +
                             " to " +
-                            primaryIndexTokenModeratorLogicAddress
+                            primaryLendingPlatformModeratorLogicAddress
                         );
                         return instance;
                     });

@@ -7,51 +7,51 @@ const config = require(configFile);
 
 let {
     PRIMARY_PROXY_ADMIN,
-    PrimaryIndexTokenWrappedTokenGatewayLogic,
-    PrimaryIndexTokenWrappedTokenGatewayProxy,
+    PrimaryLendingPlatformLeverageLogic,
+    PrimaryLendingPlatformLeverageProxy,
 } = config;
 
 let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
-let primaryIndexTokenWrappedTokenGatewayLogicAddress = PrimaryIndexTokenWrappedTokenGatewayLogic;
-let primaryIndexTokenWrappedTokenGatewayProxyAddress = PrimaryIndexTokenWrappedTokenGatewayProxy;
+let primaryLendingPlatformLeverageLogicAddress = PrimaryLendingPlatformLeverageLogic;
+let primaryLendingPlatformLeverageProxyAddress = PrimaryLendingPlatformLeverageProxy;
 
 module.exports = {
-    upgradePrimaryIndexTokenWrappedTokenGateway: async function () {
+    upgradePrimaryLendingPlatformLeverage: async function () {
 
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         console.log("DeployMaster: " + deployMaster.address);
 
         let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
-        let PrimaryIndexTokenWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryIndexTokenWrappedTokenGateway");
+        let PrimaryLendingPlatformLeverage = await hre.ethers.getContractFactory("PrimaryLendingPlatformLeverageZksync");
 
-        if (!primaryIndexTokenWrappedTokenGatewayLogicAddress) {
-            pitWrappedTokenGateway = await PrimaryIndexTokenWrappedTokenGateway.connect(deployMaster).deploy();
-            await pitWrappedTokenGateway.deployed().then(function (instance) {
-                primaryIndexTokenWrappedTokenGatewayLogicAddress = instance.address;
-                config.PrimaryIndexTokenWrappedTokenGatewayLogic = primaryIndexTokenWrappedTokenGatewayLogicAddress;
+        if (!primaryLendingPlatformLeverageLogicAddress) {
+            plpLeverage = await PrimaryLendingPlatformLeverage.connect(deployMaster).deploy();
+            await plpLeverage.deployed().then(function (instance) {
+                primaryLendingPlatformLeverageLogicAddress = instance.address;
+                config.PrimaryLendingPlatformLeverageLogic = primaryLendingPlatformLeverageLogicAddress;
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
-        console.log("PrimaryIndexTokenWrappedTokenGateway masterCopy address: " + PrimaryIndexTokenWrappedTokenGatewayLogic);
+        console.log("PrimaryLendingPlatformLeverage masterCopy address: " + primaryLendingPlatformLeverageLogicAddress);
 
         let proxyAdmin = await ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         let upgradeData = await proxyAdmin.upgradeData(
-            primaryIndexTokenWrappedTokenGatewayProxyAddress
+            primaryLendingPlatformLeverageProxyAddress
         );
         let appendTimestamp = Number(upgradeData.appendTimestamp);
         if (appendTimestamp == 0) {
             await proxyAdmin
                 .appendUpgrade(
-                    primaryIndexTokenWrappedTokenGatewayProxyAddress,
-                    primaryIndexTokenWrappedTokenGatewayLogicAddress
+                    primaryLendingPlatformLeverageProxyAddress,
+                    primaryLendingPlatformLeverageLogicAddress
                 )
                 .then(function (instance) {
                     console.log(
                         "ProxyAdmin appendUpgrade " +
-                        primaryIndexTokenWrappedTokenGatewayProxyAddress +
+                        primaryLendingPlatformLeverageProxyAddress +
                         " to " +
-                        primaryIndexTokenWrappedTokenGatewayLogicAddress
+                        primaryLendingPlatformLeverageLogicAddress
                     );
                     return instance;
                 });
@@ -60,13 +60,13 @@ module.exports = {
             let delayPeriod = Number(upgradeData.delayPeriod);
             if (appendTimestamp + delayPeriod <= timeStamp) {
                 await proxyAdmin
-                    .upgrade(primaryIndexTokenWrappedTokenGatewayProxyAddress, primaryIndexTokenWrappedTokenGatewayLogicAddress)
+                    .upgrade(primaryLendingPlatformLeverageProxyAddress, primaryLendingPlatformLeverageLogicAddress)
                     .then(function (instance) {
                         console.log(
                             "ProxyAdmin upgraded " +
-                            primaryIndexTokenWrappedTokenGatewayProxyAddress +
+                            primaryLendingPlatformLeverageProxyAddress +
                             " to " +
-                            primaryIndexTokenWrappedTokenGatewayLogicAddress
+                            primaryLendingPlatformLeverageLogicAddress
                         );
                         return instance;
                     });

@@ -120,6 +120,11 @@
             "10000000000000000000",
             "10000000000000000000"
         ],
+        "reserveFactorMantissa": [
+          "50000000000000000",
+          "70000000000000000",
+          "100000000000000000"
+        ],
         "lendingTokens": [
             "0x0C88529C86103Fa942642a59678EAEc89e52c4C8",
             "0x43458e8bbF4e8c8D45E0Cc71ceCdc47E4c6a8133",
@@ -149,7 +154,8 @@
             "10",
             "10",
             "10"
-        ]
+        ],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [

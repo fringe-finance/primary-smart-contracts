@@ -48,19 +48,21 @@
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [],
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
-        "blocksPerYear": "122640000"
+        "blocksPerYear": ""
     },
     "plpLiquidationParams": {
         "minPA": "",

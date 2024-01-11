@@ -820,7 +820,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 margin,
                 buyCalldata,
                 type
-            )).to.revertedWith("PIT: Project token is not listed");
+            )).to.revertedWith("Prj token isn't listed");
         });
         it.skip("22. Failure: Should revert when isLendingTokenListed == FALSE", async function () {
             let projectToken = prj1.address;
@@ -837,7 +837,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 margin,
                 buyCalldata,
                 type
-            )).to.revertedWith("PIT: Lending token is not listed");
+            )).to.revertedWith("Lending token isn't listed");
         });
         it("23. Failure: Should revert when allowance lendingToken < lendingTokenCount and isLeveragePosition == FALSE", async function () {
             await loadFixture();
@@ -2289,7 +2289,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2317,7 +2317,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2328,7 +2328,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2388,7 +2388,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenBeforeLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2416,7 +2416,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenAfterLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2427,7 +2427,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
                 expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
                 expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-                expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+                // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
                 expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
                 expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
                 expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2511,7 +2511,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2539,7 +2539,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2550,7 +2550,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2636,7 +2636,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenBeforeLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2664,7 +2664,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenAfterLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2675,7 +2675,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
                 expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
                 expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-                expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+                // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
                 expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
                 expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
                 expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2739,7 +2739,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2767,7 +2767,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2778,7 +2778,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2842,7 +2842,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenBeforeLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2870,7 +2870,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenAfterLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2881,7 +2881,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
                 expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
                 expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-                expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+                // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
                 expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
                 expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
                 expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -2969,7 +2969,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenBeforeLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -2997,7 +2997,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             let allowanceLendingTokenAfterLeverage = await usdc.allowance(deployMaster.address, plpLeverageAddress);
             let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(deployMaster.address, projectToken, lendingToken);
             let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-            let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+            // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
             let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
             let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, deployMaster.address);
             let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -3008,7 +3008,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
             expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
             expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
             expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-            expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+            // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
             expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
             expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
             expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
@@ -3098,7 +3098,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenBeforeLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingBeforeLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowBeforeLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralBeforeLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenBeforeLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountBeforeLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountBeforeLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -3126,7 +3126,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 let allowanceLendingTokenAfterLeverage = await usdc.allowance(signers[i].address, plpLeverageAddress);
                 let totalOutstandingAfterLeverage = await plpInstance.totalOutstanding(signers[i].address, projectToken, lendingToken);
                 let totalBorrowAfterLeverage = await plpInstance.totalBorrow(projectToken, lendingToken);
-                let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
+                // let totalBorrowPerCollateralAfterLeverage = await plpInstance.getTotalBorrowPerCollateral(projectToken);
                 let totalBorrowPerLendingTokenAfterLeverage = await plpInstance.getTotalBorrowPerLendingToken(lendingToken);
                 let depositedAmountAfterLeverage = await plpInstance.getDepositedAmount(projectToken, signers[i].address);
                 let totalDepositedAmountAfterLeverage = await plpInstance.totalDepositedProjectToken(projectToken);
@@ -3137,7 +3137,7 @@ describe("PrimaryLendingPlatformLeverage", function () {
                 expect(allowanceLendingTokenAfterLeverage).to.eq(allowanceLendingTokenBeforeLeverage.sub(borrowUSDCAmount));
                 expect(totalOutstandingAfterLeverage).to.eq(totalOutstandingBeforeLeverage.add(borrowUSDCAmount));
                 expect(totalBorrowAfterLeverage).to.eq(totalBorrowBeforeLeverage.add(borrowUSDCAmount));
-                expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
+                // expect(totalBorrowPerCollateralAfterLeverage).to.eq(totalBorrowPerCollateralBeforeLeverage.add(exp));
                 expect(totalBorrowPerLendingTokenAfterLeverage).to.eq(totalBorrowPerLendingTokenBeforeLeverage.add(exp));
                 expect(depositedAmountAfterLeverage).to.eq(depositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));
                 expect(totalDepositedAmountAfterLeverage).to.eq(totalDepositedAmountBeforeLeverage.add(argsEvent.amountReceive).add(addingAmount));

@@ -624,24 +624,6 @@ interface IPrimaryLendingPlatform {
     function getLoanToValueRatio(address projectToken, address lendingToken) external view returns (uint256 lvrNumerator, uint256 lvrDenominator);
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened after update price.
-     * @param account Address of the account.
-     * @param projectToken Address of the project token.
-     * @param lendingToken Address of the lending token.
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return The PIT value.
-     * Formula: pit = $ * LVR
-     */
-    function pitWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256);
-
-    /**
      * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened after update price.
      * @param account Address of the account.
      * @param projectToken Address of the project token.
@@ -690,24 +672,6 @@ interface IPrimaryLendingPlatform {
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint256);
-
-    /**
-     * @dev Returns the health factor of a user's borrow position for a specific project token and lending token after update price
-     * @param account The address of the user's borrow position
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return numerator The numerator of the health factor
-     * @return denominator The denominator of the health factor
-     */
-    function healthFactorWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256 numerator, uint256 denominator);
 
     /**
      * @dev Returns the evaluation of a specific token amount in USD after update price.
@@ -766,36 +730,6 @@ interface IPrimaryLendingPlatform {
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint);
-
-    /**
-     * @dev Get total borrow amount in USD per collateral for a specific project token after update price.
-     * @param projectToken The address of the project token
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return The total borrow amount in USD
-     */
-    function getTotalBorrowPerCollateralWithUpdatePrices(
-        address projectToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint);
-
-    /**
-     * @dev Convert the total outstanding amount of a user's borrow position to USD after update price.
-     * @param account The address of the user account
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return The total outstanding amount in USD
-     */
-    function totalOutstandingInUSDWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256);
 
     /**
      * @dev Returns the total estimated outstanding amount of a user's borrow position to USD after update price.

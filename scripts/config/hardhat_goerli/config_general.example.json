@@ -1,69 +1,76 @@
 {
-  "priceOracle": {
-      "Pyth": {
-          "pythOracle": "",
-          "tokensUsePyth": [],
-          "priceIdPath": []
-      },
-      "Chainlink": {
-          "sequencerUptimeFeed": "",
-          "gracePeriodTime": "",
-          "tokensUseChainlink": [],
-          "chainlinkAggregatorV3": [[]],
-          "timeOuts": [[]]
-      },
-      "Uniswap": {
-          "tokensUseUniswap": [],
-          "uniswapPairs": []
-      },
-      "BackendProvider": {
-          "tokensUseBackendProvider": []
-      },
-      "LPProvider": {
-          "tokensUseLPProvider": []
-      },
-      "wstETHProvider": {
-          "wstETHAggregatorPath": []
-      },
-      "wstETH": "",
-      "usdc": "",
-      "WETH": ""
-  },
-  "exchangeAggregatorParams": {
-      "exchangeAggregator": "",
-      "registryAggregator": ""
-  },
-  "plpModeratorParams": {
-      "projectTokens": [],
+    "priceOracle": {
+        "Pyth": {
+            "pythOracle": "",
+            "tokensUsePyth": [],
+            "priceIdPath": []
+        },
+        "Chainlink": {
+            "sequencerUptimeFeed": "",
+            "gracePeriodTime": "",
+            "tokensUseChainlink": [],
+            "chainlinkAggregatorV3": [
+                []
+            ],
+            "timeOuts": [
+                []
+            ]
+        },
+        "Uniswap": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "BackendProvider": {
+            "tokensUseBackendProvider": []
+        },
+        "LPProvider": {
+            "tokensUseLPProvider": []
+        },
+        "wstETHProvider": {
+            "wstETHAggregatorPath": [],
+            "timeOuts": []
+        },
+        "wstETH": "",
+        "usdc": "",
+        "WETH": ""
+    },
+    "exchangeAggregatorParams": {
+        "exchangeAggregator": "",
+        "registryAggregator": ""
+    },
+    "plpModeratorParams": {
+        "projectTokens": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
         "isPaused": false,
         "borrowLimitPerCollateral": [],
         "borrowLimitPerLendingToken": []
-  },
-  "blendingToken": {
-      "initialExchangeRateMantissa": [],
-      "lendingTokens": [],
-      "symbol": [],
-      "decimals": [],
-      "name": [],
-      "loanToValueRatioNumerator": [],
-      "loanToValueRatioDenominator": []
+    },
+    "blendingToken": {
+        "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
+        "lendingTokens": [],
+        "symbol": [],
+        "decimals": [],
+        "name": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
-      "gainPerYear": [],
-      "jumGainPerYear": [],
-      "targetUtil": [],
-      "newMaxBorrow": [],
-      "blocksPerYear": ""
+        "gainPerYear": [],
+        "jumGainPerYear": [],
+        "targetUtil": [],
+        "newMaxBorrow": [],
+        "blocksPerYear": ""
     },
     "plpLiquidationParams": {
-      "minPA": "",
-      "maxLRFNumerator": "",
-      "maxLRFDenominator": "",
-      "rewardCalcFactorNumerator": "",
-      "rewardCalcFactorDenominator": "",
-      "targetHFNumerator": "",
-      "targetHFDenominator": ""
+        "minPA": "",
+        "maxLRFNumerator": "",
+        "maxLRFDenominator": "",
+        "rewardCalcFactorNumerator": "",
+        "rewardCalcFactorDenominator": "",
+        "targetHFNumerator": "",
+        "targetHFDenominator": ""
     }
 }

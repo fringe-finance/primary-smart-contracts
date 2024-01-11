@@ -150,28 +150,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     }
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened after updating related token's prices.
-     *
-     * Formula: pit = $ * LVR of position.
-     * @param account Address of the account.
-     * @param projectToken Address of the project token.
-     * @param lendingToken Address of the lending token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The PIT value.
-     */
-    function pitWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return pit(account, projectToken, lendingToken);
-    }
-
-    /**
      * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened after updating related token's prices.
      *
      * Formula: pit = $ * LVR of project token.
@@ -209,27 +187,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     ) external payable returns (uint256) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return pitRemaining(account, projectToken, lendingToken);
-    }
-
-    /**
-     * @dev Returns the health factor of a user's borrow position for a specific project token and lending token after updating related token's prices.
-     * @param account The address of the user's borrow position.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return numerator The numerator of the health factor.
-     * @return denominator The denominator of the health factor.
-     */
-    function healthFactorWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256 numerator, uint256 denominator) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return healthFactor(account, projectToken, lendingToken);
     }
 
     /**
@@ -298,42 +255,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     ) external payable returns (uint) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return getTotalBorrowPerLendingToken(lendingToken);
-    }
-
-    /**
-     * @dev Gets total borrow amount in USD per collateral for a specific project token after updating related token's prices.
-     * @param projectToken The address of the project token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The total borrow amount in USD.
-     */
-    function getTotalBorrowPerCollateralWithUpdatePrices(
-        address projectToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getTotalBorrowPerCollateral(projectToken);
-    }
-
-    /**
-     * @dev Converts the total outstanding amount of a user's borrow position to USD after updating related token's prices.
-     * @param account The address of the user account.
-     * @param projectToken The address of the project token
-     * @param lendingToken The address of the lending token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The total outstanding amount in USD.
-     */
-    function totalOutstandingInUSDWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return totalOutstandingInUSD(account, projectToken, lendingToken);
     }
 
     /**

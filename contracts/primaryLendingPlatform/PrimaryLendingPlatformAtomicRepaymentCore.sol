@@ -23,6 +23,14 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
 
     IPrimaryLendingPlatform public primaryLendingPlatform;
     address public exchangeAggregator;
+    address public registryAggregator;
+
+    /**
+     * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
+     * @param exchangeAggregator The address of the exchange aggregator.
+     * @param registryAggregator The address of the registry aggregator.
+     */
+    event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator);
 
     /**
      * @dev Emitted when the primary lending platform address is set.
@@ -75,6 +83,26 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     modifier isProjectTokenListed(address projectToken) {
         require(primaryLendingPlatform.projectTokenInfo(projectToken).isListed, "AtomicRepayment: Project token is not listed");
         _;
+    }
+
+    /**
+     * @dev Updates the Exchange Aggregator contract and registry contract addresses.
+     *
+     * Requirements:
+     * - The caller must be the moderator.
+     * - `exchangeAggregatorAddress` must not be the zero address.
+     * - `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+     * @param exchangeAggregatorAddress The new address of the Exchange Aggregator contract.
+     * @param registryAggregatorAddress The new address of the Aggregator registry contract.
+     */
+    function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
+        require(exchangeAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
+        if (registryAggregatorAddress != address(0)) {
+            require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
+            registryAggregator = registryAggregatorAddress;
+        }
+        exchangeAggregator = exchangeAggregatorAddress;
+        emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
 
     /**
@@ -197,11 +225,37 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the exchange aggregator.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
-    function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal {
+        require(exchangeAggregator != address(0), "AtomicRepayment: Exchange aggregator not set");
+        if (registryAggregator != address(0)) {
+            _approveTokenTransferPara(token, tokenAmount);
+        } else {
+            _approveTokenTransferOO(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the Open Ocean exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferOO(address token, uint256 tokenAmount) internal {
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the ParaSwap exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferPara(address token, uint256 tokenAmount) internal {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
         uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
         if (allowanceAmount < tokenAmount) {

@@ -165,7 +165,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only the admin to call the function.
      */
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PIT: Caller is not the Admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller isn't Admin");
         _;
     }
 
@@ -174,7 +174,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param projectToken The address of the project token.
      */
     modifier isProjectTokenListed(address projectToken) {
-        require(projectTokenInfo[projectToken].isListed, "PIT: Project token is not listed");
+        require(projectTokenInfo[projectToken].isListed, "Prj token isn't listed");
         _;
     }
 
@@ -183,7 +183,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken The address of the lending token.
      */
     modifier isLendingTokenListed(address lendingToken) {
-        require(lendingTokenInfo[lendingToken].isListed, "PIT: Lending token is not listed");
+        require(lendingTokenInfo[lendingToken].isListed, "Lending token isn't listed");
         _;
     }
 
@@ -191,7 +191,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only related contracts to call the function.
      */
     modifier onlyRelatedContracts() {
-        require(isRelatedContract[msg.sender], "PIT: Caller is not related Contract");
+        require(isRelatedContract[msg.sender], "Caller isn't related Contract");
         _;
     }
 
@@ -199,7 +199,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only the moderator contract to call the function.
      */
     modifier onlyModeratorContract() {
-        require(msg.sender == primaryLendingPlatformModerator, "PIT: Caller is not primaryLendingPlatformModerator");
+        require(msg.sender == primaryLendingPlatformModerator, "Caller isn't Moderator");
         _;
     }
 
@@ -214,7 +214,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param newModeratorContract The address of the new moderator contract.
      */
     function setPrimaryLendingPlatformModerator(address newModeratorContract) external onlyAdmin {
-        require(newModeratorContract != address(0), "PIT: Invalid address");
+        require(newModeratorContract != address(0), "Invalid address");
         primaryLendingPlatformModerator = newModeratorContract;
         emit SetModeratorContract(newModeratorContract);
     }
@@ -266,7 +266,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param projectToken The address of the project token to remove.
      */
     function removeProjectToken(uint256 projectTokenId, address projectToken) external onlyModeratorContract {
-        require(projectTokens[projectTokenId] == projectToken, "PIT: Invalid address");
+        require(projectTokens[projectTokenId] == projectToken, "Invalid address");
         projectTokenInfo[projectToken].isListed = false;
         projectTokens[projectTokenId] = projectTokens[projectTokens.length - 1];
         projectTokens.pop();
@@ -282,7 +282,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken The address of the lending token to be removed.
      */
     function removeLendingToken(uint256 lendingTokenId, address lendingToken) external onlyModeratorContract {
-        require(lendingTokens[lendingTokenId] == lendingToken, "PIT: Invalid address");
+        require(lendingTokens[lendingTokenId] == lendingToken, "Invalid address");
         lendingTokenInfo[lendingToken].isListed = false;
         lendingTokens[lendingTokenId] = lendingTokens[lendingTokens.length - 1];
         lendingTokens.pop();
@@ -452,8 +452,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param beneficiary The address of the beneficiary receiving the deposit.
      */
     function _deposit(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal {
-        require(!projectTokenInfo[projectToken].isDepositPaused, "PIT: ProjectToken is paused");
-        require(projectTokenAmount > 0, "PIT: ProjectTokenAmount==0");
+        require(!projectTokenInfo[projectToken].isDepositPaused, "Token is paused");
+        require(projectTokenAmount > 0, "Invalid amount");
         ERC20Upgradeable(projectToken).safeTransferFrom(user, address(this), projectTokenAmount);
         _calcDepositPosition(projectToken, projectTokenAmount, beneficiary);
         emit Deposit(user, projectToken, projectTokenAmount, beneficiary);
@@ -530,9 +530,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The amount of project tokens withdrawn.
      */
     function _withdraw(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal returns (uint256) {
-        require(!projectTokenInfo[projectToken].isWithdrawPaused, "PIT: ProjectToken is paused");
+        require(!projectTokenInfo[projectToken].isWithdrawPaused, "Token is paused");
         uint256 depositedProjectTokenAmount = depositedAmount[user][projectToken];
-        require(projectTokenAmount > 0 && depositedProjectTokenAmount > 0, "PIT: Invalid PRJ token amount or depositPosition doesn't exist");
+        require(projectTokenAmount > 0 && depositedProjectTokenAmount > 0, "Invalid amount or deposit doesn't exist");
         address actualLendingToken = getLendingToken(user, projectToken);
 
         uint256 loanBody = borrowPosition[user][projectToken][actualLendingToken].loanBody;
@@ -542,7 +542,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
 
         uint256 withdrawableAmount = getCollateralAvailableToWithdraw(user, projectToken, actualLendingToken);
-        require(withdrawableAmount > 0, "PIT: Withdrawable amount is 0");
+        require(withdrawableAmount > 0, "Withdrawable amount is 0");
         if (projectTokenAmount > withdrawableAmount) {
             projectTokenAmount = withdrawableAmount;
         }
@@ -637,13 +637,13 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _supply(address lendingToken, uint256 lendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
-        require(lendingTokenAmount > 0, "PIT: LendingTokenAmount==0");
+        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
+        require(lendingTokenAmount > 0, "Invalid amount");
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         (uint256 mintError, uint256 mintedAmount) = bLendingToken.mintTo(user, lendingTokenAmount);
-        require(mintError == 0, "PIT: MintError!=0");
-        require(mintedAmount > 0, "PIT: MintedAmount==0");
+        require(mintError == 0, "MintError!=0");
+        require(mintedAmount > 0, "MintedAmount==0");
 
         emit Supply(user, lendingToken, lendingTokenAmount, address(bLendingToken), mintedAmount);
     }
@@ -702,12 +702,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _redeem(address lendingToken, uint256 bLendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
-        require(bLendingTokenAmount > 0, "PIT: BLendingTokenAmount==0");
+        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
+        require(bLendingTokenAmount > 0, "BLendingTokenAmount==0");
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         uint256 redeemError = bLendingToken.redeemTo(user, bLendingTokenAmount);
-        require(redeemError == 0, "PIT: RedeemError!=0. redeem>=supply.");
+        require(redeemError == 0, "RedeemError!=0. redeem>=supply.");
 
         emit Redeem(user, lendingToken, address(bLendingToken), bLendingTokenAmount);
     }
@@ -764,12 +764,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _redeemUnderlying(address lendingToken, uint256 lendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "PIT: Lending token is paused");
-        require(lendingTokenAmount > 0, "PIT: LendingTokenAmount==0");
+        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
+        require(lendingTokenAmount > 0, "Invalid amount");
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         uint256 redeemUnderlyingError = bLendingToken.redeemUnderlyingTo(user, lendingTokenAmount);
-        require(redeemUnderlyingError == 0, "PIT:Redeem>=supply");
+        require(redeemUnderlyingError == 0, "Redeem>=supply");
 
         emit RedeemUnderlying(user, lendingToken, address(bLendingToken), lendingTokenAmount);
     }
@@ -785,19 +785,19 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The amount of `lendingToken` borrowed.
      */
     function _borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) internal returns (uint256) {
-        require(!primaryLendingPlatformLeverage.isLeveragePosition(user, projectToken), "PIT: Invalid position");
-        require(lendingToken != address(0), "PIT: Invalid lending token");
-        require(lendingTokenAmount > 0, "PIT: Invalid lending amount");
+        require(!primaryLendingPlatformLeverage.isLeveragePosition(user, projectToken), "Invalid position");
+        require(lendingToken != address(0), "Invalid address");
+        require(lendingTokenAmount > 0, "Invalid lending amount");
         address _lendingToken = lendingTokenPerCollateral[user][projectToken];
         if (_lendingToken != address(0)) {
-            require(lendingToken == _lendingToken, "PIT: Invalid lending token");
+            require(lendingToken == _lendingToken, "Invalid lending token");
         }
         uint256 loanBody = borrowPosition[user][projectToken][lendingToken].loanBody;
         if (loanBody > 0) {
             updateInterestInBorrowPositions(user, lendingToken);
         }
         uint256 availableToBorrow = getLendingAvailableToBorrow(user, projectToken, lendingToken);
-        require(availableToBorrow > 0, "PIT: Available amount to borrow is 0");
+        require(availableToBorrow > 0, "Available amount to borrow is 0");
         if (lendingTokenAmount > availableToBorrow) {
             lendingTokenAmount = availableToBorrow;
         }
@@ -961,7 +961,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address lendingToken,
         uint256 lendingTokenAmount
     ) internal returns (uint256) {
-        require(lendingTokenAmount > 0, "PIT: LendingTokenAmount==0");
+        require(lendingTokenAmount > 0, "Invalid amount");
         uint256 borrowPositionsAmount = 0;
         for (uint256 i = 0; i < projectTokens.length; i++) {
             if (borrowPosition[borrower][projectTokens[i]][lendingToken].loanBody > 0) {
@@ -970,7 +970,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
         BorrowPosition storage _borrowPosition = borrowPosition[borrower][projectToken][lendingToken];
         if (borrowPositionsAmount == 0 || _borrowPosition.loanBody == 0) {
-            revert("PIT: No borrow position");
+            revert("No borrow position");
         }
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         updateInterestInBorrowPositions(borrower, lendingToken);
@@ -1293,7 +1293,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The total borrow amount in USD.
      */
     function getTotalBorrowPerCollateral(address projectToken) public view returns (uint) {
-        require(lendingTokensLength() > 0, "PIT: List lendingTokens is empty");
+        require(lendingTokensLength() > 0, "Tokens list is empty");
         uint256 totalBorrowInUSD;
         for (uint256 i = 0; i < lendingTokensLength(); i++) {
             uint256 amount = totalBorrow[projectToken][lendingTokens[i]];
@@ -1337,7 +1337,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     function getLoanToValueRatio(address projectToken, address lendingToken) public view returns (uint256 lvrNumerator, uint256 lvrDenominator) {
         Ratio memory lvrProjectToken = projectTokenInfo[projectToken].loanToValueRatio;
         Ratio memory lvrLendingToken = lendingTokenInfo[lendingToken].loanToValueRatio;
-        lvrNumerator = lvrProjectToken.numerator * lvrLendingToken.numerator;
-        lvrDenominator = lvrProjectToken.denominator * lvrLendingToken.denominator;
+        lvrNumerator = uint256(lvrProjectToken.numerator) * uint256(lvrLendingToken.numerator);
+        lvrDenominator = uint256(lvrProjectToken.denominator) * uint256(lvrLendingToken.denominator);
     }
 }
