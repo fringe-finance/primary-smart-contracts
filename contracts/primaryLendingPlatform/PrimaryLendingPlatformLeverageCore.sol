@@ -37,7 +37,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         AMPLIFY,
         MARGIN_TRADE
     }
-    
+
 
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
@@ -153,8 +153,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
         if (registryAggregatorAddress != address(0)) {
             require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-            registryAggregator = registryAggregatorAddress;
         }
+        registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
         emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }

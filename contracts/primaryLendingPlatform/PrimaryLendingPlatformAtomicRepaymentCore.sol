@@ -101,8 +101,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         require(exchangeAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
         if (registryAggregatorAddress != address(0)) {
             require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-            registryAggregator = registryAggregatorAddress;
         }
+        registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
         emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
