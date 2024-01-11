@@ -102,6 +102,13 @@ bytes32 constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE")
 ```
 
 
+### BUFFER_PERCENTAGE (0x952038c2)
+
+```solidity
+uint16 constant BUFFER_PERCENTAGE = 500
+```
+
+
 ## State variables info
 
 ### isLeveragePosition (0x3226d284)

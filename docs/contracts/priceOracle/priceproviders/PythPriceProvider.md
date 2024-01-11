@@ -104,6 +104,21 @@ Parameters:
 | token  | address | The address of the token whose active status has changed.   |
 | active | bool    | The new active status of the token.                         |
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+Emitted when the token decimals is set.
+
+
+Parameters:
+
+| Name             | Type  | Description             |
+| :--------------- | :---- | :---------------------- |
+| newTokenDecimals | uint8 | The new token decimals. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -211,6 +226,22 @@ Parameters:
 | Name      | Type    | Description                                 |
 | :-------- | :------ | :------------------------------------------ |
 | moderator | address | The address of the moderator to be revoked. |
+
+### setTokenDecimals (0xf2cf47be)
+
+```solidity
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
+```
+
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
+
+
+Parameters:
+
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setTokenAndPriceIdPath (0x970d6b21)
 

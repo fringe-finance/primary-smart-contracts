@@ -74,6 +74,13 @@ bytes32 constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE")
 ```
 
 
+### BUFFER_PERCENTAGE (0x952038c2)
+
+```solidity
+uint16 constant BUFFER_PERCENTAGE = 500
+```
+
+
 ## State variables info
 
 ### primaryLendingPlatform (0x92641a7c)
@@ -182,7 +189,10 @@ Parameters:
 
 | Name | Type    | Description                                                                                                 |
 | :--- | :------ | :---------------------------------------------------------------------------------------------------------- |
-| pit  | address | The address of the primary lending platform contract.  Requirements: - `pit` cannot be the zero address. |
+| pit  | address | The address of the primary lending platform contract.
+ 
+ Requirements:
+ - `pit` cannot be the zero address. |
 
 ### getTotalOutstanding (0x00fe5da3)
 
