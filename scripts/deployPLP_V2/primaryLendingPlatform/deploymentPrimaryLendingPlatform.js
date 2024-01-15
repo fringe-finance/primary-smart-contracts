@@ -916,7 +916,7 @@ module.exports = {
                         const tokensLength = await plp.projectTokensLength();
                         for (var index = 0; index < tokensLength; index++) {
                             const token = await plp.projectTokens(index);
-                            if (token == projectTokensListSnapshot[index]) {
+                            if (token == projectTokensListSnapshot[i]) {
                                 try {
                                     const tx = await plpModerator.removeProjectToken(index);
                                     console.log("\nTransaction hash: " + tx.hash);
@@ -979,7 +979,7 @@ module.exports = {
                         const tokensLength = await plp.lendingTokensLength();
                         for (var index = 0; index < tokensLength; index++) {
                             const token = await plp.lendingTokens(index);
-                            if (token == lendingTokensListSnapshot[index]) {
+                            if (token == lendingTokensListSnapshot[i]) {
                                 try {
                                     const tx = await plpModerator.removeLendingToken(index);
                                     console.log("\nTransaction hash: " + tx.hash);
