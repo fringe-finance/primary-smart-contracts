@@ -633,17 +633,21 @@ module.exports = {
             }
             {
                 for (var i = 0; i < tokensUsePyth.length; i++) {
-                    let pythMetadata = await pythPriceProvider.pythMetadata(tokensUsePyth[i]);
-                    if (pythMetadata == false) {
-                        await pythPriceProvider.setTokenAndPriceIdPath(
-                            tokensUsePyth[i],
-                            priceIdPath[i]
-                        ).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("PythPriceProvider " + pythPriceProvider.address + " set token with parameters: ");
-                            console.log("   token: " + tokensUsePyth[i]);
-                            console.log("   priceId path: " + priceIdPath[i]);
-                        });
+                    let pythMetadata = await pythPriceProvider.getPythMetadata(tokensUsePyth[i]);
+                    const currentPriceIdPath = pythMetadata.priceIdPath;
+                    for (let j = 0; j < priceIdPath.length; j++) {
+                        if (currentPriceIdPath[j] != priceIdPath[i][j]) {
+                            await pythPriceProvider.setTokenAndPriceIdPath(
+                                tokensUsePyth[i],
+                                priceIdPath[i]
+                            ).then(function (instance) {
+                                console.log("\nTransaction hash: " + instance.hash);
+                                console.log("PythPriceProvider " + pythPriceProvider.address + " set token with parameters: ");
+                                console.log("   token: " + tokensUsePyth[i]);
+                                console.log("   priceId path: " + priceIdPath[i]);
+                            });
+                            break;
+                        }
                     }
                 }
             }
@@ -711,17 +715,21 @@ module.exports = {
             }
 
             for (var i = 0; i < tokensUseChainlink.length; i++) {
-                let chainlinkMetadataIsActive = await chainlinkPriceProvider.chainlinkMetadata(tokensUseChainlink[i]);
-                if (chainlinkMetadataIsActive == false) {
-                    await chainlinkPriceProvider.setTokenAndAggregator(
-                        tokensUseChainlink[i],
-                        chainlinkAggregatorV3[i]
-                    ).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
-                        console.log("   token: " + tokensUseChainlink[i]);
-                        console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
-                    });
+                let chainlinkMetadata = await chainlinkPriceProvider.getChainlinkMetadata(tokensUseChainlink[i]);
+                const aggregatorPath = chainlinkMetadata.aggregatorPath;
+                for (let j = 0; j < aggregatorPath.length; j++) {
+                    if (aggregatorPath[j] != chainlinkAggregatorV3[i][j]) {
+                        await chainlinkPriceProvider.setTokenAndAggregator(
+                            tokensUseChainlink[i],
+                            chainlinkAggregatorV3[i]
+                        ).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
+                            console.log("   token: " + tokensUseChainlink[i]);
+                            console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
+                        });
+                        break;
+                    }
                 }
                 for (var j = 0; j < chainlinkAggregatorV3[i].length; j++) {
                     let timeOut = await chainlinkPriceProvider.timeOuts(chainlinkAggregatorV3[i][j]);
