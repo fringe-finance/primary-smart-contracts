@@ -1,4 +1,7 @@
 {
+  "liquidationBot": {
+    "uniswapV2Factory": ""
+  },
   "priceOracle": {
     "Pyth": {
       "pythOracle": "0xff1a0f4744e8582df1ae09d5611b887b6a12925c",

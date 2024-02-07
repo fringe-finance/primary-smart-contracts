@@ -1335,39 +1335,6 @@ module.exports = {
             }
         }
 
-        {
-            let currentPLP = await plpWrappedTokenGateway.primaryLendingPlatform();
-            if (currentPLP != primaryLendingPlatformV2ProxyAddress) {
-                await plpWrappedTokenGateway.setPrimaryLendingPlatform(primaryLendingPlatformV2ProxyAddress)
-                    .then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("PrimaryLendingPlatformWrappedTokenGateway set primaryLendingPlatform " + primaryLendingPlatformV2ProxyAddress);
-                    });
-            }
-        }
-
-        {
-            let currentLiquidation = await plpWrappedTokenGateway.pitLiquidation();
-            if (currentLiquidation != primaryLendingPlatformLiquidationProxyAddress) {
-                await plpWrappedTokenGateway.setPITLiquidation(primaryLendingPlatformLiquidationProxyAddress)
-                    .then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("PrimaryLendingPlatformWrappedTokenGateway set liquidation " + primaryLendingPlatformLiquidationProxyAddress);
-                    });
-            }
-        }
-
-        {
-            let currentLeverage = await plpWrappedTokenGateway.pitLeverage();
-            if (currentLeverage != primaryLendingPlatformLeverageProxyAddress) {
-                await plpWrappedTokenGateway.setPITLeverage(primaryLendingPlatformLeverageProxyAddress)
-                    .then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("PrimaryLendingPlatformWrappedTokenGateway set leverage " + primaryLendingPlatformLeverageProxyAddress);
-                    });
-            }
-        }
-
         let addresses = {
             bondtrollerAddress: bondtrollerProxyAddress,
             jumpRateModelAddress: jumpRateModelProxyAddress,

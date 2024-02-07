@@ -1,5 +1,8 @@
 {
-  "priceOracle": {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
+    "priceOracle": {
       "Pyth": {
           "pythOracle": "",
           "tokensUsePyth": [],
