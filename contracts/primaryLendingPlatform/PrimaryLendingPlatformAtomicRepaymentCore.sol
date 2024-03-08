@@ -220,9 +220,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
             ERC20Upgradeable(lendingToken).safeTransfer(msg.sender, afterLendingBalance);
         }
 
-        if (amountReceive < totalOutStanding) {
-            _deferLiquidityCheck(msg.sender, prjToken, lendingToken);
-        }
+        _deferLiquidityCheck(msg.sender, prjToken, lendingToken);
 
         emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountReceive);
     }

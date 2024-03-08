@@ -226,7 +226,7 @@ contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable {
 
         /* Short-circuit accumulating 0 interest */
         if (accrualBlockNumberPrior == currentBlockNumber) {
-            return uint256(Error.NO_ERROR);
+            return borrowIndex;
         }
 
         /* Read the previous values out of storage */
