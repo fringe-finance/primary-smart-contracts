@@ -519,7 +519,7 @@ module.exports = {
         if (priceProviderAggregatorLogicAddress) priceProviderAggregatorImplementation = new ethers.Contract(priceProviderAggregatorLogicAddress, priceProviderAggregatorInterface, wallet);
         if (wstETHPriceProviderLogicAddress) wstETHPriceProviderImplementation = new ethers.Contract(wstETHPriceProviderLogicAddress, wstETHPriceProviderInterface, wallet);
         if (lpPriceProviderLogicAddress) lpPriceProviderImplementation = new ethers.Contract(lpPriceProviderLogicAddress, lpPriceProviderInterface, wallet);
-        
+
         //==============================
         // ====================== upgrade pythPriceProvider =============================
         if (pythPriceProviderAddress) {
@@ -714,35 +714,40 @@ module.exports = {
                 }
             }
 
-            for (var i = 0; i < tokensUseChainlink.length; i++) {
-                let chainlinkMetadata = await chainlinkPriceProvider.getChainlinkMetadata(tokensUseChainlink[i]);
-                const aggregatorPath = chainlinkMetadata.aggregatorPath;
-                for (let j = 0; j < aggregatorPath.length; j++) {
-                    if (aggregatorPath[j] != chainlinkAggregatorV3[i][j]) {
-                        await chainlinkPriceProvider.setTokenAndAggregator(
-                            tokensUseChainlink[i],
-                            chainlinkAggregatorV3[i]
-                        ).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
-                            console.log("   token: " + tokensUseChainlink[i]);
-                            console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
-                        });
-                        break;
-                    }
-                }
-                for (var j = 0; j < chainlinkAggregatorV3[i].length; j++) {
-                    let timeOut = await chainlinkPriceProvider.timeOuts(chainlinkAggregatorV3[i][j]);
-                    if (timeOut != timeOuts[i][j]) {
-                        await chainlinkPriceProvider.setTimeOut(
-                            chainlinkAggregatorV3[i][j],
-                            timeOuts[i][j]
-                        ).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set timeout with parameters: ");
-                            console.log("   aggregator: " + chainlinkAggregatorV3[i][j]);
-                            console.log("   timeout: " + timeOuts[i][j]);
-                        });
+            {
+                const currentImplementation = await proxyAdmin.getProxyImplementation(chainlinkPriceProvider.address);
+                if (currentImplementation == chainlinkPriceProviderLogicAddress) {
+                    for (var i = 0; i < tokensUseChainlink.length; i++) {
+                        let chainlinkMetadata = await chainlinkPriceProvider.getChainlinkMetadata(tokensUseChainlink[i]);
+                        const aggregatorPath = chainlinkMetadata.aggregatorPath;
+                        for (let j = 0; j < aggregatorPath.length; j++) {
+                            if (aggregatorPath[j] != chainlinkAggregatorV3[i][j]) {
+                                await chainlinkPriceProvider.setTokenAndAggregator(
+                                    tokensUseChainlink[i],
+                                    chainlinkAggregatorV3[i]
+                                ).then(function (instance) {
+                                    console.log("\nTransaction hash: " + instance.hash);
+                                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
+                                    console.log("   token: " + tokensUseChainlink[i]);
+                                    console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
+                                });
+                                break;
+                            }
+                        }
+                        for (var j = 0; j < chainlinkAggregatorV3[i].length; j++) {
+                            let timeOut = await chainlinkPriceProvider.timeOuts(chainlinkAggregatorV3[i][j]);
+                            if (timeOut != timeOuts[i][j]) {
+                                await chainlinkPriceProvider.setTimeOut(
+                                    chainlinkAggregatorV3[i][j],
+                                    timeOuts[i][j]
+                                ).then(function (instance) {
+                                    console.log("\nTransaction hash: " + instance.hash);
+                                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set timeout with parameters: ");
+                                    console.log("   aggregator: " + chainlinkAggregatorV3[i][j]);
+                                    console.log("   timeout: " + timeOuts[i][j]);
+                                });
+                            }
+                        }
                     }
                 }
             }
