@@ -1,92 +1,11 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
         "priceProcessingOracle": {
-            "volatilityCapFixedPercent": "1000",
-            "minSampleInterval": "1800",
-            "logMaturingAge": "3600",
-            "longTWAPperiod": "86400",
-            "twapEnabledForAsset": [
-                [
-                    "0x5979D7b546E38E414F7E9822514be443A4800529",
-                    true
-                ],
-                [
-                    "0x872bad41cfc8ba731f811fea8b2d0b9fd6369585",
-                    true
-                ],
-                [
-                    "0x0c880f6761f1af8d9aa9c466984b80dab9a8c9e8",
-                    true
-                ],
-                [
-                    "0x580e933d90091b9ce380740e3a4a39c67eb85b4c",
-                    true
-                ],
-                [
-                    "0x11f98c7e42a367dab4f200d2fdc460fb445ce9a8",
-                    true
-                ],
-                [
-                    "0xabd587f2607542723b17f14d00d99b987c29b074",
-                    true
-                ],
-                [
-                    "0x8888888888f004100C0353d657BE6300587A6CcD",
-                    true
-                ],
-                [
-                    "0x7b5eb3940021ec0e8e463d5dbb4b7b09a89ddf96",
-                    true
-                ],
-                [
-                    "0x250Caff618cf205997309940c14C52B5DcEb351E",
-                    true
-                ],
-                [
-                    "0xA6D7D0e650aa40FFa42d845A354c12c2bc0aB15f",
-                    true
-                ],
-                [
-                    "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
-                    true
-                ],
-                [
-                    "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
-                    true
-                ],
-                [
-                    "0x912ce59144191c1204e64559fe8253a0e49e6548",
-                    true
-                ],
-                [
-                    "0xbfa641051ba0a0ad1b0acf549a89536a0d76472e",
-                    true
-                ],
-                [
-                    "0x0e15258734300290a651fdbae8deb039a8e7a2fa",
-                    true
-                ],
-                [
-                    "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9",
-                    true
-                ],
-                [
-                    "0x23a941036ae778ac51ab04cea08ed6e2fe103614",
-                    true
-                ],
-                [
-                    "0xff970a61a04b1ca14834a43f5de4533ebddb5cc8",
-                    true
-                ],
-                [
-                    "0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f",
-                    true
-                ],
-                [
-                    "0xeb8E93A0c7504Bffd8A8fFa56CD754c63aAeBFe8",
-                    true
-                ]
-            ]
+            "volatilityCapUpPercent": "1500",
+            "volatilityCapDownPercent": "1000"
         },
         "Pyth": {
             "pythOracle": "",

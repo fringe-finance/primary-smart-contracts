@@ -33,5 +33,7 @@
   "PrimaryIndexTokenLeverageLogic": true,
   "PrimaryIndexTokenLeverageProxy": true,
   "UniswapV3PriceProviderLogic": true,
-  "UniswapV3PriceProviderProxy": true
+  "UniswapV3PriceProviderProxy": true,
+  "PairFlashLogic": true,
+  "PairFlashProxy": true
 }

@@ -27,6 +27,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     mapping(address => mapping(address => LeverageType)) public typeOfLeveragePosition;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     struct Ratio {
         uint8 numerator;
         uint8 denominator;
@@ -152,8 +154,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
         if (registryAggregatorAddress != address(0)) {
             require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-            registryAggregator = registryAggregatorAddress;
         }
+        registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
         emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
@@ -180,7 +182,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      */
     function getTokenPrice(address token) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
         uint256 tokenMultiplier = 10 ** ERC20Upgradeable(token).decimals();
-        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier, false);
+        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
     }
 
     /**
@@ -283,7 +285,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         uint256 exp
     ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin, false);
+        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
         safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
         safetyMarginDenominator = (exp * lvrDenominator);
     }
@@ -300,8 +302,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * - `newTotalBorrowPerLendingToken` must be less than or equal to `borrowLimitPerLendingToken`.
      */
     function _deferLiquidityCheck(address user, address projectToken, address lendingToken) internal view {
-        uint256 pit = primaryLendingPlatform.pit(user, projectToken, lendingToken, false);
-        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(user, projectToken, lendingToken, false);
+        uint256 pit = primaryLendingPlatform.pit(user, projectToken, lendingToken);
+        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(user, projectToken, lendingToken);
         uint256 newTotalBorrowPerCollateral = primaryLendingPlatform.getTotalBorrowPerCollateral(projectToken);
         uint256 borrowLimitPerCollateral = primaryLendingPlatform.borrowLimitPerCollateral(projectToken);
         uint256 newTotalBorrowPerLendingToken = primaryLendingPlatform.getTotalBorrowPerLendingToken(lendingToken);
@@ -439,8 +441,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         (uint256 depositedProjectTokenAmount, uint256 loanBody, uint256 accrual, , ) = primaryLendingPlatform.getPosition(
             user,
             projectToken,
-            lendingToken,
-            false
+            lendingToken
         );
         require(
             (!isLeveragePosition[user][projectToken] && loanBody == 0 && accrual == 0) || isLeveragePosition[user][projectToken],
@@ -484,7 +485,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
         _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
 
-        _approveTokenTransfer(lendingToken, lendingTokenCount);
+        _approveTokenTransfer(lendingToken, (lendingTokenCount * (10000 + BUFFER_PERCENTAGE)) / 10000);
 
         uint256 amountReceive = _buyOnExchangeAggregator(projectToken, buyCalldata);
 

@@ -19,12 +19,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     IPriceOracle public priceOracle;
 
-    /**
-     * @notice Employ TWAP price processing or non-TWAP price processing.
-     * Mapping address of token => enabled TWAP for this token.
-     */
-    mapping(address => bool) public twapEnabledForAsset;
-
     mapping(address => PriceProviderInfo) public tokenPriceProvider; // address of project token => priceProvider address
 
     struct PriceProviderInfo {
@@ -58,13 +52,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     event SetPriceOracle(address indexed priceOracle);
 
     /**
-     * @dev Emitted when the asset is flagged as employ TWAP price processing or not.
-     * @param token The address of asset.
-     * @param isEnable Employ TWAP price processing is TRUE or FALSE.
-     */
-    event SetTwapEnabledForAsset(address indexed token, bool isEnable);
-
-    /**
      * @dev Emitted when the active status of a token changes.
      * @param token The address of the token whose active status has changed.
      * @param active The new active status of the token.
@@ -82,7 +69,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
         usdDecimals = 6;
     }
 
-    
     /**
      * @dev Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
      */
@@ -159,20 +145,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @dev Sets TWAP enabled state for `token`
-     * Requirements:
-     *  The caller must be the moderator.
-     * - `token` cannot be the zero address.
-     * @param token the address of token
-     * @param enabled the new TWAP enabled state
-     */
-    function setTwapEnabledForAsset(address token, bool enabled) external onlyModerator {
-        require(token != address(0), "PriceProviderAggregatorV2: invalid address");
-        twapEnabledForAsset[token] = enabled;
-        emit SetTwapEnabledForAsset(token, enabled);
-    }
-
-    /**
      * @dev Allows the moderator to change the active status of a price provider for a specific token.
      *
      * Requirements:
@@ -191,47 +163,50 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     /****************** main functions ****************** */
 
     /**
-    * @dev Calculates and update multiple the final TWAP prices of a token.
-    * @param token The token array needs to update the price.
-    */
+     * @dev Calculates and update multiple the final TWAP prices of a token.
+     * @param token The token array needs to update the price.
+     */
     function updateMultiFinalPrices(address[] memory token) external {
-        for (uint256 i = 0; i < token.length; i++) {
-            priceOracle.updateFinalPrices(token[i]);
-        }
+        _updateMultiFinalPrices(token);
     }
 
     /**
      * @dev Returns the most recent TWAP price or non-TWAP price of a token.
-     * 
+     *
      * Formula: price = priceMantissa / (10 ** priceDecimals)
      * @param token The address of the token.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return priceDecimals The decimals of the price.
      * @return timestamp The last updated timestamp of the price.
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getPrice(address token, bool useForLiquidate) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
-        if (useForLiquidate) {
-            return priceOracle.getNonTWAPprice(token);
-        } else {
-            return priceOracle.getMostTWAPprice(token);
-        }
+    function getPrice(address token) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        return priceOracle.getEstimatedTWAPprice(token);
     }
 
     /**
      * @dev returns the most TWAP price or non-TWAP price in USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getEvaluation(address token, uint256 tokenAmount, bool useForLiquidate) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation){
-        if (useForLiquidate) {
-            return priceOracle.getNonTWAPEvaluation(token, tokenAmount);
+    function getEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        (, uint64 timestamp, , ) = priceOracle.getMostTWAPprice(token);
+        if (timestamp != block.timestamp) {
+            return priceOracle.getEstimatedEvaluation(token, tokenAmount);
         } else {
             return priceOracle.getEvaluation(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to calculates and update multiple the final TWAP prices of a token.
+     * @param token The token array needs to update the price.
+     */
+    function _updateMultiFinalPrices(address[] memory token) internal {
+        for (uint256 i = 0; i < token.length; i++) {
+            priceOracle.updateFinalPrices(token[i]);
         }
     }
 }

@@ -14,6 +14,7 @@ const configFile = path.join(__dirname, `../config_${network}/config.json`);
 let configs = require(configFile);
 const verifyFilePath = path.join(__dirname, `../config_${network}/verify.json`);
 const verifyFile = require(verifyFilePath);
+const { EvmPriceServiceConnection } = require('@pythnetwork/pyth-evm-js');
 
 const verify = async (address, constructorArguments, keyInConfig) => {
     console.log("Verifying " + address);
@@ -99,11 +100,8 @@ module.exports = {
             wstETH
         } = priceOracle;
 
-        let volatilityCapFixedPercent = priceProcessingOracle.volatilityCapFixedPercent;
-        let minSampleInterval = priceProcessingOracle.minSampleInterval;
-        let logMaturingAge = priceProcessingOracle.logMaturingAge;
-        let longTWAPperiod = priceProcessingOracle.longTWAPperiod;
-        let twapEnabledForAsset = priceProcessingOracle.twapEnabledForAsset;
+        let volatilityCapUpPercent = priceProcessingOracle.volatilityCapUpPercent;
+        let volatilityCapDownPercent = priceProcessingOracle.volatilityCapDownPercent;
 
         let pythOracle = Pyth.pythOracle;
         let tokensUsePyth = Pyth.tokensUsePyth;
@@ -531,10 +529,8 @@ module.exports = {
             }
             {
                 let currentPriceProviderAggregator = await priceOracleProvider.priceProviderAggregator();
-                let currentVolatilityCapFixedPercent = await priceOracleProvider.volatilityCapFixedPercent();
-                let currentMinSampleInterval = await priceOracleProvider.minSampleInterval();
-                let currentLogMaturingAge = await priceOracleProvider.logMaturingAge();
-                let currentLongTWAPperiod = await priceOracleProvider.longTWAPperiod();
+                let currentVolatilityCapUpPercent = await priceOracleProvider.currentVolatilityCapUpPercent();
+                let currentVolatilityCapDownPercent = await priceOracleProvider.currentVolatilityCapDownPercent();
 
                 if (currentPriceProviderAggregator != priceProviderAggregatorAddress) {
                     await priceOracleProvider.setPriceProviderAggregator(priceProviderAggregatorAddress).then(function (instance) {
@@ -542,28 +538,14 @@ module.exports = {
                         console.log("priceOracleProvider set priceProviderAggregatorAddress: " + priceProviderAggregatorAddress);
                     });
                 }
-                if (currentVolatilityCapFixedPercent != volatilityCapFixedPercent) {
-                    await priceOracleProvider.setVolatilityCapFixedPercent(volatilityCapFixedPercent).then(function (instance) {
+                if (currentVolatilityCapUpPercent != volatilityCapUpPercent || currentVolatilityCapDownPercent != volatilityCapDownPercent) {
+                    await priceOracleProvider.setVolatilityCapFixedPercent(
+                        volatilityCapUpPercent,
+                        volatilityCapDownPercent
+                    ).then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
-                        console.log("priceOracleProvider set volatilityCapFixedPercent: " + volatilityCapFixedPercent);
-                    });
-                }
-                if (currentMinSampleInterval != minSampleInterval) {
-                    await priceOracleProvider.setMinSampleInterval(minSampleInterval).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("priceOracleProvider set minSampleInterval: " + minSampleInterval);
-                    });
-                }
-                if (currentLogMaturingAge != logMaturingAge) {
-                    await priceOracleProvider.setLogMaturingAge(logMaturingAge).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("priceOracleProvider set logMaturingAge: " + logMaturingAge);
-                    });
-                }
-                if (currentLongTWAPperiod != longTWAPperiod) {
-                    await priceOracleProvider.setLongTWAPperiod(longTWAPperiod).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("priceOracleProvider set longTWAPperiod: " + longTWAPperiod);
+                        console.log("priceOracleProvider set volatilityCapUpPercent: " + volatilityCapUpPercent);
+                        console.log("priceOracleProvider set volatilityCapDownPercent: " + volatilityCapDownPercent);
                     });
                 }
             }
@@ -990,20 +972,55 @@ module.exports = {
                 });
             }
         }
-        for (var i = 0; i < twapEnabledForAsset.length; i++) {
-            let enabledState = await priceProviderAggregator.twapEnabledForAsset(twapEnabledForAsset[i][0]);
-            if (enabledState != twapEnabledForAsset[i][1]) {
-                await priceProviderAggregator.setTwapEnabledForAsset(
-                    twapEnabledForAsset[i][0],
-                    twapEnabledForAsset[i][1]
+
+        {
+            const listToken = projectTokens.concat(lendingTokens);
+            const listTokenNeedUpdatePrice = [];
+            const listTokenUsePythOracle = [];
+
+            for (let i = 0; i < listToken.length; i++) {
+
+                let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
+                let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i])).priceProvider;
+
+                if (currentPrice.timestamp.toString() === "0") {
+                    listTokenNeedUpdatePrice.push(listToken[i]);
+                    if (pythPriceProviderAddress && priceProvider === pythPriceProviderAddress) {
+                        listTokenUsePythOracle.push(listToken[i]);
+                    }
+                }
+            }
+
+            let priceIds = [];
+            let updateData = [];
+            let updateFee = 0;
+            let expiredPriceFeedData;
+            if (listTokenUsePythOracle.length > 0) {
+
+                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 15);
+                if (expiredPriceFeedData.priceIds.length > 0) {
+                    const connection = new EvmPriceServiceConnection(
+                        "https://hermes.pyth.network"
+                    );
+                    priceIds = expiredPriceFeedData.priceIds;
+                    updateFee = expiredPriceFeedData.updateFee;
+                    updateData = await connection.getPriceFeedsUpdateData(expiredPriceFeedData.priceIds);
+                }
+            }
+            if (listTokenNeedUpdatePrice.length > 0) {
+                await priceProviderAggregator.updateMultiFinalPricesWithUpdatePrice(
+                    listTokenNeedUpdatePrice,
+                    priceIds,
+                    updateData, {
+                    value: updateFee
+                }
                 ).then(function (instance) {
-                    console.log("\nTransaction hash: " + instance.hash);
-                    console.log("priceProviderAggregator " + priceProviderAggregator.address + " set twapEnabledForAsset with parameters: ");
-                    console.log("   token: " + twapEnabledForAsset[i][0]);
-                    console.log("   enableState: " + twapEnabledForAsset[i][1]);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " updateMultiFinalPricesWithUpdatePrice at tx hash: " + instance.hash);
+                    console.log("Token: " + listTokenNeedUpdatePrice);
                 });
             }
         }
+
         if (wstETHPriceProviderAddress) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(wstETH);
             if (tokenPriceProvider.priceProvider != wstETHPriceProviderAddress) {

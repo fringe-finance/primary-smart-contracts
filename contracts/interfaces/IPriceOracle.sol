@@ -3,13 +3,7 @@ pragma solidity 0.8.19;
 
 interface IPriceOracle {
 
-    struct PriceInfo {
-        uint8 priceDecimals;
-        uint32 timestamp;
-        uint256 collateralPrice;
-        uint256 capitalPrice;
-    }
-    
+
     function MODERATOR_ROLE() external view returns(bytes32);
     
     function volatilityCapFixedPercent() external view returns(address priceProvider);
@@ -76,7 +70,7 @@ interface IPriceOracle {
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getMostTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
+    function getMostTWAPprice(address token) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice);
 
     /**
      * @dev Returns the non-TWAP price of a token.
@@ -86,7 +80,7 @@ interface IPriceOracle {
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getNonTWAPprice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
+    function getEstimatedTWAPprice(address token) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice);
     
     /**
      * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
@@ -104,7 +98,7 @@ interface IPriceOracle {
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getNonTWAPEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
+    function getEstimatedEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
     
     /**
      * @dev returns tuple (priceMantissa, priceDecimals)

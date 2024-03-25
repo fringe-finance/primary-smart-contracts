@@ -26,6 +26,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     address public exchangeAggregator;
     address public registryAggregator;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -99,9 +101,12 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
         require(exchangeAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
         if (registryAggregatorAddress != address(0)) {
-            require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-            registryAggregator = registryAggregatorAddress;
+            require(
+                IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress),
+                "AtomicRepayment: Invalid Augustus"
+            );
         }
+        registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
         emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
@@ -127,7 +132,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      * @return outstanding The outstanding amount for the user, project token, and lending token.
      */
     function getTotalOutstanding(address user, address projectToken, address lendingAsset) public view returns (uint256 outstanding) {
-        (, uint256 loanBody, uint256 accrual, , ) = primaryLendingPlatform.getPosition(user, projectToken, lendingAsset, false);
+        (, uint256 loanBody, uint256 accrual, , ) = primaryLendingPlatform.getPosition(user, projectToken, lendingAsset);
         outstanding = loanBody + accrual;
     }
 
@@ -162,8 +167,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         uint256 remainingDeposit = getRemainingDeposit(user, projectToken);
         // convert remainingDeposit to lending token
         uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        (uint256 projectTokenAmountInUSD, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, remainingDeposit, false);
-        (, uint256 lendingTokenAmountInUSD) = primaryLendingPlatform.getTokenEvaluation(lendingToken, lendingTokenMultiplier, false);
+        (uint256 projectTokenAmountInUSD, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, remainingDeposit);
+        (, uint256 lendingTokenAmountInUSD) = primaryLendingPlatform.getTokenEvaluation(lendingToken, lendingTokenMultiplier);
         availableLendingAmount = (projectTokenAmountInUSD * lendingTokenMultiplier) / lendingTokenAmountInUSD;
     }
 
@@ -189,7 +194,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     function _repayAtomic(address prjToken, uint256 collateralAmount, bytes memory buyCalldata, bool isRepayFully) internal {
         require(collateralAmount > 0, "AtomicRepayment: CollateralAmount must be greater than 0");
         address lendingToken = getLendingToken(msg.sender, prjToken);
-        
+
         address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(prjToken, lendingToken, false);
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
 
@@ -199,7 +204,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjToken, collateralAmount, msg.sender, address(this));
 
-        _approveTokenTransfer(prjToken, collateralAmount);
+        uint256 approvalAmount = (collateralAmount * (10000 + BUFFER_PERCENTAGE)) / 10000;
+        _approveTokenTransfer(prjToken, approvalAmount);
 
         uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjToken, lendingToken);
         (uint256 amountSold, uint256 amountReceive) = _buyOnExchangeAggregator(prjToken, lendingToken, buyCalldata);
@@ -222,9 +228,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
             ERC20Upgradeable(lendingToken).safeTransfer(msg.sender, afterLendingBalance);
         }
 
-        if (amountReceive < totalOutStanding) {
-            _deferLiquidityCheck(msg.sender, prjToken, lendingToken);
-        }
+        _deferLiquidityCheck(msg.sender, prjToken, lendingToken);
 
         emit AtomicRepayment(msg.sender, prjToken, lendingToken, amountSold, amountReceive);
     }

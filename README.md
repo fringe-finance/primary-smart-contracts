@@ -63,27 +63,20 @@ Each subfolder contains:
 
 ```
 {
+    "liquidationBot": {
+        "uniswapV2Factory": "" // Address of Uniswap V2 Factory contract
+    },
     "priceOracle": { // Configure oracle prices
         "priceProcessingOracle": {
-            "volatilityCapFixedPercent": "",// Defines the maximum threshold of price
+            "volatilityCapUpPercent": "",   // Defines the up maximum threshold of price
+                                            movement since the previously-stored
+                                            mostRecentGovernedPrice, above which the
+                                            price is capped.
+
+            "volatilityCapDownPercent": "",   // Defines the down maximum threshold of price
                                                movement since the previously-stored
                                                mostRecentGovernedPrice, above which the
                                                price is capped.
-
-            "minSampleInterval": "",        // The period time that represent the minimum
-                                               age of mostRecentAccumLog before another
-                                               entry is created in the longTWAPaccumLogs.
-
-            "logMaturingAge": "",           // TWAP calculations can only be calculated if
-                                               the oldest longTWAPaccumLogs entry is older
-                                               than logMaturingAge.
-
-            "longTWAPperiod": "",           // The period time for the long TWAP we
-                                               produce from the series of logged reported
-                                               prices.
-
-            "twapEnabledForAsset": [[]]     // Employ TWAP price processing or non-TWAP
-                                               price processing.
         },
         "Pyth": {
             "pythOracle": "",    // PythOracle Address.
@@ -212,23 +205,13 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
 //file: /hardhat_arbitrum_goerli/config_gerenal.json
 
 {
+    "liquidationBot": {
+        "uniswapV2Factory": "0x7eec0663b4f0bae379200ccd944ad521af7d5f58"
+    },
     "priceOracle": {
         "priceProcessingOracle": {
-            "volatilityCapFixedPercent": "1000",    // 10%
-            "minSampleInterval": "1800",            // 1800s
-            "logMaturingAge": "3600",               // 3600s
-            "longTWAPperiod": "86400",              // 84600s
-            "twapEnabledForAsset": [
-                ["0xA0126016B2cFcAf60df67579C81F68C02bc237d8", true],
-                ["0x2A36e1454f333fCB866009AF058c2B2B985dF8f7", true],
-                ["0x2fCabB640BDc5E23dD469f2b8F625236d063456c", true],
-                ["0x92E94754e9bdFaC92f4f376093C6bB38042aEBB2", true],
-                ["0x55f88B32D47f7BA13e969749e1D6fc3aba691914", true],
-                ["0x531F9b3df4B7d92D581771252fB3B066Ba08ff06", true],
-                ["0x0B574E6e9cd6f159dB6062e220c3976e63FAc126", true],
-                ["0xD20ee3d5c9EE0924429268d994149963ded6c72A", true],
-                ["0x5ecf82A8e520f1c280694AfBe639ebD06A7dE249", true]
-            ]
+            "volatilityCapUpPercent": "1000",       // 10%
+            "volatilityCapDownPercent": "1000",    // 10%
         },
         "Pyth": {
             "pythOracle": "",
@@ -453,7 +436,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV3PriceProviderLogic": "",
-  "UniswapV3PriceProviderProxy": ""
+  "UniswapV3PriceProviderProxy": "",
+  "PairFlashLogic": "",
+  "PairFlashProxy": ""
 }
 ```
 
@@ -497,7 +482,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV3PriceProviderLogic": true,
-  "UniswapV3PriceProviderProxy": true
+  "UniswapV3PriceProviderProxy": true,
+  "PairFlashLogic": true,
+  "PairFlashProxy": true
 }
 ```
 **Note:** To verify the smart contract, configure the `verify.json` file with the contracts that need verification (Only mainnet and testnet).
@@ -531,49 +518,71 @@ Deploying a smart contract for network-specific testing follows the example usin
 
 **Note:** The table below presents the scripts necessary for deploying smart contracts on specific networks. Testing is supported on four networks:
 
-### Mainnet
+### Deploy PLP Contracts
+
+#### Mainnet
 
 | ID | Network   | Deploy smart contract command                                                           |
 |----|-----------|-----------------------------------------------------------------------------------------|
-| 1  | Ethereum  | `npm run deploy:v2:mainnet` or `yarn deploy:v2:mainnet`                           |
-| 2  | Polygon   | `npm run deploy:v2:polygon-mainnet` or `yarn deploy:v2:polygon-mainnet`           |
-| 3  | Optimsim  | `npm run deploy:v2:optimism-mainnet` or `yarn deploy:v2:optimism-mainnet`         |
-| 4  | Arbitrum  | `npm run deploy:v2:arbitrum-mainnet` or `yarn deploy:v2:arbitrum-mainnet`         |
-| 5  | Zksync           | `npm run deploy:v2:zksync-mainnet` or `yarn deploy:v2:zksync-mainnet`        |
+| 1  | Ethereum  | `npm run deploy:v2:mainnet` <br> or <br> `yarn deploy:v2:mainnet`                           |
+| 2  | Polygon   | `npm run deploy:v2:polygon-mainnet` <br> or <br> `yarn deploy:v2:polygon-mainnet`           |
+| 3  | Optimsim  | `npm run deploy:v2:optimism-mainnet` <br> or <br> `yarn deploy:v2:optimism-mainnet`         |
+| 4  | Arbitrum  | `npm run deploy:v2:arbitrum-mainnet` <br> or <br> `yarn deploy:v2:arbitrum-mainnet`         |
+| 5  | Zksync           | `npm run deploy:v2:zksync-mainnet` <br> or <br> `yarn deploy:v2:zksync-mainnet`        |
 
-### Testnet
+#### Testnet
 
 | ID | Network          | Deploy smart contract command                                                       |
 |----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run deploy:v2:goerli` or `yarn deploy:v2:goerli`                          |
-| 2  | Polygon Mumbai   | `npm run deploy:v2:polygon-mumbai` or `yarn deploy:v2:polygon-mumbai`         |
-| 3  | Optimsim         | `npm run deploy:v2:optimism-goerli` or `yarn deploy:v2:optimism-goerli`       |
-| 4  | Arbitrum         | `npm run deploy:v2:arbitrum-goerli` or `yarn deploy:v2:arbitrum-goerli`       |
-| 5  | Zksync           | `npm run deploy:v2:zksync-goerli` or `yarn deploy:v2:zksync-goerli`        |
+| 1  | Goerli           | `npm run deploy:v2:goerli` <br> or <br> `yarn deploy:v2:goerli`                          |
+| 2  | Polygon Mumbai   | `npm run deploy:v2:polygon-mumbai` <br> or <br> `yarn deploy:v2:polygon-mumbai`         |
+| 3  | Optimsim         | `npm run deploy:v2:optimism-goerli` <br> or <br> `yarn deploy:v2:optimism-goerli`       |
+| 4  | Arbitrum         | `npm run deploy:v2:arbitrum-goerli` <br> or <br> `yarn deploy:v2:arbitrum-goerli`       |
+| 5  | Zksync           | `npm run deploy:v2:zksync-goerli` <br> or <br> `yarn deploy:v2:zksync-goerli`        |
 
-### Fork Testnet
+#### Fork Testnet
 
 **Note**: We support the deployment of smart contracts on corresponding fork networks, for the purpose of checking whether there are errors when deploying the system with the values configured in the `config_general` file. For example, before deploying the system on goerli testnet, you can use that `config_gerenal` to deploy first on goerli's fork network, to see if it encounters errors or not (similar to mainnet).
 
 | ID | Network          | Deploy smart contract command                                                       |
 |----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run deploy:v2:fork-goerli` or `yarn deploy:v2:fork-goerli`                          |
-| 2  | Polygon Mumbai   | `npm run deploy:v2:fork-mumbai` or `yarn deploy:v2:fork-mumbai`         |
-| 3  | Optimsim         | `npm run deploy:v2:fork-optimism-goerli` or `yarn deploy:v2:fork-optimism-goerli`       |
-| 4  | Arbitrum         | `npm run deploy:v2:fork-arbitrum-goerli` or `yarn deploy:v2:fork-arbitrum-goerli`       |
+| 1  | Goerli           | `npm run deploy:v2:fork-goerli` <br> or <br> `yarn deploy:v2:fork-goerli`                          |
+| 2  | Polygon Mumbai   | `npm run deploy:v2:fork-mumbai` <br> or <br> `yarn deploy:v2:fork-mumbai`         |
+| 3  | Optimsim         | `npm run deploy:v2:fork-optimism-goerli` <br> or <br> `yarn deploy:v2:fork-optimism-goerli`       |
+| 4  | Arbitrum         | `npm run deploy:v2:fork-arbitrum-goerli` <br> or <br> `yarn deploy:v2:fork-arbitrum-goerli`       |
 
 Currently, we have pre-configured `config_gerenal` (***Please do not change these files***) files that we used to deploy on the testnet of goerli, mumbai, optimism-goerli and arbitrum-goerli networks. You can run these deploy fork testnet commands immediately to better understand how they work. 
 
-### Fork Mainnet
+#### Fork Mainnet
 
 | ID | Network   | Deploy smart contract command                                                           |
 |----|-----------|-----------------------------------------------------------------------------------------|
-| 1  | Ethereum  | `npm run deploy:v2:fork-mainnet` or `yarn deploy:v2:fork-mainnet`                           |
-| 2  | Polygon   | `npm run deploy:v2:fork-polygon` or `yarn deploy:v2:fork-polygon`           |
-| 3  | Optimsim  | `npm run deploy:v2:fork-optimism` or `yarn deploy:v2:fork-optimism`         |
-| 4  | Arbitrum  | `npm run deploy:v2:fork-arbitrum` or `yarn deploy:v2:fork-arbitrum`         |
+| 1  | Ethereum  | `npm run deploy:v2:fork-mainnet` <br> or <br> `yarn deploy:v2:fork-mainnet`                           |
+| 2  | Polygon   | `npm run deploy:v2:fork-polygon` <br> or <br> `yarn deploy:v2:fork-polygon`           |
+| 3  | Optimsim  | `npm run deploy:v2:fork-optimism` <br> or <br> `yarn deploy:v2:fork-optimism`         |
+| 4  | Arbitrum  | `npm run deploy:v2:fork-arbitrum` <br> or <br> `yarn deploy:v2:fork-arbitrum`         |
 
 **Note**: We recommend that you first try deploying the system with the mainnet `config_general` file onto mainnet forks, to check if the values in the `config_gerenal` file do not lead to errors during the process. For example, a wrong address of a lending token will result in a failed deployment.
+
+### Deploy PairFlash Contract
+
+#### Mainnet
+
+| ID | Network   | Deploy smart contract command                                                           |
+|----|-----------|-----------------------------------------------------------------------------------------|
+| 1  | Ethereum  | `npm run deploy:liquidate-bot:mainnet` <br> or <br> `yarn deploy:liquidate-bot:mainnet`                           |
+| 2  | Polygon   | `npm run deploy:liquidate-bot:polygon-mainnet` <br> or <br> `yarn deploy:liquidate-bot:polygon-mainnet`           |
+| 3  | Optimsim  | `npm run deploy:liquidate-bot:optimism-mainnet` <br> or <br> `yarn deploy:liquidate-bot:optimism-mainnet`         |
+| 4  | Arbitrum  | `npm run deploy:liquidate-bot:arbitrum-mainnet` <br> or <br> `yarn deploy:liquidate-bot:arbitrum-mainnet`         |
+
+#### Testnet
+
+| ID | Network          | Deploy smart contract command                                                       |
+|----|------------------|-------------------------------------------------------------------------------------|
+| 1  | Goerli           | `npm run deploy:liquidate-bot:goerli` <br> or <br> `yarn deploy:liquidate-bot:goerli`                          |
+| 2  | Polygon Mumbai   | `npm run deploy:liquidate-bot:polygon-mumbai` <br> or <br> `yarn deploy:liquidate-bot:polygon-mumbai`         |
+| 3  | Optimsim         | `npm run deploy:liquidate-bot:optimism-goerli` <br> or <br> `yarn deploy:liquidate-bot:optimism-goerli`       |
+| 4  | Arbitrum         | `npm run deploy:liquidate-bot:arbitrum-goerli` <br> or <br> `yarn deploy:liquidate-bot:arbitrum-goerli`       |
 
 ## 3. Test case setup
 

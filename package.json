@@ -32,21 +32,17 @@
     "upgradePrimaryIndexTokenModerator_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenModerator/upgradingPrimaryIndexTokenModerator.js",
     "upgradePrimaryIndexTokenWrappedTokenGateway_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/primaryIndexTokenWrappedTokenGateway/upgradingPrimaryIndexTokenWrappedTokenGateway.js",
     "upgradeProxy_mumbai": "npx hardhat run --network polygon_mumbai ./scripts/upgradeProxy/upgradeProxy.js",
-    
     "compile": "hardhat compile",
     "compile:zksync": "cross-env ZKSYNC=true hardhat compile",
     "reset-config": "node -e \"require('dotenv').config();require('fs').copyFile('scripts/config/'+process.env.SOURCE+'/config.example.json', 'scripts/config/'+process.env.SOURCE+'/config.json', () => {});\"",
-    
     "deploy:v2:fork-goerli": "cross-env SOURCE=hardhat_goerli yarn reset-config && cross-env CHAIN=goerli BLOCK_NUMBER=9560000 npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-mumbai": "cross-env SOURCE=hardhat_polygon_mumbai yarn reset-config && cross-env CHAIN=polygon_mumbai BLOCK_NUMBER=39540000 npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-optimism-goerli": "cross-env SOURCE=hardhat_optimism_goerli yarn reset-config && cross-env CHAIN=optimism_goerli BLOCK_NUMBER=13970000 LAYER2=true npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-arbitrum-goerli": "cross-env SOURCE=hardhat_arbitrum_goerli yarn reset-config && cross-env CHAIN=arbitrum_goerli BLOCK_NUMBER=37650000 LAYER2=true npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
-    
     "deploy:v2:fork-mainnet": "cross-env SOURCE=hardhat_mainnet yarn reset-config && cross-env CHAIN=mainnet BLOCK_NUMBER=18220000 npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-polygon": "cross-env SOURCE=hardhat_polygon_mainnet yarn reset-config && cross-env CHAIN=polygon_mainnet BLOCK_NUMBER=48020000 npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-optimism": "cross-env SOURCE=hardhat_optimism_mainnet yarn reset-config && cross-env CHAIN=optimism_mainnet BLOCK_NUMBER=110080000 LAYER2=true npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:fork-arbitrum": "cross-env SOURCE=hardhat_arbitrum_mainnet yarn reset-config && cross-env CHAIN=arbitrum_mainnet BLOCK_NUMBER=134940000 LAYER2=true npx hardhat run --network hardhat scripts/deployPLP_V2/deployPLP.js",
-    
     "deploy:v2:goerli": "npx hardhat run --network ethereum_goerli scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:mainnet": "npx hardhat run --network ethereum_mainnet scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:arbitrum-goerli": "cross-env LAYER2=true npx hardhat run --network arbitrum_goerli scripts/deployPLP_V2/deployPLP.js",
@@ -57,19 +53,36 @@
     "deploy:v2:optimism-mainnet": "cross-env LAYER2=true npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:zksync-goerli": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network goerli --script deploy/deployPLP.js",
     "deploy:v2:zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/deployPLP.js",
-    
     "test:v2:fork-goerli": "cross-env SOURCE=hardhat_goerli yarn reset-config && cross-env CHAIN=goerli BLOCK_NUMBER=9560000 TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-mumbai": "cross-env SOURCE=hardhat_polygon_mumbai yarn reset-config && cross-env CHAIN=polygon_mumbai BLOCK_NUMBER=39540000 TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-optimism-goerli": "cross-env SOURCE=hardhat_optimism_goerli yarn reset-config && cross-env CHAIN=optimism_goerli BLOCK_NUMBER=13970000 LAYER2=true TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-arbitrum-goerli": "cross-env SOURCE=hardhat_arbitrum_goerli yarn reset-config && cross-env CHAIN=arbitrum_goerli BLOCK_NUMBER=37650000 LAYER2=true TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-polygon-zksync": "cross-env SOURCE=hardhat_zksync_on_polygon_mainnet yarn reset-config && cross-env CHAIN=polygon_mainnet BLOCK_NUMBER=47250000 TESTING=true TESTING_FOR_ZKSYNC=true npx hardhat test --network hardhat test/zksync_on_polygon/*.js",
-    
     "coverage:v2:fork-goerli": "cross-env SOURCE=hardhat_goerli yarn reset-config && cross-env CHAIN=goerli BLOCK_NUMBER=9560000 TESTING=true npx hardhat coverage --network hardhat --testfiles \"test/ethereum/*.js\"",
     "coverage:v2:fork-mumbai": "cross-env SOURCE=hardhat_polygon_mumbai yarn reset-config && cross-env CHAIN=polygon_mumbai BLOCK_NUMBER=39540000 TESTING=true npx hardhat coverage --network hardhat --testfiles \"test/ethereum/*.js\"",
     "coverage:v2:fork-optimism-goerli": "cross-env SOURCE=hardhat_optimism_goerli yarn reset-config && cross-env CHAIN=optimism_goerli BLOCK_NUMBER=13970000 LAYER2=true TESTING=true npx hardhat coverage --network hardhat --testfiles \"test/ethereum/*.js\"",
     "coverage:v2:fork-arbitrum-goerli": "cross-env SOURCE=hardhat_arbitrum_goerli yarn reset-config && cross-env CHAIN=arbitrum_goerli BLOCK_NUMBER=37650000 LAYER2=true TESTING=true npx hardhat coverage --network hardhat --testfiles \"test/ethereum/*.js\"",
     "coverage:v2:fork-polygon-zksync": "cross-env SOURCE=hardhat_zksync_on_polygon_mainnet yarn reset-config && cross-env CHAIN=polygon_mainnet BLOCK_NUMBER=47250000 TESTING=true TESTING_FOR_ZKSYNC=true npx hardhat coverage --network hardhat --testfiles \"test/zksync_on_polygon/*.js\"",
-    "deploy:liquidate-bot:polygon-mumbai": "npx hardhat run --network polygon_mumbai scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js"
+    
+    "deploy:liquidate-bot:goerli": "npx hardhat run --network ethereum_goerli scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:arbitrum-goerli": "npx hardhat run --network arbitrum_goerli scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:optimism-goerli": "npx hardhat run --network optimism_goerli scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:polygon-mumbai": "npx hardhat run --network polygon_mumbai scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+
+    "upgrade:liquidate-bot:goerli": "npx hardhat run --network ethereum_goerli scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:arbitrum-goerli": "npx hardhat run --network arbitrum_goerli scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:optimism-goerli": "npx hardhat run --network optimism_goerli scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:polygon-mumbai": "npx hardhat run --network polygon_mumbai scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+
+    "deploy:liquidate-bot:mainnet": "npx hardhat run --network ethereum_mainnet scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:arbitrum-mainnet": "npx hardhat run --network arbitrum_mainnet scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:optimism-mainnet": "npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    "deploy:liquidate-bot:polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/deployPLP_V2/liquidation-bot/deployPairFlash.js",
+    
+    "upgrade:liquidate-bot:mainnet": "npx hardhat run --network ethereum_mainnet scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:arbitrum-mainnet": "npx hardhat run --network arbitrum_mainnet scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:optimism-mainnet": "npx hardhat run --network optimism_mainnet scripts/upgradeProxy/pairFlash/upgradingPairFlash.js",
+    "upgrade:liquidate-bot:polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/upgradeProxy/pairFlash/upgradingPairFlash.js"
   },
   "author": "locnguyenLotussoft <loc.nguyen@lotussoft.vn>",
   "license": "ISC",
@@ -81,7 +94,7 @@
     "@openzeppelin/contracts": "4.9.3",
     "@openzeppelin/contracts-upgradeable": "4.9.3",
     "@primitivefi/hardhat-dodoc": "^0.2.3",
-    "@pythnetwork/pyth-evm-js": "^1.25.0",
+    "@pythnetwork/pyth-evm-js": "^1.29.2",
     "@solarity/hardhat-markup": "^1.0.0",
     "@uniswap/v2-core": "^1.0.1",
     "cross-env": "^7.0.3",

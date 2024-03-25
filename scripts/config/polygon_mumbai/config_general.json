@@ -1,14 +1,11 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
         "priceProcessingOracle": {
-            "volatilityCapFixedPercent": "1000",
-            "minSampleInterval": "1800",
-            "logMaturingAge": "3600",
-            "longTWAPperiod": "86400",
-            "twapEnabledForAsset": [
-                ["0x3cb302c4A80A2560050F65d552B1daD272f82d9a", true],
-                ["0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E", true]
-            ]
+            "volatilityCapUpPercent": "1000",
+            "volatilityCapDownPercent": "1500"
         },
         "Pyth": {
             "pythOracle": "0xFC6bd9F9f0c6481c6Af3A7Eb46b296A5B85ed379",
@@ -157,8 +154,5 @@
         "rewardCalcFactorDenominator": "1",
         "targetHFNumerator": "1",
         "targetHFDenominator": "1"
-    },
-    "liquidationBot": {
-        "uniswapV2Factory": "0x5757371414417b8c6caad45baef941abc7d3ab32"
     }
 }

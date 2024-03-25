@@ -3,6 +3,7 @@ const { deploymentPairFlash } = require("./deploymentPairFlash.js");
 
 async function main() {
     await deploymentPairFlash();
+    process.exit();
 }
 
 main().catch((error) => {

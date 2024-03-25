@@ -31,16 +31,27 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
+    * @dev Calculates and update multiple the final TWAP prices of a token after update price.
+    * @param token The token array needs to update the price.
+    * @param priceIds The priceIds need to update.
+    * @param updateData The updateData provided by PythNetwork.
+    */
+    function updateMultiFinalPricesWithUpdatePrice(
+        address[] memory token,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable { 
+        _updatePrices(priceIds, updateData);
+        _updateMultiFinalPrices(token);
+    }
+
+    /**
      * @dev Performs a price update if the price is no longer valid.
      * @param priceIds The priceIds need to update.
      * @param updateData The updateData provided by PythNetwork.
      */
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external payable {
-        if (priceIds.length > 0) {
-            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
-        } else {
-            require(msg.value == 0, "PriceProviderAggregatorPyth: Msg.value!=0!");
-        }
+        _updatePrices(priceIds, updateData);
     }
 
     /**
@@ -55,5 +66,18 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
         uint256 timeBeforeExpiration
     ) external view returns (bytes32[] memory priceIds, uint256 updateFee) {
         (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
+    }
+
+    /**
+     * @dev Internal function to performs a price update if the price is no longer valid.
+     * @param priceIds The priceIds need to update.
+     * @param updateData The updateData provided by PythNetwork.
+     */
+    function _updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) internal {
+        if (priceIds.length > 0) {
+            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
+        } else {
+            require(msg.value == 0, "PriceProviderAggregatorPyth: Msg.value!=0!");
+        }
     }
 }

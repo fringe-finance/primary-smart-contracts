@@ -1,14 +1,11 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
         "priceProcessingOracle": {
-            "volatilityCapFixedPercent": "1000",
-            "minSampleInterval": "1800",
-            "logMaturingAge": "3600",
-            "longTWAPperiod": "86400",
-            "twapEnabledForAsset": [
-                ["0xd4D6B474af50dF63D7Bc004f86bD4E66A375d3Da", true],
-                ["0x9c3c9283d3e44854697cd22d3faa240cfb032889", true]
-            ]
+            "volatilityCapUpPercent": "1500",
+            "volatilityCapDownPercent": "1000"
         },
         "Pyth": {
             "pythOracle": "",

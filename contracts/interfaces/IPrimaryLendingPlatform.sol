@@ -498,11 +498,10 @@ interface IPrimaryLendingPlatform {
      * @param account Address of the account.
      * @param projectToken Address of the project token.
      * @param lendingToken Address of the lending token.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return The PIT value.
      * Formula: pit = $ * LVR
      */
-    function pit(address account, address projectToken, address lendingToken, bool useForLiquidate) external view returns (uint256);
+    function pit(address account, address projectToken, address lendingToken) external view returns (uint256);
 
     /**
      * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened
@@ -553,11 +552,10 @@ interface IPrimaryLendingPlatform {
      * @dev Returns the evaluation of a specific token amount in USD
      * @param token The address of the token to evaluate
      * @param tokenAmount The amount of the token to evaluate
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getTokenEvaluation(address token, uint256 tokenAmount, bool useForLiquidate) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation);
+    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation);
 
     /**
      * @dev Returns the length of the lending tokens array
@@ -576,7 +574,6 @@ interface IPrimaryLendingPlatform {
      * @param account The address of the user's borrow position
      * @param projectToken The address of the project token
      * @param lendingToken The address of the lending token
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return depositedProjectTokenAmount The amount of project tokens deposited by the user
      * @return loanBody The amount of the lending token borrowed by the user
      * @return accrual The accrued interest of the borrow position
@@ -586,8 +583,7 @@ interface IPrimaryLendingPlatform {
     function getPosition(
         address account,
         address projectToken,
-        address lendingToken,
-        bool useForLiquidate
+        address lendingToken
     )
         external
         view
@@ -626,10 +622,9 @@ interface IPrimaryLendingPlatform {
      * @param account The address of the user account
      * @param projectToken The address of the project token
      * @param lendingToken The address of the lending token
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @return The total outstanding amount in USD
      */
-    function totalOutstandingInUSD(address account, address projectToken, address lendingToken, bool useForLiquidate) external view returns (uint256);
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) external view returns (uint256);
 
     /**
      * @dev Get the loan to value ratio of a position taken by a project token and a lending token
@@ -639,24 +634,6 @@ interface IPrimaryLendingPlatform {
      * @return lvrDenominator The denominator of the loan to value ratio
      */
     function getLoanToValueRatio(address projectToken, address lendingToken) external view returns (uint256 lvrNumerator, uint256 lvrDenominator);
-
-    /**
-     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened after update price.
-     * @param account Address of the account.
-     * @param projectToken Address of the project token.
-     * @param lendingToken Address of the lending token.
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return The PIT value.
-     * Formula: pit = $ * LVR
-     */
-    function pitWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256);
 
     /**
      * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened after update price.

@@ -2,6 +2,8 @@
 pragma solidity 0.8.19;
 pragma abicoder v2;
 
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Callee.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
@@ -17,13 +19,16 @@ import "../interfaces/IPrimaryLendingPlatformLiquidation.sol";
  * the minimum collateralization level on the Fringe Finance V2 over-collateralized DeFi lending platform.
  * The contract interacts with Uniswap V2 and supports flash loans for liquidation.
  */
-contract PairFlash is IUniswapV2Callee {
+contract PairFlash is
+    IUniswapV2Callee,
+    Initializable,
+    AccessControlUpgradeable
+{
     using SafeERC20Upgradeable for ERC20Upgradeable;
 
     IUniswapV2Factory public uniswapFactory;
     IPrimaryLendingPlatform public plp;
     IPrimaryLendingPlatformLiquidation public plpLiquidation;
-    address public owner;
 
     struct LiquidateParams {
         address borrower;
@@ -78,24 +83,26 @@ contract PairFlash is IUniswapV2Callee {
     );
 
     /**
-     * @dev Contract constructor that sets the initial Uniswap Factory, PLP, PLP Liquidation and owner addresses.
+     * @dev Initializes the contract and sets the initial Uniswap Factory, PLP, PLP Liquidation and owner addresses.
      */
-    constructor(
+    function initialize(
         address _uniswapFactory,
         address _plp,
         address _plpLiquidation
-    ) {
+    ) public initializer {
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+
         uniswapFactory = IUniswapV2Factory(_uniswapFactory);
         plp = IPrimaryLendingPlatform(_plp);
         plpLiquidation = IPrimaryLendingPlatformLiquidation(_plpLiquidation);
-        owner = msg.sender;
     }
 
     /**
-     * @dev Modifier to restrict function access to only the contract owner.
+     * @dev Modifier to restrict function access to only the admin.
      */
-    modifier onlyOwner() {
-        require(msg.sender == owner, "BOT: Only owner");
+    modifier onlyAdmin() {
+        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "BOT: Only Admin");
         _;
     }
 
@@ -108,7 +115,7 @@ contract PairFlash is IUniswapV2Callee {
      * @dev Updates the Uniswap Factory address.
      * @param newFactory The new Uniswap Factory address.
      */
-    function setUniswapFactory(address newFactory) public onlyOwner {
+    function setUniswapFactory(address newFactory) external onlyAdmin {
         require(newFactory != address(0), "BOT: Invalid address");
         emit OnSetUniswapFactory(address(uniswapFactory), newFactory);
         uniswapFactory = IUniswapV2Factory(newFactory);
@@ -118,7 +125,7 @@ contract PairFlash is IUniswapV2Callee {
      * @dev Updates the Primary Lending Platform (PLP) contract address.
      * @param newPlp The new PLP contract address.
      */
-    function setPlp(address newPlp) public onlyOwner {
+    function setPlp(address newPlp) external onlyAdmin {
         require(newPlp != address(0), "BOT: Invalid address");
         emit OnSetPlp(address(plp), newPlp);
         plp = IPrimaryLendingPlatform(newPlp);
@@ -128,7 +135,7 @@ contract PairFlash is IUniswapV2Callee {
      * @dev Updates the Primary Lending Platform Liquidation (PLP Liquidation) contract address.
      * @param newLiquidation The new PLP Liquidation contract address.
      */
-    function setPlpLiquidation(address newLiquidation) public onlyOwner {
+    function setPlpLiquidation(address newLiquidation) external onlyAdmin {
         require(newLiquidation != address(0), "BOT: Invalid address");
         emit OnSetPlpLiquidation(address(plpLiquidation), newLiquidation);
         plpLiquidation = IPrimaryLendingPlatformLiquidation(newLiquidation);

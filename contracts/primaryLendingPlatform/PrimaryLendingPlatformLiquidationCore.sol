@@ -225,7 +225,19 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address _projectToken,
         address _lendingToken
     ) public view returns (uint256 healthFactorNumerator, uint256 healthFactorDenominator) {
-        (, , , healthFactorNumerator, healthFactorDenominator) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken, true);
+        (, , , healthFactorNumerator, healthFactorDenominator) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken);
+    }
+
+    /**
+     * @dev Gets the current outstanding amount of a specific account's position.
+     * @param _account The address of the account.
+     * @param _projectToken The address of the project token.
+     * @param _lendingToken The address of the lending token.
+     * @return currentOutstanding The current outstanding amount of the account's position.
+     */
+    function getCurrentOutstanding(address _account, address _projectToken, address _lendingToken) public view returns (uint256) {
+        (, uint256 loanBody, uint256 accural, , ) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken);
+        return loanBody + accural;
     }
 
     /**
@@ -233,10 +245,10 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param token The address of the token.
      * @param amount The amount of the token.
      * @return collateralPrice The price of the token in USD.
-	 * @return capitalPrice The price of the token in USD.
+     * @return capitalPrice The price of the token in USD.
      */
     function getTokenPrice(address token, uint256 amount) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
-        return primaryLendingPlatform.getTokenEvaluation(token, amount, true);
+        return primaryLendingPlatform.getTokenEvaluation(token, amount);
     }
 
     /**
@@ -255,7 +267,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         uint256 _lendingTokenAmount,
         address liquidator
     ) internal returns (uint256) {
-        
         require(_lendingTokenAmount > 0, "PITLiquidation: LendingTokenAmount must be greater than 0");
 
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
@@ -309,10 +320,10 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         uint256 repaid = primaryLendingPlatform.repayFromRelatedContract(_projectToken, _lendingToken, _lendingTokenAmount, liquidator, _account);
 
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
-        
+
         (uint256 projectTokenPrice, ) = getTokenPrice(_projectToken, projectTokenMultiplier);
-        
-        (, uint256 repaidInUSD) =  getTokenPrice(_lendingToken, repaid);
+
+        (, uint256 repaidInUSD) = getTokenPrice(_lendingToken, repaid);
 
         uint256 projectTokenEvaluation = (repaidInUSD * projectTokenMultiplier) / projectTokenPrice;
 
@@ -391,7 +402,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @return maxLA The maximum liquidation amount in the lending token.
      */
     function getMaxLiquidationAmount(address account, address projectToken, address lendingToken) public view returns (uint256 maxLA) {
-        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(account, projectToken, lendingToken, true);
+        uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(account, projectToken, lendingToken);
         if (totalOutstandingInUSD == 0) return 0;
 
         (uint256 depositedProjectTokenAmountInUSD, ) = getTokenPrice(projectToken, primaryLendingPlatform.getDepositedAmount(projectToken, account));
@@ -420,15 +431,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
             ? (maxLAParams.numeratorMaxLA * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / maxLAParams.denominatorMaxLA
             : 0;
 
-        uint256 totalOutstandingInUSDMul = totalOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
-
-        maxLAParams.maxLACompare = maxLAParams.calculatedMaxLA > totalOutstandingInUSDMul
-            ? totalOutstandingInUSD
-            : maxLAParams.calculatedMaxLA / 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
-
-        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken, lendingTokenMultiplier);
-        maxLA = (maxLAParams.maxLACompare * lendingTokenMultiplier) / lendingTokenPrice;
+        if (maxLAParams.calculatedMaxLA >= totalOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) {
+            maxLA = getCurrentOutstanding(account, projectToken, lendingToken);
+        } else {
+            uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
+            (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken, lendingTokenMultiplier);
+            maxLA = (maxLAParams.calculatedMaxLA * lendingTokenMultiplier) / (10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / lendingTokenPrice;
+        }
     }
 
     /**
@@ -450,7 +459,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     /**
      * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
      *
-     * Formula: 
+     * Formula:
      * - MinLA = min(MaxLA, MPA)
      * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
      * @param _account The account for which to calculate the liquidation amount.

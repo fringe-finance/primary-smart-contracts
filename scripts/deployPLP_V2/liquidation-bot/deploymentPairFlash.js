@@ -17,7 +17,7 @@ const verify = async (address, constructorArguments, keyInConfig) => {
     if (!verifyFile[keyInConfig]) {
         await hre.run(`verify:verify`, {
             address,
-            constructorArguments ,
+            constructorArguments,
         });
         verifyFile[keyInConfig] = true;
         fs.writeFileSync(path.join(verifyFilePath), JSON.stringify(verifyFile, null, 2));
@@ -26,58 +26,143 @@ const verify = async (address, constructorArguments, keyInConfig) => {
 }
 
 module.exports = {
-   
-    deploymentPairFlash : async function () {
+
+    deploymentPairFlash: async function () {
         let network = await hre.network;
-        console.log("Network name: "+network.name);
-       
+        console.log("Network name: " + network.name);
+
         let signers = await hre.ethers.getSigners();
         let deployMaster = signers[0];
         let deployMasterAddress = deployMaster.address;
         console.log("DeployMaster: " + deployMasterAddress);
 
-        // Contracts ABI
-        let PairFlashABI = await hre.ethers.getContractFactory("PairFlash");
+        let ProxyAdmin = await hre.ethers.getContractFactory("PrimaryLendingPlatformProxyAdmin");
+        let TransparentUpgradeableProxy = await hre.ethers.getContractFactory("TransparentUpgradeableProxy");
+        let PairFlash = await hre.ethers.getContractFactory("PairFlash");
 
         const {
             liquidationBot
         } = configGeneral;
 
         const {
+            PRIMARY_PROXY_ADMIN,
             PrimaryLendingPlatformV2Proxy,
             PrimaryLendingPlatformLiquidationProxy,
-            PairFlash
+            PairFlashLogic,
+            PairFlashProxy
         } = config;
 
-        let pairFlashAddress = PairFlash;
+        let proxyAdminAddress = PRIMARY_PROXY_ADMIN;
+        let pairFlashLogicAddress = PairFlashLogic;
+        let pairFlashProxyAddress = PairFlashProxy;
         let uniswapV2FactoryAddress = liquidationBot.uniswapV2Factory;
         let plpAddress = PrimaryLendingPlatformV2Proxy;
         let plpLiquidationAddress = PrimaryLendingPlatformLiquidationProxy;
 
-    //====================================================
-    //deploy PairFlash
+        //====================================================
+        //deploy proxy admin
 
         console.log();
-        console.log("***** LIQUIDATION BOT DEPLOYMENT *****");
-        if(!pairFlashAddress){
-            let pairFlash = await PairFlashABI.connect(deployMaster).deploy(
-                uniswapV2FactoryAddress,
-                plpAddress,
-                plpLiquidationAddress
-            );
-            await pairFlash.deployed().then(function(instance){
-                pairFlashAddress = instance.address;
-                config.PairFlash = pairFlashAddress;
+        console.log("***** PROXY ADMIN DEPLOYMENT *****");
+        if (!proxyAdminAddress) {
+            const proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
+            await proxyAdmin.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+                proxyAdminAddress = instance.address;
+                config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
-        
-        console.log("PairFlash deployed at: " + pairFlashAddress);
-        await verify(
-            pairFlashAddress, [                
-            uniswapV2FactoryAddress,
-            plpAddress,
-            plpLiquidationAddress
-        ], "PairFlash");
+        console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
+        await verify(proxyAdminAddress, [], "PRIMARY_PROXY_ADMIN");
+        //====================================================
+        //deploy PairFlash
+
+        console.log();
+        console.log("***** LIQUIDATION BOT DEPLOYMENT *****");
+        if (!pairFlashLogicAddress) {
+            const pairFlashLogic = await PairFlash.connect(deployMaster).deploy();
+            await pairFlashLogic.deployed().then(function (instance) {
+                pairFlashLogicAddress = instance.address;
+                config.PairFlashLogic = pairFlashLogicAddress;
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
+            });
+        }
+        await verify(pairFlashLogicAddress, [], "PairFlashLogic");
+
+        if (!pairFlashProxyAddress) {
+            const pairFlashProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                pairFlashLogicAddress,
+                proxyAdminAddress,
+                "0x"
+            );
+            await pairFlashProxy.deployed().then(function (instance) {
+                console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+                config.PairFlashProxy = pairFlashProxyAddress = instance.address;
+                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
+            });
+        }
+
+        console.log("PairFlash deployed at: " + pairFlashLogicAddress);
+        await verify(pairFlashProxyAddress, [
+            pairFlashLogicAddress,
+            proxyAdminAddress,
+            "0x"
+        ], "PairFlashProxy");
+
+        let pairFlash = PairFlash.attach(pairFlashProxyAddress).connect(deployMaster);
+
+        console.log();
+        console.log("*****SETTING LIQUIDATION BOT *****");
+
+        // Initialize
+        {
+            let plp = await pairFlash.plp();
+            if (plp == hre.ethers.constants.AddressZero) {
+                await pairFlash.initialize(
+                    uniswapV2FactoryAddress,
+                    plpAddress,
+                    plpLiquidationAddress
+                ).then(function (instance) {
+                    console.log("PairFlash initialized at " + pairFlashProxyAddress + " at tx hash " + instance.hash);
+                    console.log("uniswapV2FactoryAddress: " + uniswapV2FactoryAddress);
+                    console.log("plpAddress: " + plpAddress);
+                    console.log("plpLiquidationAddress: " + plpLiquidationAddress);
+                });
+            }
+        }
+        console.log();
+        // Update uniswap v2 address
+        {
+            const uniswapFactory = await pairFlash.uniswapFactory();
+            if (uniswapFactory != hre.ethers.utils.getAddress(uniswapV2FactoryAddress)) {
+                await pairFlash.setUniswapFactory(uniswapV2FactoryAddress).then(function (instance) {
+                    console.log("PairFlash setUniswapFactory at " + pairFlashProxyAddress + " at tx hash " + instance.hash);
+                    console.log("uniswapV2FactoryAddress: " + uniswapV2FactoryAddress);
+                });
+            }
+        }
+        console.log();
+        // Update plp address
+        {
+            const plp = await pairFlash.plp();
+            if (plp != hre.ethers.utils.getAddress(plpAddress)) {
+                await pairFlash.setPlp(plpAddress).then(function (instance) {
+                    console.log("PairFlash setPlp at " + pairFlashProxyAddress + " at tx hash " + instance.hash);
+                    console.log("plpAddress: " + plpAddress);
+                });
+            }
+        }
+        console.log();
+        // Update plp liquidation
+        {
+            const plpLiquidation = await pairFlash.plpLiquidation();
+            if (plpLiquidation != hre.ethers.utils.getAddress(plpLiquidationAddress)) {
+                await pairFlash.setPlpLiquidation(plpLiquidationAddress).then(function (instance) {
+                    console.log("PairFlash setPlpLiquidation at " + pairFlashProxyAddress + " at tx hash " + instance.hash);
+                    console.log("plpLiquidationAddress: " + plpLiquidationAddress);
+                });
+            }
+        }
     }
 };

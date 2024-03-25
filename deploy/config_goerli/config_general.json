@@ -1,44 +1,8 @@
 {
   "priceOracle": {
     "priceProcessingOracle": {
-      "volatilityCapFixedPercent": "1000",
-      "minSampleInterval": "1800",
-      "logMaturingAge": "3600",
-      "longTWAPperiod": "86400",
-      "twapEnabledForAsset": [
-        [
-          "0x8141bbE65f611711EcF1e42A50E00bBE669A17CF",
-          true
-        ],
-        [
-          "0x2199b5009998e69e0B6Cb574C7c2f4a8954d9acA",
-          true
-        ],
-        [
-          "0x9b968333cBF98DDfc3daBCD25f8Ee5B2d3FC7e2D",
-          true
-        ],
-        [
-          "0xd966aAb2165701989D6F840e073A37c0a7fA9790",
-          true
-        ],
-        [
-          "0x80Fce3eA2e84A01C377585E5413F2AB4EabCfd58",
-          true
-        ],
-        [
-          "0xD38b51dfFcb3C0d7258F3bD0FbfE40E81d7e0E77",
-          true
-        ],
-        [
-          "0x875C14fF7d15C0414f856DEe29e5694d71f0b2E0",
-          true
-        ],
-        [
-          "0x9138c817656a95c62B19F1526Abe415eCC49d4BC",
-          true
-        ]
-      ]
+      "volatilityCapUpPercent": "1500",
+      "volatilityCapDownPercent": "1000"
     },
     "Pyth": {
       "pythOracle": "0xC38B1dd611889Abc95d4E0a472A667c3671c08DE",

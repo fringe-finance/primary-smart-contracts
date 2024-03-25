@@ -150,34 +150,9 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     }
 
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened after updating related token's prices.
-     *
-     * Formula: pit = $ * LVR of position.
-     * @param account Address of the account.
-     * @param projectToken Address of the project token.
-     * @param lendingToken Address of the lending token.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The PIT value.
-     */
-    function pitWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        bool useForLiquidate,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return pit(account, projectToken, lendingToken, useForLiquidate);
-    }
-
-    /**
      * @dev Returns the evaluation of a specific token amount in USD after updating related token's prices.
      * @param token The address of the token to evaluate.
      * @param tokenAmount The amount of the token to evaluate.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
@@ -186,12 +161,11 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     function getTokenEvaluationWithUpdatePrices(
         address token,
         uint256 tokenAmount,
-        bool useForLiquidate,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getTokenEvaluation(token, tokenAmount, useForLiquidate);
+        return getTokenEvaluation(token, tokenAmount);
     }
 
     /**
@@ -199,7 +173,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
      * @param account The address of the user's borrow position.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
      * @return depositedProjectTokenAmount The amount of project tokens deposited by the user.
@@ -212,7 +185,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         address account,
         address projectToken,
         address lendingToken,
-        bool useForLiquidate,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     )
@@ -227,7 +199,7 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         )
     {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getPosition(account, projectToken, lendingToken, useForLiquidate);
+        return getPosition(account, projectToken, lendingToken);
     }
 
     /**
@@ -235,7 +207,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
      * @param account The address of the user account.
      * @param projectToken The address of the project token
      * @param lendingToken The address of the lending token.
-     * @param useForLiquidate Flag to indicate whether the price is used for liquidation.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
      * @return The total outstanding amount in USD.
@@ -244,11 +215,10 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         address account,
         address projectToken,
         address lendingToken,
-        bool useForLiquidate,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint256) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return totalOutstandingInUSD(account, projectToken, lendingToken, useForLiquidate);
+        return totalOutstandingInUSD(account, projectToken, lendingToken);
     }
 }
