@@ -1,5 +1,8 @@
 {
-  "priceOracle": {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
+    "priceOracle": {
       "Pyth": {
           "pythOracle": "",
           "tokensUsePyth": [],
@@ -43,6 +46,7 @@
   },
   "blendingToken": {
       "initialExchangeRateMantissa": [],
+      "reserveFactorMantissa": [],
       "lendingTokens": [],
       "symbol": [],
       "decimals": [],

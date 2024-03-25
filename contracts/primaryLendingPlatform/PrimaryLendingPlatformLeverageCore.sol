@@ -27,6 +27,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
     mapping(address => mapping(address => LeverageType)) public typeOfLeveragePosition;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     struct Ratio {
         uint8 numerator;
         uint8 denominator;
@@ -37,7 +39,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         MARGIN_TRADE
     }
 
-    
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -151,9 +152,12 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
         require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
         if (registryAggregatorAddress != address(0)) {
-            require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
-            registryAggregator = registryAggregatorAddress;
+            require(
+                IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress),
+                "AtomicRepayment: Invalid Augustus"
+            );
         }
+        registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
         emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
@@ -329,39 +333,46 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         ERC20Upgradeable(lendingToken).safeTransferFrom(user, address(this), lendingTokenAmount);
     }
 
+    /**
+     * @notice Executes a buy order on the exchange aggregators contract for multiple assets.
+     * @param tokensFrom An array of addresses representing the assets to sell on the exchange aggregator.
+     * @param tokenToInfo Information about the token to buy on the exchange aggregator, including its address and type.
+     * @param buyCalldata An array of calldata for the buy operations.
+     * @return assetAmountSolds An array of amounts representing the amounts of each asset sold during the operation.
+     * @dev This function handles the buy operations for multiple assets, including selling tokens, buying the target token, and wrapping the received amount.
+     */
     function _buyOnExchangeAggregatorWithMultiAsset(
-        address[] memory tokenFrom,
-        address tokenTo,
-        bytes[] memory buyCalldata,
-        Asset.Type tokenToType
+        address[] memory tokensFrom,
+        Asset.Info memory tokenToInfo,
+        bytes[] memory buyCalldata
     ) internal returns (uint256[] memory assetAmountSolds, uint256 assetAmountReceive) {
-        (address[] memory assets, ) = Asset._unwrap(Asset.Info({addr: tokenTo, tokenType: tokenToType}), 0);
+        (address[] memory unwrapTokensTo, ) = Asset._unwrap(tokenToInfo, 0);
 
-        uint256 lenTokenFrom = tokenFrom.length;
-        uint256 lenTokenTo = assets.length;
+        uint256 lenTokensFrom = tokensFrom.length;
+        uint256 lenTokensTo = unwrapTokensTo.length;
 
-        assetAmountSolds = new uint256[](lenTokenFrom);
-        uint256[] memory assetAmountReceives = new uint256[](lenTokenTo);
+        assetAmountSolds = new uint256[](lenTokensFrom);
+        uint256[] memory assetAmountReceives = new uint256[](lenTokensTo);
 
-        if (lenTokenFrom == 1 && lenTokenTo > lenTokenFrom) {
-            for (uint8 i = 0; i < lenTokenTo; i++) {
+        if (lenTokensFrom == 1 && lenTokensTo > lenTokensFrom) {
+            for (uint8 i = 0; i < lenTokensTo; i++) {
                 uint256 amountSold;
-                (amountSold, assetAmountReceives[i]) = _buyOnExchangeAggregator(tokenFrom[0], assets[i], buyCalldata[i]);
+                (amountSold, assetAmountReceives[i]) = _buyOnExchangeAggregator(tokensFrom[0], unwrapTokensTo[i], buyCalldata[i]);
                 assetAmountSolds[0] += amountSold;
             }
-        } else if (lenTokenTo == 1 && lenTokenTo < lenTokenFrom) {
-            for (uint8 i = 0; i < lenTokenFrom; i++) {
+        } else if (lenTokensTo == 1 && lenTokensTo < lenTokensFrom) {
+            for (uint8 i = 0; i < lenTokensFrom; i++) {
                 uint256 amountReceive;
-                (assetAmountSolds[i], amountReceive) = _buyOnExchangeAggregator(tokenFrom[i], assets[0], buyCalldata[i]);
+                (assetAmountSolds[i], amountReceive) = _buyOnExchangeAggregator(tokensFrom[i], unwrapTokensTo[0], buyCalldata[i]);
                 assetAmountReceives[0] += amountReceive;
             }
-        } else if (lenTokenFrom == lenTokenTo) {
-            for (uint8 i = 0; i < lenTokenFrom; i++) {
-                (assetAmountSolds[i], assetAmountReceives[i]) = _buyOnExchangeAggregator(tokenFrom[i], assets[i], buyCalldata[i]);
+        } else if (lenTokensFrom == lenTokensTo) {
+            for (uint8 i = 0; i < lenTokensFrom; i++) {
+                (assetAmountSolds[i], assetAmountReceives[i]) = _buyOnExchangeAggregator(tokensFrom[i], unwrapTokensTo[i], buyCalldata[i]);
             }
         }
 
-        assetAmountReceive = Asset._wrap(assets, assetAmountReceives, Asset.Info({addr: tokenTo, tokenType: tokenToType}));
+        assetAmountReceive = Asset._wrap(unwrapTokensTo, assetAmountReceives, tokenToInfo);
     }
 
     /**
@@ -372,7 +383,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @return amountSold The amount of tokens sold on exchange aggregator.
      * @return amountReceive The amount of tokens received from exchange aggregator.
      */
-     function _buyOnExchangeAggregator(
+    function _buyOnExchangeAggregator(
         address tokenFrom,
         address tokenTo,
         bytes memory buyCalldata
@@ -490,23 +501,23 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @notice Unwraps the given project token, converting it into its underlying assets, and approves their transfer.
-     * @param prjInfo Information about the project token, including its address and type.
-     * @param collateralAmount The amount of project token to be unwrapped and approved for transfer.
+     * @notice Unwraps the given token, converting it into its underlying assets, and approves their transfer.
+     * @param info Information about the token, including its address and type.
+     * @param amount The amount of token to be unwrapped and approved for transfer.
      * @return assets An array containing the addresses of the underlying assets.
      * @return assetAmounts An array containing the amounts of the underlying assets corresponding to the unwrapped project token.
      */
-     function _unwrapProjectTokenAndApprove(
-        Asset.Info memory prjInfo,
-        uint256 collateralAmount
+    function _unwrapTokenAndApprove(
+        Asset.Info memory info,
+        uint256 amount
     ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
-        (assets, assetAmounts) = Asset._unwrap(prjInfo, collateralAmount);
+        (assets, assetAmounts) = Asset._unwrap(info, amount);
 
         for (uint8 i = 0; i < assets.length; i++) {
-            _approveTokenTransfer(assets[i], assetAmounts[i]);
+            uint256 approvalAmount = (assetAmounts[i] * (10000 + BUFFER_PERCENTAGE)) / 10000;
+            _approveTokenTransfer(assets[i], approvalAmount);
         }
     }
-
 
     /**
      * @dev Internal function to be called when a user wants to leverage their position.
@@ -538,14 +549,14 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
         _nakedBorrow(borrower, lendingInfo.addr, lendingTokenCount, prjInfo.addr, currentLendingToken);
 
-        (address[] memory lendingAssets,) = _unwrapProjectTokenAndApprove(lendingInfo, lendingTokenCount);
+        (address[] memory lendingAssets, ) = _unwrapTokenAndApprove(lendingInfo, lendingTokenCount);
 
-        (, uint256 amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(lendingAssets, prjInfo.addr, buyCalldata, prjInfo.tokenType);
+        (, uint256 amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(lendingAssets, prjInfo, buyCalldata);
 
         (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, prjInfo.addr, amountReceive, marginCollateralAmount);
 
         _deferLiquidityCheck(borrower, prjInfo.addr, lendingInfo.addr);
-
+        
         if (!isLeveragePosition[borrower][prjInfo.addr]) {
             isLeveragePosition[borrower][prjInfo.addr] = true;
         }

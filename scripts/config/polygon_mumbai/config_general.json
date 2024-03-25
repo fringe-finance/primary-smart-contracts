@@ -1,4 +1,7 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
         "Pyth": {
             "pythOracle": "",
@@ -112,6 +115,11 @@
             "10000000000000000000",
             "10000000000000000000",
             "10000000000000000000"
+        ],
+        "reserveFactorMantissa": [
+          "50000000000000000",
+          "70000000000000000",
+          "100000000000000000"
         ],
         "lendingTokens": [
             "0xbEba3820E44eDcD0e6e174aff7C999eE39C09F0E",

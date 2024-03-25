@@ -15,6 +15,7 @@ require("hardhat-tracer");
 require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
 
+
 const {
   INFURA_KEY,
   PRIVATE_KEY,
@@ -110,7 +111,7 @@ if (isZksync) {
       },
 
       polygon_mumbai: {
-        url: `https://polygon-mumbai-pokt.nodies.app`,
+        url: `https://polygon-mumbai.infura.io/v3/${INFURA_KEY}`,
         accounts: [PRIVATE_KEY]
       },
       optimism_goerli: {
@@ -135,7 +136,7 @@ if (isZksync) {
       currency: "USD",
     },
     mocha: {
-      timeout: 6000000,
+      timeout: 60000,
     },
     etherscan: {
       apiKey: {

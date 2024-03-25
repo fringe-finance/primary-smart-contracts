@@ -32,10 +32,7 @@ library Asset {
      * @return assets The unwrapped assets' addresses.
      * @return assetAmounts The amounts of the unwrapped assets.
      */
-    function _unwrap(
-        Info memory _tokenInfo,
-        uint256 _tokenAmount
-    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+    function _unwrap(Info memory _tokenInfo, uint256 _tokenAmount) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
         if (_tokenInfo.tokenType == Type.LP) {
             assets = new address[](2);
             assets[0] = IUniswapV2Pair(_tokenInfo.addr).token0();
@@ -67,15 +64,9 @@ library Asset {
      * @param _tokenInfo Information about the token, including its address and type.
      * @return tokenAmount The amount of the wrapped token.
      */
-    function _wrap(
-        address[] memory _assets,
-        uint256[] memory _assetAmounts,
-        Info memory _tokenInfo
-    ) internal returns (uint256 tokenAmount) {
+    function _wrap(address[] memory _assets, uint256[] memory _assetAmounts, Info memory _tokenInfo) internal returns (uint256 tokenAmount) {
         if (_tokenInfo.tokenType == Type.LP) {
-            
             if (_assetAmounts[0] > 0 && _assetAmounts[1] > 0) {
-
                 (uint112 reserve0, uint112 reserve1, ) = IUniswapV2Pair(_tokenInfo.addr).getReserves();
 
                 uint256 amountA;
@@ -98,7 +89,6 @@ library Asset {
                 ERC20Upgradeable(_assets[1]).safeTransfer(_tokenInfo.addr, amountB);
 
                 tokenAmount = IUniswapV2Pair(_tokenInfo.addr).mint(address(this));
-
             } else if (_assetAmounts[0] > 0) {
                 ERC20Upgradeable(_assets[0]).safeTransfer(msg.sender, _assetAmounts[0]);
             } else if (_assetAmounts[1] > 0) {
@@ -109,6 +99,50 @@ library Asset {
             tokenAmount = IERC4626Upgradeable(_tokenInfo.addr).deposit(_assetAmounts[0], address(this));
         } else {
             tokenAmount = _assetAmounts[0];
+        }
+    }
+
+    /**
+     * @notice Redeems the redundant amount of tokens for the underlying assets.
+     * @param _tokenInfo Information about the token, including its address and type.
+     * @param _receiver The address that will receive the redeemed assets.
+     * @return assets The redeemed assets' addresses.
+     * @return assetAmounts The amounts of the redeemed assets.
+     */
+    function _redeem(Info memory _tokenInfo, address _receiver) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        uint256 _tokenAmount = IERC20Upgradeable(_tokenInfo.addr).balanceOf(address(this));
+        if (_tokenInfo.tokenType == Type.LP) {
+            assets = new address[](2);
+            assets[0] = IUniswapV2Pair(_tokenInfo.addr).token0();
+            assets[1] = IUniswapV2Pair(_tokenInfo.addr).token1();
+            if (_tokenAmount > 0) {
+                assetAmounts = new uint256[](2);
+                IUniswapV2Pair(_tokenInfo.addr).transfer(_tokenInfo.addr, _tokenAmount);
+                (assetAmounts[0], assetAmounts[1]) = IUniswapV2Pair(_tokenInfo.addr).burn(_receiver);
+            }
+            uint256 _token0Amount = ERC20Upgradeable(assets[0]).balanceOf(address(this));
+            uint256 _token1Amount = ERC20Upgradeable(assets[1]).balanceOf(address(this));
+            if (_token0Amount > 0) {
+                assetAmounts[0] += _token0Amount;
+                ERC20Upgradeable(assets[0]).safeTransfer(_receiver, _token0Amount);
+            }
+            if (_token1Amount > 0) {
+                assetAmounts[1] += _token1Amount;
+                ERC20Upgradeable(assets[1]).safeTransfer(_receiver, _token1Amount);
+            }
+        } else {
+            assets = new address[](1);
+            assetAmounts = new uint256[](1);
+            if (_tokenInfo.tokenType == Type.ERC4626) {
+                assets[0] = IERC4626Upgradeable(_tokenInfo.addr).asset();
+                if (_tokenAmount > 0) {
+                    assetAmounts[0] = IERC4626Upgradeable(_tokenInfo.addr).redeem(_tokenAmount, _receiver, address(this));
+                }
+            } else {
+                assets[0] = _tokenInfo.addr;
+                assetAmounts[0] = _tokenAmount;
+                ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
+            }
         }
     }
 

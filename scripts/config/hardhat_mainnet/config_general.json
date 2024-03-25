@@ -1,185 +1,74 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
-        "Pyth": {
-            "pythOracle": "",
-            "tokensUsePyth": [],
-            "priceIdPath": []
-        },
-        "Chainlink": {
-            "sequencerUptimeFeed": "",
-            "gracePeriodTime": "",
-            "tokensUseChainlink": [
-                "0x6B175474E89094C44Da98b954EedeAC495271d0F",
-                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-                "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-                "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-                "0xAE461cA67B15dc8dc81CE7615e0320dA1A9aB8D5"
-            ],
-            "chainlinkAggregatorV3": [
-                [
-                    "0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9"
-                ],
-                [
-                    "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"
-                ],
-                [
-                    "0x3E7d1eAB13ad0104d2750B8863b489D65364e32D"
-                ],
-                [
-                    "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-                ],
-                [
-                    "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"
-                ]
-            ],
-            "timeOuts": [
-                [
-                    "84600"
-                ],
-                [
-                    "84600"
-                ],
-                [
-                    "84600"
-                ],
-                [
-                    "84600"
-                ],
-                [
-                    "84600"
-                ]
-            ]
-        },
-        "Uniswap": {
-            "tokensUseUniswap": [],
-            "uniswapPairs": []
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
-        "LPProvider": {
-            "tokensUseLPProvider": []
-        },
-        "wstETHProvider": {
-            "wstETHAggregatorPath": [],
-            "timeOuts": []
-        },
-        "wstETH": "",
-        "usdc": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-    },
-    "exchangeAggregatorParams": {
-        "exchangeAggregator": "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57",
-        "registryAggregator": "0xa68bEA62Dc4034A689AA0F58A76681433caCa663"
-    },
-    "plpModeratorParams": {
-        "projectTokens": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0xAE461cA67B15dc8dc81CE7615e0320dA1A9aB8D5"
-        ],
-        "loanToValueRatioNumerator": [
-            "6",
-            "6",
-            "6",
-            "9",
-            "9",
-            "6"
-        ],
-        "loanToValueRatioDenominator": [
-            "10",
-            "10",
-            "10",
-            "10",
-            "10",
-            "10"
-        ],
+      "Pyth": {
+          "pythOracle": "",
+          "tokensUsePyth": [],
+          "priceIdPath": []
+      },
+      "Chainlink": {
+          "sequencerUptimeFeed": "",
+          "gracePeriodTime": "",
+          "tokensUseChainlink": [],
+          "chainlinkAggregatorV3": [[]],
+          "timeOuts": [[]]
+      },
+      "Uniswap": {
+          "tokensUseUniswap": [],
+          "uniswapPairs": []
+      },
+      "BackendProvider": {
+          "tokensUseBackendProvider": []
+      },
+      "LPProvider": {
+          "tokensUseLPProvider": []
+      },
+      "wstETHPriceProvider": {
+          "wstETHAggregatorPath": []
+      },
+      "wstETH": "",
+      "usdc": "",
+      "WETH": ""
+  },
+  "exchangeAggregatorParams": {
+      "exchangeAggregator": "",
+      "registryAggregator": ""
+  },
+  "plpModeratorParams": {
+      "projectTokens": [],
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
         "isPaused": false,
-        "borrowLimitPerCollateral": [
-            "1000000000000",
-            "1000000000000",
-            "1000000000000",
-            "1000000000000",
-            "1000000000000",
-            "1000000000000"
-        ],
-        "borrowLimitPerLendingToken": [
-            "1000000000000",
-            "1000000000000",
-            "1000000000000"
-        ]
-    },
-    "blendingToken": {
-        "initialExchangeRateMantissa": [
-            "10000000000000000000",
-            "10000000000000000000",
-            "10000000000000000000"
-        ],
-        "lendingTokens": [
-            "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-            "0xAE461cA67B15dc8dc81CE7615e0320dA1A9aB8D5",
-            "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-        ],
-        "symbol": [
-            "fUSDT",
-            "fDAIUSDC",
-            "fWETH"
-        ],
-        "decimals": [
-            "6",
-            "18",
-            "18"
-        ],
-        "name": [
-            "fUSDT",
-            "fDAIUSDC",
-            "fWETH"
-        ],
-        "loanToValueRatioNumerator": [
-            "9",
-            "9",
-            "9"
-        ],
-        "loanToValueRatioDenominator": [
-            "10",
-            "10",
-            "10"
-        ],
-        "initialSupplyAmount": [
-            "",
-            "",
-            ""
-        ]
+        "borrowLimitPerCollateral": [],
+        "borrowLimitPerLendingToken": []
+  },
+  "blendingToken": {
+      "initialExchangeRateMantissa": [],
+      "reserveFactorMantissa": [],
+      "lendingTokens": [],
+      "symbol": [],
+      "decimals": [],
+      "name": [],
+      "loanToValueRatioNumerator": [],
+      "loanToValueRatioDenominator": [],
+      "initialSupplyAmount": []
     },
     "jumRateModel": {
-        "gainPerYear": [
-            "47564697600",
-            "47564697600",
-            "47564697600"
-        ],
-        "jumGainPerYear": [
-            "2102400000000000000000000",
-            "2102400000000000000000000",
-            "2102400000000000000000000"
-        ],
-        "targetUtil": [
-            "500000000000000000",
-            "500000000000000000",
-            "500000000000000000"
-        ],
-        "newMaxBorrow": [
-            "10000000000000",
-            "10000000000000",
-            "10000000000000"
-        ],
-        "blocksPerYear": "14908790"
+      "gainPerYear": [],
+      "jumGainPerYear": [],
+      "targetUtil": [],
+      "newMaxBorrow": [],
+      "blocksPerYear": ""
     },
     "plpLiquidationParams": {
-        "minPA": "1000000",
-        "maxLRFNumerator": "115",
-        "maxLRFDenominator": "100",
-        "rewardCalcFactorNumerator": "1",
-        "rewardCalcFactorDenominator": "1",
-        "targetHFNumerator": "1",
-        "targetHFDenominator": "1"
+      "minPA": "",
+      "maxLRFNumerator": "",
+      "maxLRFDenominator": "",
+      "rewardCalcFactorNumerator": "",
+      "rewardCalcFactorDenominator": "",
+      "targetHFNumerator": "",
+      "targetHFDenominator": ""
     }
 }

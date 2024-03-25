@@ -61,6 +61,9 @@ Each subfolder contains:
 
 ```
 {
+    "liquidationBot": { // Configure liquidation bot
+        "uniswapV2Factory": ""   // Address of UniswapV2Factory contract.
+    },
     "priceOracle": { // Configure oracle prices
         "Pyth": {
             "pythOracle": "",    // PythOracle Address.
@@ -140,6 +143,9 @@ Each subfolder contains:
         "initialExchangeRateMantissa": [], // ExchangeRate Mantissa value corresponding
                                            // each token in the lendingTokens list.
 
+        "reserveFactorMantissa": [],       // ReserveFactor Mantissa value corresponding
+                                           // each token in the lendingTokens list.
+
         "lendingTokens": [],               // List of address lending tokens.
 
         "symbol": [],                      // List of symbol bLendingToken corresponding
@@ -191,6 +197,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
 //file: ./scripts/config/arbitrum_goerli/config_gerenal.json
 
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
         "Pyth": {
             "pythOracle": "",
@@ -301,6 +310,11 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
           "10000000000000000000",
           "10000000000000000000"
       ],
+      "reserveFactorMantissa": [
+          "50000000000000000",
+          "70000000000000000",
+          "100000000000000000"
+      ],
       "lendingTokens": [
           "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
           "0xD20ee3d5c9EE0924429268d994149963ded6c72A",
@@ -409,7 +423,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": ""
+  "UniswapV2PriceProviderProxy": "",
+  "PairFlashLogic": "",
+  "PairFlashProxy": ""
 }
 ```
 
@@ -451,7 +467,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV2PriceProviderProxy": true,
+  "PairFlashLogic": true,
+  "PairFlashProxy": true
 }
 ```
 
@@ -538,6 +556,28 @@ Currently, we have pre-configured `config_gerenal` (**_Please do not change thes
 | 4   | Arbitrum | `npm run deploy:v2:fork-arbitrum` or `yarn deploy:v2:fork-arbitrum` |
 
 **Note**: We recommend that you first try deploying the system with the mainnet `config_general` file onto mainnet forks, to check if the values in the `config_gerenal` file do not lead to errors during the process. For example, a wrong address of a lending token will result in a failed deployment.
+
+### 2.5 Deploy Liquidation Bot contract
+
+The liquidation bot contract is deployed separately from the main contract. The liquidation bot contract is used to liquidate the collateral of the borrower when the health factor is below the threshold. The liquidation bot contract is deployed on the mainnet and testnet.
+
+### Mainnet
+
+| ID  | Network  | Deploy smart contract command                                             |
+| --- | -------- | ------------------------------------------------------------------------- |
+| 1   | Ethereum | `npm run deploy:liquidate-bot:mainnet` or `yarn deploy:liquidate-bot:mainnet`                   |
+| 2   | Polygon  | `npm run deploy:liquidate-bot:polygon-mainnet` or `yarn deploy:liquidate-bot:polygon-mainnet`   |
+| 3   | Optimsim | `npm run deploy:liquidate-bot:optimism-mainnet` or `yarn deploy:liquidate-bot:optimism-mainnet` |
+| 4   | Arbitrum | `npm run deploy:liquidate-bot:arbitrum-mainnet` or `yarn deploy:liquidate-bot:arbitrum-mainnet` |
+
+### Testnet
+
+| ID  | Network        | Deploy smart contract command                                           |
+| --- | -------------- | ----------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run deploy:liquidate-bot:goerli` or `yarn deploy:liquidate-bot:goerli`                   |
+| 2   | Polygon Mumbai | `npm run deploy:liquidate-bot:polygon-mumbai` or `yarn deploy:liquidate-bot:polygon-mumbai`   |
+| 3   | Optimsim       | `npm run deploy:liquidate-bot:optimism-goerli` or `yarn deploy:liquidate-bot:optimism-goerli` |
+| 4   | Arbitrum       | `npm run deploy:liquidate-bot:arbitrum-goerli` or `deploy:liquidate-bot:arbitrum-goerli` |
 
 ## 3. Test case setup
 

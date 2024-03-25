@@ -16,8 +16,6 @@ let config = require(configFile);
 const verifyFilePath = path.join(__dirname, `../../config/${network}${chain}/verify.json`);
 const verifyFile = require(verifyFilePath);
 
-
-
 const verify = async (address, constructorArguments, keyInConfig) => {
     console.log("Verifying " + address);
     if (!verifyFile[keyInConfig]) {
@@ -29,6 +27,54 @@ const verify = async (address, constructorArguments, keyInConfig) => {
         fs.writeFileSync(path.join(verifyFilePath), JSON.stringify(verifyFile, null, 2));
     }
     console.log("Verified " + address);
+};
+
+const upgrade = async (proxyAdmin, implementationInstance, proxyInstance) => {
+    const currentImplementation = await proxyAdmin.getProxyImplementation(proxyInstance.address);
+    console.log("Current proxy: " + proxyInstance.address);
+    console.log("Current implementation: " + currentImplementation);
+    console.log("Expected implementation: " + implementationInstance.address);
+    console.log();
+    if (currentImplementation != implementationInstance.address) {
+        const upgradeData = await proxyAdmin.upgradeData(proxyInstance.address);
+        const appendTimestamp = Number(upgradeData.appendTimestamp);
+        if (appendTimestamp == 0) {
+            await proxyAdmin.appendUpgrade(proxyInstance.address, implementationInstance.address)
+                .then(function (instance) {
+                    console.log("[Appending upgrade] ");
+                    console.log("Transaction hash: " + instance.hash);
+                    console.log("ProxyAdmin appendUpgrade implementation " + implementationInstance.address + " to proxy " + proxyInstance.address);
+                });
+        } else {
+            let timeStamp = (await hre.ethers.provider.getBlock("latest")).timestamp;
+            let delayPeriod = Number(upgradeData.delayPeriod);
+            if (timeStamp >= appendTimestamp + delayPeriod) {
+                await proxyAdmin.upgrade(proxyInstance.address, implementationInstance.address)
+                    .then(function (instance) {
+                        if (upgradeData.newImplementation != implementationInstance.address) {
+                            console.log("[Canceling upgrade]");
+                            console.log("Upgrade implementation in queue " + upgradeData.newImplementation + " is different from expected implementation " + implementationInstance.address);
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("ProxyAdmin canceled upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        } else {
+                            console.log("[Upgrading] ");
+                            console.log("ProxyAdmin upgraded implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        }
+                    });
+            } else {
+                console.log("[Delaying upgrade]");
+                console.log("In delay period to upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                console.log("AppendTimestamp: ", appendTimestamp);
+                console.log("Delay time: ", delayPeriod);
+                console.log("Current: ", timeStamp);
+                console.log("Can upgrade at: ", appendTimestamp + delayPeriod);
+                console.log("Need to wait another: " + (appendTimestamp + delayPeriod - timeStamp) + "seconds");
+                console.log();
+            }
+        }
+    } else {
+        console.log("Current implementation is synced with expected implementation " + implementationInstance.address);
+    }
 };
 
 module.exports = {
@@ -63,6 +109,7 @@ module.exports = {
         let PrimaryLendingPlatformWrappedTokenGateway = await hre.ethers.getContractFactory("PrimaryLendingPlatformWrappedTokenGatewayZksync");
         let PrimaryLendingPlatformModerator = await hre.ethers.getContractFactory("PrimaryLendingPlatformModerator");
 
+        let proxyAdmin;
         let jumpRateModel;
         let bondtroller;
         let blending;
@@ -153,6 +200,7 @@ module.exports = {
         let loanToValueRatioNumeratorLendingToken = blendingToken.loanToValueRatioNumerator;
         let loanToValueRatioDenominatorLendingToken = blendingToken.loanToValueRatioDenominator;
         let initialSupplyAmount = blendingToken.initialSupplyAmount;
+        let reserveFactorMantissa = blendingToken.reserveFactorMantissa;
 
         let projectTokens = plpModeratorParams.projectTokens;
         let loanToValueRatioNumerator = plpModeratorParams.loanToValueRatioNumerator;
@@ -183,34 +231,6 @@ module.exports = {
 
         console.log("Network name: " + network.name);
         console.log("DeployMaster: " + deployMaster.address);
-        //====================================================
-        //deploy proxy admin
-
-        console.log();
-        console.log("***** PROXY ADMIN DEPLOYMENT *****");
-        if (!proxyAdminAddress) {
-            let proxyAdmin = await ProxyAdmin.connect(deployMaster).deploy();
-            await proxyAdmin.deployed().then(function (instance) {
-                proxyAdminAddress = instance.address;
-                if (!isTesting) config.PRIMARY_PROXY_ADMIN = proxyAdminAddress;
-                fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
-            });
-        }
-
-        console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
-        await verify(proxyAdminAddress, [], "PRIMARY_PROXY_ADMIN");
-
-        //====================================================
-        //deploy price oracle
-
-        // console.log();
-        // console.log("***** PRICE ORACLE DEPLOYMENT *****");
-        // if (!priceProvider) {
-        //     const { deploymentPriceOracle } = require('../priceOracle/deploymentPriceProividerAggregator.js')
-        //     let priceOracleAddresses = await deploymentPriceOracle(proxyAdminAddress)
-        //     priceProvider = priceOracleAddresses.priceProviderAggregatorAddress
-        // }
-        // console.log("PriceOracle is deployed at: " + priceProvider);
 
         //====================================================
         console.log();
@@ -545,6 +565,7 @@ module.exports = {
         //setting params
 
         //instances of contracts
+        proxyAdmin = ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         bondtroller = Bondtroller.attach(bondtrollerProxyAddress).connect(deployMaster);
         jumpRateModel = JumpRateModel.attach(jumpRateModelProxyAddress).connect(deployMaster);
         plp = PrimaryLendingPlatformV2.attach(primaryLendingPlatformV2ProxyAddress).connect(deployMaster);
@@ -563,6 +584,74 @@ module.exports = {
         plpLeverageImplementation = PrimaryLendingPlatformLeverage.attach(primaryLendingPlatformLeverageLogicAddress).connect(deployMaster);
         plpModeratorImplementation = PrimaryLendingPlatformModerator.attach(primaryLendingPlatformModeratorLogicAddress).connect(deployMaster);
         plpWrappedTokenGatewayImplementation = PrimaryLendingPlatformWrappedTokenGateway.attach(primaryLendingPlatformWrappedTokenGatewayLogicAddress).connect(deployMaster);
+
+        //====================================================
+        // ====================== upgrade bondtroller ======================
+        if (bondtrollerProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING BONDTROLLER *****");
+            await upgrade(proxyAdmin, bondtrollerImplementation, bondtroller);
+        }
+
+        // ====================== upgrade jumpRateModel ======================
+        if (jumpRateModelProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING JUMP-RATE MODEL *****");
+            await upgrade(proxyAdmin, jumpRateModelImplementation, jumpRateModel);
+        }
+
+        // ====================== upgrade blending token ======================
+        if (blendingTokenProxyAddresses.length > 0) {
+            console.log();
+            console.log("***** UPGRADING BLENDING TOKEN *****");
+            for (var i = 0; i < blendingTokenProxyAddresses.length; i++) {
+                console.log();
+                console.log("Blending token " + blendingTokenProxyAddresses[i]);
+                await upgrade(proxyAdmin, blendingImplementation, BLendingToken.attach(blendingTokenProxyAddresses[i]));
+            }
+        }
+
+        // ====================== upgrade primary lending platform ======================
+        if (primaryLendingPlatformV2ProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM *****");
+            await upgrade(proxyAdmin, plpImplementation, plp);
+        }
+
+        // ====================== upgrade primary lending platform moderator ======================
+        if (primaryLendingPlatformModeratorProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM MODERATOR *****");
+            await upgrade(proxyAdmin, plpModeratorImplementation, plpModerator);
+        }
+
+        // ====================== upgrade primary lending platform liquidation ======================
+        if (primaryLendingPlatformLiquidationProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM LIQUIDATION *****");
+            await upgrade(proxyAdmin, plpLiquidationImplementation, plpLiquidation);
+        }
+
+        // ====================== upgrade primary lending platform atomic repayment ======================
+        if (primaryLendingPlatformAtomicRepaymentProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM ATOMIC REPAYMENT *****");
+            await upgrade(proxyAdmin, plpAtomicRepaymentImplementation, plpAtomicRepayment);
+        }
+
+        // ====================== upgrade primary lending platform leverage ======================
+        if (primaryLendingPlatformLeverageProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM LEVERAGE *****");
+            await upgrade(proxyAdmin, plpLeverageImplementation, plpLeverage);
+        }
+
+        // ====================== upgrade primary lending platform wrapped token gateway ======================
+        if (primaryLendingPlatformWrappedTokenGatewayProxyAddress) {
+            console.log();
+            console.log("***** UPGRADING PRIMARY LENDING PLATFORM WRAPPED TOKEN GATEWAY *****");
+            await upgrade(proxyAdmin, plpWrappedTokenGatewayImplementation, plpWrappedTokenGateway);
+        }
 
         console.log();
         console.log("***** 1. Setting Bondtroller *****");
@@ -696,6 +785,17 @@ module.exports = {
                     console.log("Blending token call initialize at " + blending.address);
                 });
             }
+
+            {
+                let reserveFactor = await blending.reserveFactorMantissa();
+                if (reserveFactor != reserveFactorMantissa[i] && reserveFactorMantissa[i] != "") {
+                    await blending._setReserveFactor(reserveFactorMantissa[i]).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("blending set reserve factor " + reserveFactorMantissa[i]);
+                    });
+                }
+            }
+
             {
                 let plpAddress = await blending.primaryLendingPlatform();
                 if (plpAddress != primaryLendingPlatformV2ProxyAddress) {
@@ -792,7 +892,7 @@ module.exports = {
                     loanToValueRatioDenominator[i]
                 ).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
-                    console.log("Added prj token " + projectTokens[i] + ":");
+                    console.log("Added prj token " + projectTokens[i]);
                     console.log("LoanToValueRatio: ");
                     console.log("   Numerator:   " + loanToValueRatioNumerator[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominator[i]);
@@ -800,14 +900,53 @@ module.exports = {
             }
         }
 
+        {
+            const projectTokensLength = await plp.projectTokensLength();
+            let projectTokensListSnapshot = [];
+            for (var i = 0; i < projectTokensLength; i++) {
+                projectTokensListSnapshot.push(await plp.projectTokens(i));
+            }
+
+            for (var i = 0; i < projectTokensListSnapshot.length; i++) {
+                for (var j = 0; j < projectTokens.length; j++) {
+                    if (projectTokensListSnapshot[i] == projectTokens[j]) {
+                        break;
+                    }
+                    if (j == projectTokens.length - 1) {
+                        const tokensLength = await plp.projectTokensLength();
+                        for (var index = 0; index < tokensLength; index++) {
+                            const token = await plp.projectTokens(index);
+                            if (token == projectTokensListSnapshot[i]) {
+                                try {
+                                    const tx = await plpModerator.removeProjectToken(index);
+                                    console.log("\nTransaction hash: " + tx.hash);
+                                    console.log("Removed prj token " + projectTokensListSnapshot[i]);
+                                    await tx.wait(2);
+                                } catch (error) {
+                                    if (error.reason == "execution reverted: PITModerator: ProjectToken amount exist on PIT") {
+                                        console.log("\x1b[31m%s\x1b[0m", "\n[ERROR] Project token " + projectTokensListSnapshot[i] + " has been deposited");
+                                        console.log("\x1b[31m%s\x1b[0m", "Please withdraw all this token amount and try again");
+                                    } else {
+                                        console.log("\x1b[31m%s\x1b[0m", "\n[ERROR] " + error.reason);
+                                    }
+                                } finally {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
         for (var i = 0; i < lendingTokens.length; i++) {
             let lendingTokenInfo = await plp.lendingTokenInfo(lendingTokens[i]);
-            let lendingTokenLoan = await plp.lendingTokenInfo(lendingTokens[i]);
             if (lendingTokenInfo.isListed == false
                 || lendingTokenInfo.isPaused != isPaused
                 || lendingTokenInfo.bLendingToken != blendingTokenProxyAddresses[i]
-                || lendingTokenLoan.loanToValueRatio.numerator != loanToValueRatioNumeratorLendingToken[i]
-                || lendingTokenLoan.loanToValueRatio.denominator != loanToValueRatioDenominatorLendingToken[i]
+                || lendingTokenInfo.loanToValueRatio.numerator != loanToValueRatioNumeratorLendingToken[i]
+                || lendingTokenInfo.loanToValueRatio.denominator != loanToValueRatioDenominatorLendingToken[i]
             )
                 await plpModerator.addLendingToken(
                     lendingTokens[i],
@@ -817,11 +956,61 @@ module.exports = {
                     loanToValueRatioDenominatorLendingToken[i],
                 ).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
-                    console.log("Added lending token " + lendingTokens[i] + ":");
+                    console.log("Added lending token " + lendingTokens[i]);
                     console.log("LoanToValueRatio: ");
                     console.log("   Numerator:   " + loanToValueRatioNumeratorLendingToken[i]);
                     console.log("   Denominator: " + loanToValueRatioDenominatorLendingToken[i]);
                 });
+        }
+
+        {
+            const lendingTokensLength = await plp.lendingTokensLength();
+            let lendingTokensListSnapshot = [];
+            for (var i = 0; i < lendingTokensLength; i++) {
+                lendingTokensListSnapshot.push(await plp.lendingTokens(i));
+            }
+6
+            for (var i = 0; i < lendingTokensListSnapshot.length; i++) {
+                for (var j = 0; j < lendingTokens.length; j++) {
+                    if (lendingTokensListSnapshot[i] == lendingTokens[j]) {
+                        break;
+                    }
+                    if (j == lendingTokens.length - 1) {
+                        const tokensLength = await plp.lendingTokensLength();
+                        for (var index = 0; index < tokensLength; index++) {
+                            const token = await plp.lendingTokens(index);
+                            if (token == lendingTokensListSnapshot[i]) {
+                                try {
+                                    const tx = await plpModerator.removeLendingToken(index);
+                                    console.log("\nTransaction hash: " + tx.hash);
+                                    console.log("Removed lending token " + lendingTokensListSnapshot[i]);
+                                    await tx.wait(2);
+                                } catch (error) {
+                                    if (error.reason == "execution reverted: PITModerator: Exist borrow of lendingToken") {
+                                        const projectTokensLength = await plp.projectTokensLength();
+                                        let projectTokensListSnapshot = [];
+                                        for (var k = 0; k < projectTokensLength; k++) {
+                                            projectTokensListSnapshot.push(await plp.projectTokens(k));
+                                        }
+                                        for (var l = 0; l < projectTokensListSnapshot.length; l++) {
+                                            const borrowBalance = await plp.totalBorrow(projectTokensListSnapshot[l], token);
+                                            if (borrowBalance.toString() != "0") {
+                                                console.log("\x1b[31m%s\x1b[0m", "\n[ERROR] Lending token " + projectTokensListSnapshot[i] + " has been borrowed by project token " + projectTokensListSnapshot[l]);
+                                                console.log("\x1b[31m%s\x1b[0m", "Please repay all this token amount and try again");
+                                            }
+                                        }
+                                    } else {
+                                        console.log("\x1b[31m%s\x1b[0m", "\n[ERROR] " + error.reason);
+                                    }
+                                } finally {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         for (var i = 0; i < projectTokens.length; i++) {
@@ -910,27 +1099,52 @@ module.exports = {
                 let totalSupplyValue = ethers.BigNumber.from(totalSupply.toString());
 
                 let initialSupplyValue = initialSupplyAmount[i] == "" ? ethers.BigNumber.from(0) : ethers.BigNumber.from(initialSupplyAmount[i].toString());
-                if (initialSupplyValue.gt(ethers.BigNumber.from(0)) && totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                if (initialSupplyValue.gt(ethers.BigNumber.from(0))) {
                     let lendingToken = ERC20.attach(lendingTokens[i]).connect(deployMaster);
 
-                    let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
-                    let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
-                    if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
-                        console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
-                        return;
-                    } else {
-                        let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
-                        let allowanceValue = ethers.BigNumber.from(allowance.toString());
+                    if (totalSupplyValue.eq(ethers.BigNumber.from(0))) {
+                        let lendingTokenBalance = await lendingToken.balanceOf(deployMasterAddress);
+                        let lendingTokenBalanceValue = ethers.BigNumber.from(lendingTokenBalance.toString());
+                        if (lendingTokenBalanceValue.lt(initialSupplyValue)) {
+                            console.log("Please ensure there is sufficient token balance for " + lendingTokens[i] + " in " + deployMasterAddress + " before continue");
+                            return;
+                        } else {
+                            let allowance = await lendingToken.allowance(deployMasterAddress, blending.address);
+                            let allowanceValue = ethers.BigNumber.from(allowance.toString());
+                            if (allowanceValue.lt(initialSupplyValue)) {
+                                const tx = await lendingToken.approve(blending.address, initialSupplyValue);
+                                console.log("\nTransaction hash: " + tx.hash);
+                                console.log("Approve " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                                await tx.wait(10);
+                            }
 
-                        let approveAmount = allowanceValue.lt(initialSupplyValue) ? initialSupplyValue.sub(allowanceValue) : ethers.BigNumber.from(0);
-                        await lendingToken.approve(blending.address, approveAmount).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("Approve " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
-                        });
+                            await plp.supply(lendingTokens[i], initialSupplyValue).then(function (instance) {
+                                console.log("\nTransaction hash: " + instance.hash);
+                                console.log("Supply " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
+                            });
+                        }
+                    }
 
-                        await plp.supply(lendingTokens[i], initialSupplyAmount[i]).then(function (instance) {
+                    let blendingTokenBalanceOfAddress0x0 = await blending.balanceOf(ZERO_ADDRESS);
+                    let blendingTokenBalanceOfAddress0x0Value = ethers.BigNumber.from(blendingTokenBalanceOfAddress0x0.toString());
+                    if (blendingTokenBalanceOfAddress0x0Value.eq(ethers.BigNumber.from(0))) {
+                        let exchangeRate = await blending.exchangeRateStored();
+                        let exchangeRateValue = ethers.BigNumber.from(exchangeRate.toString());
+
+                        let blendingTokenDecimals = await blending.decimals();
+                        let blendingTokenDecimalsValue = ethers.BigNumber.from(blendingTokenDecimals.toString());
+
+                        let lendingTokenDecimals = await lendingToken.decimals();
+                        let lendingTokenDecimalsValue = ethers.BigNumber.from(lendingTokenDecimals.toString());
+
+                        let blendingTokenBurnValue = initialSupplyValue
+                            .mul(ethers.BigNumber.from(10).pow(ethers.BigNumber.from(18)))
+                            .div(exchangeRateValue)
+                            .mul(ethers.BigNumber.from(10).pow(blendingTokenDecimalsValue))
+                            .div(ethers.BigNumber.from(10).pow(lendingTokenDecimalsValue));
+                        await blending.transfer(ZERO_ADDRESS, blendingTokenBurnValue).then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
-                            console.log("Supply " + initialSupplyAmount[i] + " " + lendingTokens[i] + " to " + blending.address);
+                            console.log("Burn " + blendingTokenBurnValue + " " + blendingTokenProxyAddresses[i] + " to " + ZERO_ADDRESS);
                         });
                     }
                 }
@@ -1115,6 +1329,39 @@ module.exports = {
                     .then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
                         console.log("PrimaryLendingPlatformWrappedTokenGateway call initialize at " + plpWrappedTokenGateway.address);
+                    });
+            }
+        }
+
+        {
+            let currentPLP = await plpWrappedTokenGateway.primaryLendingPlatform();
+            if (currentPLP != primaryLendingPlatformV2ProxyAddress) {
+                await plpWrappedTokenGateway.setPrimaryLendingPlatform(primaryLendingPlatformV2ProxyAddress)
+                    .then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("PrimaryLendingPlatformWrappedTokenGateway set primaryLendingPlatform " + primaryLendingPlatformV2ProxyAddress);
+                    });
+            }
+        }
+
+        {
+            let currentLiquidation = await plpWrappedTokenGateway.pitLiquidation();
+            if (currentLiquidation != primaryLendingPlatformLiquidationProxyAddress) {
+                await plpWrappedTokenGateway.setPITLiquidation(primaryLendingPlatformLiquidationProxyAddress)
+                    .then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("PrimaryLendingPlatformWrappedTokenGateway set liquidation " + primaryLendingPlatformLiquidationProxyAddress);
+                    });
+            }
+        }
+
+        {
+            let currentLeverage = await plpWrappedTokenGateway.pitLeverage();
+            if (currentLeverage != primaryLendingPlatformLeverageProxyAddress) {
+                await plpWrappedTokenGateway.setPITLeverage(primaryLendingPlatformLeverageProxyAddress)
+                    .then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("PrimaryLendingPlatformWrappedTokenGateway set leverage " + primaryLendingPlatformLeverageProxyAddress);
                     });
             }
         }

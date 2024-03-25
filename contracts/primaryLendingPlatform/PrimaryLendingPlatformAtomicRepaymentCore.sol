@@ -30,6 +30,8 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     address public exchangeAggregator;
     address public registryAggregator;
 
+    uint16 public constant BUFFER_PERCENTAGE = 500;
+
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -189,32 +191,28 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     /**
      * @dev Internal function to repay a loan atomically using the given project token as collateral internal.
      * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the lending token from the exchange aggregator.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
-     * @param lendingTokenType The type of the lending token, indicating whether it's an ERC20 token, ERC4626 token, or LP token.
      */
     function _repayAtomic(
         Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 collateralAmount,
         bytes[] memory buyCalldata,
-        bool isRepayFully,
-        Asset.Type lendingTokenType
+        bool isRepayFully
     ) internal {
-        (address lendingToken, uint256 tokenAmountRemaining, uint256 amountReceive) = _beforeRepay(
+        (uint256 tokenAmountRemaining, uint256 amountReceive) = _beforeRepay(
             prjInfo,
+            lendingInfo,
             collateralAmount,
-            buyCalldata,
-            lendingTokenType
+            buyCalldata
         );
+        _repayInternal(prjInfo, lendingInfo, amountReceive, isRepayFully);
+        _afterRepay(prjInfo, lendingInfo);
 
-        uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjInfo.addr, lendingToken);
-        if (isRepayFully) require(amountReceive >= totalOutStanding, "AtomicRepayment: Amount receive not enough to repay fully");
-        primaryLendingPlatform.repayFromRelatedContract(prjInfo.addr, lendingToken, amountReceive, address(this), msg.sender);
-
-        _afterRepay(prjInfo.addr, lendingToken, amountReceive, totalOutStanding);
-
-        emit AtomicRepayment(msg.sender, prjInfo.addr, lendingToken, collateralAmount - tokenAmountRemaining, amountReceive);
+        emit AtomicRepayment(msg.sender, prjInfo.addr, lendingInfo.addr, collateralAmount - tokenAmountRemaining, amountReceive);
     }
 
     /**
@@ -237,7 +235,10 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
     function _approveTokenTransferOO(address token, uint256 tokenAmount) internal {
-        Asset._safeIncreaseAllowance(exchangeAggregator, token, tokenAmount);
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
+        }
     }
 
     /**
@@ -247,7 +248,10 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      */
     function _approveTokenTransferPara(address token, uint256 tokenAmount) internal {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
-        Asset._safeIncreaseAllowance(tokenTransferProxy, token, tokenAmount);
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(tokenTransferProxy, tokenAmount - allowanceAmount);
+        }
     }
 
     /**
@@ -283,10 +287,9 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     /**
      * @notice Executes necessary steps before repaying a loan atomically, including collateral deposit, asset unwrapping, buying lending tokens, and handling remaining collateral.
      * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the lending token from the exchange aggregator.
-     * @param lendingTokenType The type of lending token involved in the repayment (ERC20, ERC4626, LP).
-     * @return lendingToken The address of the lending token used for the repayment.
      * @return tokenAmountRemaining The remaining collateral amount after the repayment process.
      * @return amountReceive The total amount of the lending token received after executing the buy transactions.
      * @dev This function handles collateral deposit, unwrapping project token, buying lending tokens, and managing remaining collateral.
@@ -294,12 +297,12 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      */
     function _beforeRepay(
         Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 collateralAmount,
-        bytes[] memory buyCalldata,
-        Asset.Type lendingTokenType
-    ) internal returns (address lendingToken, uint256 tokenAmountRemaining, uint256 amountReceive) {
+        bytes[] memory buyCalldata
+    ) internal returns (uint256 tokenAmountRemaining, uint256 amountReceive) {
         require(collateralAmount > 0, "AtomicRepayment: CollateralAmount must be greater than 0");
-        lendingToken = getLendingToken(msg.sender, prjInfo.addr);
+        require(lendingInfo.addr == getLendingToken(msg.sender, prjInfo.addr), "AtomicRepayment: Invalid lending token");
 
         uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(prjInfo.addr, msg.sender);
         if (collateralAmount > depositedProjectTokenAmount) {
@@ -307,86 +310,103 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjInfo.addr, collateralAmount, msg.sender, address(this));
 
-        (address[] memory assets, uint256[] memory assetAmounts) = _unwrapProjectTokenAndApprove(prjInfo, collateralAmount);
+        (address[] memory prjTokens, uint256[] memory prjTokenAmounts) = _unwrapTokenAndApprove(prjInfo, collateralAmount);
 
-        uint256[] memory assetAmountSolds;
-        (assetAmountSolds, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(assets, lendingToken, buyCalldata, lendingTokenType);
+        uint256[] memory amountSold;
+        (amountSold, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(prjTokens, lendingInfo, buyCalldata);
 
         //deposit collateral back in the pool, if left after the swap(buy)
-        tokenAmountRemaining = _depositCollateralRemainingAfterSell(assets, assetAmounts, assetAmountSolds, prjInfo);
-
-        Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken, lendingToken, amountReceive);
+        tokenAmountRemaining = _depositCollateralRemainingAfterSell(prjTokens, prjTokenAmounts, amountSold, prjInfo);
     }
 
     /**
-     * @notice Executes necessary steps after repaying a loan atomically, including handling lending token balances and deferring liquidity checks if needed.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token used for the repayment.
+     * @notice Executes the necessary steps to repay a loan atomically
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param amountReceive The total amount of the lending token received after the repayment process.
-     * @param totalOutStanding The total outstanding amount of the loan after repayment.
+     * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     * @dev This function handles the actual repayment, lending token balances, transfers remaining balances to the sender, and defers liquidity checks if the received amount is less than the total outstanding.
+     */
+    function _repayInternal(Asset.Info memory prjInfo, Asset.Info memory lendingInfo, uint256 amountReceive, bool isRepayFully) internal {
+        uint256 totalOutStanding = getTotalOutstanding(msg.sender, prjInfo.addr, lendingInfo.addr);
+        if (isRepayFully) require(amountReceive >= totalOutStanding, "AtomicRepayment: Amount receive not enough to repay fully");
+
+        Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(lendingInfo.addr).bLendingToken, lendingInfo.addr, amountReceive);
+        primaryLendingPlatform.repayFromRelatedContract(prjInfo.addr, lendingInfo.addr, amountReceive, address(this), msg.sender);
+    }
+
+    /**
+     * @notice Executes necessary steps after repaying a loan atomically, including checking balance of any remaining tokens in this contract, then transferring to the user and deferring liquidity checks if needed.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @dev This function handles lending token balances, transfers remaining balances to the sender, and defers liquidity checks if the received amount is less than the total outstanding.
      */
-    function _afterRepay(address projectToken, address lendingToken, uint256 amountReceive, uint256 totalOutStanding) internal {
-        uint256 afterLendingBalance = ERC20Upgradeable(lendingToken).balanceOf(address(this));
-        if (afterLendingBalance > 0) {
-            ERC20Upgradeable(lendingToken).safeTransfer(msg.sender, afterLendingBalance);
-        }
-        if (amountReceive < totalOutStanding) {
-            _deferLiquidityCheck(msg.sender, projectToken, lendingToken);
-        }
+    function _afterRepay(Asset.Info memory prjInfo, Asset.Info memory lendingInfo) internal {
+        Asset._redeem(prjInfo, msg.sender);
+        Asset._redeem(lendingInfo, msg.sender);
+
+        _deferLiquidityCheck(msg.sender, prjInfo.addr, lendingInfo.addr);
     }
 
     /**
-     * @notice Unwraps the given project token, converting it into its underlying assets, and approves their transfer.
-     * @param prjInfo Information about the project token, including its address and type.
-     * @param collateralAmount The amount of project token to be unwrapped and approved for transfer.
+     * @notice Unwraps the given token, converting it into its underlying assets, and approves their transfer.
+     * @param info Information about the token, including its address and type.
+     * @param amount The amount of token to be unwrapped and approved for transfer.
      * @return assets An array containing the addresses of the underlying assets.
      * @return assetAmounts An array containing the amounts of the underlying assets corresponding to the unwrapped project token.
      */
-    function _unwrapProjectTokenAndApprove(
-        Asset.Info memory prjInfo,
-        uint256 collateralAmount
+    function _unwrapTokenAndApprove(
+        Asset.Info memory info,
+        uint256 amount
     ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
-        (assets, assetAmounts) = Asset._unwrap(prjInfo, collateralAmount);
+        (assets, assetAmounts) = Asset._unwrap(info, amount);
 
         for (uint8 i = 0; i < assets.length; i++) {
-            _approveTokenTransfer(assets[i], assetAmounts[i]);
+            uint256 approvalAmount = (assetAmounts[i] * (10000 + BUFFER_PERCENTAGE)) / 10000;
+            _approveTokenTransfer(assets[i], approvalAmount);
         }
     }
 
+    /**
+     * @notice Executes a buy order on the exchange aggregators contract for multiple assets.
+     * @param tokensFrom An array of addresses representing the assets to sell on the exchange aggregator.
+     * @param tokenToInfo Information about the token to buy on the exchange aggregator, including its address and type.
+     * @param buyCalldata An array of calldata for the buy operations.
+     * @return assetAmountSolds An array of amounts representing the amounts of each asset sold during the operation.
+     * @dev This function handles the buy operations for multiple assets, including selling tokens, buying the target token, and wrapping the received amount.
+     */
     function _buyOnExchangeAggregatorWithMultiAsset(
-        address[] memory tokenFrom,
-        address tokenTo,
-        bytes[] memory buyCalldata,
-        Asset.Type lendingTokenType
+        address[] memory tokensFrom,
+        Asset.Info memory tokenToInfo,
+        bytes[] memory buyCalldata
     ) internal returns (uint256[] memory assetAmountSolds, uint256 assetAmountReceive) {
-        (address[] memory assets, ) = Asset._unwrap(Asset.Info({addr: tokenTo, tokenType: lendingTokenType}), 0);
+        (address[] memory unwrapTokensTo, ) = Asset._unwrap(tokenToInfo, 0);
 
-        uint256 lenTokenFrom = tokenFrom.length;
-        uint256 lenTokenTo = assets.length;
+        uint256 lenTokensFrom = tokensFrom.length;
+        uint256 lenTokensTo = unwrapTokensTo.length;
 
-        assetAmountSolds = new uint256[](lenTokenFrom);
-        uint256[] memory assetAmountReceives = new uint256[](lenTokenTo);
+        assetAmountSolds = new uint256[](lenTokensFrom);
+        uint256[] memory assetAmountReceives = new uint256[](lenTokensTo);
 
-        if (lenTokenFrom == 1 && lenTokenTo > lenTokenFrom) {
-            for (uint8 i = 0; i < lenTokenTo; i++) {
+        if (lenTokensFrom == 1 && lenTokensTo > lenTokensFrom) {
+            for (uint8 i = 0; i < lenTokensTo; i++) {
                 uint256 amountSold;
-                (amountSold, assetAmountReceives[i]) = _buyOnExchangeAggregator(tokenFrom[0], assets[i], buyCalldata[i]);
+                (amountSold, assetAmountReceives[i]) = _buyOnExchangeAggregator(tokensFrom[0], unwrapTokensTo[i], buyCalldata[i]);
                 assetAmountSolds[0] += amountSold;
             }
-        } else if (lenTokenTo == 1 && lenTokenTo < lenTokenFrom) {
-            for (uint8 i = 0; i < lenTokenFrom; i++) {
+        } else if (lenTokensTo == 1 && lenTokensTo < lenTokensFrom) {
+            for (uint8 i = 0; i < lenTokensFrom; i++) {
                 uint256 amountReceive;
-                (assetAmountSolds[i], amountReceive) = _buyOnExchangeAggregator(tokenFrom[i], assets[0], buyCalldata[i]);
+                (assetAmountSolds[i], amountReceive) = _buyOnExchangeAggregator(tokensFrom[i], unwrapTokensTo[0], buyCalldata[i]);
                 assetAmountReceives[0] += amountReceive;
             }
-        } else if (lenTokenFrom == lenTokenTo) {
-            for (uint8 i = 0; i < lenTokenFrom; i++) {
-                (assetAmountSolds[i], assetAmountReceives[i]) = _buyOnExchangeAggregator(tokenFrom[i], assets[i], buyCalldata[i]);
+        } else if (lenTokensFrom == lenTokensTo) {
+            for (uint8 i = 0; i < lenTokensFrom; i++) {
+                (assetAmountSolds[i], assetAmountReceives[i]) = _buyOnExchangeAggregator(tokensFrom[i], unwrapTokensTo[i], buyCalldata[i]);
             }
         }
 
-        assetAmountReceive = Asset._wrap(assets, assetAmountReceives, Asset.Info({addr: tokenTo, tokenType: lendingTokenType}));
+        assetAmountReceive = Asset._wrap(unwrapTokensTo, assetAmountReceives, tokenToInfo);
     }
 
     /**

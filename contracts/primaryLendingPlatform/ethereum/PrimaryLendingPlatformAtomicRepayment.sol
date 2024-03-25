@@ -8,7 +8,6 @@ import "../PrimaryLendingPlatformAtomicRepaymentCore.sol";
  * @dev Contract that allows users to repay loans atomically using the Augustus Paraswap exchange aggregator. Inherit from PrimaryLendingPlatformAtomicRepaymentCore.
  */
 contract PrimaryLendingPlatformAtomicRepayment is PrimaryLendingPlatformAtomicRepaymentCore {
-
     /**
      * @notice Repays a loan atomically using the given project token as collateral.
      * @dev Repays the loan in a single atomic transaction.
@@ -30,18 +29,18 @@ contract PrimaryLendingPlatformAtomicRepayment is PrimaryLendingPlatformAtomicRe
      * - Transfers the remaining lending token amount to the user.
      * - Defers the liquidity check for the user, project token, and lending token.
      * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the project token.
      * @param isRepayFully A boolean indicating whether to fully repay the loan or not.
-     * @param lendingTokenType The type of the lending token, indicating whether it's an ERC20 token, ERC4626 token, or LP token.
      */
     function repayAtomic(
-        Asset.Info memory prjInfo, 
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 collateralAmount,
-        bytes[] memory buyCalldata, 
-        bool isRepayFully,
-        Asset.Type lendingTokenType    
+        bytes[] memory buyCalldata,
+        bool isRepayFully
     ) external nonReentrant {
-        _repayAtomic(prjInfo, collateralAmount, buyCalldata, isRepayFully, lendingTokenType);
+        _repayAtomic(prjInfo, lendingInfo, collateralAmount, buyCalldata, isRepayFully);
     }
 }
