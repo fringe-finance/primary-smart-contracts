@@ -35,7 +35,7 @@ const upgrade = async (proxyAdmin, implementationInstance, proxyInstance) => {
     console.log("Current implementation: " + currentImplementation);
     console.log("Expected implementation: " + implementationInstance.address);
     console.log();
-    if (currentImplementation != implementationInstance.address) {
+    if (currentImplementation.toLowerCase() != implementationInstance.address.toLowerCase()) {
         const upgradeData = await proxyAdmin.upgradeData(proxyInstance.address);
         const appendTimestamp = Number(upgradeData.appendTimestamp);
         if (appendTimestamp == 0) {
@@ -51,7 +51,7 @@ const upgrade = async (proxyAdmin, implementationInstance, proxyInstance) => {
             if (timeStamp >= appendTimestamp + delayPeriod) {
                 await proxyAdmin.upgrade(proxyInstance.address, implementationInstance.address)
                     .then(function (instance) {
-                        if (upgradeData.newImplementation != implementationInstance.address) {
+                        if (upgradeData.newImplementation.toLowerCase() != implementationInstance.address.toLowerCase()) {
                             console.log("[Canceling upgrade]");
                             console.log("Upgrade implementation in queue " + upgradeData.newImplementation + " is different from expected implementation " + implementationInstance.address);
                             console.log("Transaction hash: " + instance.hash);
@@ -678,7 +678,7 @@ module.exports = {
 
         {
             let primaryIndexTokenAddress = await bondtroller.getPrimaryLendingPlatformAddress();
-            if (primaryIndexTokenAddress != primaryLendingPlatformV2ProxyAddress) {
+            if (primaryIndexTokenAddress.toLowerCase() != primaryLendingPlatformV2ProxyAddress.toLowerCase()) {
                 await bondtroller.setPrimaryLendingPlatformAddress(primaryLendingPlatformV2ProxyAddress).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
                     console.log("Bondtroller set PLP " + primaryLendingPlatformV2ProxyAddress);
@@ -798,7 +798,7 @@ module.exports = {
 
             {
                 let plpAddress = await blending.primaryLendingPlatform();
-                if (plpAddress != primaryLendingPlatformV2ProxyAddress) {
+                if (plpAddress.toLowerCase() != primaryLendingPlatformV2ProxyAddress.toLowerCase()) {
                     await blending.setPrimaryLendingPlatform(primaryLendingPlatformV2ProxyAddress).then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
                         console.log("blending " + blending.address + " set primaryLendingPlatform " + primaryLendingPlatformV2ProxyAddress);
@@ -836,7 +836,7 @@ module.exports = {
 
         {
             let plpModerator = await plp.primaryLendingPlatformModerator();
-            if (plpModerator != primaryLendingPlatformModeratorProxyAddress) {
+            if (plpModerator.toLowerCase() != primaryLendingPlatformModeratorProxyAddress.toLowerCase()) {
                 await plp.setPrimaryLendingPlatformModerator(primaryLendingPlatformModeratorProxyAddress)
                     .then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
@@ -872,7 +872,7 @@ module.exports = {
 
         {
             let priceOracle = await plp.priceOracle();
-            if (priceOracle != PriceProviderAggregatorProxy) {
+            if (priceOracle.toLowerCase() != PriceProviderAggregatorProxy.toLowerCase()) {
                 await plpModerator.setPriceOracle(PriceProviderAggregatorProxy).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
                     console.log("PrimaryLendingPlatformV2 set priceOracle: " + PriceProviderAggregatorProxy);
@@ -909,14 +909,14 @@ module.exports = {
 
             for (var i = 0; i < projectTokensListSnapshot.length; i++) {
                 for (var j = 0; j < projectTokens.length; j++) {
-                    if (projectTokensListSnapshot[i] == projectTokens[j]) {
+                    if (projectTokensListSnapshot[i].toLowerCase() == projectTokens[j].toLowerCase()) {
                         break;
                     }
                     if (j == projectTokens.length - 1) {
                         const tokensLength = await plp.projectTokensLength();
                         for (var index = 0; index < tokensLength; index++) {
                             const token = await plp.projectTokens(index);
-                            if (token == projectTokensListSnapshot[i]) {
+                            if (token.toLowerCase() == projectTokensListSnapshot[i].toLowerCase()) {
                                 try {
                                     const tx = await plpModerator.removeProjectToken(index);
                                     console.log("\nTransaction hash: " + tx.hash);
@@ -944,7 +944,7 @@ module.exports = {
             let lendingTokenInfo = await plp.lendingTokenInfo(lendingTokens[i]);
             if (lendingTokenInfo.isListed == false
                 || lendingTokenInfo.isPaused != isPaused
-                || lendingTokenInfo.bLendingToken != blendingTokenProxyAddresses[i]
+                || lendingTokenInfo.bLendingToken.toLowerCase() != blendingTokenProxyAddresses[i].toLowerCase()
                 || lendingTokenInfo.loanToValueRatio.numerator != loanToValueRatioNumeratorLendingToken[i]
                 || lendingTokenInfo.loanToValueRatio.denominator != loanToValueRatioDenominatorLendingToken[i]
             )
@@ -972,14 +972,14 @@ module.exports = {
 6
             for (var i = 0; i < lendingTokensListSnapshot.length; i++) {
                 for (var j = 0; j < lendingTokens.length; j++) {
-                    if (lendingTokensListSnapshot[i] == lendingTokens[j]) {
+                    if (lendingTokensListSnapshot[i].toLowerCase() == lendingTokens[j].toLowerCase()) {
                         break;
                     }
                     if (j == lendingTokens.length - 1) {
                         const tokensLength = await plp.lendingTokensLength();
                         for (var index = 0; index < tokensLength; index++) {
                             const token = await plp.lendingTokens(index);
-                            if (token == lendingTokensListSnapshot[i]) {
+                            if (token.toLowerCase() == lendingTokensListSnapshot[i].toLowerCase()) {
                                 try {
                                     const tx = await plpModerator.removeLendingToken(index);
                                     console.log("\nTransaction hash: " + tx.hash);
@@ -1041,7 +1041,7 @@ module.exports = {
 
         {
             let primaryLendingPlatformLeverage = await plp.primaryLendingPlatformLeverage();
-            if (primaryLendingPlatformLeverage != primaryLendingPlatformLeverageProxyAddress) {
+            if (primaryLendingPlatformLeverage.toLowerCase() != primaryLendingPlatformLeverageProxyAddress.toLowerCase()) {
                 await plpModerator.setPrimaryLendingPlatformLeverage(primaryLendingPlatformLeverageProxyAddress).then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
                     console.log("PrimaryLendingPlatformV2 set Leverage contract " + primaryLendingPlatformLeverageProxyAddress);
@@ -1245,7 +1245,7 @@ module.exports = {
         }
         let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
         let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
-        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
             await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
                 .then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
@@ -1284,7 +1284,7 @@ module.exports = {
         }
         currentExchangeAggregator = await plpLeverage.exchangeAggregator();
         currentRegistryAggregator = await plpLeverage.registryAggregator();
-        if (exchangeAggregator != currentExchangeAggregator || registryAggregator != currentRegistryAggregator) {
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
             await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
                 .then(function (instance) {
                     console.log("\nTransaction hash: " + instance.hash);
@@ -1335,7 +1335,7 @@ module.exports = {
 
         {
             let currentPLP = await plpWrappedTokenGateway.primaryLendingPlatform();
-            if (currentPLP != primaryLendingPlatformV2ProxyAddress) {
+            if (currentPLP.toLowerCase() != primaryLendingPlatformV2ProxyAddress.toLowerCase()) {
                 await plpWrappedTokenGateway.setPrimaryLendingPlatform(primaryLendingPlatformV2ProxyAddress)
                     .then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
@@ -1346,7 +1346,7 @@ module.exports = {
 
         {
             let currentLiquidation = await plpWrappedTokenGateway.pitLiquidation();
-            if (currentLiquidation != primaryLendingPlatformLiquidationProxyAddress) {
+            if (currentLiquidation.toLowerCase() != primaryLendingPlatformLiquidationProxyAddress.toLowerCase()) {
                 await plpWrappedTokenGateway.setPITLiquidation(primaryLendingPlatformLiquidationProxyAddress)
                     .then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
@@ -1357,7 +1357,7 @@ module.exports = {
 
         {
             let currentLeverage = await plpWrappedTokenGateway.pitLeverage();
-            if (currentLeverage != primaryLendingPlatformLeverageProxyAddress) {
+            if (currentLeverage.toLowerCase() != primaryLendingPlatformLeverageProxyAddress.toLowerCase()) {
                 await plpWrappedTokenGateway.setPITLeverage(primaryLendingPlatformLeverageProxyAddress)
                     .then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
