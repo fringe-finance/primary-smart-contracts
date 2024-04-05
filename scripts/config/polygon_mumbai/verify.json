@@ -4,11 +4,11 @@
   "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
   "ChainlinkPriceProviderProxy": true,
-  "BackendPriceProviderLogic": true,
+  "BackendPriceProviderLogic": false,
   "BackendPriceProviderProxy": true,
   "PriceProviderAggregatorLogic": true,
   "PriceProviderAggregatorProxy": true,
-  "LPPriceProviderLogic": true,
+  "LPPriceProviderLogic": false,
   "LPPriceProviderProxy": true,
   "wstETHPriceProviderLogic": true,
   "wstETHPriceProviderProxy": true,
@@ -32,6 +32,6 @@
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
   "UniswapV2PriceProviderProxy": true,
-  "PairFlashLogic": true,
+  "PairFlashLogic": false,
   "PairFlashProxy": true
 }
