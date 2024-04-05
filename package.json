@@ -51,16 +51,7 @@
     "deploy:v2:optimism-mainnet": "cross-env LAYER2=true npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:zksync-goerli": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network goerli --script deploy/deployPLP.js",
     "deploy:v2:zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/deployPLP.js",
-    
-    "deploy:liquidate-bot:goerli": "npx hardhat run --network ethereum_goerli scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:arbitrum-goerli": "npx hardhat run --network arbitrum_goerli scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:optimism-goerli": "npx hardhat run --network optimism_goerli scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:polygon-mumbai": "npx hardhat run --network polygon_mumbai scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:mainnet": "npx hardhat run --network ethereum_mainnet scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:arbitrum-mainnet": "npx hardhat run --network arbitrum_mainnet scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:optimism-mainnet": "npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-    "deploy:liquidate-bot:polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/deployPLP_V2/liquidationBot/deployPairFlash.js",
-
+ 
     "test:v2:fork-goerli": "cross-env SOURCE=hardhat_goerli yarn reset-config && cross-env CHAIN=goerli BLOCK_NUMBER=9560000 TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-mumbai": "cross-env SOURCE=hardhat_polygon_mumbai yarn reset-config && cross-env CHAIN=polygon_mumbai BLOCK_NUMBER=39540000 TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
     "test:v2:fork-optimism-goerli": "cross-env SOURCE=hardhat_optimism_goerli yarn reset-config && cross-env CHAIN=optimism_goerli BLOCK_NUMBER=13970000 LAYER2=true TESTING=true npx hardhat test --network hardhat test/ethereum/*.js",
@@ -77,10 +68,7 @@
     "estimate:v2:arbitrum-mainnet": "cross-env LAYER2=true npx hardhat run --network arbitrum_mainnet scripts/deployPLP_V2/estimate.js",
     "estimate:v2:polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/deployPLP_V2/estimate.js",
     "estimate:v2:optimism-mainnet": "cross-env LAYER2=true npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/estimate.js",
-    "estimate:v2:zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/estimate.js",
-
-    "test:estimate-script:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=18812357 TESTING=true npx hardhat test --network hardhat test/lp-tokens/estimate-script.js",
-    "test:leverage-borrow:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=18925681 TESTING=true npx hardhat test --network hardhat test/lp-tokens/leverageBorrow"
+    "estimate:v2:zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/estimate.js"
   },
   "author": "",
   "license": "ISC",
@@ -94,7 +82,6 @@
     "@primitivefi/hardhat-dodoc": "^0.2.3",
     "@pythnetwork/pyth-evm-js": "^1.25.0",
     "@solarity/hardhat-markup": "^1.0.0",
-    "axios": "^1.6.2",
     "@uniswap/v2-core": "^1.0.1",
     "cross-env": "^7.0.3",
     "hardhat": "^2.14.0",
