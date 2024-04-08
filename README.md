@@ -102,12 +102,18 @@ Each subfolder contains:
                                            // if the time elapsed since the last price update
                                            // is valid (corresponds to chainlinkAggregatorV3).
         },
-        "Uniswap": {
-            "pricePointTWAPperiod": "",// The price point TWAP period.
-            "tokensUseUniswap": [],    // List of address tokens uses prices from Uniswap.
+        "UniswapV2": {
+            "tokensUseUniswap": [],    // List of address tokens uses prices from UniswapV2.
 
             "uniswapPairs": []         // List of address uniswapPair used to get the price for
-                                       // each corresponding token in List tokensUseUniswap.
+                                       // each corresponding token in List tokensUseUniswapV3.
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "",// The price point TWAP period.
+            "tokensUseUniswap": [],    // List of address tokens uses prices from UniswapV3.
+
+            "uniswapPairs": []         // List of address uniswapPair used to get the price for
+                                       // each corresponding token in List tokensUseUniswapV3.
         },
         "BackendProvider": {
             "tokensUseBackendProvider": [] // List of address tokens uses prices from Backend.
@@ -123,7 +129,6 @@ Each subfolder contains:
                                        // if the time elapsed since the last price update
                                        // is valid (corresponds to wstETHAggregatorPath).                
         },
-        "priceDecimals": {}, // Price decimals correspond to each token.
         "wstETH": "", // Address of wstETH token
         "usdc": "",   // Address of USDC token
         "WETH": ""    // Address of WETH token
@@ -237,7 +242,11 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
               ["180"]
           ]
         },
-        "Uniswap": {
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "UniswapV3": {
             "pricePointTWAPperiod": "10",
             "tokensUseUniswap": [
               "0xA0126016B2cFcAf60df67579C81F68C02bc237d8",
@@ -264,15 +273,6 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
                 "0x6550bc2301936011c1334555e62A87705A81C12C"
             ],
             "timeOuts": ["180"]
-        },
-        "priceDecimals": {
-            "0xA0126016B2cFcAf60df67579C81F68C02bc237d8": "18",
-            "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7": "18",
-            "0x2fCabB640BDc5E23dD469f2b8F625236d063456c": "18",
-            "0x55f88B32D47f7BA13e969749e1D6fc3aba691914": "18",
-            "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126": "18",
-            "0xD20ee3d5c9EE0924429268d994149963ded6c72A": "18",
-            "0x5ecf82A8e520f1c280694AfBe639ebD06A7dE249": "18"
         },
         "wstETH": "0x55f88B32D47f7BA13e969749e1D6fc3aba691914",
         "usdc": "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
@@ -435,6 +435,8 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageLogic": "",
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
+  "UniswapV2PriceProviderLogic": "",
+  "UniswapV2PriceProviderProxy": "",
   "UniswapV3PriceProviderLogic": "",
   "UniswapV3PriceProviderProxy": "",
   "PairFlashLogic": "",
@@ -481,6 +483,8 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformWrappedTokenGatewayProxy": true,
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
+  "UniswapV2PriceProviderLogic": "",
+  "UniswapV2PriceProviderProxy": "",
   "UniswapV3PriceProviderLogic": true,
   "UniswapV3PriceProviderProxy": true,
   "PairFlashLogic": true,

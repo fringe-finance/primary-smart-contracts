@@ -150,6 +150,46 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     }
 
     /**
+     * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened after updating related token's prices.
+     *
+     * Formula: pit = $ * LVR of project token.
+     * @param account Address of the account.
+     * @param projectToken Address of the project token.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return The PIT value.
+     */
+    function pitCollateralWithUpdatePrices(
+        address account,
+        address projectToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return pitCollateral(account, projectToken);
+    }
+
+    /**
+     * @dev Returns the remaining PIT (primary index token) of a user's borrow position for a specific project token and lending token after updating related token's prices.
+     * @param account The address of the user's borrow position.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return The remaining PIT of the user's borrow position.
+     */
+    function pitRemainingWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return pitRemaining(account, projectToken, lendingToken);
+    }
+
+    /**
      * @dev Returns the evaluation of a specific token amount in USD after updating related token's prices.
      * @param token The address of the token to evaluate.
      * @param tokenAmount The amount of the token to evaluate.
@@ -203,22 +243,58 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     }
 
     /**
-     * @dev Converts the total outstanding amount of a user's borrow position to USD after updating related token's prices.
-     * @param account The address of the user account.
-     * @param projectToken The address of the project token
+     * @dev Gets total borrow amount in USD for a specific lending token after updating related token's prices.
      * @param lendingToken The address of the lending token.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
-     * @return The total outstanding amount in USD.
+     * @return The total borrow amount in USD.
      */
-    function totalOutstandingInUSDWithUpdatePrices(
+    function getTotalBorrowPerLendingTokenWithUpdatePrices(
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return getTotalBorrowPerLendingToken(lendingToken);
+    }
+
+    /**
+     * @dev Calculates the collateral available for withdrawal based on the loan-to-value ratio of a specific project token after updating related token's prices.
+     * @param account Address of the user.
+     * @param projectToken Address of the project token.
+     * @param lendingToken Address of the lending token.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return collateralProjectToWithdraw The amount of collateral available for withdrawal in the project token.
+     */
+    function getCollateralAvailableToWithdrawWithUpdatePrices(
         address account,
         address projectToken,
         address lendingToken,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable returns (uint256) {
+    ) external payable returns (uint256 collateralProjectToWithdraw) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return totalOutstandingInUSD(account, projectToken, lendingToken);
+        return getCollateralAvailableToWithdraw(account, projectToken, lendingToken);
+    }
+
+    /**
+     * @dev Calculates the lending token available amount for borrowing after updating related token's prices.
+     * @param account Address of the user.
+     * @param projectToken Address of the project token.
+     * @param lendingToken Address of the lending token.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     * @return availableToBorrow The amount of lending token available amount for borrowing.
+     */
+    function getLendingAvailableToBorrowWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 availableToBorrow) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return getLendingAvailableToBorrow(account, projectToken, lendingToken);
     }
 }

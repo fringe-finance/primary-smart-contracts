@@ -17,7 +17,7 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
 
     string public constant DESCRIPTION = "Price provider that uses uniswapV3";
 
-    uint8 public decimals;
+    uint8 public tokenDecimals;
 
     uint32 public pricePointTWAPperiod;
 
@@ -65,7 +65,7 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        decimals = 18;
+        tokenDecimals = 18;
     }
 
     /**
@@ -191,7 +191,7 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
         UniswapV3Metadata memory metadata = uniswapV3Metadata[token];
         require(metadata.isActive, "UniswapV3PriceProvider: token is not active");
         (int24 tick, ) = OracleLibrary.consult(metadata.pair, pricePointTWAPperiod);
-        priceDecimals = 18;
+        priceDecimals = tokenDecimals;
         price = OracleLibrary.getQuoteAtTick(
             tick,
             uint128(10 ** (metadata.tokenDecimals + priceDecimals)),
@@ -206,6 +206,16 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public override view returns (uint8) {
-        return decimals;
+        return tokenDecimals;
+    }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes the active status, pair address, pairAsset address, tokenDecimals, and pairAssetDecimals.
+     */
+    function getUniswapV3Metadata(address token) public view returns (UniswapV3Metadata memory) {
+        UniswapV3Metadata memory metadata = uniswapV3Metadata[token];
+        return metadata;
     }
 }

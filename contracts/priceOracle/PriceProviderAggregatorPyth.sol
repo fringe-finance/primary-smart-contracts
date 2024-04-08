@@ -31,16 +31,12 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
-    * @dev Calculates and update multiple the final TWAP prices of a token after update price.
-    * @param token The token array needs to update the price.
-    * @param priceIds The priceIds need to update.
-    * @param updateData The updateData provided by PythNetwork.
-    */
-    function updateMultiFinalPricesWithUpdatePrice(
-        address[] memory token,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable { 
+     * @dev Calculates and update multiple the final TWAP prices of a token after update price.
+     * @param token The token array needs to update the price.
+     * @param priceIds The priceIds need to update.
+     * @param updateData The updateData provided by PythNetwork.
+     */
+    function updateMultiFinalPricesWithUpdatePrice(address[] memory token, bytes32[] memory priceIds, bytes[] calldata updateData) external payable {
         _updatePrices(priceIds, updateData);
         _updateMultiFinalPrices(token);
     }
@@ -52,6 +48,27 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
      */
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external payable {
         _updatePrices(priceIds, updateData);
+    }
+
+    /**
+     * @dev Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
+     * @param token The address of the token to get the price of.
+     * @param priceIds The priceIds need to update price.
+     * @param updateData The updateData provided by PythNetwork.
+     * @return priceDecimals The number of decimal places in the price of the token.
+     * @return timestamp The timestamp of the price.
+     * @return collateralPrice The price of the token in USD, represented as a mantissa.
+     * @return capitalPrice The price of the token in USD, represented as a mantissa.
+     */
+    function getUpdatedPrice(
+        address token,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        if (tokenPriceProvider[token] == pythPriceProvider) {
+            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
+        }
+        return getPrice(token);
     }
 
     /**

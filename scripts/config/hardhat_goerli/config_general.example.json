@@ -23,7 +23,11 @@
         []
       ]
     },
-    "Uniswap": {
+    "UniswapV2": {
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
+    },
+    "UniswapV3": {
       "pricePointTWAPperiod": "",
       "tokensUseUniswap": [],
       "uniswapPairs": []
@@ -37,7 +41,6 @@
     "wstETHProvider": {
       "wstETHAggregatorPath": []
     },
-    "priceDecimals": {},
     "wstETH": "",
     "usdc": "",
     "WETH": ""

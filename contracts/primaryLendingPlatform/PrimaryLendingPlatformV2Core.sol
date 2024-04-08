@@ -1175,36 +1175,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address actualLendingToken,
         bool isBorrow
     ) public view returns (address[] memory tokens) {
-        if (actualLendingToken != address(0)) {
-            if (!isBorrow) {
-                // The array includes of 2 elements are projectToken and actualLendingToken.
-                tokens = new address[](2);
-                tokens[0] = projectToken;
-                tokens[1] = actualLendingToken;
-            } else {
-                uint256 lendingTokensLen = lendingTokensLength();
-                address[] memory lendingTokensUpdateFinalPrice = new address[](lendingTokensLen);
-                uint256 lendingTokensIndex = 0;
-
-                for (uint256 i = 0; i < lendingTokensLen; i++) {
-                    address lendingToken = lendingTokens[i];
-
-                    if (totalBorrow[projectToken][lendingToken] > 0 || lendingToken == actualLendingToken) {
-                        lendingTokensUpdateFinalPrice[lendingTokensIndex++] = lendingToken; 
-                    }
-                }
-                // The length of the array includes the lendingTokens that need to be updated final price and projectToken.
-                tokens = new address[](lendingTokensIndex + 1);
-                for (uint256 i = 0; i < lendingTokensIndex; i++) {
-                    tokens[i] = lendingTokensUpdateFinalPrice[i];
-                }
-                tokens[lendingTokensIndex] = projectToken;
-            }
-        } else {
-            // The array includes of 1 element is projectToken.
-            tokens = new address[](1);
-            tokens[0] = projectToken;
-        }
+        return priceOracle.getTokensUpdateFinalPrices(projectToken, actualLendingToken, isBorrow);
     }
 
     /**

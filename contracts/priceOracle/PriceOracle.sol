@@ -16,6 +16,8 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
 
     uint16 public constant SECONDS_PER_HOUR = 1 hours;
 
+    uint8 public tokenPriceDecimals;
+
     uint8 public usdDecimals;
 
     /**
@@ -97,6 +99,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         _setupRole(MODERATOR_ROLE, msg.sender);
 
         usdDecimals = 6;
+        tokenPriceDecimals = 8;
         priceProviderAggregator = IPriceProviderAggregator(_priceProviderAggregator);
         tvcUp = _tvcUp;
         tvcDown = _tvcDown;
@@ -216,7 +219,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         address token
     ) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
         PriceInfo memory info = priceInfo[token];
-        return (getTokenPriceDecimals(token), info.timestamp, info.collateralPrice, info.capitalPrice);
+        return (tokenPriceDecimals, info.timestamp, info.collateralPrice, info.capitalPrice);
     }
 
     /**
@@ -232,16 +235,7 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
     ) public view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
         uint256 reportedPrice = getReportedPrice(token);
         GovernedPrice memory governedPrice = _calcGovernedPrice(mostGovernedPrice[token], reportedPrice, uint64(block.timestamp));
-        return (getTokenPriceDecimals(token), governedPrice.timestamp, governedPrice.collateralPrice, governedPrice.capitalPrice);
-    }
-
-    /**
-     * @dev Returns the decimals price of the token.
-     * @param token The address of the token.
-     * @return priceDecimals The decimals price of the token.
-     */
-    function getTokenPriceDecimals(address token) public view returns (uint8 priceDecimals) {
-        return priceProviderAggregator.tokenPriceProvider(token).priceDecimals;
+        return (tokenPriceDecimals, governedPrice.timestamp, governedPrice.collateralPrice, governedPrice.capitalPrice);
     }
 
     /**
@@ -253,9 +247,8 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      */
     function getEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
         PriceInfo memory info = priceInfo[token];
-        uint8 priceDecimals = getTokenPriceDecimals(token);
-        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice, priceDecimals);
-        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice, priceDecimals);
+        collateralEvaluation = _calEvaluation(token, tokenAmount, info.collateralPrice);
+        capitalEvaluation = _calEvaluation(token, tokenAmount, info.capitalPrice);
     }
 
     /**
@@ -269,9 +262,9 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
         address token,
         uint256 tokenAmount
     ) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
-        (uint8 priceDecimals, , uint256 collateralPrice, uint256 capitalPrice) = getEstimatedTWAPprice(token);
-        collateralEvaluation = _calEvaluation(token, tokenAmount, collateralPrice, priceDecimals);
-        capitalEvaluation = _calEvaluation(token, tokenAmount, capitalPrice, priceDecimals);
+        (, , uint256 collateralPrice, uint256 capitalPrice) = getEstimatedTWAPprice(token);
+        collateralEvaluation = _calEvaluation(token, tokenAmount, collateralPrice);
+        capitalEvaluation = _calEvaluation(token, tokenAmount, capitalPrice);
     }
 
     /**
@@ -280,11 +273,10 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      * @param token the address of token which price is to return
      */
     function getReportedPrice(address token) public view returns (uint256 priceMantissa) {
-        (uint256 reportedPrice, uint8 priceDecimals) = PriceProvider(priceProviderAggregator.tokenPriceProvider(token).priceProvider).getPrice(token);
-        uint8 calculatedPriceDecimals = getTokenPriceDecimals(token);
-        priceMantissa = priceDecimals >= calculatedPriceDecimals
-            ? reportedPrice / (10 ** (priceDecimals - calculatedPriceDecimals))
-            : reportedPrice * (10 ** (calculatedPriceDecimals - priceDecimals));
+        (uint256 reportedPrice, uint8 priceDecimals) = PriceProvider(priceProviderAggregator.tokenPriceProvider(token)).getPrice(token);
+        priceMantissa = priceDecimals >= tokenPriceDecimals
+            ? reportedPrice / (10 ** (priceDecimals - tokenPriceDecimals))
+            : reportedPrice * (10 ** (tokenPriceDecimals - priceDecimals));
     }
 
     /**
@@ -292,10 +284,9 @@ contract PriceOracle is Initializable, AccessControlUpgradeable {
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
      * @param price the price of token
-     * @param priceDecimals the decimals of price
      */
-    function _calEvaluation(address token, uint256 tokenAmount, uint256 price, uint8 priceDecimals) private view returns (uint256 evaluation) {
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
+    function _calEvaluation(address token, uint256 tokenAmount, uint256 price) private view returns (uint256 evaluation) {
+        evaluation = (tokenAmount * price) / (10 ** tokenPriceDecimals);
         uint8 tokenDecimals = IERC20MetadataUpgradeable(token).decimals();
         if (tokenDecimals >= usdDecimals) {
             evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals));

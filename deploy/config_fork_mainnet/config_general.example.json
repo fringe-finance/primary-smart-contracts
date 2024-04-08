@@ -34,7 +34,6 @@
             "wstETHAggregatorPath": [],
             "timeOuts": []
         },
-        "priceDecimals": {},
         "wstETH": "",
         "usdc": "",
         "WETH": ""

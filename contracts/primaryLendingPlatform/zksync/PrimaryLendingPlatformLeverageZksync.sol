@@ -99,4 +99,73 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
         _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
     }
+
+    /**
+     * @notice Calculates the lending token count for a given notional value after updating related token's prices.
+     * @param _lendingToken The address of the lending token.
+     * @param notionalValue The notional value for which the lending token count is to be calculated.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return lendingTokenCount The calculated lending token count.
+     */
+    function calculateLendingTokenCountWithUpdatePrices(
+        address _lendingToken,
+        uint notionalValue,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint lendingTokenCount) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
+        return calculateLendingTokenCount(_lendingToken, notionalValue);
+    }
+
+    /**
+     * @notice Calculates the margin amount for a given position and safety margin after updating related token's prices.
+     *
+     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param safetyMarginNumerator The numerator of the safety margin ratio.
+     * @param safetyMarginDenominator The denominator of the safety margin ratio.
+     * @param expAmount The exposure amount.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return marginAmount The calculated margin amount.
+     */
+    function calculateMarginWithUpdatePrices(
+        address projectToken,
+        address lendingToken,
+        uint safetyMarginNumerator,
+        uint safetyMarginDenominator,
+        uint expAmount,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint marginAmount) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
+        return calculateMargin(projectToken, lendingToken, safetyMarginNumerator, safetyMarginDenominator, expAmount);
+    }
+
+    /**
+     * @notice Calculates the safety margin numerator and denominator for a given position, margin, and exposure after updating related token's prices.
+     *
+     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param margin The margin amount.
+     * @param exp The exposure amount.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return safetyMarginNumerator The calculated safety margin numerator.
+     * @return safetyMarginDenominator The calculated safety margin denominator.
+     */
+    function calculateSafetyMarginWithUpdatePrices(
+        address projectToken,
+        address lendingToken,
+        uint margin,
+        uint exp,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint safetyMarginNumerator, uint safetyMarginDenominator) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
+        return calculateSafetyMargin(projectToken, lendingToken, margin, exp);
+    }
 }

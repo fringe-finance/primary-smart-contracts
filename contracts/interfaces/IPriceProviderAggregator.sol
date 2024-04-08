@@ -5,11 +5,6 @@ interface IPriceProviderAggregator {
 
     /****************** Moderator functions ****************** */
 
-    struct PriceProviderInfo {
-        address priceProvider;
-        uint8 priceDecimals;
-    }
-
     /**
      * @dev Sets price provider to `token` and its corresponding price provider.
      * @param token the address of token.
@@ -41,11 +36,24 @@ interface IPriceProviderAggregator {
      */
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external payable;
 
+    /**@dev This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+     * @param projectToken Address of the project token.
+     * @param actualLendingToken Address of the lending token.
+     * @param isBorrow Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.
+     * @return tokens Array of tokens that need to update final price.
+     */
+    function getTokensUpdateFinalPrices(
+        address projectToken,
+        address actualLendingToken,
+        bool isBorrow
+    ) external view returns (address[] memory tokens);
+
     /**
      * @dev Returns priceProvider address.
      * @param token The address of token which address of priceProvider is to return.
      */
-    function tokenPriceProvider(address token) external view returns(PriceProviderInfo memory); 
+    function tokenPriceProvider(address token) external view returns(address priceProvider); 
+    
     /**
      * @dev Returns the most recent TWAP price of a token.
      * @param token The address of the token.

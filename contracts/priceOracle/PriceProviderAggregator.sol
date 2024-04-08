@@ -6,6 +6,7 @@ import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol"
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./priceproviders/PriceProvider.sol";
 import "../interfaces/IPriceOracle.sol";
+import "../interfaces/IPrimaryLendingPlatform.sol";
 
 /**
  * @title PriceProviderAggregator
@@ -15,16 +16,11 @@ import "../interfaces/IPriceOracle.sol";
 contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    uint8 public usdDecimals;
-
     IPriceOracle public priceOracle;
 
-    mapping(address => PriceProviderInfo) public tokenPriceProvider; // address of project token => priceProvider address
+    IPrimaryLendingPlatform public primaryLendingPlatform;
 
-    struct PriceProviderInfo {
-        address priceProvider;
-        uint8 priceDecimals;
-    }
+    mapping(address => address) public tokenPriceProvider; // address of project token => priceProvider address
 
     /**
      * @dev Emitted when the moderator role is granted to a new account.
@@ -43,13 +39,19 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @param token The address of the token whose price provider is set.
      * @param priceProvider The address of the price provider.
      */
-    event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider, uint8 indexed priceDecimals);
+    event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider);
 
     /**
      * @dev Emitted when the priceOracle is set.
      * @param priceOracle The address of priceOracle contract.
      */
     event SetPriceOracle(address indexed priceOracle);
+
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new address of the primary lending platform.
+     */
+    event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
 
     /**
      * @dev Emitted when the active status of a token changes.
@@ -60,13 +62,15 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     /**
      * @dev Initializes the contract by setting up the access control roles and assigning the default and moderator roles to the contract deployer.
+     * @param newPriceOracle The address of the new PriceOracle contract.
      * @notice This function should only be called once during contract deployment.
      */
-    function initialize() public initializer {
+    function initialize(address newPriceOracle) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
+
+        priceOracle = IPriceOracle(newPriceOracle);
     }
 
     /**
@@ -118,17 +122,12 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * - `priceProvider` cannot be the zero address.
      * @param token the address of token.
      * @param priceProvider the address of price provider. Should implement the interface of `PriceProvider`.
-     * @param priceDecimals the decimals of token price.
      */
-    function setTokenAndPriceProvider(address token, address priceProvider, uint8 priceDecimals) public onlyModerator {
+    function setTokenAndPriceProvider(address token, address priceProvider) public onlyModerator {
         require(token != address(0), "PriceProviderAggregator: Invalid token");
         require(priceProvider != address(0), "PriceProviderAggregator: Invalid priceProvider");
-        PriceProviderInfo storage priceProviderInfo = tokenPriceProvider[token];
-        priceProviderInfo.priceProvider = priceProvider;
-        if (priceProviderInfo.priceDecimals == 0) {
-            priceProviderInfo.priceDecimals = priceDecimals;
-        }
-        emit SetTokenAndPriceProvider(token, priceProvider, priceProviderInfo.priceDecimals);
+        tokenPriceProvider[token] = priceProvider;
+        emit SetTokenAndPriceProvider(token, priceProvider);
     }
 
     /**
@@ -145,6 +144,19 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     }
 
     /**
+     * @dev Sets the address of the primary lending platform contract.
+     * @param plp The address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - `plp` cannot be the zero address.
+     */
+    function setPrimaryLendingPlatform(address plp) external onlyModerator {
+        require(plp != address(0), "PriceProviderAggregator: Invalid address");
+        primaryLendingPlatform = IPrimaryLendingPlatform(plp);
+        emit SetPrimaryLendingPlatform(plp);
+    }
+
+    /**
      * @dev Allows the moderator to change the active status of a price provider for a specific token.
      *
      * Requirements:
@@ -155,7 +167,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @param active The new active status to set for the price provider.
      */
     function changeActive(address priceProvider, address token, bool active) public onlyModerator {
-        require(tokenPriceProvider[token].priceProvider == priceProvider, "PriceProviderAggregator: Mismatch token`s price provider");
+        require(tokenPriceProvider[token] == priceProvider, "PriceProviderAggregator: Mismatch token`s price provider");
         PriceProvider(priceProvider).changeActive(token, active);
         emit ChangeActive(priceProvider, token, active);
     }
@@ -170,6 +182,49 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
         _updateMultiFinalPrices(token);
     }
 
+    /**@dev This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+     * @param projectToken Address of the project token.
+     * @param actualLendingToken Address of the lending token.
+     * @param isBorrow Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.
+     * @return tokens Array of tokens that need to update final price.
+     */
+    function getTokensUpdateFinalPrices(
+        address projectToken,
+        address actualLendingToken,
+        bool isBorrow
+    ) public view returns (address[] memory tokens) {
+        if (actualLendingToken != address(0)) {
+            if (!isBorrow) {
+                // The array includes of 2 elements are projectToken and actualLendingToken.
+                tokens = new address[](2);
+                tokens[0] = projectToken;
+                tokens[1] = actualLendingToken;
+            } else {
+                uint256 lendingTokensLen = primaryLendingPlatform.lendingTokensLength();
+                address[] memory lendingTokensUpdateFinalPrice = new address[](lendingTokensLen);
+                uint256 lendingTokensIndex = 0;
+
+                for (uint256 i = 0; i < lendingTokensLen; i++) {
+                    address lendingToken = primaryLendingPlatform.lendingTokens(i);
+
+                    if (primaryLendingPlatform.totalBorrow(projectToken, lendingToken) > 0 || lendingToken == actualLendingToken) {
+                        lendingTokensUpdateFinalPrice[lendingTokensIndex++] = lendingToken; 
+                    }
+                }
+                // The length of the array includes the lendingTokens that need to be updated final price and projectToken.
+                tokens = new address[](lendingTokensIndex + 1);
+                for (uint256 i = 0; i < lendingTokensIndex; i++) {
+                    tokens[i] = lendingTokensUpdateFinalPrice[i];
+                }
+                tokens[lendingTokensIndex] = projectToken;
+            }
+        } else {
+            // The array includes of 1 element is projectToken.
+            tokens = new address[](1);
+            tokens[0] = projectToken;
+        }
+    }
+
     /**
      * @dev Returns the most recent TWAP price or non-TWAP price of a token.
      *
@@ -180,7 +235,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @return collateralPrice The collateral price of the token.
      * @return capitalPrice The capital price of the token.
      */
-    function getPrice(address token) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+    function getPrice(address token) public view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
         return priceOracle.getEstimatedTWAPprice(token);
     }
 
@@ -198,6 +253,17 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
         } else {
             return priceOracle.getEvaluation(token, tokenAmount);
         }
+    }
+
+    /**
+     * @dev returns the last stored TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getMostEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        return priceOracle.getEvaluation(token, tokenAmount);
     }
 
     /**

@@ -31,6 +31,54 @@ const verify = async (address, constructorArguments, keyInConfig) => {
     console.log("Verified " + address);
 };
 
+const upgrade = async (proxyAdmin, implementationInstance, proxyInstance) => {
+    const currentImplementation = await proxyAdmin.getProxyImplementation(proxyInstance.address);
+    console.log("Current proxy: " + proxyInstance.address);
+    console.log("Current implementation: " + currentImplementation);
+    console.log("Expected implementation: " + implementationInstance.address);
+    console.log();
+    if (currentImplementation.toLowerCase() != implementationInstance.address.toLowerCase()) {
+        const upgradeData = await proxyAdmin.upgradeData(proxyInstance.address);
+        const appendTimestamp = Number(upgradeData.appendTimestamp);
+        if (appendTimestamp == 0) {
+            await proxyAdmin.appendUpgrade(proxyInstance.address, implementationInstance.address)
+                .then(function (instance) {
+                    console.log("[Appending upgrade] ");
+                    console.log("Transaction hash: " + instance.hash);
+                    console.log("ProxyAdmin appendUpgrade implementation " + implementationInstance.address + " to proxy " + proxyInstance.address);
+                });
+        } else {
+            let timeStamp = (await hre.ethers.provider.getBlock("latest")).timestamp;
+            let delayPeriod = Number(upgradeData.delayPeriod);
+            if (timeStamp >= appendTimestamp + delayPeriod) {
+                await proxyAdmin.upgrade(proxyInstance.address, implementationInstance.address)
+                    .then(function (instance) {
+                        if (upgradeData.newImplementation.toLowerCase() != implementationInstance.address.toLowerCase()) {
+                            console.log("[Canceling upgrade]");
+                            console.log("Upgrade implementation in queue " + upgradeData.newImplementation + " is different from expected implementation " + implementationInstance.address);
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("ProxyAdmin canceled upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        } else {
+                            console.log("[Upgrading] ");
+                            console.log("ProxyAdmin upgraded implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                        }
+                    });
+            } else {
+                console.log("[Delaying upgrade]");
+                console.log("In delay period to upgrade implementation " + upgradeData.newImplementation + " to proxy " + proxyInstance.address);
+                console.log("AppendTimestamp: ", appendTimestamp);
+                console.log("Delay time: ", delayPeriod);
+                console.log("Current: ", timeStamp);
+                console.log("Can upgrade at: ", appendTimestamp + delayPeriod);
+                console.log("Need to wait another: " + (appendTimestamp + delayPeriod - timeStamp) + "seconds");
+                console.log();
+            }
+        }
+    } else {
+        console.log("Current implementation is synced with expected implementation " + implementationInstance.address);
+    }
+};
+
 module.exports = {
 
     deploymentPriceOracle: async function () {
@@ -40,6 +88,7 @@ module.exports = {
 
         let network = hre.network;
         let signers = await hre.ethers.getSigners();
+
         let deployMaster = signers[0];
         let deployMasterAddress = deployMaster.address;
 
@@ -50,6 +99,7 @@ module.exports = {
         let PythPriceProvider;
         let ChainlinkPriceProvider;
         let BackendPriceProvider;
+        let UniswapV2PriceProvider;
         let UniswapV3PriceProvider;
         let UniswapV2PriceProviderMock;
         let PriceProviderAggregator;
@@ -63,11 +113,22 @@ module.exports = {
         let pythPriceProvider;
         let chainlinkPriceProvider;
         let backendPriceProvider;
+        let uniswapV2PriceProvider;
         let uniswapV3PriceProvider;
         let uniswapV2PriceProviderMock;
         let priceProviderAggregator;
         let lpPriceProvider;
         let wstETHPriceProvider;
+
+        let pythPriceProviderImplementation;
+        let chainlinkPriceProviderImplementation;
+        let backendPriceProviderImplementation;
+        let uniswapV2PriceProviderImplementation;
+        let uniswapV3PriceProviderImplementation;
+        let priceProviderAggregatorImplementation;
+        let priceOracleImplementation;
+        let lpPriceProviderImplementation;
+        let wstETHPriceProviderImplementation;
 
 
         //====================================================
@@ -83,12 +144,12 @@ module.exports = {
             priceProcessingOracle,
             Pyth,
             Chainlink,
-            Uniswap,
+            UniswapV2,
+            UniswapV3,
             BackendProvider,
             LPProvider,
             wstETHProvider,
-            wstETH,
-            priceDecimals
+            wstETH
         } = priceOracle;
         let volatilityCapUpPercent = priceProcessingOracle.volatilityCapUpPercent;
         let volatilityCapDownPercent = priceProcessingOracle.volatilityCapDownPercent;
@@ -101,9 +162,11 @@ module.exports = {
         let tokensUseChainlink = Chainlink.tokensUseChainlink;
         let chainlinkAggregatorV3 = Chainlink.chainlinkAggregatorV3;
         let timeOuts = Chainlink.timeOuts;
-        let tokensUseUniswap = Uniswap.tokensUseUniswap;
-        let pricePointTWAPperiod = Uniswap.pricePointTWAPperiod;
-        let uniswapPairs = Uniswap.uniswapPairs;
+        let tokensUseUniswapV2 = UniswapV2.tokensUseUniswap;
+        let uniswapPairsV2 = UniswapV2.uniswapPairs;
+        let tokensUseUniswapV3 = UniswapV3.tokensUseUniswap;
+        let pricePointTWAPperiodV3 = UniswapV3.pricePointTWAPperiod;
+        let uniswapPairsV3 = UniswapV3.uniswapPairs;
         let tokensUseBackendProvider = BackendProvider.tokensUseBackendProvider;
         let tokensUseLPProvider = LPProvider.tokensUseLPProvider;
         let wstETHAggregatorPath = wstETHProvider.wstETHAggregatorPath;
@@ -122,6 +185,8 @@ module.exports = {
             ChainlinkPriceProviderProxy,
             BackendPriceProviderLogic,
             BackendPriceProviderProxy,
+            UniswapV2PriceProviderLogic,
+            UniswapV2PriceProviderProxy,
             UniswapV3PriceProviderLogic,
             UniswapV3PriceProviderProxy,
             PriceProviderAggregatorLogic,
@@ -139,6 +204,7 @@ module.exports = {
         let chainlinkPriceProviderAddress = isTesting ? "" : ChainlinkPriceProviderProxy;
         let priceProviderAggregatorAddress = isTesting ? "" : PriceProviderAggregatorProxy;
         let backendPriceProviderAddress = isTesting ? "" : BackendPriceProviderProxy;
+        let uniswapV2PriceProviderAddress = isTesting ? "" : UniswapV2PriceProviderProxy;
         let uniswapV3PriceProviderAddress = isTesting ? "" : UniswapV3PriceProviderProxy;
         let uniswapV2PriceProviderMockAddress = "";
         let lpPriceProviderAddress = isTesting ? "" : LPPriceProviderProxy;
@@ -149,6 +215,7 @@ module.exports = {
         let pythPriceProviderLogicAddress = isTesting ? "" : PythPriceProviderLogic;
         let chainlinkPriceProviderLogicAddress = isTesting ? "" : ChainlinkPriceProviderLogic;
         let priceProviderAggregatorLogicAddress = isTesting ? "" : PriceProviderAggregatorLogic;
+        let uniswapV2PriceProviderLogicAddress = isTesting ? "" : UniswapV2PriceProviderLogic;
         let uniswapV3PriceProviderLogicAddress = isTesting ? "" : UniswapV3PriceProviderLogic;
         let uniswapV2PriceProviderMockLogicAddress = "";
         let lpPriceProviderLogicAddress = isTesting ? "" : LPPriceProviderLogic;
@@ -161,10 +228,10 @@ module.exports = {
         ChainlinkPriceProvider = isLayer2 ? await hre.ethers.getContractFactory("ChainlinkPriceProviderL2")
             : await hre.ethers.getContractFactory("ChainlinkPriceProvider");
         BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
+        UniswapV2PriceProvider = await hre.ethers.getContractFactory("UniswapV2PriceProvider");
         UniswapV3PriceProvider = await hre.ethers.getContractFactory("UniswapV3PriceProvider");
         UniswapV2PriceProviderMock = await hre.ethers.getContractFactory("UniswapV2PriceProviderMock");
-        PriceProviderAggregator = tokensUsePyth.length > 0 ? await hre.ethers.getContractFactory("PriceProviderAggregatorPyth")
-            : await hre.ethers.getContractFactory("PriceProviderAggregator");
+        PriceProviderAggregator = await hre.ethers.getContractFactory("PriceProviderAggregatorPyth");
         LPPriceProvider = await hre.ethers.getContractFactory("LPPriceProvider");
         WstETHPriceProvider = isLayer2 ? await hre.ethers.getContractFactory("wstETHPriceProviderL2") : await hre.ethers.getContractFactory("wstETHPriceProvider");
 
@@ -190,6 +257,7 @@ module.exports = {
             });
         }
         console.log("ProxyAdmin deployed at: " + proxyAdminAddress);
+
         await verify(proxyAdminAddress, [], "PRIMARY_PROXY_ADMIN");
 
         //====================== deploy priceOracle =============================
@@ -221,7 +289,7 @@ module.exports = {
                 fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
             });
         }
-        console.log(`PriceOracle was deployed at: ${priceOracleLogicAddress}`);
+        console.log(`\nPriceOracle was deployed at: ${priceOracleLogicAddress}`);
         await verify(priceOracleAddress, [
             priceOracleLogicAddress,
             proxyAdminAddress,
@@ -258,7 +326,7 @@ module.exports = {
                     fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
                 });
             }
-            console.log(`PythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
+            console.log(`\nPythPriceProvider was deployed at: ${pythPriceProviderAddress}`);
             await verify(pythPriceProviderAddress, [
                 pythPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -297,7 +365,7 @@ module.exports = {
                 });
             }
 
-            console.log("ChainlinkPriceProvider proxy address: " + chainlinkPriceProviderAddress);
+            console.log("\nChainlinkPriceProvider proxy address: " + chainlinkPriceProviderAddress);
             await verify(chainlinkPriceProviderAddress, [
                 chainlinkPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -335,7 +403,7 @@ module.exports = {
                     fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
                 });
             }
-            console.log("BackendPriceProvider proxy address: " + backendPriceProviderAddress);
+            console.log("\nBackendPriceProvider proxy address: " + backendPriceProviderAddress);
             await verify(backendPriceProviderAddress, [
                 backendPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -343,8 +411,46 @@ module.exports = {
             ], "BackendPriceProviderProxy");
         }
         //=========================
+        //deploy uniswapV2PriceProvider
+        if (tokensUseUniswapV2.length > 0) {
+            console.log();
+            console.log("***** UNISWAPV2 PRICE PROVIDER DEPLOYMENT *****");
+
+            if (!uniswapV2PriceProviderLogicAddress) {
+                uniswapV2PriceProvider = await UniswapV2PriceProvider.connect(deployMaster).deploy();
+                await uniswapV2PriceProvider.deployed().then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+                    uniswapV2PriceProviderLogicAddress = instance.address;
+                    config.UniswapV2PriceProviderLogic = uniswapV2PriceProviderLogicAddress;
+                    fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 3));
+                });
+            }
+            console.log("UniswapV2PriceProvider masterCopy address: " + uniswapV2PriceProviderLogicAddress);
+            await verify(uniswapV2PriceProviderLogicAddress, [], "UniswapV2PriceProviderLogic");
+
+            if (!uniswapV2PriceProviderAddress) {
+                let uniswapV2PriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+                    uniswapV2PriceProviderLogicAddress,
+                    proxyAdminAddress,
+                    "0x"
+                );
+                await uniswapV2PriceProviderProxy.deployed().then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.deployTransaction.hash);
+                    uniswapV2PriceProviderAddress = instance.address;
+                    config.UniswapV2PriceProviderProxy = uniswapV2PriceProviderAddress;
+                    fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
+                });
+            }
+            console.log("\nUniswapV2PriceProvider proxy address: " + uniswapV2PriceProviderAddress);
+            await verify(uniswapV2PriceProviderAddress, [
+                uniswapV2PriceProviderLogicAddress,
+                proxyAdminAddress,
+                "0x"
+            ], "UniswapV2PriceProviderProxy");
+        }
+
         //deploy uniswapV3PriceProvider
-        if (tokensUseUniswap.length > 0) {
+        if (tokensUseUniswapV3.length > 0) {
             console.log();
             console.log("***** UNISWAPV3 PRICE PROVIDER DEPLOYMENT *****");
 
@@ -380,6 +486,7 @@ module.exports = {
                 "0x"
             ], "UniswapV3PriceProviderProxy");
         }
+
         //=========================
         //deploy LPPriceProvider
         if (tokensUseLPProvider.length > 0) {
@@ -411,7 +518,7 @@ module.exports = {
                     fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
                 });
             }
-            console.log("lpPriceProvider proxy address: " + lpPriceProviderAddress);
+            console.log("\nlpPriceProvider proxy address: " + lpPriceProviderAddress);
             await verify(lpPriceProviderAddress, [
                 lpPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -450,7 +557,7 @@ module.exports = {
                     fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
                 });
             }
-            console.log("wstETHPriceProvider proxy address: " + wstETHPriceProviderAddress);
+            console.log("\nwstETHPriceProvider proxy address: " + wstETHPriceProviderAddress);
             await verify(wstETHPriceProviderAddress, [
                 wstETHPriceProviderLogicAddress,
                 proxyAdminAddress,
@@ -460,7 +567,7 @@ module.exports = {
         //=========================
         //deploy PriceProviderAggregator
         console.log();
-        console.log("***** USB PRICE ORACLE DEPLOYMENT *****");
+        console.log("***** PRICE PROVIDER AGGREGATOR DEPLOYMENT *****");
 
         if (!priceProviderAggregatorLogicAddress) {
             priceProviderAggregator = await PriceProviderAggregator.connect(deployMaster).deploy();
@@ -475,12 +582,12 @@ module.exports = {
         await verify(priceProviderAggregatorLogicAddress, [], "PriceProviderAggregatorLogic");
 
         if (!priceProviderAggregatorAddress) {
-            let usbPriceOracleProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
+            let priceProviderAggregatorProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
                 priceProviderAggregatorLogicAddress,
                 proxyAdminAddress,
                 "0x"
             );
-            await usbPriceOracleProxy.deployed().then(function (instance) {
+            await priceProviderAggregatorProxy.deployed().then(function (instance) {
                 console.log("\nTransaction hash: " + instance.deployTransaction.hash);
                 priceProviderAggregatorAddress = instance.address;
                 config.PriceProviderAggregatorProxy = priceProviderAggregatorAddress;
@@ -488,7 +595,7 @@ module.exports = {
             });
         }
 
-        console.log("PriceProviderAggregator proxy address: " + priceProviderAggregatorAddress);
+        console.log("\nPriceProviderAggregator proxy address: " + priceProviderAggregatorAddress);
         await verify(priceProviderAggregatorAddress, [
             priceProviderAggregatorLogicAddress,
             proxyAdminAddress,
@@ -517,10 +624,11 @@ module.exports = {
                 });
             }
             uniswapV2PriceProviderMock = UniswapV2PriceProviderMock.attach(uniswapV2PriceProviderMockAddress).connect(deployMaster);
-            let usdDecimal = await uniswapV2PriceProviderMock.getPriceDecimals();
-
-            if (usdDecimal == 0) {
-                await uniswapV2PriceProviderMock.initialize();
+            {
+                let usdDecimal = await uniswapV2PriceProviderMock.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await uniswapV2PriceProviderMock.initialize();
+                }
             }
 
             {
@@ -534,20 +642,110 @@ module.exports = {
         //====================================================
         //setting params
 
+        proxyAdmin = ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         priceOracleProvider = PriceOracle.attach(priceOracleAddress).connect(deployMaster);
         pythPriceProvider = PythPriceProvider.attach(pythPriceProviderAddress).connect(deployMaster);
         chainlinkPriceProvider = ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
         backendPriceProvider = BackendPriceProvider.attach(backendPriceProviderAddress).connect(deployMaster);
+        uniswapV2PriceProvider = UniswapV2PriceProvider.attach(uniswapV2PriceProviderAddress).connect(deployMaster);
         uniswapV3PriceProvider = UniswapV3PriceProvider.attach(uniswapV3PriceProviderAddress).connect(deployMaster);
         lpPriceProvider = LPPriceProvider.attach(lpPriceProviderAddress).connect(deployMaster);
         wstETHPriceProvider = WstETHPriceProvider.attach(wstETHPriceProviderAddress).connect(deployMaster);
         priceProviderAggregator = PriceProviderAggregator.attach(priceProviderAggregatorAddress).connect(deployMaster);
+        priceOracleProvider = PriceOracle.attach(priceOracleAddress).connect(deployMaster);
+
+        pythPriceProviderImplementation = PythPriceProvider.attach(pythPriceProviderLogicAddress).connect(deployMaster);
+        chainlinkPriceProviderImplementation = ChainlinkPriceProvider.attach(chainlinkPriceProviderLogicAddress).connect(deployMaster);
+        backendPriceProviderImplementation = BackendPriceProvider.attach(backendPriceProviderLogicAddress).connect(deployMaster);
+        uniswapV2PriceProviderImplementation = UniswapV2PriceProvider.attach(uniswapV2PriceProviderLogicAddress).connect(deployMaster);
+        uniswapV3PriceProviderImplementation = UniswapV3PriceProvider.attach(uniswapV3PriceProviderLogicAddress).connect(deployMaster);
+        lpPriceProviderImplementation = LPPriceProvider.attach(lpPriceProviderLogicAddress).connect(deployMaster);
+        wstETHPriceProviderImplementation = WstETHPriceProvider.attach(wstETHPriceProviderLogicAddress).connect(deployMaster);
+        priceProviderAggregatorImplementation = PriceProviderAggregator.attach(priceProviderAggregatorLogicAddress).connect(deployMaster);
+        priceOracleImplementation = PriceOracle.attach(priceOracleLogicAddress).connect(deployMaster);
+
+        //==============================
+        // ====================== upgrade pythPriceProvider =============================
+        if (pythPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING PYTH PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, pythPriceProviderImplementation, pythPriceProvider);
+        }
+
+        // ====================== upgrade chainlinkPriceProvider =============================
+        if (chainlinkPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING CHAINLINK PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, chainlinkPriceProviderImplementation, chainlinkPriceProvider);
+        }
+
+        // ====================== upgrade backendPriceProvider =============================
+        if (backendPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING BACKEND PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, backendPriceProviderImplementation, backendPriceProvider);
+        }
+
+        // ====================== upgrade uniswapV2PriceProvider =============================
+        if (uniswapV2PriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING UNISWAPV2 PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, uniswapV2PriceProviderImplementation, uniswapV2PriceProvider);
+        }
+
+        // ====================== upgrade uniswapV3PriceProvider =============================
+        if (uniswapV3PriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING UNISWAPV3 PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, uniswapV3PriceProviderImplementation, uniswapV3PriceProvider);
+        }
+
+        // ====================== upgrade lpPriceProvider =============================
+        if (lpPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING LP PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, lpPriceProviderImplementation, lpPriceProvider);
+        }
+
+        // ====================== upgrade wstETHPriceProvider =============================
+        if (wstETHPriceProviderAddress) {
+            console.log();
+            console.log("***** UPGRADING WSTETH PRICE PROVIDER *****");
+            await upgrade(proxyAdmin, wstETHPriceProviderImplementation, wstETHPriceProvider);
+        }
+
+        // ====================== upgrade priceProviderAggregator =============================
+        if (priceProviderAggregatorAddress) {
+            console.log();
+            console.log("***** UPGRADING PRICE PROVIDER AGGREGATOR *****");
+            await upgrade(proxyAdmin, priceProviderAggregatorImplementation, priceProviderAggregator);
+        }
+
+        if (priceOracleAddress) {
+            console.log();
+            console.log("***** UPGRADING PRICE ORACLE *****");
+            await upgrade(proxyAdmin, priceOracleImplementation, priceOracleProvider);
+        }
 
         //==============================
         //set priceOracle
         if (priceOracleAddress) {
             console.log();
             console.log("***** SETTING PRICE ORACLE *****");
+
+            {
+                let usdDecimal = await priceOracleImplementation.usdDecimals();
+                if (usdDecimal == 0) {
+                    await priceOracleImplementation.initialize(
+                        priceProviderAggregatorAddress,
+                        volatilityCapUpPercent,
+                        volatilityCapDownPercent
+                    ).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("PriceOracle Implementation initialized at " + priceOracleLogicAddress);
+                    });
+                }
+            }
 
             usdDecimal = await priceOracleProvider.usdDecimals();
 
@@ -567,7 +765,7 @@ module.exports = {
                 let currentVolatilityCapUpPercent = await priceOracleProvider.tvcUp();
                 let currentVolatilityCapDownPercent = await priceOracleProvider.tvcDown();
 
-                if (currentPriceProviderAggregator != priceProviderAggregatorAddress) {
+                if (currentPriceProviderAggregator.toLowerCase() != priceProviderAggregatorAddress.toLowerCase()) {
                     await priceOracleProvider.setPriceProviderAggregator(priceProviderAggregatorAddress).then(function (instance) {
                         console.log("\nTransaction hash: " + instance.hash);
                         console.log("priceOracleProvider set priceProviderAggregatorAddress: " + priceProviderAggregatorAddress);
@@ -585,10 +783,23 @@ module.exports = {
                 }
             }
         }
+
         // ====================== set pythPriceProvider =============================
         if (pythPriceProviderAddress) {
             console.log();
             console.log("***** SETTING PYTH PRICE PROVIDER *****");
+
+            {
+                let tokenDecimal = await pythPriceProviderImplementation.tokenDecimals();
+                if (tokenDecimal == 0) {
+                    await pythPriceProviderImplementation.initialize()
+                        .then(function (instance) {
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("PythPriceProvider Implementation initialized at " + pythPriceProviderLogicAddress);
+                        });
+                }
+            }
+
             {
                 let tokenDecimal = await pythPriceProvider.tokenDecimals();
                 if (tokenDecimal == 0) {
@@ -613,7 +824,7 @@ module.exports = {
             }
             {
                 let currentPythOracle = await pythPriceProvider.pythOracle();
-                if (currentPythOracle != pythOracle) {
+                if (currentPythOracle.toLowerCase() != pythOracle.toLowerCase()) {
                     await pythPriceProvider.setPythOracle(pythOracle)
                         .then(function (instance) {
                             console.log("\nTransaction hash: " + instance.hash);
@@ -623,17 +834,21 @@ module.exports = {
             }
             {
                 for (var i = 0; i < tokensUsePyth.length; i++) {
-                    let pythMetadata = await pythPriceProvider.pythMetadata(tokensUsePyth[i]);
-                    if (pythMetadata == false) {
-                        await pythPriceProvider.setTokenAndPriceIdPath(
-                            tokensUsePyth[i],
-                            priceIdPath[i]
-                        ).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("PythPriceProvider " + pythPriceProvider.address + " set token with parameters: ");
-                            console.log("   token: " + tokensUsePyth[i]);
-                            console.log("   priceId path: " + priceIdPath[i]);
-                        });
+                    let pythMetadata = await pythPriceProvider.getPythMetadata(tokensUsePyth[i]);
+                    const currentPriceIdPath = pythMetadata.priceIdPath;
+                    for (let j = 0; j < priceIdPath[i].length; j++) {
+                        if (currentPriceIdPath[j] != priceIdPath[i][j]) {
+                            await pythPriceProvider.setTokenAndPriceIdPath(
+                                tokensUsePyth[i],
+                                priceIdPath[i]
+                            ).then(function (instance) {
+                                console.log("\nTransaction hash: " + instance.hash);
+                                console.log("PythPriceProvider " + pythPriceProvider.address + " set token with parameters: ");
+                                console.log("   token: " + tokensUsePyth[i]);
+                                console.log("   priceId path: " + priceIdPath[i]);
+                            });
+                            break;
+                        }
                     }
                 }
             }
@@ -643,13 +858,27 @@ module.exports = {
         if (chainlinkPriceProviderAddress) {
             console.log();
             console.log("***** SETTING CHAINLINK PRICE PROVIDER *****");
-            let decimals = await chainlinkPriceProvider.decimals();
-            if (decimals == 0) {
-                await chainlinkPriceProvider.initialize()
-                    .then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("ChainlinkPriceProvider initialized at " + chainlinkPriceProviderAddress);
-                    });
+
+            {
+                let tokenDecimals = await chainlinkPriceProviderImplementation.tokenDecimals();
+                if (tokenDecimals == 0) {
+                    await chainlinkPriceProviderImplementation.initialize()
+                        .then(function (instance) {
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("ChainlinkPriceProvider Implementation initialized at " + chainlinkPriceProviderLogicAddress);
+                        });
+                }
+            }
+
+            {
+                let tokenDecimals = await chainlinkPriceProvider.tokenDecimals();
+                if (tokenDecimals == 0) {
+                    await chainlinkPriceProvider.initialize()
+                        .then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("ChainlinkPriceProvider initialized at " + chainlinkPriceProviderAddress);
+                        });
+                }
             }
 
             {
@@ -685,31 +914,40 @@ module.exports = {
                 }
             }
 
-            for (var i = 0; i < tokensUseChainlink.length; i++) {
-                let chainlinkMetadataIsActive = await chainlinkPriceProvider.chainlinkMetadata(tokensUseChainlink[i]);
-                if (chainlinkMetadataIsActive == false) {
-                    await chainlinkPriceProvider.setTokenAndAggregator(
-                        tokensUseChainlink[i],
-                        chainlinkAggregatorV3[i]
-                    ).then(function (instance) {
-                        console.log("\nTransaction hash: " + instance.hash);
-                        console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
-                        console.log("   token: " + tokensUseChainlink[i]);
-                        console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
-                    });
-                }
-                for (var j = 0; j < chainlinkAggregatorV3[i].length; j++) {
-                    let timeOut = await chainlinkPriceProvider.timeOuts(chainlinkAggregatorV3[i][j]);
-                    if (timeOut != timeOuts[i][j]) {
-                        await chainlinkPriceProvider.setTimeOut(
-                            chainlinkAggregatorV3[i][j],
-                            timeOuts[i][j]
-                        ).then(function (instance) {
-                            console.log("\nTransaction hash: " + instance.hash);
-                            console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set timeout with parameters: ");
-                            console.log("   aggregator: " + chainlinkAggregatorV3[i][j]);
-                            console.log("   timeout: " + timeOuts[i][j]);
-                        });
+            {
+                const currentImplementation = await proxyAdmin.getProxyImplementation(chainlinkPriceProvider.address);
+                if (currentImplementation.toLowerCase() == chainlinkPriceProviderLogicAddress.toLowerCase()) {
+                    for (var i = 0; i < tokensUseChainlink.length; i++) {
+                        let chainlinkMetadata = await chainlinkPriceProvider.getChainlinkMetadata(tokensUseChainlink[i]);
+                        const aggregatorPath = chainlinkMetadata.aggregatorPath;
+                        for (let j = 0; j < chainlinkAggregatorV3[i].length; j++) {
+                            if (aggregatorPath[j] != chainlinkAggregatorV3[i][j]) {
+                                await chainlinkPriceProvider.setTokenAndAggregator(
+                                    tokensUseChainlink[i],
+                                    chainlinkAggregatorV3[i]
+                                ).then(function (instance) {
+                                    console.log("\nTransaction hash: " + instance.hash);
+                                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set token with parameters: ");
+                                    console.log("   token: " + tokensUseChainlink[i]);
+                                    console.log("   aggregator path: " + chainlinkAggregatorV3[i]);
+                                });
+                                break;
+                            }
+                        }
+                        for (var j = 0; j < chainlinkAggregatorV3[i].length; j++) {
+                            let timeOut = await chainlinkPriceProvider.timeOuts(chainlinkAggregatorV3[i][j]);
+                            if (timeOut != timeOuts[i][j]) {
+                                await chainlinkPriceProvider.setTimeOut(
+                                    chainlinkAggregatorV3[i][j],
+                                    timeOuts[i][j]
+                                ).then(function (instance) {
+                                    console.log("\nTransaction hash: " + instance.hash);
+                                    console.log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " set timeout with parameters: ");
+                                    console.log("   aggregator: " + chainlinkAggregatorV3[i][j]);
+                                    console.log("   timeout: " + timeOuts[i][j]);
+                                });
+                            }
+                        }
                     }
                 }
             }
@@ -720,12 +958,27 @@ module.exports = {
         if (backendPriceProviderAddress) {
             console.log();
             console.log("***** SETTING BACKEND PRICE PROVIDER *****");
-            usdDecimal = await backendPriceProvider.usdDecimals();
-            if (usdDecimal == 0) {
-                await backendPriceProvider.initialize()
-                    .then(function (instance) {
-                        console.log("BackendPriceProvider " + backendPriceProviderAddress + " initialized at tx hash: " + instance.hash);
-                    });
+
+            {
+                let usdDecimal = await backendPriceProviderImplementation.usdDecimals();
+                if (usdDecimal == 0) {
+                    await backendPriceProviderImplementation.initialize()
+                        .then(function (instance) {
+                            console.log("Transaction hash: " + instance.hash);
+                            console.log("BackendPriceProvider Implementation initialized at: " + backendPriceProviderLogicAddress);
+                        });
+                }
+            }
+
+            {
+                let usdDecimal = await backendPriceProvider.usdDecimals();
+                if (usdDecimal == 0) {
+                    await backendPriceProvider.initialize()
+                        .then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("BackendPriceProvider initialized at: " + backendPriceProviderAddress);
+                        });
+                }
             }
 
             {
@@ -734,7 +987,8 @@ module.exports = {
                 if (!isModeratorRole) {
                     await backendPriceProvider.grantTrustedBackendRole(deployMasterAddress)
                         .then(function (instance) {
-                            console.log("BackendPriceProvider " + backendPriceProvider.address + " set trusted backend " + deployMasterAddress + " at tx hash: " + instance.hash);
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("BackendPriceProvider set trusted backend at " + backendPriceProvider.address);
                         });
                 }
             }
@@ -744,13 +998,61 @@ module.exports = {
                 let backendMetadata = await backendPriceProvider.backendMetadata(tokensUseBackendProvider[i]);
                 if (backendMetadata.isListed == false || backendMetadata.isActive == false) {
                     await backendPriceProvider.setToken(tokensUseBackendProvider[i]).then(function (instance) {
-                        console.log("BackendPriceProvider " + backendPriceProvider.address + " set token " + tokensUseBackendProvider[i] + "at tx hash: " + instance.hash);
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("BackendPriceProvider " + backendPriceProvider.address + " set token " + tokensUseBackendProvider[i]);
                     });
                 }
             }
         }
 
         //==============================
+        //set uniswapV2PriceProvider
+        if (uniswapV2PriceProviderAddress) {
+            console.log();
+            console.log("***** SETTING UNISWAPV2 PRICE PROVIDER *****");
+
+            {
+                let usdDecimal = await uniswapV2PriceProviderImplementation.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await uniswapV2PriceProviderImplementation.initialize().then(function (instance) {
+                        console.log("Transaction hash: " + instance.hash);
+                        console.log("UniswapV2PriceProvider Implementation initialized at " + uniswapV2PriceProviderLogicAddress);
+                    });
+                }
+            }
+
+            {
+                let usdDecimal = await uniswapV2PriceProvider.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await uniswapV2PriceProvider.initialize().then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("UniswapV2PriceProvider initialized at " + uniswapV2PriceProviderAddress);
+                    });
+                }
+            }
+
+            {
+                let moderatorRole = await uniswapV2PriceProvider.MODERATOR_ROLE();
+                let isModeratorRole = await uniswapV2PriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
+                if (!isModeratorRole) {
+                    await uniswapV2PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("UniswapV2PriceProvider granted moderator at " + priceProviderAggregatorAddress);
+                    });
+                }
+            }
+
+            for (var i = 0; i < tokensUseUniswapV2.length; i++) {
+                let uniswapV2Metadata = await uniswapV2PriceProvider.uniswapV2Metadata(tokensUseUniswapV2[i]);
+                if (uniswapV2Metadata.isActive == false || uniswapV2Metadata.pair.toLowerCase() != uniswapPairsV2[i].toLowerCase()) {
+                    await uniswapV2PriceProvider.setTokenAndPair(tokensUseUniswapV2[i], uniswapPairsV2[i]).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("UniswapV2PriceProvider set token " + tokensUseUniswapV2[i] + " and pair " + uniswapPairsV2[i]);
+                    });
+                }
+            }
+        }
+
         //set uniswapV3PriceProvider
         if (uniswapV3PriceProviderAddress) {
             console.log();
@@ -776,19 +1078,19 @@ module.exports = {
 
             {
                 let currentPricePointTWAPperiod = await uniswapV3PriceProvider.pricePointTWAPperiod();
-                if (pricePointTWAPperiod != currentPricePointTWAPperiod) {
-                    await uniswapV3PriceProvider.setPricePointTWAPperiod(pricePointTWAPperiod).then(function (instance) {
-                        console.log("UniswapV3PriceProvider set pricePointTWAPperiod: " + pricePointTWAPperiod + " at tx hash " + instance.hash);
+                if (pricePointTWAPperiodV3 != currentPricePointTWAPperiod) {
+                    await uniswapV3PriceProvider.setPricePointTWAPperiod(pricePointTWAPperiodV3).then(function (instance) {
+                        console.log("UniswapV3PriceProvider set pricePointTWAPperiod: " + pricePointTWAPperiodV3 + " at tx hash " + instance.hash);
                     });
                 }
             }
 
-            for (var i = 0; i < tokensUseUniswap.length; i++) {
-                let uniswapV3Metadata = await uniswapV3PriceProvider.uniswapV3Metadata(tokensUseUniswap[i]);
-                console.log(tokensUseUniswap[i], uniswapPairs[i]);
-                if (uniswapV3Metadata.isActive == false || uniswapV3Metadata.pair != uniswapPairs[i]) {
-                    await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswap[i], uniswapPairs[i]).then(function (instance) {
-                        console.log("UniswapV3PriceProvider  set token " + tokensUseUniswap[i] + " and pair " + uniswapPairs[i] + " at tx hash: " + instance.hash);
+            for (var i = 0; i < tokensUseUniswapV3.length; i++) {
+                let uniswapV3Metadata = await uniswapV3PriceProvider.uniswapV3Metadata(tokensUseUniswapV3[i]);
+                console.log(tokensUseUniswapV3[i], uniswapPairsV3[i]);
+                if (uniswapV3Metadata.isActive == false || uniswapV3Metadata.pair.toLowerCase() != uniswapPairsV3[i].toLowerCase()) {
+                    await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswapV3[i], uniswapPairsV3[i]).then(function (instance) {
+                        console.log("UniswapV3PriceProvider  set token " + tokensUseUniswapV3[i] + " and pair " + uniswapPairsV3[i] + " at tx hash: " + instance.hash);
                     });
                 }
             }
@@ -800,12 +1102,24 @@ module.exports = {
             console.log();
             console.log("***** SETTING LP PRICE PROVIDER *****");
 
-            usdDecimal = await lpPriceProvider.getPriceDecimals();
+            {
+                let usdDecimal = await lpPriceProviderImplementation.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await lpPriceProviderImplementation.initialize().then(function (instance) {
+                        console.log("Transaction hash: " + instance.hash);
+                        console.log("lpPriceProvider Implementation initialized at " + lpPriceProviderLogicAddress);
+                    });
+                }
+            }
 
-            if (usdDecimal == 0) {
-                await lpPriceProvider.initialize().then(function (instance) {
-                    console.log("lpPriceProvider initialized at " + lpPriceProviderAddress + " at tx hash " + instance.hash);
-                });
+            {
+                let usdDecimal = await lpPriceProvider.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await lpPriceProvider.initialize().then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("lpPriceProvider initialized at " + lpPriceProviderAddress);
+                    });
+                }
             }
 
             {
@@ -813,16 +1127,18 @@ module.exports = {
                 let isModeratorRole = await lpPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
                     await lpPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("lpPriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("lpPriceProvider granted moderator " + priceProviderAggregatorAddress);
                     });
                 }
             }
 
             for (var i = 0; i < tokensUseLPProvider.length; i++) {
                 let lpMetadata = await lpPriceProvider.lpMetadata(tokensUseLPProvider[i]);
-                if (lpMetadata.isActive == false || lpMetadata.base != priceProviderAggregatorAddress) {
+                if (lpMetadata.isActive == false || lpMetadata.base.toLowerCase() != priceProviderAggregatorAddress.toLowerCase()) {
                     await lpPriceProvider.setLPTokenAndProvider(tokensUseLPProvider[i], priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("LPPriceProvider  set token " + tokensUseLPProvider[i] + " and pair " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("LPPriceProvider  set token " + tokensUseLPProvider[i] + " and pair " + priceProviderAggregatorAddress);
                     });
                 }
             }
@@ -834,11 +1150,24 @@ module.exports = {
             console.log();
             console.log("***** SETTING WSTETH PRICE PROVIDER *****");
 
-            usdDecimal = await wstETHPriceProvider.getPriceDecimals();
-            if (usdDecimal == 0) {
-                await wstETHPriceProvider.initialize(wstETH, wstETHAggregatorPath).then(function (instance) {
-                    console.log("wstETHPriceProvider initialized at " + wstETHPriceProviderAddress + " at tx hash " + instance.hash);
-                });
+            {
+                let usdDecimal = await wstETHPriceProviderImplementation.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await wstETHPriceProviderImplementation.initialize(wstETH, wstETHAggregatorPath).then(function (instance) {
+                        console.log("Transaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider Implementation initialized at " + wstETHPriceProviderLogicAddress);
+                    });
+                }
+            }
+
+            {
+                let usdDecimal = await wstETHPriceProvider.getPriceDecimals();
+                if (usdDecimal == 0) {
+                    await wstETHPriceProvider.initialize(wstETH, wstETHAggregatorPath).then(function (instance) {
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider initialized at " + wstETHPriceProviderAddress);
+                    });
+                }
             }
 
             {
@@ -846,7 +1175,8 @@ module.exports = {
                 let isModeratorRole = await wstETHPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
                     await wstETHPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
-                        console.log("wstETHPriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider granted moderator " + priceProviderAggregatorAddress);
                     });
                 }
             }
@@ -873,7 +1203,8 @@ module.exports = {
                 }
                 if (checkUpdateWstETHAggregatorPath) {
                     await wstETHPriceProvider.addAggregatorPath(wstETHAggregatorPath).then(function (instance) {
-                        console.log("wstETHPriceProvider add AggregatorPath: " + wstETHAggregatorPath + " at tx hash " + instance.hash);
+                        console.log("\nTransaction hash: " + instance.hash);
+                        console.log("wstETHPriceProvider add AggregatorPath: " + wstETHAggregatorPath);
                     });
                 }
             }
@@ -920,88 +1251,136 @@ module.exports = {
         //set priceProviderAggregator
         console.log();
         console.log("***** SETTING PROVIDER AGGREGATOR *****");
-        usdDecimal = await priceProviderAggregator.usdDecimals();
-        if (usdDecimal == 0) {
-            await priceProviderAggregator.initialize().then(function (instance) {
-                console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress + " at tx hash: " + instance.hash);
-            });
+
+        {
+            let adminRole = await priceProviderAggregatorImplementation.DEFAULT_ADMIN_ROLE();
+            let isAdminRole = await priceProviderAggregatorImplementation.hasRole(adminRole, deployMasterAddress);
+            if (!isAdminRole) {
+                await priceProviderAggregatorImplementation.initialize(priceOracleAddress)
+                    .then(function (instance) {
+                        console.log("Transaction hash: " + instance.hash);
+                        console.log("PriceProviderAggregator Implementation initialized at " + priceProviderAggregatorLogicAddress);
+                    });
+            }
         }
+
+        {
+            let adminRole = await priceProviderAggregator.DEFAULT_ADMIN_ROLE();
+            let isAdminRole = await priceProviderAggregator.hasRole(adminRole, deployMasterAddress);
+            if (!isAdminRole) {
+                await priceProviderAggregator.initialize(priceOracleAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator initialized at " + priceProviderAggregatorAddress);
+                });
+            }
+        }
+
         {
             let currentPriceOracleAddress = await priceProviderAggregator.priceOracle();
-            if (currentPriceOracleAddress != priceOracleAddress) {
+            if (currentPriceOracleAddress.toLowerCase() != priceOracleAddress.toLowerCase()) {
                 await priceProviderAggregator.setPriceOracle(priceOracleAddress).then(function (instance) {
                     console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set priceOracle " + priceOracleAddress + " at tx hash: " + instance.hash);
                 });
             }
         }
+
         {
             let moderatorRole = await priceProviderAggregator.MODERATOR_ROLE();
             let isModeratorRole = await priceProviderAggregator.hasRole(moderatorRole, deployMasterAddress);
             if (!isModeratorRole) {
                 await priceProviderAggregator.grantModerator(deployMasterAddress).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granted moderator " + deployMasterAddress + " at tx hash: " + instance.hash);
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " granted moderator " + deployMasterAddress);
                 });
             }
         }
         {
             if (pythPriceProviderAddress) {
-                let currentPythPriceProvider = await priceProviderAggregator.pythPriceProvider();
-                if (currentPythPriceProvider != pythPriceProviderAddress) {
-                    await priceProviderAggregator.setPythPriceProvider(pythPriceProviderAddress).then(function (instance) {
-                        console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set pythPriceProviderAddress " + pythPriceProviderAddress + " at tx hash: " + instance.hash);
-                    });
+                const currentImplementation = await proxyAdmin.getProxyImplementation(priceProviderAggregator.address);
+                if (currentImplementation.toLowerCase() == priceProviderAggregatorLogicAddress.toLowerCase()) {
+                    let currentPythPriceProvider = await priceProviderAggregator.pythPriceProvider();
+                    if (currentPythPriceProvider.toLowerCase() != pythPriceProviderAddress.toLowerCase()) {
+                        await priceProviderAggregator.setPythPriceProvider(pythPriceProviderAddress).then(function (instance) {
+                            console.log("\nTransaction hash: " + instance.hash);
+                            console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set pythPriceProviderAddress " + pythPriceProviderAddress);
+                        });
+                    }
                 }
             }
         }
         for (var i = 0; i < tokensUseChainlink.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseChainlink[i]);
-            if (tokenPriceProvider.priceProvider != chainlinkPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress, priceDecimals[tokensUseChainlink[i]]).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseChainlink[i] + " with priceOracle " + chainlinkPriceProviderAddress + " at tx hash: " + instance.hash);
+            if (tokenPriceProvider.toLowerCase() != chainlinkPriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseChainlink[i], chainlinkPriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseChainlink[i] + " with priceOracle " + chainlinkPriceProviderAddress);
                 });
             }
         }
 
-        for (var i = 0; i < tokensUseUniswap.length; i++) {
-            let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseUniswap[i]);
-            if (tokenPriceProvider.priceProvider != uniswapV3PriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswap[i], uniswapV3PriceProviderAddress, priceDecimals[tokensUseUniswap[i]]).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseUniswap[i] + " with priceOracle " + uniswapV3PriceProviderAddress + " at tx hash: " + instance.hash);
+        for (var i = 0; i < tokensUseUniswapV2.length; i++) {
+            let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseUniswapV2[i]);
+            if (tokenPriceProvider.toLowerCase() != uniswapV2PriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswapV2[i], uniswapV2PriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseUniswapV2[i] + " with priceOracle " + uniswapV2PriceProviderAddress);
+                });
+            }
+        }
+
+        for (var i = 0; i < tokensUseUniswapV3.length; i++) {
+            let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseUniswapV3[i]);
+            if (tokenPriceProvider.toLowerCase() != uniswapV3PriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseUniswapV3[i], uniswapV3PriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseUniswapV3[i] + " with priceOracle " + uniswapV3PriceProviderAddress);
                 });
             }
         }
 
         for (var i = 0; i < tokensUseLPProvider.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUseLPProvider[i]);
-            if (tokenPriceProvider.priceProvider != lpPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseLPProvider[i], lpPriceProviderAddress, priceDecimals[tokensUseLPProvider[i]]).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseLPProvider[i] + " with priceOracle " + lpPriceProviderAddress + " at tx hash: " + instance.hash);
+            if (tokenPriceProvider.toLowerCase() != lpPriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUseLPProvider[i], lpPriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUseLPProvider[i] + " with priceOracle " + lpPriceProviderAddress);
                 });
             }
         }
 
         for (var i = 0; i < tokensUsePyth.length; i++) {
             let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(tokensUsePyth[i]);
-            if (tokenPriceProvider.priceProvider != pythPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(tokensUsePyth[i], pythPriceProviderAddress, priceDecimals[tokensUsePyth[i]]).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUsePyth[i] + " with priceOracle " + pythPriceProviderAddress + " at tx hash: " + instance.hash);
+            if (tokenPriceProvider.toLowerCase() != pythPriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(tokensUsePyth[i], pythPriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + tokensUsePyth[i] + " with priceOracle " + pythPriceProviderAddress);
+                });
+            }
+        }
+
+        if (wstETHPriceProviderAddress) {
+            let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(wstETH);
+            if (tokenPriceProvider.toLowerCase() != wstETHPriceProviderAddress.toLowerCase()) {
+                await priceProviderAggregator.setTokenAndPriceProvider(wstETH, wstETHPriceProviderAddress).then(function (instance) {
+                    console.log("\nTransaction hash: " + instance.hash);
+                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + wstETH + " with priceOracle " + wstETHPriceProviderAddress);
                 });
             }
         }
 
         {
-            const listToken = projectTokens.concat(lendingTokens);
+            const listToken = projectTokens.concat(lendingTokens.filter(item => projectTokens.indexOf(item) < 0));
             const listTokenNeedUpdatePrice = [];
             const listTokenUsePythOracle = [];
 
             for (let i = 0; i < listToken.length; i++) {
 
                 let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
-                let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i])).priceProvider;
+                let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i]));
 
                 if (currentPrice.timestamp.toString() === "0") {
                     listTokenNeedUpdatePrice.push(listToken[i]);
-                    if (pythPriceProviderAddress && priceProvider === pythPriceProviderAddress) {
+                    if (pythPriceProviderAddress && priceProvider.toLowerCase() === pythPriceProviderAddress.toLowerCase()) {
                         listTokenUsePythOracle.push(listToken[i]);
                     }
                 }
@@ -1012,7 +1391,6 @@ module.exports = {
             let updateFee = 0;
             let expiredPriceFeedData;
             if (listTokenUsePythOracle.length > 0) {
-
                 expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 15);
                 if (expiredPriceFeedData.priceIds.length > 0) {
                     const connection = new EvmPriceServiceConnection(
@@ -1037,21 +1415,13 @@ module.exports = {
             }
         }
 
-        if (wstETHPriceProviderAddress) {
-            let tokenPriceProvider = await priceProviderAggregator.tokenPriceProvider(wstETH);
-            if (tokenPriceProvider.priceProvider != wstETHPriceProviderAddress) {
-                await priceProviderAggregator.setTokenAndPriceProvider(wstETH, wstETHPriceProviderAddress, priceDecimals[wstETH]).then(function (instance) {
-                    console.log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + wstETH + " with priceOracle " + wstETHPriceProviderAddress + " at tx hash: " + instance.hash);
-                });
-            }
-        }
-
         let addresses = {
             proxyAdminAddress: proxyAdminAddress,
             priceOracleAddress: priceOracleAddress,
             pythPriceProviderAddress: pythPriceProviderAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
             backendPriceProviderAddress: backendPriceProviderAddress,
+            uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
             uniswapV3PriceProviderAddress: uniswapV3PriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
             lpPriceProviderAddress: lpPriceProviderAddress,

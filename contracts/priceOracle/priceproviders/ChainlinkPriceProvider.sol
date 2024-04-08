@@ -18,7 +18,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
 
     uint8 public constant MAX_PRICE_PATH_LENGTH = 5;
 
-    uint8 public decimals;
+    uint8 public tokenDecimals;
 
     mapping(address => uint256) public timeOuts; // address of aggregatorPath => timeout of aggregatorPath
     mapping(address => ChainlinkMetadata) public chainlinkMetadata; // address of token => metadata of chainlink
@@ -70,7 +70,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        decimals = 18;
+        tokenDecimals = 8;
     }
 
     /**
@@ -208,12 +208,12 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
             priceMantissa *= getLatestPrice(aggregatorPath[i]); // earn price
             priceDecimals += AggregatorV3Interface(aggregatorPath[i]).decimals(); // earn price decimals
         }
-        if (priceDecimals >= decimals) {
-            priceMantissa /= 10 ** (decimals - decimals);
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
         } else {
-            priceMantissa *= 10 ** (decimals - priceDecimals);
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
         }
-        priceDecimals = decimals;
+        priceDecimals = tokenDecimals;
     }
 
     /**
@@ -221,6 +221,16 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
      * @return The number of decimals used for the price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return decimals;
+        return tokenDecimals;
+    }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes active status of token and array of Chainlink aggregator addresses used to get the price of the token.
+     */
+    function getChainlinkMetadata(address token) public view returns (ChainlinkMetadata memory) {
+        ChainlinkMetadata memory metadata = chainlinkMetadata[token];
+        return metadata;
     }
 }
