@@ -445,7 +445,7 @@ describe("PrimaryLendingPlatformAtomicRepayment", function () {
                 collateralAmount,
                 buyCalldata,
                 isRepayFully
-            )).to.be.revertedWith("PIT: Project token is not listed");
+            )).to.be.revertedWith("Prj token isn't listed");
         });
         it("9. Failure: Should revert when buyCalldata invalid and depositedProjectTokenAmount < collateralAmount", async function () {
             let projectToken = prj1.address;

@@ -20,7 +20,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
 
     uint8 public constant MAX_PRICE_PATH_LENGTH = 5;
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     address public wstETH;
 
@@ -67,7 +67,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
         _setupRole(MODERATOR_ROLE, msg.sender);
         wstETH = _wstETH;
         aggregatorPath = _aggregatorPath;
-        usdDecimals = 6;
+        tokenDecimals = 10;
     }
 
     /**
@@ -165,10 +165,10 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
             priceMantissa *= getLatestPrice(_aggregatorPath[i]); // earn price
             priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals(); // earn price decimals
         }
-        if (priceDecimals >= usdDecimals) {
-            priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
         } else {
-            priceMantissa *= 10 ** (usdDecimals - priceDecimals);
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
         }
     }
 
@@ -184,7 +184,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
         assert(wstETHToStETH > 0);
         uint256 stETHToUSD = getPriceSTETH();
         priceMantissa = (wstETHToStETH * stETHToUSD) / PRECISION;
-        priceDecimals = usdDecimals;
+        priceDecimals = tokenDecimals;
     }
 
     /**
@@ -196,8 +196,8 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
         (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
         evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
-        uint8 tokenDecimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 6
-        evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
+        uint8 decimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 10
+        evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
     }
 
     /**
@@ -205,7 +205,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
     
     /**

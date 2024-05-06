@@ -1,9 +1,17 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "",
+            "volatilityCapDownPercent": ""
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
-            "priceIdPath": []
+            "priceIdPath": [],
+            "priceDecimals": ""
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",
@@ -14,21 +22,31 @@
             ],
             "timeOuts": [
                 []
-            ]
+            ],
+            "priceDecimals": ""
         },
-        "Uniswap": {
+        "UniswapV2": {
             "tokensUseUniswap": [],
-            "uniswapPairs": []
+            "uniswapPairs": [],
+            "priceDecimals": ""
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "",
+            "tokensUseUniswap": [],
+            "uniswapPairs": [],
+            "priceDecimals": ""
         },
         "BackendProvider": {
             "tokensUseBackendProvider": []
         },
         "LPProvider": {
-            "tokensUseLPProvider": []
+            "tokensUseLPProvider": [],
+            "priceDecimals": ""
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [],
-            "timeOuts": []
+            "timeOuts": [],
+            "priceDecimals": ""
         },
         "wstETH": "",
         "usdc": "",
@@ -48,12 +66,14 @@
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
     },
     "jumRateModel": {
         "gainPerYear": [],

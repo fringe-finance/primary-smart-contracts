@@ -9,6 +9,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../paraswap/interfaces/IParaSwapAugustus.sol";
 import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 import "../interfaces/IPrimaryLendingPlatform.sol";
+import "../interfaces/IPriceProviderAggregator.sol";
+import "../util/Asset.sol";
 
 /**
  * @title PrimaryLendingPlatformLeverageCore.
@@ -22,8 +24,11 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     mapping(address => mapping(address => bool)) public isLeveragePosition;
     IPrimaryLendingPlatform public primaryLendingPlatform;
     address public exchangeAggregator;
+    address public registryAggregator;
 
     mapping(address => mapping(address => LeverageType)) public typeOfLeveragePosition;
+
+    uint16 public constant BUFFER_PERCENTAGE = 500;
 
     struct Ratio {
         uint8 numerator;
@@ -34,6 +39,14 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         AMPLIFY,
         MARGIN_TRADE
     }
+
+    
+    /**
+     * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
+     * @param exchangeAggregator The address of the exchange aggregator.
+     * @param registryAggregator The address of the registry aggregator.
+     */
+    event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator);
 
     /**
      * @dev Emitted when a user leverages their borrowing position.
@@ -129,6 +142,29 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
+     * @dev Updates the Exchange Aggregator contract and registry contract addresses.
+     *
+     * Requirements:
+     * - The caller must be the moderator.
+     * - `exchangeAggregatorAddress` must not be the zero address.
+     * - `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+     * @param exchangeAggregatorAddress The new address of the Exchange Aggregator contract.
+     * @param registryAggregatorAddress The new address of the Aggregator registry contract.
+     */
+    function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
+        require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
+        if (registryAggregatorAddress != address(0)) {
+            require(
+                IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress),
+                "AtomicRepayment: Invalid Augustus"
+            );
+        }
+        registryAggregator = registryAggregatorAddress;
+        exchangeAggregator = exchangeAggregatorAddress;
+        emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
+    }
+
+    /**
      * @dev Sets the address of the primary lending platform contract.
      *
      * Requirements:
@@ -145,11 +181,12 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     /**
      * @dev Returns the price of a given token in USD.
      * @param token The address of the token to get the price of.
-     * @return price The price of the token in USD.
+     * @return collateralPrice The price of the token in USD.
+	 * @return capitalPrice The price of the token in USD.
      */
-    function getTokenPrice(address token) public view returns (uint256 price) {
+    function getTokenPrice(address token) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
         uint256 tokenMultiplier = 10 ** ERC20Upgradeable(token).decimals();
-        price = primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
+        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
     }
 
     /**
@@ -173,7 +210,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @return lendingTokenCount The calculated lending token count.
      */
     function calculateLendingTokenCount(address lendingToken, uint256 notionalValue) public view returns (uint256 lendingTokenCount) {
-        lendingTokenCount = (notionalValue * 10 ** ERC20Upgradeable(lendingToken).decimals()) / getTokenPrice(lendingToken);
+        (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken);
+        lendingTokenCount = (notionalValue * 10 ** ERC20Upgradeable(lendingToken).decimals()) / lendingTokenPrice;
     }
 
     /**
@@ -219,7 +257,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         uint256 margin = ((expAmount *
             (lvrDenominator * (safetyMarginDenominator + safetyMarginNumerator) - lvrNumerator * safetyMarginDenominator)) /
             (lvrNumerator * safetyMarginDenominator));
-        marginAmount = (margin * 10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenPrice(projectToken);
+        (uint256 projectTokenPrice, ) = getTokenPrice(projectToken);
+        marginAmount = (margin * 10 ** ERC20Upgradeable(projectToken).decimals()) / projectTokenPrice;
     }
 
     /**
@@ -250,7 +289,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         uint256 exp
     ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        uint256 marginPrice = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
+        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
         safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
         safetyMarginDenominator = (exp * lvrDenominator);
     }
@@ -299,14 +338,38 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         ERC20Upgradeable(lendingToken).safeTransferFrom(user, address(this), lendingTokenAmount);
     }
 
+    function _buyOnExchangeAggregatorWithMultiAsset(
+        address[] memory tokensFrom,
+        Asset.Info memory tokenToInfo,
+        bytes[] memory buyCalldata
+    ) internal returns (uint256[] memory assetAmountRemainings, uint256 assetAmountReceive) {
+        (address[] memory unwrapTokensTo, ) = Asset._unwrap(tokenToInfo, 0);
+
+        for (uint8 i = 0; i < buyCalldata.length; i++) {
+            _buyOnExchangeAggregator(buyCalldata[i]);
+        }
+
+        uint256[] memory assetAmountReceives = new uint256[](unwrapTokensTo.length);
+        for (uint8 i = 0; i < unwrapTokensTo.length; i++) {
+            assetAmountReceives[i] = ERC20Upgradeable(unwrapTokensTo[i]).balanceOf(address(this));
+        }
+        assetAmountReceive = Asset._wrap(unwrapTokensTo, assetAmountReceives, tokenToInfo);
+
+        assetAmountRemainings = new uint256[](tokensFrom.length);
+        for (uint8 i = 0; i < tokensFrom.length; i++) {
+            if (tokensFrom[i] != tokenToInfo.addr) {
+                assetAmountRemainings[i] = ERC20Upgradeable(tokensFrom[i]).balanceOf(address(this));
+            }
+        }
+    }
+
     /**
-     * @dev Internal function to execute a buy order on the exchange aggregator contract and returns the amount of tokens received.
-     * @param tokenTo The address of the token to buy.
-     * @param buyCalldata The calldata required for the ParaSwap operation.
-     * @return amountReceive The amount of tokens received after the ParaSwap operation.
+     * @dev Internal function to execute a buy order on the exchange aggregator contract.
+     * @param buyCalldata The calldata for the buy operation.
      */
-    function _buyOnExchangeAggregator(address tokenTo, bytes memory buyCalldata) internal returns (uint256 amountReceive) {
-        uint256 beforeBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
+     function _buyOnExchangeAggregator(
+        bytes memory buyCalldata
+    ) internal {
         // solium-disable-next-line security/no-call-value
         (bool success, ) = exchangeAggregator.call(buyCalldata);
         if (!success) {
@@ -316,16 +379,40 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
                 revert(0, returndatasize())
             }
         }
-        uint256 afterBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
-        amountReceive = afterBalanceTo - beforeBalanceTo;
     }
 
     /**
-     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount.
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the exchange aggregator.
      * @param token The address of the ERC20 token to be approved.
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
-    function _approveTokenTransfer(address token, uint256 tokenAmount) internal virtual {
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal {
+        require(exchangeAggregator != address(0), "PrimaryLendingPlatformLeverage: Exchange aggregator not set");
+        if (registryAggregator != address(0)) {
+            _approveTokenTransferPara(token, tokenAmount);
+        } else {
+            _approveTokenTransferOO(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the Open Ocean exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferOO(address token, uint256 tokenAmount) internal {
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the ParaSwap exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferPara(address token, uint256 tokenAmount) internal {
         address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
         uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
         if (allowanceAmount < tokenAmount) {
@@ -390,9 +477,28 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
+     * @notice Unwraps the given token, converting it into its underlying assets, and approves their transfer.
+     * @param info Information about the token, including its address and type.
+     * @param amount The amount of token to be unwrapped and approved for transfer.
+     * @return assets An array containing the addresses of the underlying assets.
+     * @return assetAmounts An array containing the amounts of the underlying assets corresponding to the unwrapped project token.
+     */
+    function _unwrapTokenAndApprove(
+        Asset.Info memory info,
+        uint256 amount
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        (assets, assetAmounts) = Asset._unwrap(info, amount);
+
+        for (uint8 i = 0; i < assets.length; i++) {
+            uint256 approvalAmount = (assetAmounts[i] * (10000 + BUFFER_PERCENTAGE)) / 10000;
+            _approveTokenTransfer(assets[i], approvalAmount);
+        }
+    }
+
+    /**
      * @dev Internal function to be called when a user wants to leverage their position.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
@@ -400,41 +506,54 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @param leverageType The type of leverage position.
      */
     function _leveragedBorrow(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 notionalExposure,
         uint256 marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         address borrower,
         uint8 leverageType
     ) internal {
         require(notionalExposure > 0, "PITLeverage: Invalid amount");
-        address currentLendingToken = primaryLendingPlatform.getLendingToken(borrower, projectToken);
+        address currentLendingToken = primaryLendingPlatform.getLendingToken(borrower, prjInfo.addr);
         if (currentLendingToken != address(0)) {
-            require(lendingToken == currentLendingToken, "PITLeverage: Invalid lending token");
+            require(lendingInfo.addr == currentLendingToken, "PITLeverage: Invalid lending token");
         }
-        _checkIsValidPosition(borrower, projectToken, lendingToken, marginCollateralAmount);
-
-        uint256 lendingTokenCount = calculateLendingTokenCount(lendingToken, notionalExposure);
-
-        _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
-
-        _approveTokenTransfer(lendingToken, lendingTokenCount);
-
-        uint256 amountReceive = _buyOnExchangeAggregator(projectToken, buyCalldata);
-
-        (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, projectToken, amountReceive, marginCollateralAmount);
-
-        _deferLiquidityCheck(borrower, projectToken, lendingToken);
-
-        if (!isLeveragePosition[borrower][projectToken]) {
-            isLeveragePosition[borrower][projectToken] = true;
+        {
+            address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(prjInfo.addr, lendingInfo.addr, true);
+            IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);    
         }
-        typeOfLeveragePosition[borrower][projectToken] = LeverageType(leverageType);
+        
+        _checkIsValidPosition(borrower, prjInfo.addr, lendingInfo.addr, marginCollateralAmount);
+
+        uint256 lendingTokenCount = calculateLendingTokenCount(lendingInfo.addr, notionalExposure);
+
+        _nakedBorrow(borrower, lendingInfo.addr, lendingTokenCount, prjInfo.addr, currentLendingToken);
+
+        (address[] memory lendingAssets, ) = _unwrapTokenAndApprove(lendingInfo, lendingTokenCount);
+
+        uint256 amountReceive;
+        {
+            uint256[] memory amountRemaining; 
+            (amountRemaining, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(lendingAssets, prjInfo, buyCalldata);
+            for (uint8 i =0; i < amountRemaining.length; i++) {
+                ERC20Upgradeable(lendingAssets[i]).safeTransfer(borrower, amountRemaining[i]);
+            }
+        }
+        
+
+        (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, prjInfo.addr, amountReceive, marginCollateralAmount);
+        
+        _deferLiquidityCheck(borrower, prjInfo.addr, lendingInfo.addr);
+        
+        if (!isLeveragePosition[borrower][prjInfo.addr]) {
+            isLeveragePosition[borrower][prjInfo.addr] = true;
+        }
+        typeOfLeveragePosition[borrower][prjInfo.addr] = LeverageType(leverageType);
         emit LeveragedBorrow(
             borrower,
-            projectToken,
-            lendingToken,
+            prjInfo.addr,
+            lendingInfo.addr,
             notionalExposure,
             lendingTokenCount,
             marginCollateralAmount,

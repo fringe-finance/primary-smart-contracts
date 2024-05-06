@@ -8,7 +8,6 @@
 
 ## Table of Contents
 
-
 [1. Setup the environment](#1-setup-the-environment)
 
 [2. Deploy smart contract](#2-deploy-smart-contract)
@@ -18,18 +17,16 @@
 - [2.3. Compile contract](#23-compile-contract)
 - [2.4. Run script deploy](#24-run-script-deploy)
 
-
 [3. Test case setup](#3-test-case-setup)
 
 [4. Test scripts](#4-test-scripts)
 
-[5. Running tests and coverage](#5-running-tests-and-coverage)  
+[5. Running tests and coverage](#5-running-tests-and-coverage)
 
-- [5.1. Running tests](#51-running-tests)  
+- [5.1. Running tests](#51-running-tests)
 - [5.2. Measuring test coverage](#52-measuring-test-coverage)
 
 [6. Conclusion](#6-conclusion)
-
 
 ## 1. Setup the environment
 
@@ -37,25 +34,26 @@ Create a new `.env` file based on the `.env.example` file, fill all keys into `.
 
 ```
 ETHERSCAN_API_KEY=      // Etherscan key to verify the smart contract --> update here
-POLYGONSCAN_API_KEY=    // --> Update here (the perpose of the key) 
-OPTIMISM_API_KEY=       // --> Update here (the perpose of the key) 
-ARBISCAN_API_KEY=       // --> Update here (the perpose of the key)  
-INFURA_KEY=             // --> Update here (the perpose of the key) 
-PRIVATE_KEY=            // --> Update here (the perpose of the key) 
+POLYGONSCAN_API_KEY=    // --> Update here (the perpose of the key)
+OPTIMISM_API_KEY=       // --> Update here (the perpose of the key)
+ARBISCAN_API_KEY=       // --> Update here (the perpose of the key)
+INFURA_KEY=             // --> Update here (the perpose of the key)
+PRIVATE_KEY=            // --> Update here (the perpose of the key)
 ```
 
-## 2. Deploy smart contract  
+## 2. Deploy smart contract
 
 ### 2.1 Install package dependencies
 
 Install packages by running:
+
 ```
 yarn
 ```
 
 ### 2.2 Setup config general
 
-The configuration information is stored in the `scripts/config/` folder for ethereum networks and in the `deploy/config_*/` folder for zksync network. This folder contains subfolders that correspond to the networks used for testing and deploy. 
+The configuration information is stored in the `scripts/config/{network}_{chain}` folder for ethereum networks and in the `deploy/config_{chain}` folder for zksync network. This folder contains subfolders that correspond to the networks used for testing and deploy.
 
 Each subfolder contains:
 
@@ -63,14 +61,29 @@ Each subfolder contains:
 
 ```
 {
+    "liquidationBot": { // Configure liquidation bot
+        "uniswapV2Factory": ""   // Address of UniswapV2Factory contract.
+    },
     "priceOracle": { // Configure oracle prices
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "",   // Defines the up maximum threshold of price
+                                            movement since the previously-stored
+                                            mostRecentGovernedPrice, above which the
+                                            price is capped.
+
+            "volatilityCapDownPercent": "",   // Defines the down maximum threshold of price
+                                               movement since the previously-stored
+                                               mostRecentGovernedPrice, above which the
+                                               price is capped.
+        },
         "Pyth": {
             "pythOracle": "",    // PythOracle Address.
 
             "tokensUsePyth": [], // List of address tokens uses prices from Pyth.
-            
-            "priceIdPath": [[]]  // List of priceId arrays used to get the price for
-                                 // each corresponding token in List tokensUsePyth.
+
+            "priceIdPath": [[]],    // List of priceId arrays used to get the price for
+                                    // each corresponding token in List tokensUsePyth.
+            "priceDecimals": ""     // The number of decimals for the price.
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",     // Proxy addresses for the L2 sequencer feeds.
@@ -84,29 +97,45 @@ Each subfolder contains:
                                            // get the price for each corresponding
                                            // token in List tokensUseChainlink.
 
-            "timeOuts": [[]]               // List of the timeout value array is used to check
+            "timeOuts": [[]],              // List of the timeout value array is used to check
                                            // if the time elapsed since the last price update
                                            // is valid (corresponds to chainlinkAggregatorV3).
+            "priceDecimals": ""            // The number of decimals for the price.
         },
-        "Uniswap": {
-            "tokensUseUniswap": [], // List of address tokens uses prices from Uniswap.
+        "UniswapV2": {
+            "tokensUseUniswap": [],    // List of address tokens uses prices from UniswapV2.
 
-            "uniswapPairs": []      // List of address uniswapPair used to get the price for
-                                    // each corresponding token in List tokensUseUniswap.
+            "uniswapPairs": [],         // List of address uniswapPair used to get the price for
+                                        // each corresponding token in List tokensUseUniswapV3.
+            "priceDecimals": ""         // The number of decimals for the price.
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "",// The price point TWAP period.
+            "tokensUseUniswap": [],    // List of address tokens uses prices from UniswapV3.
+
+            "uniswapPairs": [],         // List of address uniswapPair used to get the price for
+                                        // each corresponding token in List tokensUseUniswapV3.
+            "priceDecimals": ""         // The number of decimals for the price.
         },
         "BackendProvider": {
             "tokensUseBackendProvider": [] // List of address tokens uses prices from Backend.
         },
         "LPProvider": {
-            "tokensUseLPProvider": [] // List of address tokens uses prices from LPProvider.
+            "tokensUseLPProvider": [],  // List of address tokens uses prices from LPProvider.
+            "priceDecimals": ""         // The number of decimals for the price.
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": [],  // List of address tokens uses prices from ERC4626Provider.
+            "priceDecimals": ""             // The number of decimals for the price.
         },
         "wstETHProvider": {
-            "wstETHAggregatorPath": [] // Address Aggregator array used to get
-                                       // price for wstETH from Chainlink.
+            "wstETHAggregatorPath": [], // Address Aggregator array used to get
+                                        // price for wstETH from Chainlink.
 
-            "timeOuts": []             // List of the timeout value array is used to check
-                                       // if the time elapsed since the last price update
-                                       // is valid (corresponds to wstETHAggregatorPath).                
+            "timeOuts": [],             // List of the timeout value array is used to check
+                                        // if the time elapsed since the last price update
+                                        // is valid (corresponds to wstETHAggregatorPath).
+            "priceDecimals": ""         // The number of decimals for the price.
         },
         "wstETH": "", // Address of wstETH token
         "usdc": "",   // Address of USDC token
@@ -123,7 +152,7 @@ Each subfolder contains:
                                            // ratio for the project token corresponding
                                            // to each token in the tokens list.
 
-        "loanToValueRatioDenominator": [], // The denominator of the loan-to-value 
+        "loanToValueRatioDenominator": [], // The denominator of the loan-to-value
                                            // ratio for the project token corresponding
                                            // to each token in the tokens list.
 
@@ -142,6 +171,9 @@ Each subfolder contains:
         "initialExchangeRateMantissa": [], // ExchangeRate Mantissa value corresponding
                                            // each token in the lendingTokens list.
 
+        "reserveFactorMantissa": [],       // ReserveFactor Mantissa value corresponding
+                                           // each token in the lendingTokens list.
+
         "lendingTokens": [],               // List of address lending tokens.
 
         "symbol": [],                      // List of symbol bLendingToken corresponding
@@ -157,9 +189,11 @@ Each subfolder contains:
                                            // ratio for the lending token corresponding
                                            // to each token in the lendingTokens list.
 
-        "loanToValueRatioDenominator": []  // The denominator of the loan-to-value 
+        "loanToValueRatioDenominator": [], // The denominator of the loan-to-value
                                            // ratio for the lending token corresponding
                                            // to each token in the lendingTokens list.
+
+        "initialSupplyAmount": []          // The initial supply amount for the blending token. Can leave empty if not used.
       },
       "jumRateModel": {
         "gainPerYear": [],    // The gain per year for the blending token.
@@ -172,8 +206,8 @@ Each subfolder contains:
         "minPA": "",                       // The minimum partial liquidation amount.
         "maxLRFNumerator": "",             // The numerator of the LRF ratio.
         "maxLRFDenominator": "",           // The denominator of the LRF ratio.
-        
-        "rewardCalcFactorNumerator": "",   // The numerator of the liquidator 
+
+        "rewardCalcFactorNumerator": "",   // The numerator of the liquidator
                                            // reward calculation factor.
 
         "rewardCalcFactorDenominator": "", // The denominator of the liquidator
@@ -184,16 +218,26 @@ Each subfolder contains:
       }
 }
 ```
+
 This is an example of the `config_general.json` file used to deploy to the `Arbitrum Goerli` network.
+
 ```
-//file: /hardhat_arbitrum_goerli/config_gerenal.json
+//file: ./scripts/config/arbitrum_goerli/config_gerenal.json
 
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "1000",       // 10%
+            "volatilityCapDownPercent": "1000",    // 10%
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
-            "priceIdPath": []
+            "priceIdPath": [],
+            "priceDecimals": "10"
         },
         "Chainlink": {
             "sequencerUptimeFeed": "0x4da69F028a5790fCCAfe81a75C0D24f46ceCDd69",
@@ -212,19 +256,27 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
               ["86460"],
               ["86460"],
               ["180"]
-          ]
+            ],
+            "priceDecimals": "8"
         },
-        "Uniswap": {
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": [],
+            "priceDecimals": "10"
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "10",
             "tokensUseUniswap": [
               "0xA0126016B2cFcAf60df67579C81F68C02bc237d8",
               "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
               "0x2fCabB640BDc5E23dD469f2b8F625236d063456c"
             ],
             "uniswapPairs": [
-              "0x92E94754e9bdFaC92f4f376093C6bB38042aEBB2",
-              "0xbbE83BF43BBc1185BBFbFdc160C650b549ee9eC7",
-              "0x7A4680dF7759A12ea0A7636e0EAC448F90CA6cb5"
-            ]
+              "0x9DE6200BAA0BFfEC839647B6d9C8FE28c91Ee60E",
+              "0x591A038bB59174535dc898c4f90B8C5C5E487Ece",
+              "0x8484E5f7684F5B2F0f61C5C2e1aC7d49c32877C2"
+            ],
+            "priceDecimals": "18"
         },
         "BackendProvider": {
             "tokensUseBackendProvider": []
@@ -233,13 +285,22 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
             "tokensUseLPProvider": [
               "0x92E94754e9bdFaC92f4f376093C6bB38042aEBB2",
               "0x531F9b3df4B7d92D581771252fB3B066Ba08ff06"
-            ]
+            ],
+            "priceDecimals": "10"
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": [
+                "0xc3dA79e0De523eEf7AC1e4ca9aBFE3aAc9973133",
+                "0x0c80F31B840C6564e6c5E18f386FaD96b63514cA"
+            ],
+            "priceDecimals": "10"
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [
                 "0x6550bc2301936011c1334555e62A87705A81C12C"
             ],
-            "timeOuts": ["180"]
+            "timeOuts": ["180"],
+            "priceDecimals": "10"
         },
         "wstETH": "0x55f88B32D47f7BA13e969749e1D6fc3aba691914",
         "usdc": "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
@@ -299,6 +360,11 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
           "10000000000000000000",
           "10000000000000000000"
       ],
+      "reserveFactorMantissa": [
+          "50000000000000000",
+          "70000000000000000",
+          "100000000000000000"
+      ],
       "lendingTokens": [
           "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
           "0xD20ee3d5c9EE0924429268d994149963ded6c72A",
@@ -328,6 +394,11 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
           "10",
           "10",
           "10"
+      ],
+      "initialSupplyAmount": [
+          "1000000",
+          "1000000000000000000",
+          "1000000000000000000"
       ]
   },
       "jumRateModel": {
@@ -366,9 +437,12 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
 ```
 
 - `config_example.json:` Copy the entire content from this file to a file named `config.json` to save the addresses of deployed contracts.
+
 ```
 {
   "PRIMARY_PROXY_ADMIN": "",
+  "PriceOracleLogic": "",
+  "PriceOracleProxy": "",
   "PythPriceProviderLogic": "",
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "",
@@ -401,7 +475,9 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": ""
+  "UniswapV2PriceProviderProxy": "",
+  "PairFlashLogic": "",
+  "PairFlashProxy": ""
 }
 ```
 
@@ -412,6 +488,8 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
 ```
 {
   "PRIMARY_PROXY_ADMIN": true,
+  "PriceOracleLogic": true,
+  "PriceOracleProxy": true,
   "PythPriceProviderLogic": true,
   "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
@@ -443,30 +521,42 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV2PriceProviderProxy": true,
+  "PairFlashLogic": true,
+  "PairFlashProxy": true
 }
 ```
+
 **Note:** To verify the smart contract, configure the `verify.json` file with the contracts that need verification (Only mainnet and testnet).
 
 ## 2.3 Compile contract
 
 Before deploying the contract, run the following command to compile the contract:
+
 ### Ethereum networks (Ethereum, Polygon, Optimsim and Arbitrum)
+
 ```
 yarn compile
 ```
- or
+
+or
+
 ```
 npm run compile
 ```
+
 ### Zksync network
+
 ```
 yarn compile:zksync
 ```
- or
+
+or
+
 ```
 npm run compile:zksync
 ```
+
 ## 2.4 Run script deploy
 
 Deploying a smart contract for network-specific testing follows the example using the Arbitrum network:
@@ -477,53 +567,77 @@ Deploying a smart contract for network-specific testing follows the example usin
 
 **Note:** The table below presents the scripts necessary for deploying smart contracts on specific networks. Testing is supported on four networks:
 
-### Mainnet
+### Deploy PLP Contracts
 
-| ID | Network   | Deploy smart contract command                                                           |
-|----|-----------|-----------------------------------------------------------------------------------------|
-| 1  | Ethereum  | `npm run deploy:v2:mainnet` or `yarn deploy:v2:mainnet`                           |
-| 2  | Polygon   | `npm run deploy:v2:polygon-mainnet` or `yarn deploy:v2:polygon-mainnet`           |
-| 3  | Optimsim  | `npm run deploy:v2:optimism-mainnet` or `yarn deploy:v2:optimism-mainnet`         |
-| 4  | Arbitrum  | `npm run deploy:v2:arbitrum-mainnet` or `yarn deploy:v2:arbitrum-mainnet`         |
-| 5  | Zksync           | `npm run deploy:v2:zksync-mainnet` or `yarn deploy:v2:zksync-mainnet`        |
+#### Mainnet
 
-### Testnet
+| ID  | Network  | Deploy smart contract command                                             |
+| --- | -------- | ------------------------------------------------------------------------- |
+| 1   | Ethereum | `npm run deploy:v2:mainnet` or `yarn deploy:v2:mainnet`                   |
+| 2   | Polygon  | `npm run deploy:v2:polygon-mainnet` or `yarn deploy:v2:polygon-mainnet`   |
+| 3   | Optimsim | `npm run deploy:v2:optimism-mainnet` or `yarn deploy:v2:optimism-mainnet` |
+| 4   | Arbitrum | `npm run deploy:v2:arbitrum-mainnet` or `yarn deploy:v2:arbitrum-mainnet` |
+| 5   | Zksync   | `npm run deploy:v2:zksync-mainnet` or `yarn deploy:v2:zksync-mainnet`     |
 
-| ID | Network          | Deploy smart contract command                                                       |
-|----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run deploy:v2:goerli` or `yarn deploy:v2:goerli`                          |
-| 2  | Polygon Mumbai   | `npm run deploy:v2:polygon-mumbai` or `yarn deploy:v2:polygon-mumbai`         |
-| 3  | Optimsim         | `npm run deploy:v2:optimism-goerli` or `yarn deploy:v2:optimism-goerli`       |
-| 4  | Arbitrum         | `npm run deploy:v2:arbitrum-goerli` or `yarn deploy:v2:arbitrum-goerli`       |
-| 5  | Zksync           | `npm run deploy:v2:zksync-goerli` or `yarn deploy:v2:zksync-goerli`        |
+#### Testnet
 
-### Fork Testnet
+| ID  | Network        | Deploy smart contract command                                           |
+| --- | -------------- | ----------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run deploy:v2:goerli` or `yarn deploy:v2:goerli`                   |
+| 2   | Polygon Mumbai | `npm run deploy:v2:polygon-mumbai` or `yarn deploy:v2:polygon-mumbai`   |
+| 3   | Optimsim       | `npm run deploy:v2:optimism-goerli` or `yarn deploy:v2:optimism-goerli` |
+| 4   | Arbitrum       | `npm run deploy:v2:arbitrum-goerli` or `yarn deploy:v2:arbitrum-goerli` |
+| 5   | Zksync         | `npm run deploy:v2:zksync-goerli` or `yarn deploy:v2:zksync-goerli`     |
+
+#### Fork Testnet
 
 **Note**: We support the deployment of smart contracts on corresponding fork networks, for the purpose of checking whether there are errors when deploying the system with the values configured in the `config_general` file. For example, before deploying the system on goerli testnet, you can use that `config_gerenal` to deploy first on goerli's fork network, to see if it encounters errors or not (similar to mainnet).
 
-| ID | Network          | Deploy smart contract command                                                       |
-|----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run deploy:v2:fork-goerli` or `yarn deploy:v2:fork-goerli`                          |
-| 2  | Polygon Mumbai   | `npm run deploy:v2:fork-mumbai` or `yarn deploy:v2:fork-mumbai`         |
-| 3  | Optimsim         | `npm run deploy:v2:fork-optimism-goerli` or `yarn deploy:v2:fork-optimism-goerli`       |
-| 4  | Arbitrum         | `npm run deploy:v2:fork-arbitrum-goerli` or `yarn deploy:v2:fork-arbitrum-goerli`       |
+| ID  | Network        | Deploy smart contract command                                                     |
+| --- | -------------- | --------------------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run deploy:v2:fork-goerli` or `yarn deploy:v2:fork-goerli`                   |
+| 2   | Polygon Mumbai | `npm run deploy:v2:fork-mumbai` or `yarn deploy:v2:fork-mumbai`                   |
+| 3   | Optimsim       | `npm run deploy:v2:fork-optimism-goerli` or `yarn deploy:v2:fork-optimism-goerli` |
+| 4   | Arbitrum       | `npm run deploy:v2:fork-arbitrum-goerli` or `yarn deploy:v2:fork-arbitrum-goerli` |
 
-Currently, we have pre-configured `config_gerenal` (***Please do not change these files***) files that we used to deploy on the testnet of goerli, mumbai, optimism-goerli and arbitrum-goerli networks. You can run these deploy fork testnet commands immediately to better understand how they work. 
+Currently, we have pre-configured `config_gerenal` (**_Please do not change these files_**) files that we used to deploy on the testnet of goerli, mumbai, optimism-goerli and arbitrum-goerli networks. You can run these deploy fork testnet commands immediately to better understand how they work.
 
-### Fork Mainnet
+#### Fork Mainnet
 
-| ID | Network   | Deploy smart contract command                                                           |
-|----|-----------|-----------------------------------------------------------------------------------------|
-| 1  | Ethereum  | `npm run deploy:v2:fork-mainnet` or `yarn deploy:v2:fork-mainnet`                           |
-| 2  | Polygon   | `npm run deploy:v2:fork-polygon` or `yarn deploy:v2:fork-polygon`           |
-| 3  | Optimsim  | `npm run deploy:v2:fork-optimism` or `yarn deploy:v2:fork-optimism`         |
-| 4  | Arbitrum  | `npm run deploy:v2:fork-arbitrum` or `yarn deploy:v2:fork-arbitrum`         |
+| ID  | Network  | Deploy smart contract command                                       |
+| --- | -------- | ------------------------------------------------------------------- |
+| 1   | Ethereum | `npm run deploy:v2:fork-mainnet` or `yarn deploy:v2:fork-mainnet`   |
+| 2   | Polygon  | `npm run deploy:v2:fork-polygon` or `yarn deploy:v2:fork-polygon`   |
+| 3   | Optimsim | `npm run deploy:v2:fork-optimism` or `yarn deploy:v2:fork-optimism` |
+| 4   | Arbitrum | `npm run deploy:v2:fork-arbitrum` or `yarn deploy:v2:fork-arbitrum` |
 
 **Note**: We recommend that you first try deploying the system with the mainnet `config_general` file onto mainnet forks, to check if the values in the `config_gerenal` file do not lead to errors during the process. For example, a wrong address of a lending token will result in a failed deployment.
 
+### 2.5 Deploy Liquidation Bot contract
+
+The liquidation bot contract is deployed separately from the main contract. The liquidation bot contract is used to liquidate the collateral of the borrower when the health factor is below the threshold. The liquidation bot contract is deployed on the mainnet and testnet.
+
+### Mainnet
+
+| ID  | Network  | Deploy smart contract command                                                                   |
+| --- | -------- | ----------------------------------------------------------------------------------------------- |
+| 1   | Ethereum | `npm run deploy:liquidate-bot:mainnet` or `yarn deploy:liquidate-bot:mainnet`                   |
+| 2   | Polygon  | `npm run deploy:liquidate-bot:polygon-mainnet` or `yarn deploy:liquidate-bot:polygon-mainnet`   |
+| 3   | Optimsim | `npm run deploy:liquidate-bot:optimism-mainnet` or `yarn deploy:liquidate-bot:optimism-mainnet` |
+| 4   | Arbitrum | `npm run deploy:liquidate-bot:arbitrum-mainnet` or `yarn deploy:liquidate-bot:arbitrum-mainnet` |
+
+### Testnet
+
+| ID  | Network        | Deploy smart contract command                                                                 |
+| --- | -------------- | --------------------------------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run deploy:liquidate-bot:goerli` or `yarn deploy:liquidate-bot:goerli`                   |
+| 2   | Polygon Mumbai | `npm run deploy:liquidate-bot:polygon-mumbai` or `yarn deploy:liquidate-bot:polygon-mumbai`   |
+| 3   | Optimsim       | `npm run deploy:liquidate-bot:optimism-goerli` or `yarn deploy:liquidate-bot:optimism-goerli` |
+| 4   | Arbitrum       | `npm run deploy:liquidate-bot:arbitrum-goerli` or `deploy:liquidate-bot:arbitrum-goerli`      |
+
 ## 3. Test case setup
 
-Setup test cases for all main functions in each smart contract. Document for the test case [here](). 
+Setup test cases for all main functions in each smart contract. Document for the test case [here]().
 
 ## 4. Test scripts
 
@@ -533,27 +647,29 @@ Test scripts are written based on the test cases in [section 3](#3-test-case-set
 
 Each network has a different configuration for testing. In this document, we support four types of network:
 
-| ID | Network          | Configuration                                                             |
-|----|------------------|---------------------------------------------------------------------------|
-| 1  | Goerli           | BLOCKNUMBER=9560000 TESTING=true CHAIN=goerli LAYER2=false                |
-| 2  | Polygon Mumbai   | BLOCKNUMBER=39540000 TESTING=true CHAIN=polygon_mumbai LAYER2=false       |
-| 3  | Optimsim         | BLOCKNUMBER=13975000 TESTING=true CHAIN=optimsim_goerli LAYER2=true       |
-| 4  | Arbitrum         | BLOCKNUMBER=37650000 TESTING=true CHAIN=arbitrum_goerli LAYER2=true       |
-| 5  | Zksync           | BLOCKNUMBER=47250000 TESTING=true CHAIN=polygon_mainnet TESTING_FOR_ZKSYNC=true
+| ID  | Network        | Configuration                                                                   |
+| --- | -------------- | ------------------------------------------------------------------------------- |
+| 1   | Goerli         | BLOCKNUMBER=9560000 TESTING=true CHAIN=goerli LAYER2=false                      |
+| 2   | Polygon Mumbai | BLOCKNUMBER=39540000 TESTING=true CHAIN=polygon_mumbai LAYER2=false             |
+| 3   | Optimsim       | BLOCKNUMBER=13975000 TESTING=true CHAIN=optimsim_goerli LAYER2=true             |
+| 4   | Arbitrum       | BLOCKNUMBER=37650000 TESTING=true CHAIN=arbitrum_goerli LAYER2=true             |
+| 5   | Zksync         | BLOCKNUMBER=47250000 TESTING=true CHAIN=polygon_mainnet TESTING_FOR_ZKSYNC=true |
 
 **Note**: Since hardhat does not support the `zksync` network fork, we have tested the logic of the contracts that will be deployed for zksync on the `polygon-mainnet` fork network.
 
 **Customize Chain Settings**:
-- `BLOCKNUMBER`: ***Do not change the block number*** as it may affect test results accuracy. The provided block numbers in the configuration file are critical for accurate testing and forking.
+
+- `BLOCKNUMBER`: **_Do not change the block number_** as it may affect test results accuracy. The provided block numbers in the configuration file are critical for accurate testing and forking.
 - `TESTING`: Set this to `true` in testing. (When set to `true`, `console.log` will be disabled and will not write addresses when deploying the contract to the `config` file).
 - `LAYER2`: Set this to `true` if the network is a layer2 that supports sequencer feeds.
 - `TESTING_FOR_ZKSYNC`: To differentiate from other networks.
 
-These environment variables are set in cmd scripts in the package.json file. ***Please do not make changes***.
+These environment variables are set in cmd scripts in the package.json file. **_Please do not make changes_**.
 
-In the folders `scripts/config/hardhat_*/` there are files `config.testing.json`, these files are used to configure parameters when testing, ***Please do not change these files***.
+In the folders `scripts/config/hardhat_*/` there are files `config.testing.json`, these files are used to configure parameters when testing, **_Please do not change these files_**.
 
-Example: 
+Example:
+
 ```
 //file: /hardhat_arbitrum_goerli/config.testing.json
 
@@ -576,6 +692,7 @@ Example:
     }
 }
 ```
+
 - **impersonateAccount**: The address of the contract creator who deployed the token on the testnet used for testing (Mainly to get `mint` role).
 - **uniswapFactory**: Address of UniswapFactory contract.
 - **uniswapV2Router**: Address of UniswapV2Router contract.
@@ -587,24 +704,23 @@ There are 6 script test files to test 6 contracts. When running the command for 
 
 ### Running test
 
-| ID | Network          | Testing smart contract command                                                       |
-|----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run test:v2:fork-goerli` or `yarn test:v2:fork-goerli`                          |
-| 2  | Polygon Mumbai   | `npm run test:v2:fork-mumbai` or `yarn test:v2:fork-mumbai`         |
-| 3  | Optimsim         | `npm run test:v2:fork-optimism-goerli` or `yarn test:v2:fork-optimism-goerli`       |
-| 4  | Arbitrum         | `npm run test:v2:fork-arbitrum-goerli` or `yarn test:v2:fork-arbitrum-goerli`       |
-| 5  | Zksync           | `npm run test:v2:fork-polygon-zksync` or `yarn test:v2:fork-polygon-zksync`        |
+| ID  | Network        | Testing smart contract command                                                |
+| --- | -------------- | ----------------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run test:v2:fork-goerli` or `yarn test:v2:fork-goerli`                   |
+| 2   | Polygon Mumbai | `npm run test:v2:fork-mumbai` or `yarn test:v2:fork-mumbai`                   |
+| 3   | Optimsim       | `npm run test:v2:fork-optimism-goerli` or `yarn test:v2:fork-optimism-goerli` |
+| 4   | Arbitrum       | `npm run test:v2:fork-arbitrum-goerli` or `yarn test:v2:fork-arbitrum-goerli` |
+| 5   | Zksync         | `npm run test:v2:fork-polygon-zksync` or `yarn test:v2:fork-polygon-zksync`   |
 
 ### Running test coverage
 
-| ID | Network          | Testing smart contract command                                                       |
-|----|------------------|-------------------------------------------------------------------------------------|
-| 1  | Goerli           | `npm run coverage:v2:fork-goerli` or `yarn coverage:v2:fork-goerli`                          |
-| 2  | Polygon Mumbai   | `npm run coverage:v2:fork-mumbai` or `yarn coverage:v2:fork-mumbai`         |
-| 3  | Optimsim         | `npm run coverage:v2:fork-optimism-goerli` or `yarn coverage:v2:fork-optimism-goerli`       |
-| 4  | Arbitrum         | `npm run coverage:v2:fork-arbitrum-goerli` or `yarn coverage:v2:fork-arbitrum-goerli`       |
-| 5  | Zksync           | `npm run coverage:v2:fork-polygon-zksync` or `yarn coverage:v2:fork-polygon-zksync`        |
-
+| ID  | Network        | Testing smart contract command                                                        |
+| --- | -------------- | ------------------------------------------------------------------------------------- |
+| 1   | Goerli         | `npm run coverage:v2:fork-goerli` or `yarn coverage:v2:fork-goerli`                   |
+| 2   | Polygon Mumbai | `npm run coverage:v2:fork-mumbai` or `yarn coverage:v2:fork-mumbai`                   |
+| 3   | Optimsim       | `npm run coverage:v2:fork-optimism-goerli` or `yarn coverage:v2:fork-optimism-goerli` |
+| 4   | Arbitrum       | `npm run coverage:v2:fork-arbitrum-goerli` or `yarn coverage:v2:fork-arbitrum-goerli` |
+| 5   | Zksync         | `npm run coverage:v2:fork-polygon-zksync` or `yarn coverage:v2:fork-polygon-zksync`   |
 
 ### 5.2. Measuring test coverage
 

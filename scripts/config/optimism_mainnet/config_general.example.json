@@ -1,5 +1,12 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "",
+            "volatilityCapDownPercent": ""
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
@@ -9,10 +16,19 @@
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [],
-            "chainlinkAggregatorV3": [[]],
-            "timeOuts": [[]]
+            "chainlinkAggregatorV3": [
+                []
+            ],
+            "timeOuts": [
+                []
+            ]
         },
-        "Uniswap": {
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "",
             "tokensUseUniswap": [],
             "uniswapPairs": []
         },
@@ -36,29 +52,31 @@
     },
     "plpModeratorParams": {
         "projectTokens": [],
-          "loanToValueRatioNumerator": [],
-          "loanToValueRatioDenominator": [],
-          "isPaused": false,
-          "borrowLimitPerCollateral": [],
-          "borrowLimitPerLendingToken": []
+        "loanToValueRatioNumerator": [],
+        "loanToValueRatioDenominator": [],
+        "isPaused": false,
+        "borrowLimitPerCollateral": [],
+        "borrowLimitPerLendingToken": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
+        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": []
-      },
-      "jumRateModel": {
+        "loanToValueRatioDenominator": [],
+        "initialSupplyAmount": []
+    },
+    "jumRateModel": {
         "gainPerYear": [],
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
         "blocksPerYear": ""
-      },
-      "plpLiquidationParams": {
+    },
+    "plpLiquidationParams": {
         "minPA": "",
         "maxLRFNumerator": "",
         "maxLRFDenominator": "",
@@ -66,5 +84,5 @@
         "rewardCalcFactorDenominator": "",
         "targetHFNumerator": "",
         "targetHFDenominator": ""
-      }
+    }
 }

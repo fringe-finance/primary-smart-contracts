@@ -3,7 +3,7 @@ const axios = require('axios');
 const BD = require("js-big-decimal");
 const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
-const OOEJson = require("../artifacts/OpenOceanExchange.json");
+const OOEJson = require("../artifacts-for-testing/OpenOceanExchange.json");
 const ifaceOpenOceanExchange = new hre.ethers.utils.Interface(OOEJson.abi);
 const connection = new EvmPriceServiceConnection(
     "https://xc-mainnet.pyth.network"

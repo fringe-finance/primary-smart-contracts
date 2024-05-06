@@ -18,7 +18,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
 
     uint8 public constant MAX_PRICE_PATH_LENGTH = 5;
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     mapping(address => uint256) public timeOuts; // address of aggregatorPath => timeout of aggregatorPath
     mapping(address => ChainlinkMetadata) public chainlinkMetadata; // address of token => metadata of chainlink
@@ -62,15 +62,21 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     event SetTimeOut(address indexed aggregatorPath, uint256 newTimeOut);
 
     /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
      * @dev Initializes the contract by setting up the access control roles and assigning them to the contract deployer.
      * The `DEFAULT_ADMIN_ROLE` and `MODERATOR_ROLE` roles are set up with the contract deployer as the initial role bearer.
-     * `usdDecimals` is set to 6.
+     * `decimals` is set to 18.
      */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
+        tokenDecimals = 8;
     }
 
     /**
@@ -208,29 +214,12 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
             priceMantissa *= getLatestPrice(aggregatorPath[i]); // earn price
             priceDecimals += AggregatorV3Interface(aggregatorPath[i]).decimals(); // earn price decimals
         }
-        if (priceDecimals >= usdDecimals) {
-            priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
         } else {
-            priceMantissa *= 10 ** (usdDecimals - priceDecimals);
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
         }
-        priceDecimals = usdDecimals;
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD using the Chainlink price feed.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-        uint8 tokenDecimals = ERC20Upgradeable(token).decimals();
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
-        }
+        priceDecimals = tokenDecimals;
     }
 
     /**
@@ -238,6 +227,16 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
      * @return The number of decimals used for the price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
+    }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes active status of token and array of Chainlink aggregator addresses used to get the price of the token.
+     */
+    function getChainlinkMetadata(address token) public view returns (ChainlinkMetadata memory) {
+        ChainlinkMetadata memory metadata = chainlinkMetadata[token];
+        return metadata;
     }
 }

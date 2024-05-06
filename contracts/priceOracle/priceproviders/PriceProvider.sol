@@ -23,22 +23,6 @@ abstract contract PriceProvider {
         revert("PriceProvider: UpdatePrices is forbidden");
     }
 
-    /**
-     * @dev Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
-     * @param token The address of the token to get the price of.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return priceMantissa The price of the token in USD, represented as a mantissa.
-     * @return priceDecimals The number of decimal places in the price of the token.
-     */
-    function getUpdatedPrice(
-        address token,
-        bytes[] calldata updateData
-    ) external payable virtual returns (uint256 priceMantissa, uint8 priceDecimals){
-        token; updateData;
-        priceMantissa; priceDecimals;
-        revert("PriceProvider: getUpdatedPrice is forbidden");
-    }
-
     /****************** view functions ****************** */
 
     /**
@@ -83,17 +67,6 @@ abstract contract PriceProvider {
     function getEvaluation(address token, uint256 tokenAmount) public virtual view returns(uint256 evaluation) {}
     
     /**
-     * @dev Returns the evaluation of a given token amount based on the last updated price.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount.
-     */
-    function getEvaluationUnsafe(address token, uint256 tokenAmount) public virtual view returns(uint256 evaluation) {
-        token; tokenAmount; evaluation;
-        revert("PriceProvider: getEvaluationUnsafe is forbidden");
-    }
-
-    /**
      * @dev return the evaluation in $ of `tokenAmount` with signed price.
      * @param token the address of token to get evaluation in $.
      * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals.
@@ -116,5 +89,12 @@ abstract contract PriceProvider {
      * @return priceIds An array of bytes32 representing the expired price feed IDs.
      * @return updateFee The fee required to update the expired price feeds.
      */
-    function getExpiredPriceFeeds(address[] memory token, uint256 timeBeforeExpiration) external virtual view returns(bytes32[] memory priceIds, uint256 updateFee) {}
+    function getExpiredPriceFeeds(
+        address[] memory token, 
+        uint256 timeBeforeExpiration
+    ) external virtual view returns(bytes32[] memory priceIds, uint256 updateFee) {
+        token; timeBeforeExpiration;
+        priceIds; updateFee;
+        revert("PriceProvider: getExpiredPriceFeeds is forbidden");
+    }
 }

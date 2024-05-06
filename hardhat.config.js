@@ -122,12 +122,12 @@ if (isZksync) {
       },
 
       ethereum_goerli: {
-        url: "https://rpc.ankr.com/eth_goerli",
+        url:  `https://goerli.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
         accounts: [PRIVATE_KEY]
       },
       arbitrum_goerli: {
-        url: "https://goerli-rollup.arbitrum.io/rpc",
+        url: `https://arbitrum-goerli.infura.io/v3/${INFURA_KEY}`,
         accounts: [PRIVATE_KEY]
       },
     },
@@ -168,7 +168,7 @@ if (isZksync) {
       debugMode: false,
     },
     markup: {
-      outdir: "./generated-markups",
+      outdir: "./docs",
       onlyFiles: [
         "contracts",
       ],
