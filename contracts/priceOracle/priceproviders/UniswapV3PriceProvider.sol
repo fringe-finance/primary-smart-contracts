@@ -2,30 +2,32 @@
 pragma solidity 0.8.19;
 
 import "./PriceProvider.sol";
-import "./mute/IMuteSwitchPairDynamic.sol";
+import "./uniswapV3/v3-core/interfaces/IUniswapV3Pool.sol";
+import "./uniswapV3/v3-periphery/libraries/OracleLibrary.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
+
 /**
- * @title Mute price provider
- * @dev This implementation can be affected by price manipulation due to not using TWAP.
- * For development purposes only
+ * @title UniswapV3 price provider
  */
-contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
+contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    string public constant DESCRIPTION = "Price provider that uses mute.io";
+    string public constant DESCRIPTION = "Price provider that uses uniswapV3";
 
     uint8 public tokenDecimals;
 
-    mapping(address => MuteMetadata) public muteMetadata; // address of token => metadata for mute
+    uint32 public pricePointTWAPperiod;
 
-    struct MuteMetadata {
+    mapping(address => UniswapV3Metadata) public uniswapV3Metadata; // address of token => metadata for uniswapV3
+
+    struct UniswapV3Metadata {
         bool isActive;
-        address pair; // address of mute liquidity pool token for pair
-        address pairAsset; // address of second token in pair with token
-        uint8 tokenDecimals; // decimals of project token
+        address pair;       // address of uniswap liquidity pool token for pair 
+        address pairAsset;  // address of second token in pair with token
+        uint8 tokenDecimals;  // decimals of project token
         uint8 pairAssetDecimals; // decimals of second token in pair with token
     }
 
@@ -42,7 +44,7 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     event RevokeModeratorRole(address indexed moderator);
 
     /**
-     * @dev Emitted when the token and pair addresses are set for the UniswapV2PriceProvider contract.
+     * @dev Emitted when the token and pair addresses are set for the UniswapV3PriceProvider contract.
      * @param token The address of the token that is set.
      * @param pair The address of the pair that is set.
      */
@@ -63,12 +65,13 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
 
     /**
      * @dev Initializes the contract by setting up the access control roles and the number of decimals for the USD token.
-     */
+     *`decimals` is set to 18.
+     **/
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        tokenDecimals = 10;
+        tokenDecimals = 18;
     }
 
     /**
@@ -93,7 +96,7 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @dev Grants the moderator role to a new address.
      * @param newModerator The address of the new moderator.
      */
-    function grantModerator(address newModerator) public onlyAdmin {
+    function grantModerator(address newModerator) external onlyAdmin {
         grantRole(MODERATOR_ROLE, newModerator);
         emit GrantModeratorRole(newModerator);
     }
@@ -102,7 +105,7 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @dev Revokes the moderator role from an address.
      * @param moderator The address of the moderator to be revoked.
      */
-    function revokeModerator(address moderator) public onlyAdmin {
+    function revokeModerator(address moderator) external onlyAdmin {
         revokeRole(MODERATOR_ROLE, moderator);
         emit RevokeModeratorRole(moderator);
     }
@@ -118,11 +121,10 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
         tokenDecimals = newTokenDecimals;
         emit SetTokenDecimals(newTokenDecimals);
     }
-
+    
     /**
-     * @dev Sets the token and pair addresses for the MutePriceProvider contract.
-     *
-     * Requirements:
+     * @dev Sets the token and pair addresses for the UniswapV3PriceProvider contract.
+     * #### Requirements:
      * - `token` and `pair` addresses must not be zero.
      * - Only the contract moderator can call this function.
      * - The `token` and `pair` addresses must be valid.
@@ -130,14 +132,14 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @param token The address of the token to be set.
      * @param pair The address of the pair to be set.
      */
-    function setTokenAndPair(address token, address pair) public onlyModerator {
-        require(token != address(0) && pair != address(0), "MutePriceProvider: Invalid token or pair!");
-        MuteMetadata storage metadata = muteMetadata[token];
+    function setTokenAndPair(address token, address pair) external onlyModerator {
+        require(token != address(0) && pair != address(0),"UniswapV3PriceProvider: Invalid token or pair!");
+        UniswapV3Metadata storage metadata = uniswapV3Metadata[token];
         metadata.isActive = true;
         metadata.pair = pair;
-        address pairAsset = IMuteSwitchPairDynamic(pair).token0();
-        if (pairAsset == token) {
-            pairAsset = IMuteSwitchPairDynamic(pair).token1();
+        address pairAsset = IUniswapV3Pool(pair).token0();
+        if(pairAsset == token){
+            pairAsset = IUniswapV3Pool(pair).token1();
         }
         metadata.pairAsset = pairAsset;
         metadata.tokenDecimals = ERC20Upgradeable(token).decimals();
@@ -146,31 +148,41 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /**
-     * @dev Changes the active status of a token in the MutePriceProvider contract.
-     *
-     * Requirements:
-     * - The token must be listed in the MutePriceProvider contract.
+     * @dev Changes the active status of a token in the UniswapV3PriceProvider contract.
+     * #### Requirements:
+     * - The token must be listed in the UniswapV3PriceProvider contract.
      * - Only the contract moderator can call this function.
      * @param token The address of the token to change the active status for.
      * @param active The new active status of the token.
      */
     function changeActive(address token, bool active) public override onlyModerator {
-        require(muteMetadata[token].pair != address(0), "MutePriceProvider: Token is not listed!");
-        muteMetadata[token].isActive = active;
+        require(uniswapV3Metadata[token].pair != address(0), "UniswapV3PriceProvider: token is not listed!");
+        uniswapV3Metadata[token].isActive = active;
         emit ChangeActive(token, active);
+    }
+
+    /**
+     * @dev Sets the price point TWAP period for the UniswapV3PriceProvider contract.
+     * #### Requirements:
+     * - Only the contract moderator can call this function.
+     * @param period The new price point TWAP period.
+     */
+    function setPricePointTWAPperiod(uint32 period) public onlyModerator {
+        require(period > 0, "UniswapV3PriceProvider: Invalid period!");
+        pricePointTWAPperiod = period;
     }
 
     /****************** view functions ****************** */
 
     /**
-     * @dev Check if a token is listed on Mute.
+     * @dev Check if a token is listed on UniswapV3.
      * @param token The address of the token to check.
      * @return A boolean indicating whether the token is listed or not.
      */
-    function isListed(address token) public view override returns (bool) {
-        if (muteMetadata[token].pair != address(0)) {
+    function isListed(address token) public override view returns(bool){
+        if(uniswapV3Metadata[token].pair != address(0)){
             return true;
-        } else {
+        }else{
             return false;
         }
     }
@@ -180,8 +192,8 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @param token The address of the token to check.
      * @return A boolean indicating whether the token is active or not.
      */
-    function isActive(address token) public view override returns (bool) {
-        return muteMetadata[token].isActive;
+    function isActive(address token) public override view returns(bool){
+        return uniswapV3Metadata[token].isActive;
     }
 
     /**
@@ -191,54 +203,35 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @return priceDecimals The number of decimals for the price.
      * @notice This function requires that the token is active in the price provider.
      */
-    function getPrice(address token) public view override returns (uint256 price, uint8 priceDecimals) {
-        MuteMetadata memory metadata = muteMetadata[token];
-        require(metadata.isActive, "MutePriceProvider: Token is not active");
-        address mutePair = metadata.pair;
-        address pairAsset = metadata.pairAsset;
-        (uint256 tokenReserve, uint256 pairAssetReserve) = getReserves(mutePair, token, pairAsset);
-        uint8 decimals = metadata.tokenDecimals;
-        uint8 pairAssetDecimals = metadata.pairAssetDecimals;
-        priceDecimals = 18;
-        price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** decimals));
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD using the Mute price oracle.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 decimals = muteMetadata[token].tokenDecimals;
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-    }
-
-    /**
-     * @dev Returns the reserves of the specified Mute pair for the given tokens.
-     * @param mutePair The address of the Mute pair.
-     * @param tokenA The address of the first token.
-     * @param tokenB The address of the second token.
-     * @return reserveA The reserve of the first token.
-     * @return reserveB The reserve of the second token.
-     */
-    function getReserves(address mutePair, address tokenA, address tokenB) public view returns (uint256 reserveA, uint256 reserveB) {
-        (address token0, ) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA); //sort tokens
-        (uint256 reserve0, uint256 reserve1, ) = IMuteSwitchPairDynamic(mutePair).getReserves(); //getting reserves
-        (reserveA, reserveB) = (tokenA == token0) ? (reserve0, reserve1) : (reserve1, reserve0); //form the correct order of reserves
+    function getPrice(address token) public override view returns (uint256 price, uint8 priceDecimals) {
+        UniswapV3Metadata memory metadata = uniswapV3Metadata[token];
+        require(metadata.isActive, "UniswapV3PriceProvider: token is not active");
+        (int24 tick, ) = OracleLibrary.consult(metadata.pair, pricePointTWAPperiod);
+        priceDecimals = tokenDecimals;
+        price = OracleLibrary.getQuoteAtTick(
+            tick,
+            uint128(10 ** (metadata.tokenDecimals + priceDecimals)),
+            token,
+            metadata.pairAsset
+        );
+        price /= 10 ** metadata.pairAssetDecimals;
     }
 
     /**
      * @dev Returns the number of decimals used for the USD price.
      * @return The number of decimals used for the USD price.
      */
-    function getPriceDecimals() public view override returns (uint8) {
+    function getPriceDecimals() public override view returns (uint8) {
         return tokenDecimals;
+    }
+
+    /**
+     * @dev Returns the metadata set up for token.
+     * @param token The address of the token.
+     * @return metadata The metadata includes the active status, pair address, pairAsset address, tokenDecimals, and pairAssetDecimals.
+     */
+    function getUniswapV3Metadata(address token) public view returns (UniswapV3Metadata memory) {
+        UniswapV3Metadata memory metadata = uniswapV3Metadata[token];
+        return metadata;
     }
 }

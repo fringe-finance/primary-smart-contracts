@@ -195,14 +195,15 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
      * @param tokenAmount The amount of the token to evaluate.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
-     * @return The evaluated token amount in USD.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
     function getTokenEvaluationWithUpdatePrices(
         address token,
         uint256 tokenAmount,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable returns (uint256) {
+    ) external payable returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return getTokenEvaluation(token, tokenAmount);
     }

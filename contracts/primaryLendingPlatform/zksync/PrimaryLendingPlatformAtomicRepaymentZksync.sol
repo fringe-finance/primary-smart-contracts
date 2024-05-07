@@ -72,22 +72,24 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
      * - Repays the lending token amount to the primary lending platform contract.
      * - Transfers the remaining lending token amount to the user.
      * - Defers the liquidity check for the user, project token, and lending token.
-     * @param prjToken The project token to use as collateral.
-     * @param collateralAmount The amount of collateral to use.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
+     * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for the swap operation.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
      * @param priceIds An array of bytes32 price identifiers to update.
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function repayAtomic(
-        address prjToken,
-        uint collateralAmount,
-        bytes memory buyCalldata,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
+        uint256 collateralAmount,
+        bytes[] memory buyCalldata,
         bool isRepayFully,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _repayAtomic(prjToken, collateralAmount, buyCalldata, isRepayFully);
+        _repayAtomic(prjInfo, lendingInfo, collateralAmount, buyCalldata, isRepayFully);
     }
 }

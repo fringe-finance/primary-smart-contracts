@@ -12,6 +12,7 @@ import "../interfaces/IWETH.sol";
 import "../interfaces/IBLendingToken.sol";
 import "../interfaces/IPrimaryLendingPlatformLiquidation.sol";
 import "../interfaces/IPrimaryLendingPlatformLeverage.sol";
+import "../util/Asset.sol";
 
 /**
  * @title PrimaryLendingPlatformWrappedTokenGatewayCore.
@@ -246,7 +247,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
      * @dev Internal function to liquidate a position by providing project tokens in Ether.
      * @param receivedWETH Amount of lending tokens to liquidate.
      */
-    function _liquidateWithProjectETH(uint256 receivedWETH) internal {
+    function _internalLiquidateWithProjectETH(uint256 receivedWETH) internal {
         WETH.transferFrom(msg.sender, address(this), receivedWETH);
         WETH.withdraw(receivedWETH);
         _safeTransferETH(msg.sender, receivedWETH);

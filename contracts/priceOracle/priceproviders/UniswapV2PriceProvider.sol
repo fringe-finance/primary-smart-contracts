@@ -17,7 +17,7 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
 
     string public constant DESCRIPTION = "Price provider that uses uniswapV2";
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     mapping(address => UniswapV2Metadata) public uniswapV2Metadata; // address of token => metadata for uniswapV2
 
@@ -56,13 +56,19 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     event ChangeActive(address indexed token, bool active);
 
     /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
      * @dev Initializes the contract by setting up the access control roles and the number of decimals for the USD token.
      */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
+        tokenDecimals = 10;
     }
 
     /**
@@ -102,6 +108,16 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /****************** Moderator functions ****************** */
+
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
 
     /**
      * @dev Sets the token and pair addresses for the UniswapV2PriceProvider contract.
@@ -181,10 +197,10 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
         address uniswapPair = uniswapV2metadata.pair;
         address pairAsset = uniswapV2metadata.pairAsset;
         (uint256 tokenReserve, uint256 pairAssetReserve) = getReserves(uniswapPair, token, pairAsset);
-        uint8 tokenDecimals = uniswapV2metadata.tokenDecimals;
+        uint8 decimals = uniswapV2metadata.tokenDecimals;
         uint8 pairAssetDecimals = uniswapV2metadata.pairAssetDecimals;
         priceDecimals = 18;
-        price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** tokenDecimals));
+        price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** decimals));
     }
 
     /**
@@ -196,11 +212,11 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
         (uint256 price, uint8 priceDecimals) = getPrice(token);
         evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 tokenDecimals = uniswapV2Metadata[token].tokenDecimals;
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
+        uint8 decimals = uniswapV2Metadata[token].tokenDecimals;
+        if (decimals >= tokenDecimals) {
+            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
         } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
+            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
         }
     }
 
@@ -223,6 +239,6 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
 }

@@ -421,6 +421,18 @@ interface IPrimaryLendingPlatform {
 
     //************* VIEW FUNCTIONS ********************************
 
+    /**@dev This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+     * @param projectToken Address of the project token.
+     * @param actualLendingToken Address of the lending token.
+     * @param isBorrow Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.
+     * @return Array of tokens that need to update final price.
+     */
+    function getTokensUpdateFinalPrices(
+        address projectToken, 
+        address actualLendingToken, 
+        bool isBorrow
+    ) external view returns (address[] memory );
+    
     /**
      * @dev return address of price oracle with interface of PriceProviderAggregator
      */
@@ -541,9 +553,10 @@ interface IPrimaryLendingPlatform {
      * @dev Returns the evaluation of a specific token amount in USD
      * @param token The address of the token to evaluate
      * @param tokenAmount The amount of the token to evaluate
-     * @return The evaluated token amount in USD
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256);
+    function getTokenEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation);
 
     /**
      * @dev Returns the length of the lending tokens array
