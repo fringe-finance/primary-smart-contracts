@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -103,6 +101,21 @@ Parameters:
 | aggregatorPath | address | The address of the Chainlink aggregator path.   |
 | newTimeOut     | uint256 | The new time out value in seconds.              |
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+Emitted when the token decimals is set.
+
+
+Parameters:
+
+| Name             | Type  | Description             |
+| :--------------- | :---- | :---------------------- |
+| newTokenDecimals | uint8 | The new token decimals. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -128,10 +141,10 @@ uint8 constant MAX_PRICE_PATH_LENGTH = 5
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 
@@ -175,7 +188,7 @@ function initialize() public initializer
 
 Initializes the contract by setting up the access control roles and assigning them to the contract deployer.
 The `DEFAULT_ADMIN_ROLE` and `MODERATOR_ROLE` roles are set up with the contract deployer as the initial role bearer.
-`usdDecimals` is set to 6.
+`decimals` is set to 8.
 ### grantModerator (0x6981c7ae)
 
 ```solidity
@@ -228,8 +241,7 @@ Parameters:
 | Name           | Type    | Description                                                                                                                                                                                                   |
 | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | aggregatorPath | address | The address of chainlink aggregator contract.                                                                                                                                                                 |
-| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified
- amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
+| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
 
 ### setTokenAndAggregator (0xedc607b0)
 
@@ -356,32 +368,6 @@ Parameters:
 | Name  | Type    | Description        |
 | :---- | :------ | :----------------- |
 | token | address | the token address. |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount in USD using the Chainlink price feed.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                                |
-| :--------- | :------ | :----------------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount in USD. |
 
 ### getPriceDecimals (0x1b30aafc)
 

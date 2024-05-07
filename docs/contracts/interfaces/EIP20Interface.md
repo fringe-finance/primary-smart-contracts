@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 interface EIP20Interface
 ```

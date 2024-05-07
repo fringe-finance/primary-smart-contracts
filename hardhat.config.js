@@ -127,7 +127,7 @@ if (isZksync) {
         accounts: [PRIVATE_KEY]
       },
       arbitrum_goerli: {
-        url: "https://goerli-rollup.arbitrum.io/rpc",
+        url: `https://arbitrum-goerli.infura.io/v3/${INFURA_KEY}`,
         accounts: [PRIVATE_KEY]
       },
     },

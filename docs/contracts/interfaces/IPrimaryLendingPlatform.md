@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 interface IPrimaryLendingPlatform
 ```
@@ -901,6 +899,34 @@ Parameters:
 | account      | address | Address of the borrower.      |
 | lendingToken | address | Address of the lending token. |
 
+### getTokensUpdateFinalPrices (0xef290120)
+
+```solidity
+function getTokensUpdateFinalPrices(
+    address projectToken,
+    address actualLendingToken,
+    bool isBorrow
+) external view returns (address[] memory)
+```
+
+This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+
+
+Parameters:
+
+| Name               | Type    | Description                                                                                              |
+| :----------------- | :------ | :------------------------------------------------------------------------------------------------------- |
+| projectToken       | address | Address of the project token.                                                                            |
+| actualLendingToken | address | Address of the lending token.                                                                            |
+| isBorrow           | bool    | Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.   |
+
+
+Return values:
+
+| Name | Type      | Description                                      |
+| :--- | :-------- | :----------------------------------------------- |
+| [0]  | address[] | Array of tokens that need to update final price. |
+
 ### priceOracle (0x2630c12f)
 
 ```solidity
@@ -1237,7 +1263,10 @@ Return values:
 function getTokenEvaluation(
     address token,
     uint256 tokenAmount
-) external view returns (uint256)
+)
+    external
+    view
+    returns (uint256 collateralEvaluation, uint256 capitalEvaluation)
 ```
 
 Returns the evaluation of a specific token amount in USD
@@ -1253,9 +1282,10 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                       |
-| :--- | :------ | :-------------------------------- |
-| [0]  | uint256 | The evaluated token amount in USD |
+| Name                 | Type    | Description                                                            |
+| :------------------- | :------ | :--------------------------------------------------------------------- |
+| collateralEvaluation | uint256 | the USD evaluation of token by its `tokenAmount` in collateral price   |
+| capitalEvaluation    | uint256 | the USD evaluation of token by its `tokenAmount` in capital price      |
 
 ### lendingTokensLength (0x2412b575)
 

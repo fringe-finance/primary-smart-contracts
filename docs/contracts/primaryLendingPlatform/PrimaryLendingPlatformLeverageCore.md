@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -272,7 +270,9 @@ Parameters:
 ### getTokenPrice (0xd02641a0)
 
 ```solidity
-function getTokenPrice(address token) public view returns (uint256 price)
+function getTokenPrice(
+    address token
+) public view returns (uint256 collateralPrice, uint256 capitalPrice)
 ```
 
 Returns the price of a given token in USD.
@@ -287,9 +287,10 @@ Parameters:
 
 Return values:
 
-| Name  | Type    | Description                    |
-| :---- | :------ | :----------------------------- |
-| price | uint256 | The price of the token in USD. |
+| Name            | Type    | Description                      |
+| :-------------- | :------ | :------------------------------- |
+| collateralPrice | uint256 | The price of the token in USD.   |
+| capitalPrice    | uint256 | The price of the token in USD.   |
 
 ### isValidCollateralization (0x2de0f093)
 

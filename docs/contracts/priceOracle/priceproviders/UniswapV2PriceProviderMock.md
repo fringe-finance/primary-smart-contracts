@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -67,6 +65,13 @@ event ChangeActive(address indexed token, bool active)
 ```
 
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -85,10 +90,10 @@ string constant DESCRIPTION = "Price provider that uses uniswapV2"
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 
@@ -144,6 +149,22 @@ function grantModerator(address newModerator) public onlyAdmin
 function revokeModerator(address moderator) public onlyAdmin
 ```
 
+
+### setTokenDecimals (0xf2cf47be)
+
+```solidity
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
+```
+
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
+
+
+Parameters:
+
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setTokenAndPrice (0x179750ec)
 

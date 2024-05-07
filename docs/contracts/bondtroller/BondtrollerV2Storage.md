@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract BondtrollerV2Storage is BondtrollerV1Storage
 ```

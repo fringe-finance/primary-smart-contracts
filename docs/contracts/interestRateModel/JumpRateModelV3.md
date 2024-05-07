@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract JumpRateModelV3 is Initializable, InterestRateModel, AccessControlUpgradeable
 ```

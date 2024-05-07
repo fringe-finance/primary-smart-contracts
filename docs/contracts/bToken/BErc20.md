@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract BErc20 is BToken, BErc20Interface
 ```

@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PriceProvider
 ```
@@ -47,33 +45,6 @@ Parameters:
 | :--------- | :-------- | :-------------------------------------- |
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
-
-### getUpdatedPrice (0xe8ad2b23)
-
-```solidity
-function getUpdatedPrice(
-    address token,
-    bytes[] calldata updateData
-) external payable virtual returns (uint256 priceMantissa, uint8 priceDecimals)
-```
-
-Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
-
-
-Parameters:
-
-| Name       | Type    | Description                                     |
-| :--------- | :------ | :---------------------------------------------- |
-| token      | address | The address of the token to get the price of.   |
-| updateData | bytes[] | The updateData provided by PythNetwork.         |
-
-
-Return values:
-
-| Name          | Type    | Description                                                 |
-| :------------ | :------ | :---------------------------------------------------------- |
-| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
-| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
 
 ### isActive (0x9f8a13d7)
 
@@ -185,32 +156,6 @@ function getEvaluation(
 ```
 
 Returns the evaluation of a given token amount based on the current price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
-
-### getEvaluationUnsafe (0xb03ec98d)
-
-```solidity
-function getEvaluationUnsafe(
-    address token,
-    uint256 tokenAmount
-) public view virtual returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the last updated price.
 
 
 Parameters:

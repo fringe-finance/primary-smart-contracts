@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core
 ```
@@ -279,7 +277,10 @@ function getTokenEvaluationWithUpdatePrices(
     uint256 tokenAmount,
     bytes32[] memory priceIds,
     bytes[] calldata updateData
-) external payable returns (uint256)
+)
+    external
+    payable
+    returns (uint256 collateralEvaluation, uint256 capitalEvaluation)
 ```
 
 Returns the evaluation of a specific token amount in USD after updating related token's prices.
@@ -297,9 +298,10 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                        |
-| :--- | :------ | :--------------------------------- |
-| [0]  | uint256 | The evaluated token amount in USD. |
+| Name                 | Type    | Description                                                            |
+| :------------------- | :------ | :--------------------------------------------------------------------- |
+| collateralEvaluation | uint256 | the USD evaluation of token by its `tokenAmount` in collateral price   |
+| capitalEvaluation    | uint256 | the USD evaluation of token by its `tokenAmount` in capital price      |
 
 ### getPositionWithUpdatePrices (0xa767ebd3)
 

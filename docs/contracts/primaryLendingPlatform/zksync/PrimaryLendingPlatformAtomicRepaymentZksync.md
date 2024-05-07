@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAtomicRepaymentCore
 ```
@@ -79,13 +77,14 @@ Return values:
 | :--------------------- | :------ | :---------------------------------------------------------- |
 | availableLendingAmount | uint256 | The available lending token amount that the user can repay. |
 
-### repayAtomic (0x5a0535c6)
+### repayAtomic (0x4f6db5fc)
 
 ```solidity
 function repayAtomic(
-    address prjToken,
+    Asset.Info memory prjInfo,
+    Asset.Info memory lendingInfo,
     uint256 collateralAmount,
-    bytes memory buyCalldata,
+    bytes[] memory buyCalldata,
     bool isRepayFully,
     bytes32[] memory priceIds,
     bytes[] calldata updateData
@@ -117,11 +116,12 @@ Effects:
 
 Parameters:
 
-| Name             | Type      | Description                                                                  |
-| :--------------- | :-------- | :--------------------------------------------------------------------------- |
-| prjToken         | address   | The project token to use as collateral.                                      |
-| collateralAmount | uint256   | The amount of collateral to use.                                             |
-| buyCalldata      | bytes     | The calldata for the swap operation.                                         |
-| isRepayFully     | bool      | A boolean indicating whether the loan should be repaid fully or partially.   |
-| priceIds         | bytes32[] | An array of bytes32 price identifiers to update.                             |
-| updateData       | bytes[]   | An array of bytes update data for the corresponding price identifiers.       |
+| Name             | Type              | Description                                                                  |
+| :--------------- | :---------------- | :--------------------------------------------------------------------------- |
+| prjInfo          | struct Asset.Info | Information about the project token, including its address and type.         |
+| lendingInfo      | struct Asset.Info | Information about the lending token, including its address and type.         |
+| collateralAmount | uint256           | The amount of collateral to use for repayment.                               |
+| buyCalldata      | bytes[]           | The calldata for the swap operation.                                         |
+| isRepayFully     | bool              | A boolean indicating whether the loan should be repaid fully or partially.   |
+| priceIds         | bytes32[]         | An array of bytes32 price identifiers to update.                             |
+| updateData       | bytes[]           | An array of bytes update data for the corresponding price identifiers.       |

@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PriceProviderAggregatorPyth is PriceProviderAggregator
 ```
@@ -54,6 +52,27 @@ Parameters:
 | :------------------- | :------ | :----------------------------------------- |
 | newPythPriceProvider | address | The address of PythPriceProvider contract. |
 
+### updateMultiFinalPricesWithUpdatePrice (0x2a92f7f1)
+
+```solidity
+function updateMultiFinalPricesWithUpdatePrice(
+    address[] memory token,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
+```
+
+Calculates and update multiple the final TWAP prices of a token after update price.
+
+
+Parameters:
+
+| Name       | Type      | Description                                  |
+| :--------- | :-------- | :------------------------------------------- |
+| token      | address[] | The token array needs to update the price.   |
+| priceIds   | bytes32[] | The priceIds need to update.                 |
+| updateData | bytes[]   | The updateData provided by PythNetwork.      |
+
 ### updatePrices (0x0aa9adbc)
 
 ```solidity
@@ -73,13 +92,22 @@ Parameters:
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
 
-### getUpdatedPrice (0xe8ad2b23)
+### getUpdatedPrice (0xb876879d)
 
 ```solidity
 function getUpdatedPrice(
     address token,
+    bytes32[] memory priceIds,
     bytes[] calldata updateData
-) external payable returns (uint256 priceMantissa, uint8 priceDecimals)
+)
+    external
+    payable
+    returns (
+        uint8 priceDecimals,
+        uint64 timestamp,
+        uint256 collateralPrice,
+        uint256 capitalPrice
+    )
 ```
 
 Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
@@ -87,18 +115,21 @@ Returns the latest price of a given token in USD after update price if price pro
 
 Parameters:
 
-| Name       | Type    | Description                                     |
-| :--------- | :------ | :---------------------------------------------- |
-| token      | address | The address of the token to get the price of.   |
-| updateData | bytes[] | The updateData provided by PythNetwork.         |
+| Name       | Type      | Description                                     |
+| :--------- | :-------- | :---------------------------------------------- |
+| token      | address   | The address of the token to get the price of.   |
+| priceIds   | bytes32[] | The priceIds need to update price.              |
+| updateData | bytes[]   | The updateData provided by PythNetwork.         |
 
 
 Return values:
 
-| Name          | Type    | Description                                                 |
-| :------------ | :------ | :---------------------------------------------------------- |
-| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
-| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
+| Name            | Type    | Description                                                 |
+| :-------------- | :------ | :---------------------------------------------------------- |
+| priceDecimals   | uint8   | The number of decimal places in the price of the token.     |
+| timestamp       | uint64  | The timestamp of the price.                                 |
+| collateralPrice | uint256 | The price of the token in USD, represented as a mantissa.   |
+| capitalPrice    | uint256 | The price of the token in USD, represented as a mantissa.   |
 
 ### getExpiredPriceFeeds (0xe1f67b13)
 
@@ -126,29 +157,3 @@ Return values:
 | :-------- | :-------- | :--------------------------------------------- |
 | priceIds  | bytes32[] | The priceId array needs to update the price.   |
 | updateFee | uint256   | The update fee.                                |
-
-### getEvaluationUnsafe (0xb03ec98d)
-
-```solidity
-function getEvaluationUnsafe(
-    address token,
-    uint256 tokenAmount
-) public view returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the last updated price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |

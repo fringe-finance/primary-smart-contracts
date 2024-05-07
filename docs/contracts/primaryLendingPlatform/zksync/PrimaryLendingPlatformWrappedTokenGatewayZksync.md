@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatformWrappedTokenGatewayCore
 ```
@@ -59,16 +57,23 @@ Parameters:
 | priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
 | updateData         | bytes[]   | An array of update data used to update the price oracle.         |
 
-### liquidateWithProjectETH (0x3d82a5ca)
+### liquidate (0xeca52d59)
 
 ```solidity
-function liquidateWithProjectETH(
+function liquidate(
     address _account,
-    address _lendingToken,
+    Asset.Info memory _prjInfo,
+    Asset.Info memory _lendingInfo,
     uint256 _lendingTokenAmount,
     bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) public payable nonReentrant
+    bytes[] calldata updateData,
+    uint256 updateFee,
+    bytes[] memory buyCalldata
+)
+    public
+    payable
+    nonReentrant
+    returns (address[] memory assets, uint256[] memory assetAmounts)
 ```
 
 Liquidates a position by providing project tokens in Ether and update related token's prices.
@@ -76,49 +81,25 @@ Liquidates a position by providing project tokens in Ether and update related to
 
 Parameters:
 
-| Name                | Type      | Description                                                      |
-| :------------------ | :-------- | :--------------------------------------------------------------- |
-| _account            | address   | Address of the account to be liquidated.                         |
-| _lendingToken       | address   | Address of the lending token.                                    |
-| _lendingTokenAmount | uint256   | Amount of lending tokens to liquidate.                           |
-| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
+| Name                | Type              | Description                                                                                                                                                       |
+| :------------------ | :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| _account            | address           | Address of the account to be liquidated.                                                                                                                          |
+| _prjInfo            | struct Asset.Info | Information about the project token, including its address and type.                                                                                              |
+| _lendingInfo        | struct Asset.Info | Information about the lending token, including its address and type.                                                                                              |
+| _lendingTokenAmount | uint256           | Amount of lending tokens to liquidate.                                                                                                                            |
+| priceIds            | bytes32[]         | An array of price identifiers used to update the price oracle.                                                                                                    |
+| updateData          | bytes[]           | An array of update data used to update the price oracle.                                                                                                          |
+| updateFee           | uint256           | Update fee pays for updating price.                                                                                                                               |
+| buyCalldata         | bytes[]           | The calldata for buying the lending token from the exchange aggregator. If the calldata is empty, the liquidation will execute liquidation without hot borrowing. |
 
-### liquidateWithLendingETH (0x49b009d4)
-
-```solidity
-function liquidateWithLendingETH(
-    address _account,
-    address _projectToken,
-    uint256 _lendingTokenAmount,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData,
-    uint256 updateFee
-) public payable nonReentrant
-```
-
-Liquidates a position by providing lending tokens in Ether and update related token's prices.
-
-
-Parameters:
-
-| Name                | Type      | Description                                                      |
-| :------------------ | :-------- | :--------------------------------------------------------------- |
-| _account            | address   | Address of the account to be liquidated.                         |
-| _projectToken       | address   | Address of the project token.                                    |
-| _lendingTokenAmount | uint256   | Amount of lending tokens in Ether to liquidate.                  |
-| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
-| updateFee           | uint256   | Update fee pays for updating price.                              |
-
-### leveragedBorrowWithProjectETH (0xd5790a86)
+### leveragedBorrowWithProjectETH (0x291fd0dc)
 
 ```solidity
 function leveragedBorrowWithProjectETH(
-    address _lendingToken,
+    Asset.Info memory _lendingInfo,
     uint256 _notionalExposure,
     uint256 _marginCollateralAmount,
-    bytes memory buyCalldata,
+    bytes[] memory buyCalldata,
     uint8 leverageType,
     bytes32[] memory priceIds,
     bytes[] calldata updateData,
@@ -131,13 +112,13 @@ Borrows lending tokens in a leveraged position using project tokens in Ether and
 
 Parameters:
 
-| Name                    | Type      | Description                                                      |
-| :---------------------- | :-------- | :--------------------------------------------------------------- |
-| _lendingToken           | address   | Address of the lending token.                                    |
-| _notionalExposure       | uint256   | The notional exposure of the leveraged position.                 |
-| _marginCollateralAmount | uint256   | Amount of collateral in margin.                                  |
-| buyCalldata             | bytes     | Calldata for buying project tokens.                              |
-| leverageType            | uint8     | The type of leverage.                                            |
-| priceIds                | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData              | bytes[]   | An array of update data used to update the price oracle.         |
-| updateFee               | uint256   | Update fee pays for updating price.                              |
+| Name                    | Type              | Description                                                            |
+| :---------------------- | :---------------- | :--------------------------------------------------------------------- |
+| _lendingInfo            | struct Asset.Info | Information about the lending token, including its address and type.   |
+| _notionalExposure       | uint256           | The notional exposure of the leveraged position.                       |
+| _marginCollateralAmount | uint256           | Amount of collateral in margin.                                        |
+| buyCalldata             | bytes[]           | Calldata for buying project tokens.                                    |
+| leverageType            | uint8             | The type of leverage.                                                  |
+| priceIds                | bytes32[]         | An array of price identifiers used to update the price oracle.         |
+| updateData              | bytes[]           | An array of update data used to update the price oracle.               |
+| updateFee               | uint256           | Update fee pays for updating price.                                    |

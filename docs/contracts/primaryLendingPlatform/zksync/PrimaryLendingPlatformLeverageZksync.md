@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageCore
 ```
@@ -15,15 +13,15 @@ The PrimaryLendingPlatformLeverageZksync contract is the contract that allows us
 Contract that allows users to open leveraged positions using the OpenOcean exchange aggregator. Inherit from PrimaryLendingPlatformLeverageCore.
 ## Functions info
 
-### leveragedBorrow (0x104daaf9)
+### leveragedBorrow (0x40b5aa8d)
 
 ```solidity
 function leveragedBorrow(
-    address projectToken,
-    address lendingToken,
+    Asset.Info memory prjInfo,
+    Asset.Info memory lendingInfo,
     uint256 notionalExposure,
     uint256 marginCollateralAmount,
-    bytes memory buyCalldata,
+    bytes[] memory buyCalldata,
     uint8 leverageType,
     bytes32[] memory priceIds,
     bytes[] calldata updateData
@@ -54,26 +52,26 @@ Effects:
 
 Parameters:
 
-| Name                   | Type      | Description                                                             |
-| :--------------------- | :-------- | :---------------------------------------------------------------------- |
-| projectToken           | address   | The address of the project token.                                       |
-| lendingToken           | address   | The address of the lending token.                                       |
-| notionalExposure       | uint256   | The desired notional exposure for the leverage position.                |
-| marginCollateralAmount | uint256   | The amount of collateral to be added to the position as margin.         |
-| buyCalldata            | bytes     | The calldata for buying the project token on the exchange aggregator.   |
-| leverageType           | uint8     | The type of leverage position.                                          |
-| priceIds               | bytes32[] | An array of bytes32 price identifiers to update.                        |
-| updateData             | bytes[]   | An array of bytes update data for the corresponding price identifiers.  |
+| Name                   | Type              | Description                                                             |
+| :--------------------- | :---------------- | :---------------------------------------------------------------------- |
+| prjInfo                | struct Asset.Info | Information about the project token, including its address and type.    |
+| lendingInfo            | struct Asset.Info | Information about the lending token, including its address and type.    |
+| notionalExposure       | uint256           | The desired notional exposure for the leverage position.                |
+| marginCollateralAmount | uint256           | The amount of collateral to be added to the position as margin.         |
+| buyCalldata            | bytes[]           | The calldata for buying the project token on the exchange aggregator.   |
+| leverageType           | uint8             | The type of leverage position.                                          |
+| priceIds               | bytes32[]         | An array of bytes32 price identifiers to update.                        |
+| updateData             | bytes[]           | An array of bytes update data for the corresponding price identifiers.  |
 
-### leveragedBorrowFromRelatedContract (0x30c1f2fd)
+### leveragedBorrowFromRelatedContract (0xb21cacd5)
 
 ```solidity
 function leveragedBorrowFromRelatedContract(
-    address projectToken,
-    address lendingToken,
+    Asset.Info memory prjInfo,
+    Asset.Info memory lendingInfo,
     uint256 notionalExposure,
     uint256 marginCollateralAmount,
-    bytes memory buyCalldata,
+    bytes[] memory buyCalldata,
     address borrower,
     uint8 leverageType,
     bytes32[] memory priceIds,
@@ -104,45 +102,17 @@ Effects:
 
 Parameters:
 
-| Name                   | Type      | Description                                                            |
-| :--------------------- | :-------- | :--------------------------------------------------------------------- |
-| projectToken           | address   | The address of the project token the user wants to invest in.          |
-| lendingToken           | address   | The address of the lending token used for collateral.                  |
-| notionalExposure       | uint256   | The notional exposure of the user's investment.                        |
-| marginCollateralAmount | uint256   | The amount of collateral to be deposited by the user.                  |
-| buyCalldata            | bytes     | The calldata used for buying the project token on the DEX.             |
-| borrower               | address   | The address of the user for whom the funds are being borrowed.         |
-| leverageType           | uint8     | The type of leverage position.                                         |
-| priceIds               | bytes32[] | An array of bytes32 price identifiers to update.                       |
-| updateData             | bytes[]   | An array of bytes update data for the corresponding price identifiers. |
-
-### getTokenPriceWithUpdatePrices (0x3d2b7a27)
-
-```solidity
-function getTokenPriceWithUpdatePrices(
-    address token,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256 price)
-```
-
-Returns the price of a given token in USD after updating related token's prices.
-
-
-Parameters:
-
-| Name       | Type      | Description                                                            |
-| :--------- | :-------- | :--------------------------------------------------------------------- |
-| token      | address   | The address of the token to get the price of.                          |
-| priceIds   | bytes32[] | An array of bytes32 price identifiers to update.                       |
-| updateData | bytes[]   | An array of bytes update data for the corresponding price identifiers. |
-
-
-Return values:
-
-| Name  | Type    | Description                      |
-| :---- | :------ | :------------------------------- |
-| price | uint256 | The price of the token in USD.   |
+| Name                   | Type              | Description                                                            |
+| :--------------------- | :---------------- | :--------------------------------------------------------------------- |
+| prjInfo                | struct Asset.Info | Information about the project token, including its address and type.   |
+| lendingInfo            | struct Asset.Info | Information about the lending token, including its address and type.   |
+| notionalExposure       | uint256           | The notional exposure of the user's investment.                        |
+| marginCollateralAmount | uint256           | The amount of collateral to be deposited by the user.                  |
+| buyCalldata            | bytes[]           | The calldata used for buying the project token on the DEX.             |
+| borrower               | address           | The address of the user for whom the funds are being borrowed.         |
+| leverageType           | uint8             | The type of leverage position.                                         |
+| priceIds               | bytes32[]         | An array of bytes32 price identifiers to update.                       |
+| updateData             | bytes[]           | An array of bytes update data for the corresponding price identifiers. |
 
 ### calculateLendingTokenCountWithUpdatePrices (0xff7e86fa)
 

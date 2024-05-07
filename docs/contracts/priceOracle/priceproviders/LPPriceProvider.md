@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -89,6 +87,21 @@ Parameters:
 | token  | address | The address of the token whose active status has changed.   |
 | active | bool    | The new active status of the token.                         |
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+Emitted when the token decimals is set.
+
+
+Parameters:
+
+| Name             | Type  | Description             |
+| :--------------- | :---- | :---------------------- |
+| newTokenDecimals | uint8 | The new token decimals. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -100,10 +113,10 @@ bytes32 constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE")
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 
@@ -170,6 +183,22 @@ Parameters:
 | Name      | Type    | Description                          |
 | :-------- | :------ | :----------------------------------- |
 | moderator | address | The address to revoke the role from. |
+
+### setTokenDecimals (0xf2cf47be)
+
+```solidity
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
+```
+
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
+
+
+Parameters:
+
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setLPTokenAndProvider (0x98a0fb36)
 

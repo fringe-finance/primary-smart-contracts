@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -102,10 +100,10 @@ uint8 constant MAX_PRICE_PATH_LENGTH = 5
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 

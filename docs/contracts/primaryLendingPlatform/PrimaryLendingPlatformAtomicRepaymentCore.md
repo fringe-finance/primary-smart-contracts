@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -189,10 +187,7 @@ Parameters:
 
 | Name | Type    | Description                                                                                                 |
 | :--- | :------ | :---------------------------------------------------------------------------------------------------------- |
-| pit  | address | The address of the primary lending platform contract.
- 
- Requirements:
- - `pit` cannot be the zero address. |
+| pit  | address | The address of the primary lending platform contract.  Requirements: - `pit` cannot be the zero address. |
 
 ### getTotalOutstanding (0x00fe5da3)
 

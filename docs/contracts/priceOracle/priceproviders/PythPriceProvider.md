@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -336,37 +334,6 @@ Parameters:
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
 
-### getUpdatedPrice (0xe8ad2b23)
-
-```solidity
-function getUpdatedPrice(
-    address token,
-    bytes[] calldata updateData
-)
-    external
-    payable
-    override
-    returns (uint256 priceMantissa, uint8 priceDecimals)
-```
-
-Returns the latest price of a given token in USD after update price.
-
-
-Parameters:
-
-| Name       | Type    | Description                                     |
-| :--------- | :------ | :---------------------------------------------- |
-| token      | address | The address of the token to get the price of.   |
-| updateData | bytes[] | The updateData provided by PythNetwork.         |
-
-
-Return values:
-
-| Name          | Type    | Description                                                 |
-| :------------ | :------ | :---------------------------------------------------------- |
-| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
-| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
-
 ### isListed (0xf794062e)
 
 ```solidity
@@ -467,32 +434,6 @@ Return values:
 | Name       | Type    | Description                                |
 | :--------- | :------ | :----------------------------------------- |
 | evaluation | uint256 | The evaluation of the token amount in USD. |
-
-### getEvaluationUnsafe (0xb03ec98d)
-
-```solidity
-function getEvaluationUnsafe(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the last updated price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
 
 ### getPriceDecimals (0x1b30aafc)
 

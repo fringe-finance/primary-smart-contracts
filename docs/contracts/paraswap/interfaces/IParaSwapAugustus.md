@@ -4,8 +4,6 @@
 
 #### License: AGPL-3.0
 
-## 
-
 ```solidity
 interface IParaSwapAugustus
 ```

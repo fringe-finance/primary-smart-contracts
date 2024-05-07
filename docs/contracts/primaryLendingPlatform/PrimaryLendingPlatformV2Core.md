@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -1186,6 +1184,34 @@ Parameters:
 | account      | address | Address of the borrower.      |
 | lendingToken | address | Address of the lending token. |
 
+### getTokensUpdateFinalPrices (0xef290120)
+
+```solidity
+function getTokensUpdateFinalPrices(
+    address projectToken,
+    address actualLendingToken,
+    bool isBorrow
+) public view returns (address[] memory tokens)
+```
+
+This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+
+
+Parameters:
+
+| Name               | Type    | Description                                                                                              |
+| :----------------- | :------ | :------------------------------------------------------------------------------------------------------- |
+| projectToken       | address | Address of the project token.                                                                            |
+| actualLendingToken | address | Address of the lending token.                                                                            |
+| isBorrow           | bool    | Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.   |
+
+
+Return values:
+
+| Name   | Type      | Description                                      |
+| :----- | :-------- | :----------------------------------------------- |
+| tokens | address[] | Array of tokens that need to update final price. |
+
 ### pit (0x72d456af)
 
 ```solidity
@@ -1361,7 +1387,7 @@ Return values:
 function getTokenEvaluation(
     address token,
     uint256 tokenAmount
-) public view returns (uint256)
+) public view returns (uint256 collateralEvaluation, uint256 capitalEvaluation)
 ```
 
 Returns the price of a specific token amount in USD.
@@ -1377,9 +1403,10 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                        |
-| :--- | :------ | :--------------------------------- |
-| [0]  | uint256 | The evaluated token amount in USD. |
+| Name                 | Type    | Description                                                            |
+| :------------------- | :------ | :--------------------------------------------------------------------- |
+| collateralEvaluation | uint256 | the USD evaluation of token by its `tokenAmount` in collateral price   |
+| capitalEvaluation    | uint256 | the USD evaluation of token by its `tokenAmount` in capital price      |
 
 ### lendingTokensLength (0x2412b575)
 
@@ -1529,7 +1556,7 @@ Return values:
 ```solidity
 function getTotalBorrowPerLendingToken(
     address lendingToken
-) public view returns (uint256)
+) public view returns (uint256 amountInUSD)
 ```
 
 Gets total borrow amount in USD for a specific lending token.
@@ -1544,9 +1571,9 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                     |
-| :--- | :------ | :------------------------------ |
-| [0]  | uint256 | The total borrow amount in USD. |
+| Name        | Type    | Description                     |
+| :---------- | :------ | :------------------------------ |
+| amountInUSD | uint256 | The total borrow amount in USD. |
 
 ### totalOutstandingInUSD (0xb189b70a)
 
@@ -1555,7 +1582,7 @@ function totalOutstandingInUSD(
     address account,
     address projectToken,
     address lendingToken
-) public view returns (uint256)
+) public view returns (uint256 amountInUSD)
 ```
 
 Converts the total outstanding amount of a user's borrow position to USD.
@@ -1572,9 +1599,9 @@ Parameters:
 
 Return values:
 
-| Name | Type    | Description                          |
-| :--- | :------ | :----------------------------------- |
-| [0]  | uint256 | The total outstanding amount in USD. |
+| Name        | Type    | Description                          |
+| :---------- | :------ | :----------------------------------- |
+| amountInUSD | uint256 | The total outstanding amount in USD. |
 
 ### getLoanToValueRatio (0xe84dc1b3)
 

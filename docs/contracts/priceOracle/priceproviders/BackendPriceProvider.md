@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
