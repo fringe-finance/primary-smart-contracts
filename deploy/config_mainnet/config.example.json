@@ -1,5 +1,7 @@
 {
   "PRIMARY_PROXY_ADMIN": "",
+  "PriceOracleLogic": "",
+  "PriceOracleProxy": "",
   "PythPriceProviderLogic": "",
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "",

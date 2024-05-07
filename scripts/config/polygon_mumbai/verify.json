@@ -1,16 +1,18 @@
 {
   "PRIMARY_PROXY_ADMIN": true,
+  "PriceOracleLogic": true,
+  "PriceOracleProxy": true,
   "PythPriceProviderLogic": true,
   "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
   "ChainlinkPriceProviderProxy": true,
-  "BackendPriceProviderLogic": true,
+  "BackendPriceProviderLogic": false,
   "BackendPriceProviderProxy": true,
   "PriceProviderAggregatorLogic": true,
   "PriceProviderAggregatorProxy": true,
-  "LPPriceProviderLogic": true,
+  "LPPriceProviderLogic": false,
   "LPPriceProviderProxy": true,
-  "wstETHPriceProviderLogic": true,
+  "wstETHPriceProviderLogic": false,
   "wstETHPriceProviderProxy": true,
   "BondtrollerLogic": true,
   "BondtrollerProxy": true,
@@ -31,5 +33,9 @@
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
   "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true
+  "UniswapV2PriceProviderProxy": true,
+  "UniswapV3PriceProviderLogic": false,
+  "UniswapV3PriceProviderProxy": true,
+  "PairFlashLogic": false,
+  "PairFlashProxy": true
 }

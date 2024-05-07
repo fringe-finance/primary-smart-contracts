@@ -36,5 +36,7 @@
   "PrimaryLendingPlatformLeverageProxy": "0x020f22fA8da852Deb07aAebc3944EE0240645a35",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "0xEE459AFc14ae19b76eBA40e7139ff6BfeCa763Eb",
-  "UniswapV2PriceProviderProxy": "0x07c637CCf6E6581cAe1C675f70bF950981F9B7F1"
+  "UniswapV2PriceProviderProxy": "0x07c637CCf6E6581cAe1C675f70bF950981F9B7F1",
+  "PairFlashLogic": "",
+  "PairFlashProxy": ""
 }

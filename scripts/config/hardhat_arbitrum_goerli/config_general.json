@@ -1,5 +1,8 @@
 {
-  "priceOracle": {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
+    "priceOracle": {
       "Pyth": {
           "pythOracle": "",
           "tokensUsePyth": [],
@@ -12,16 +15,31 @@
             "0x0B574E6e9cd6f159dB6062e220c3976e63FAc126",
             "0xD20ee3d5c9EE0924429268d994149963ded6c72A",
             "0x5ecf82A8e520f1c280694AfBe639ebD06A7dE249"
-          ],
-          "chainlinkAggregatorV3": [
-            ["0x1692Bdd32F31b831caAc1b0c9fAF68613682813b"],
-            ["0x103b53E977DA6E4Fa92f76369c8b7e20E7fb7fe1"],
-            ["0x62CAe0FA2da220f43a51F86Db2EDb36DcA9A5A08"]
-          ],
-          "timeOuts": [
-            ["86400"],
-            ["86400"],
-            ["86400"]
+        ],
+        "symbol": [
+            "fUSDC",
+            "fUSB",
+            "fWETH"
+        ],
+        "decimals": [
+            "6",
+            "18",
+            "18"
+        ],
+        "name": [
+            "fUSDC",
+            "fUSB",
+            "fWETH"
+        ],
+        "loanToValueRatioNumerator": [
+            "9",
+            "9",
+            "9"
+        ],
+        "loanToValueRatioDenominator": [
+            "10",
+            "10",
+            "10"
         ]
       },
       "Uniswap": {

@@ -1,5 +1,12 @@
 {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "1500",
+            "volatilityCapDownPercent": "1000"
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
@@ -22,14 +29,19 @@
             ],
             "timeOuts": [
                 [
-                    "1260"
+                    "86400"
                 ],
                 [
-                    "1260"
+                    "86400"
                 ]
             ]
         },
-        "Uniswap": {
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": "10",
             "tokensUseUniswap": [
                 "0x183795dC6ACcab754707C8cFCBFB00A0eF967127",
                 "0x96c5102CD90bA55A1fe72aa1eb8f4C6d23D5fEB7",
@@ -37,10 +49,10 @@
                 "0x436F54ea1A52398806793761d37b6E6Aa1006829"
             ],
             "uniswapPairs": [
-                "0x49266294abCc0781FDb5A1a3139e5a0Fb84d3a97",
-                "0x798A4836D06bac1f527D1457eD614f0B35ba9999",
-                "0xbc2f7a9C637dc99116C64f833C62779895eB8721",
-                "0x8C58eF2302e24931e5D27BAE553B2EB56D4209F6"
+                "0x9a390a4D1D05Ec8Af7e3039C3bBf1dA73856593b",
+                "0x29ab56279Cfc122C2740aD2A743c1825897EE62e",
+                "0x24207a9d66250682dEDac2E1E672DfE27aDD866f",
+                "0xad5D7a23b47457728463D8F9f73044d359021788"
             ]
         },
         "BackendProvider": {
@@ -48,8 +60,6 @@
         },
         "LPProvider": {
             "tokensUseLPProvider": [
-                "0xff255Fed77d73F4df76eAaeB4EE640F00a2C9dA0",
-                "0x49266294abCc0781FDb5A1a3139e5a0Fb84d3a97"
             ]
         },
         "wstETHProvider": {
@@ -57,7 +67,7 @@
                 "0xC16679B963CeB52089aD2d95312A5b85E318e9d2"
             ],
             "timeOuts": [
-                "180"
+                "86400"
             ]
         },
         "wstETH": "0xB76F6f5FEFcd0BC8D3f64A9e288A33900cA7631F",
@@ -70,12 +80,10 @@
     },
     "plpModeratorParams": {
         "projectTokens": [
-            "0x183795dC6ACcab754707C8cFCBFB00A0eF967127",
-            "0x96c5102CD90bA55A1fe72aa1eb8f4C6d23D5fEB7",
-            "0x86A13B8B2DB2c9885286DdD5e657A4d8c2B75751",
-            "0x49266294abCc0781FDb5A1a3139e5a0Fb84d3a97",
-            "0xff255Fed77d73F4df76eAaeB4EE640F00a2C9dA0",
-            "0xB76F6f5FEFcd0BC8D3f64A9e288A33900cA7631F"
+            "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
+            "0xC5Dd0a058C28eA9E8a7268225dE3E9ce53c10923",
+            "0xFc10849184c31d5569cE3C3FDB0C3c918a57D733",
+            "0xab92432e539E1530C97EbCcC4CD2A3BddB99F067"
         ],
         "loanToValueRatioNumerator": [
             "6",

@@ -1,5 +1,7 @@
 {
   "PRIMARY_PROXY_ADMIN": "",
+  "PriceOracleLogic": "",
+  "PriceOracleProxy": "",
   "PythPriceProviderLogic": "",
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "",
@@ -10,6 +12,8 @@
   "PriceProviderAggregatorProxy": "",
   "LPPriceProviderLogic": "",
   "LPPriceProviderProxy": "",
+  "ERC4626PriceProviderLogic": "",
+  "ERC4626PriceProviderProxy": "",
   "wstETHPriceProviderLogic": "",
   "wstETHPriceProviderProxy": "",
   "BondtrollerLogic": "",
@@ -32,5 +36,7 @@
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
   "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": ""
+  "UniswapV2PriceProviderProxy": "",
+  "UniswapV3PriceProviderLogic": "",
+  "UniswapV3PriceProviderProxy": ""
 }

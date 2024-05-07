@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { deploymentMockToken } = require("./deploymentMockToken");
-const isTesting = Object.keys(process.env).includes('TESTING');
+const isTesting = process.env.TESTING === "true";
 
 module.exports = {
 
@@ -95,6 +95,7 @@ module.exports = {
             return addresses;
         } else {
             console.log(addresses);
+            return addresses;
         }
     }
 };

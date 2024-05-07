@@ -1,5 +1,8 @@
 {
-  "priceOracle": {
+    "liquidationBot": {
+        "uniswapV2Factory": ""
+    },
+    "priceOracle": {
       "Pyth": {
           "pythOracle": "",
           "tokensUsePyth": [],
@@ -53,19 +56,63 @@
       "initialSupplyAmount": []
     },
     "jumRateModel": {
-      "gainPerYear": [],
-      "jumGainPerYear": [],
-      "targetUtil": [],
-      "newMaxBorrow": [],
-      "blocksPerYear": ""
+        "gainPerYear": [
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600",
+            "47564697600"
+        ],
+        "jumGainPerYear": [
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000",
+            "2102400000000000000000000"
+        ],
+        "targetUtil": [
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000",
+            "500000000000000000"
+        ],
+        "newMaxBorrow": [
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000",
+            "10000000000000"
+        ],
+        "blocksPerYear": "2102400"
     },
     "plpLiquidationParams": {
-      "minPA": "",
-      "maxLRFNumerator": "",
-      "maxLRFDenominator": "",
-      "rewardCalcFactorNumerator": "",
-      "rewardCalcFactorDenominator": "",
-      "targetHFNumerator": "",
-      "targetHFDenominator": ""
+        "minPA": "1000000",
+        "maxLRFNumerator": "115",
+        "maxLRFDenominator": "100",
+        "rewardCalcFactorNumerator": "1",
+        "rewardCalcFactorDenominator": "1",
+        "targetHFNumerator": "1",
+        "targetHFDenominator": "1"
     }
 }
