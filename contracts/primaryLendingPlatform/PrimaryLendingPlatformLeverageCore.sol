@@ -40,7 +40,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         MARGIN_TRADE
     }
 
-    
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
      * @param exchangeAggregator The address of the exchange aggregator.
@@ -182,7 +181,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @dev Returns the price of a given token in USD.
      * @param token The address of the token to get the price of.
      * @return collateralPrice The price of the token in USD.
-	 * @return capitalPrice The price of the token in USD.
+     * @return capitalPrice The price of the token in USD.
      */
     function getTokenPrice(address token) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
         uint256 tokenMultiplier = 10 ** ERC20Upgradeable(token).decimals();
@@ -367,9 +366,7 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @dev Internal function to execute a buy order on the exchange aggregator contract.
      * @param buyCalldata The calldata for the buy operation.
      */
-     function _buyOnExchangeAggregator(
-        bytes memory buyCalldata
-    ) internal {
+    function _buyOnExchangeAggregator(bytes memory buyCalldata) internal {
         // solium-disable-next-line security/no-call-value
         (bool success, ) = exchangeAggregator.call(buyCalldata);
         if (!success) {
@@ -521,9 +518,9 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         }
         {
             address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(prjInfo.addr, lendingInfo.addr, true);
-            IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);    
+            IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
         }
-        
+
         _checkIsValidPosition(borrower, prjInfo.addr, lendingInfo.addr, marginCollateralAmount);
 
         uint256 lendingTokenCount = calculateLendingTokenCount(lendingInfo.addr, notionalExposure);
@@ -534,18 +531,17 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
 
         uint256 amountReceive;
         {
-            uint256[] memory amountRemaining; 
+            uint256[] memory amountRemaining;
             (amountRemaining, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(lendingAssets, prjInfo, buyCalldata);
-            for (uint8 i =0; i < amountRemaining.length; i++) {
+            for (uint8 i = 0; i < amountRemaining.length; i++) {
                 ERC20Upgradeable(lendingAssets[i]).safeTransfer(borrower, amountRemaining[i]);
             }
         }
-        
 
         (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, prjInfo.addr, amountReceive, marginCollateralAmount);
-        
+
         _deferLiquidityCheck(borrower, prjInfo.addr, lendingInfo.addr);
-        
+
         if (!isLeveragePosition[borrower][prjInfo.addr]) {
             isLeveragePosition[borrower][prjInfo.addr] = true;
         }

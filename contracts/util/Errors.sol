@@ -24,4 +24,10 @@ library Errors {
     error AvailableAmounToBorrowIsZero();
     error NoBorrowPosition();
     error TokensListIsEmpty();
+    error InvalidEqualAmount();
+    error InvalidValue();
+    error InvalidHealthFactor();
+    error InvalidAugustusAddress();
+    error InvalidReceiveAmount();
+    error NotIncludedAmount();
 }

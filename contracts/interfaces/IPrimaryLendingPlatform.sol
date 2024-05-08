@@ -117,14 +117,6 @@ interface IPrimaryLendingPlatform {
     ) external;
 
     /**
-     * @dev Pauses or unpauses deposits and withdrawals of a project token.
-     * @param projectToken The address of the project token.
-     * @param isDepositPaused Boolean indicating whether deposits are paused or unpaused.
-     * @param isWithdrawPaused Boolean indicating whether withdrawals are paused or unpaused.
-     */
-    function setPausedProjectToken(address projectToken, bool isDepositPaused, bool isWithdrawPaused) external;
-
-    /**
      * @dev Sets the bLendingToken and paused status of a lending token.
      * @param lendingToken The address of the lending token.
      * @param bLendingToken The address of the bLendingToken.
@@ -139,13 +131,6 @@ interface IPrimaryLendingPlatform {
         uint8 loanToValueRatioNumerator,
         uint8 loanToValueRatioDenominator
     ) external;
-
-    /**
-     * @dev Pauses or unpauses a lending token.
-     * @param lendingToken The address of the lending token.
-     * @param isPaused Boolean indicating whether the lending token is paused or unpaused.
-     */
-    function setPausedLendingToken(address lendingToken, bool isPaused) external;
 
     //************* PUBLIC FUNCTIONS ********************************
     //************* Deposit FUNCTION ********************************

@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -32,16 +30,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     mapping(address => LendingTokenInfo) public lendingTokenInfo; // lending token address => LendingTokenInfo
 
     mapping(address => uint256) public totalDepositedProjectToken; // tokenAddress => PRJ token staked
-    mapping(address => mapping(address => uint256)) public depositedAmount; // user address => PRJ token address => PRJ token deposited
+    mapping(address => mapping(address => uint256)) private depositedAmount; // user address => PRJ token address => PRJ token deposited
     mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
     mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token [] = prjToken
-    mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
+    mapping(address => mapping(address => uint256)) private borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
 
     mapping(address => uint256) public totalBorrowPerLendingToken; //lending token address => total borrow by lending token [] - irrespective of the collateral assets used
     mapping(address => uint256) public borrowLimitPerLendingToken; //lending token address => limit of borrowing; [borrowLimit]=$
-    mapping(address => mapping(address => address)) public lendingTokenPerCollateral; // user address => project token address => lending token address
+    mapping(address => mapping(address => address)) internal lendingTokenPerCollateral; // user address => project token address => lending token address
 
     mapping(address => bool) public isRelatedContract;
 
@@ -177,7 +175,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param projectToken The address of the project token.
      */
     modifier isProjectTokenListed(address projectToken) {
-        require(projectTokenInfo[projectToken].isListed, "Prj token isn't listed");
+        if (!projectTokenInfo[projectToken].isListed) {
+            revert Errors.ProjectTokenIsNotListed();
+        }
         _;
     }
 
@@ -356,20 +356,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Sets the deposit and withdraw pause status for a given project token.
-     *
-     * Requirements:
-     * - The caller must be the moderator contract.
-     * @param projectToken The address of the project token.
-     * @param isDepositPaused The boolean value indicating whether deposit is paused or not.
-     * @param isWithdrawPaused The boolean value indicating whether withdraw is paused or not.
-     */
-    function setPausedProjectToken(address projectToken, bool isDepositPaused, bool isWithdrawPaused) external onlyModeratorContract {
-        projectTokenInfo[projectToken].isDepositPaused = isDepositPaused;
-        projectTokenInfo[projectToken].isWithdrawPaused = isWithdrawPaused;
-    }
-
-    /**
      * @dev Sets the lending token information for a given lending token.
      *
      * Requirements:
@@ -396,19 +382,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         info.isPaused = isPaused;
         info.bLendingToken = BLendingToken(bLendingToken);
         info.loanToValueRatio = Ratio(loanToValueRatioNumerator, loanToValueRatioDenominator);
-    }
-
-    /**
-     * @dev Sets the pause status of a lending token.
-     *
-     * Requirements:
-     * - The caller must be the moderator contract.
-     * - The lending token must be listed.
-     * @param lendingToken The address of the lending token.
-     * @param isPaused The pause status to be set.
-     */
-    function setPausedLendingToken(address lendingToken, bool isPaused) external onlyModeratorContract isLendingTokenListed(lendingToken) {
-        lendingTokenInfo[lendingToken].isPaused = isPaused;
     }
 
     //************* PUBLIC FUNCTIONS ********************************

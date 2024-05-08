@@ -407,21 +407,6 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     }
 
     /**
-     * @dev Sets the deposit and withdraw pause status for a project token.
-     * @param projectToken The address of the project token.
-     * @param isDepositPaused The boolean value indicating whether deposit is paused or not.
-     * @param isWithdrawPaused The boolean value indicating whether withdraw is paused or not.
-     */
-    function setPausedProjectToken(
-        address projectToken,
-        bool isDepositPaused,
-        bool isWithdrawPaused
-    ) public onlyModerator isProjectTokenListed(projectToken) {
-        primaryLendingPlatform.setPausedProjectToken(projectToken, isDepositPaused, isWithdrawPaused);
-        emit SetPausedProjectToken(projectToken, isDepositPaused, isWithdrawPaused);
-    }
-
-    /**
      * @dev Sets the lending token information for the primary lending platform.
      *
      * Requirements:
@@ -444,20 +429,6 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
         require(IBLendingToken(bLendingToken).underlying() == lendingToken, "PITModerator: UnderlyingOfbLendingToken!=lendingToken");
         emit SetPausedLendingToken(lendingToken, isPaused);
         emit LoanToValueRatioSet(lendingToken, loanToValueRatioNumerator, loanToValueRatioDenominator);
-    }
-
-    /**
-     * @dev Sets the pause status for a lending token.
-     *
-     * Requirements:
-     * - The function can only be called by the moderator.
-     * - The lending token must be listed on the primary lending platform.
-     * @param lendingToken The address of the lending token.
-     * @param isPaused The new pause status for the lending token.
-     */
-    function setPausedLendingToken(address lendingToken, bool isPaused) public onlyModerator isLendingTokenListed(lendingToken) {
-        primaryLendingPlatform.setPausedLendingToken(lendingToken, isPaused);
-        emit SetPausedLendingToken(lendingToken, isPaused);
     }
 
     /**

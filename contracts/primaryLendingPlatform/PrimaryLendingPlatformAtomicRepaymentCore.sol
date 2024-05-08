@@ -204,12 +204,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         bytes[] memory buyCalldata,
         bool isRepayFully
     ) internal {
-        (uint256 tokenAmountRemaining, uint256 amountReceive) = _beforeRepay(
-            prjInfo,
-            lendingInfo,
-            collateralAmount,
-            buyCalldata
-        );
+        (uint256 tokenAmountRemaining, uint256 amountReceive) = _beforeRepay(prjInfo, lendingInfo, collateralAmount, buyCalldata);
         _repayInternal(prjInfo, lendingInfo, amountReceive, isRepayFully);
         _afterRepay(prjInfo, lendingInfo);
 
@@ -259,9 +254,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      * @dev Internal function to execute a buy order on the exchange aggregator contract.
      * @param buyCalldata The calldata for the buy operation.
      */
-    function _buyOnExchangeAggregator(
-        bytes memory buyCalldata
-    ) internal {
+    function _buyOnExchangeAggregator(bytes memory buyCalldata) internal {
         // solium-disable-next-line security/no-call-value
         (bool success, ) = exchangeAggregator.call(buyCalldata);
         if (!success) {
@@ -299,7 +292,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         }
         primaryLendingPlatform.calcAndTransferDepositPosition(prjInfo.addr, collateralAmount, msg.sender, address(this));
 
-        (address[] memory prjTokens,) = _unwrapTokenAndApprove(prjInfo, collateralAmount);
+        (address[] memory prjTokens, ) = _unwrapTokenAndApprove(prjInfo, collateralAmount);
 
         uint256[] memory amountRemaining;
         (amountRemaining, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(prjTokens, lendingInfo, buyCalldata);

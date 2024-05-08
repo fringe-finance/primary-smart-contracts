@@ -12,6 +12,7 @@ import "../interfaces/IPriceProviderAggregator.sol";
 import "../paraswap/interfaces/IParaSwapAugustus.sol";
 import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 import "../util/Asset.sol";
+import "../util/Errors.sol";
 
 /**
  * @title PrimaryLendingPlatformLiquidationCore.
@@ -178,7 +179,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorLRF The denominator of the LRF ratio.
      */
     function setMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
-        require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorLRF == 0) {
+            revert Errors.InvalidValue();
+        }
         maxLRF = Ratio(numeratorLRF, denominatorLRF);
         emit SetMaxLRF(numeratorLRF, denominatorLRF);
     }
@@ -193,7 +196,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorLRF The denominator of the liquidator reward calculation factor.
      */
     function setLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
-        require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorLRF == 0) {
+            revert Errors.InvalidValue();
+        }
         liquidatorRewardCalcFactor = Ratio(numeratorLRF, denominatorLRF);
         emit SetLiquidatorRewardCalculationFactor(numeratorLRF, denominatorLRF);
     }
@@ -207,7 +212,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
      */
     function setPrimaryLendingPlatformAddress(address newPrimaryLendingPlatform) external onlyModerator {
-        require(newPrimaryLendingPlatform != address(0), "PITLiquidation: Invalid address");
+        if (newPrimaryLendingPlatform == address(0)) {
+            revert Errors.InvalidAddress();
+        }
         primaryLendingPlatform = IPrimaryLendingPlatform(newPrimaryLendingPlatform);
         emit SetPrimaryLendingPlatform(newPrimaryLendingPlatform);
     }
@@ -222,7 +229,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorHF The denominator for the target health factor.
      */
     function setTargetHealthFactor(uint8 numeratorHF, uint8 denominatorHF) external onlyModerator {
-        require(denominatorHF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorHF == 0) {
+            revert Errors.InvalidValue();
+        }
         targetHealthFactor = Ratio(numeratorHF, denominatorHF);
         emit SetTargetHealthFactor(numeratorHF, denominatorHF);
     }
@@ -238,12 +247,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param registryAggregatorAddress The new address of the Aggregator registry contract.
      */
     function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
-        require(exchangeAggregatorAddress != address(0), "AtomicRepayment: Invalid address");
+        if (exchangeAggregatorAddress == address(0)) {
+            revert Errors.InvalidAddress();
+        }
         if (registryAggregatorAddress != address(0)) {
-            require(
-                IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress),
-                "PITLiquidation: Invalid Augustus"
-            );
+            if (!IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress)) {
+                revert Errors.InvalidAugustusAddress();
+            }
         }
         registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
@@ -428,11 +438,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         (address[] memory prjTokens, ) = _unwrapTokenAndApprove(_prjInfo, _projectTokenReward);
 
         (, uint256 amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(prjTokens, _lendingInfo, _buyCalldata);
-
-        require(
-            amountReceive >= _lendingTokenAmount,
-            "PITLiquidation: Received amount is less than the borrowed amount from the exchange aggregator"
-        );
+        if (amountReceive < _lendingTokenAmount) {
+            revert Errors.InvalidReceiveAmount();
+        }
 
         Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(_lendingInfo.addr).bLendingToken, _lendingInfo.addr, amountReceive);
         primaryLendingPlatform.repayFromRelatedContract(_prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount, _liquidator, _liquidator);
@@ -452,16 +460,24 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         address _lendingToken,
         uint256 _lendingTokenAmount
     ) internal view returns (uint256) {
-        require(_lendingTokenAmount > 0, "PITLiquidation: LendingTokenAmount must be greater than 0");
+        if (_lendingTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
         (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
-        require(healthFactorNumerator < healthFactorDenominator, "PITLiquidation: HealthFactor>=1");
+        if (healthFactorNumerator >= healthFactorDenominator) {
+            revert Errors.InvalidHealthFactor();
+        }
 
         (uint256 maxLA, uint256 minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
         if (minLA != maxLA) {
-            require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PITLiquidation: Invalid amount when minLA != maxLA");
+            if (_lendingTokenAmount < minLA || _lendingTokenAmount > maxLA) {
+                revert Errors.NotIncludedAmount();
+            }
             return _lendingTokenAmount;
         } else {
-            require(_lendingTokenAmount >= minLA, "PITLiquidation: Invalid amount when minLA == maxLA");
+            if (_lendingTokenAmount < minLA) {
+                revert Errors.InvalidEqualAmount();
+            }
             return maxLA;
         }
     }
@@ -476,7 +492,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     function _nakedBorrow(address user, address lendingToken, uint256 lendingTokenAmount, address projectToken) internal {
         address currentLendingToken = primaryLendingPlatform.getLendingToken(user, projectToken);
         if (currentLendingToken != address(0)) {
-            require(lendingToken == currentLendingToken, "PITLiquidation: Invalid lending token");
+            if (lendingToken != currentLendingToken) {
+                revert Errors.InvalidAddress();
+            }
         }
         primaryLendingPlatform.updateInterestInBorrowPositions(user, lendingToken);
         primaryLendingPlatform.calcBorrowPosition(user, projectToken, lendingToken, lendingTokenAmount, currentLendingToken);
@@ -712,7 +730,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param tokenAmount The amount of tokens to be approved for transfer.
      */
     function _approveTokenTransfer(address token, uint256 tokenAmount) internal {
-        require(exchangeAggregator != address(0), "AtomicRepayment: Exchange aggregator not set");
+        if (exchangeAggregator == address(0)) {
+            revert Errors.InvalidAddress();
+        }
         if (registryAggregator != address(0)) {
             _approveTokenTransferPara(token, tokenAmount);
         } else {

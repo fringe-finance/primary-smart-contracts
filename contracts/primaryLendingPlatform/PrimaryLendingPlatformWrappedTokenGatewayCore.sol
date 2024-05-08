@@ -40,7 +40,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
      * @dev Emitted when the PIT liquidation address is set.
      */
     event SetPITLiquidation(address newPITLiquidation);
-    
+
     /**
      * @dev Emitted when the PIT (Pool Interest Token) leverage is set to a new address.
      * @param newPITLeverage The address of the new PIT leverage contract.
