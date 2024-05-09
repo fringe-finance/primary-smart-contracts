@@ -98,6 +98,12 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
     event SetPrimaryLendingPlatformLeverage(address indexed newPrimaryLendingPlatformLeverage);
 
     /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new primary lending platform address.
+     */
+    event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
+
+    /**
      * @dev Emitted when the price oracle contract is set.
      * @param newOracle The address of the new price oracle contract.
      */
@@ -218,6 +224,20 @@ contract PrimaryLendingPlatformModerator is Initializable, AccessControlUpgradea
         require(currentAdmin != address(0) && newAdmin != address(0), "PITModerator: Invalid addresses");
         primaryLendingPlatform.grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         primaryLendingPlatform.revokeRole(DEFAULT_ADMIN_ROLE, currentAdmin);
+    }
+
+    /**
+     * @dev Sets the address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - Only the moderator can call this function.
+     * - The new primary lending platform address cannot be the zero address.
+     * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
+     */
+    function setPrimaryLendingPlatform(address newPrimaryLendingPlatform) external onlyModerator {
+        require(newPrimaryLendingPlatform != address(0), "PITModerator: Invalid address");
+        primaryLendingPlatform = IPrimaryLendingPlatform(newPrimaryLendingPlatform);
+        emit SetPrimaryLendingPlatform(newPrimaryLendingPlatform);
     }
 
     /**
