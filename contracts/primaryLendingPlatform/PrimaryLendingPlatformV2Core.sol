@@ -588,50 +588,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     //************* Supply FUNCTION ********************************
-
-    /**
-     * @notice Supplies a specified amount of a lending token to the platform.
-     * @dev Allows a user to supply a specified amount of a lending token to the platform.
-     * @param lendingToken The address of the lending token being supplied.
-     * @param lendingTokenAmount The amount of the lending token being supplied.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - The lending token is not paused.
-     * - The lending token amount is greater than 0.
-     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     *
-     * Effects:
-     * - Mints the corresponding bLendingTokens and credits them to the user.
-     */
-    function supply(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _supply(lendingToken, lendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Supplies a certain amount of lending tokens to the platform from a specific user.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - Called by a related contract.
-     * - The lending token is not paused.
-     * - The lending token amount is greater than 0.
-     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     *
-     * Effects:
-     * - Mints the corresponding bLendingTokens and credits them to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be supplied.
-     * @param user Address of the user.
-     */
-    function supplyFromRelatedContract(
-        address lendingToken,
-        uint256 lendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _supply(lendingToken, lendingTokenAmount, user);
-    }
-
     /**
      * @dev Internal function that performs the supply of lending token to the user by minting bLendingToken.
      * @param lendingToken Address of the lending token.
@@ -663,51 +619,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     //************* Redeem FUNCTION ********************************
 
     /**
-     * @notice Redeems a specified amount of bLendingToken from the platform.
-     * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
-     *
-     * Requirements:
-     * - The lendingToken is listed.
-     * - The lending token should not be paused.
-     * - The bLendingTokenAmount should be greater than zero.
-     * - The redemption of bLendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Burns the bLendingTokens from the user.
-     * - Transfers the corresponding lending tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
-     */
-    function redeem(address lendingToken, uint256 bLendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _redeem(lendingToken, bLendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
-     *
-     * Requirements:
-     * - The lendingToken is listed.
-     _ - Called by a related contract.
-     * - The lending token should not be paused.
-     * - The bLendingTokenAmount should be greater than zero.
-     * - The redemption of bLendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Burns the bLendingTokens from the user.
-     * - Transfers the corresponding lending tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
-     * @param user Address of the user.
-     */
-    function redeemFromRelatedContract(
-        address lendingToken,
-        uint256 bLendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _redeem(lendingToken, bLendingTokenAmount, user);
-    }
-
-    /**
      * @dev Internal function that performs the redemption of bLendingToken and returns the corresponding lending token to the user.
      * @param lendingToken Address of the lending token.
      * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
@@ -733,49 +644,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     //************* RedeemUnderlying FUNCTION ********************************
-
-    /**
-     * @notice Redeems a specified amount of lendingToken from the platform.
-     * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to user.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - The lending token should not be paused.
-     * - The lendingTokenAmount should be greater than zero.
-     * - The redemption of lendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Transfers the corresponding underlying tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
-     */
-    function redeemUnderlying(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _redeemUnderlying(lendingToken, lendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - Called by a related contract.
-     * - The lending token should not be paused.
-     * - The lendingTokenAmount should be greater than zero.
-     * - The redemption of lendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Transfers the corresponding underlying tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
-     * @param user Address of the user.
-     */
-    function redeemUnderlyingFromRelatedContract(
-        address lendingToken,
-        uint256 lendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _redeemUnderlying(lendingToken, lendingTokenAmount, user);
-    }
 
     /**
      * @dev Internal function that performs the redemption of lending token and returns the corresponding underlying token to the user.

@@ -177,47 +177,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
-     * The ETH is converted to WETH and then transferred to the user's address.
-     * The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
-     */
-    function supply() external payable nonReentrant {
-        WETH.deposit{value: msg.value}();
-        WETH.transfer(msg.sender, msg.value);
-        primaryLendingPlatform.supplyFromRelatedContract(address(WETH), msg.value, msg.sender);
-    }
-
-    /**
-     * @dev Redeems the specified amount of bLendingToken for the underlying asset (WETH) and transfers it to the caller.
-     * @param bLendingTokenAmount The amount of bLendingToken to redeem. If set to `type(uint256).max`, redeems all the bLendingToken balance of the caller.
-     */
-    function redeem(uint256 bLendingTokenAmount) external nonReentrant {
-        address fWETH = primaryLendingPlatform.lendingTokenInfo(address(WETH)).bLendingToken;
-        uint256 userBalance = IBLendingToken(fWETH).balanceOf(msg.sender);
-        uint256 amountToWithdraw = bLendingTokenAmount;
-        if (bLendingTokenAmount == type(uint256).max) {
-            amountToWithdraw = userBalance;
-        }
-        primaryLendingPlatform.redeemFromRelatedContract(address(WETH), amountToWithdraw, msg.sender);
-        uint256 exchangeRate = IBLendingToken(fWETH).exchangeRateStored();
-        uint256 lendingAmountToWithdraw = (amountToWithdraw * exchangeRate) / 1e18;
-        WETH.transferFrom(msg.sender, address(this), lendingAmountToWithdraw);
-        WETH.withdraw(lendingAmountToWithdraw);
-        _safeTransferETH(msg.sender, lendingAmountToWithdraw);
-    }
-
-    /**
-     * @dev Redeems the underlying asset from the Primary Lending Platform and transfers it to the caller.
-     * @param lendingTokenAmount The amount of the lending token to redeem.
-     */
-    function redeemUnderlying(uint256 lendingTokenAmount) external nonReentrant {
-        primaryLendingPlatform.redeemUnderlyingFromRelatedContract(address(WETH), lendingTokenAmount, msg.sender);
-        WETH.transferFrom(msg.sender, address(this), lendingTokenAmount);
-        WETH.withdraw(lendingTokenAmount);
-        _safeTransferETH(msg.sender, lendingTokenAmount);
-    }
-
-    /**
      * @dev Repays the specified amount of the project token's Ether outstanding debt using the lending token.
      * @param projectToken The address of the project token.
      * @param lendingTokenAmount The amount of the lending token to be used for repayment.
@@ -237,7 +196,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
      * @dev Internal function to borrow WETH from the Primary Lending Platform.
      * @param lendingTokenAmount The amount of WETH to be borrowed.
      */
-    function _borrow(uint256 lendingTokenAmount) internal {
+    function _transferETH(uint256 lendingTokenAmount) internal {
         WETH.transferFrom(msg.sender, address(this), lendingTokenAmount);
         WETH.withdraw(lendingTokenAmount);
         _safeTransferETH(msg.sender, lendingTokenAmount);
