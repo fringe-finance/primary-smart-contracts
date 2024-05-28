@@ -95,7 +95,13 @@
     "estimate:v2:zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/estimate.js",
     "test:lp-repay-atomic:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=19722872 TESTING=true npx hardhat test --network hardhat test/lp-tokens/repay-atomic.js",
     "test:lp-leverage-borrow:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=19722872 TESTING=true npx hardhat test --network hardhat test/lp-tokens/leverageBorrow.js",
-    "test:lp-price-oracle:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=19788246 TESTING=true npx hardhat test --network hardhat test/lp-tokens/price-oracle.js"
+    "test:lp-price-oracle:fork-mainnet": "cross-env CHAIN=mainnet BLOCK_NUMBER=19788246 TESTING=true npx hardhat test --network hardhat test/lp-tokens/price-oracle.js",
+    
+    "deploy:v2:erc4626-sepolia": "npx hardhat run --network ethereum_sepolia scripts/deployPLP_V2/deployToken/deployERC4626.js",
+    "deploy:v2:erc4626-mainnet": "npx hardhat run --network ethereum_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js",
+    "deploy:v2:erc4626-arbitrum-mainnet": "npx hardhat run --network arbitrum_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js",
+    "deploy:v2:erc4626-polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js",
+    "deploy:v2:erc4626-optimism-mainnet": "npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js"
   },
   "author": "",
   "license": "ISC",

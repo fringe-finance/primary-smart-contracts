@@ -120,9 +120,13 @@ if (isZksync) {
         timeout: 99999999,
         gasPrice: 1_500_000_000
       },
-
       ethereum_goerli: {
         url:  `https://goerli.infura.io/v3/${INFURA_KEY}`,
+        timeout: 99999999,
+        accounts: [PRIVATE_KEY]
+      },
+      ethereum_sepolia: {
+        url: `https://sepolia.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
         accounts: [PRIVATE_KEY]
       },
@@ -142,6 +146,7 @@ if (isZksync) {
       apiKey: {
         mainnet: ETHERSCAN_API_KEY,
         goerli: ETHERSCAN_API_KEY,
+        sepolia: ETHERSCAN_API_KEY,
         polygon: POLYGONSCAN_API_KEY,
         polygonMumbai: POLYGONSCAN_API_KEY,
         arbitrumOne: ARBISCAN_API_KEY,

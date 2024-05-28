@@ -1,0 +1,23 @@
+{
+  "info": {
+    "assets": [
+      "0x6a0CC7B42B906e6E2432518761850410491A7A82",
+      "0x89016D0c5f06B05F7E22C51A47411888760b0F93"
+    ],
+    "names": [
+      "erc4626-USDC",
+      "erc4626-DAI"
+    ],
+    "symbols": [
+      "erc4626-USDC",
+      "erc4626-DAI"
+    ],
+    "interestPercents": [
+      "200",
+      "200"
+    ]
+  },
+  "tokenVault": [
+    
+  ]
+}
