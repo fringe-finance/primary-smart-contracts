@@ -12,7 +12,7 @@ contract TokenVault is ERC4626 {
     uint16 public interestPercent; // decimals: 2. Ex: 100% is 10000 units
 
     constructor(
-        ERC20 _asset,
+        MockERC20 _asset,
         string memory _name,
         string memory _symbol,
         uint16 _interestPercent

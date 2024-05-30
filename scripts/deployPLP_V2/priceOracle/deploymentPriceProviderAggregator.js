@@ -1608,7 +1608,7 @@ module.exports = {
             let updateFee = 0;
             let expiredPriceFeedData;
             if (listTokenUsePythOracle.length > 0) {
-                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 15);
+                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 1500);
                 if (expiredPriceFeedData.priceIds.length > 0) {
                     const connection = new EvmPriceServiceConnection(
                         "https://hermes.pyth.network"

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.19;
 
-import {ERC20} from "../tokens/ERC20.sol";
+import {MockERC20} from "../tokens/MockERC20.sol";
 import {SafeTransferLib} from "../utils/SafeTransferLib.sol";
 import {FixedPointMathLib} from "../utils/FixedPointMathLib.sol";
 
 /// @notice Minimal ERC4626 tokenized Vault implementation.
 /// @author Solmate (https://github.com/transmissions11/solmate/blob/main/src/tokens/ERC4626.sol)
-abstract contract ERC4626 is ERC20 {
-    using SafeTransferLib for ERC20;
+abstract contract ERC4626 is MockERC20 {
+    using SafeTransferLib for MockERC20;
     using FixedPointMathLib for uint256;
 
     /*//////////////////////////////////////////////////////////////
@@ -29,13 +29,13 @@ abstract contract ERC4626 is ERC20 {
                                IMMUTABLES
     //////////////////////////////////////////////////////////////*/
 
-    ERC20 public immutable asset;
+    MockERC20 public immutable asset;
 
     constructor(
-        ERC20 _asset,
+        MockERC20 _asset,
         string memory _name,
         string memory _symbol
-    ) ERC20(_name, _symbol, _asset.decimals()) {
+    ) MockERC20(_name, _symbol, _asset.decimals()) {
         asset = _asset;
     }
 
