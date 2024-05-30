@@ -958,7 +958,7 @@ module.exports = {
                         });
                 }
             }
-            
+
             {
                 const tokenDecimal = await chainlinkPriceProvider.getPriceDecimals();
                 const currentImplementation = await proxyAdmin.getProxyImplementation(chainlinkPriceProvider.address);
@@ -1592,14 +1592,11 @@ module.exports = {
 
             for (let i = 0; i < listToken.length; i++) {
 
-                let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
                 let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i]));
 
-                if (currentPrice.timestamp.toString() === "0") {
-                    listTokenNeedUpdatePrice.push(listToken[i]);
-                    if (pythPriceProviderAddress && priceProvider.toLowerCase() === pythPriceProviderAddress.toLowerCase()) {
-                        listTokenUsePythOracle.push(listToken[i]);
-                    }
+                listTokenNeedUpdatePrice.push(listToken[i]);
+                if (pythPriceProviderAddress && priceProvider.toLowerCase() === pythPriceProviderAddress.toLowerCase()) {
+                    listTokenUsePythOracle.push(listToken[i]);
                 }
             }
 
