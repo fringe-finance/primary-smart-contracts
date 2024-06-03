@@ -95,8 +95,10 @@ library Asset {
                 ERC20Upgradeable(_assets[1]).safeTransfer(msg.sender, _assetAmounts[1]);
             }
         } else if (_tokenInfo.tokenType == Type.ERC4626) {
-            _safeIncreaseAllowance(_tokenInfo.addr, _assets[0], _assetAmounts[0]);
-            tokenAmount = IERC4626Upgradeable(_tokenInfo.addr).deposit(_assetAmounts[0], address(this));
+            if (IERC4626Upgradeable(_tokenInfo.addr).previewDeposit(_assetAmounts[0]) > 0) {
+                _safeIncreaseAllowance(_tokenInfo.addr, _assets[0], _assetAmounts[0]);
+                tokenAmount = IERC4626Upgradeable(_tokenInfo.addr).deposit(_assetAmounts[0], address(this));
+            }
         } else {
             tokenAmount = _assetAmounts[0];
         }
