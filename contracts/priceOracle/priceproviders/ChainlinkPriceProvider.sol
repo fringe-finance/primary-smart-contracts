@@ -118,6 +118,16 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     /****************** Moderator functions ****************** */
 
     /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
+    
+    /**
      * @notice Sets the timeout value corresponding to the aggregatorPath.
      * @dev Example: ETH/USD have a new answer is written when the off-chain data moves more than the
      *      0.5% deviation threshold or 3600 seconds have passed since the last answer was written on-chain.
