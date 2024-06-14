@@ -443,7 +443,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         }
 
         Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(_lendingInfo.addr).bLendingToken, _lendingInfo.addr, amountReceive);
-        primaryLendingPlatform.repayFromRelatedContract(_prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount, _liquidator, _liquidator);
+        primaryLendingPlatform.repayFromRelatedContract(_prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount, address(this), _liquidator);
     }
 
     /**
