@@ -55,13 +55,18 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
      * @dev Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
      * The ETH is converted to WETH and then transferred to the user's address.
      * The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
+     * @param supplyAmount The amount of ETH to supply.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
+     * @param updateFee Update fee pays for updating price.
      */
-    function supply(bytes32[] memory priceIds, bytes[] calldata updateData) external payable nonReentrant {
-        WETH.deposit{value: msg.value}();
-        WETH.transfer(msg.sender, msg.value);
-        primaryLendingPlatform.supplyFromRelatedContract(address(WETH), msg.value, msg.sender, priceIds, updateData);
+    function supply(uint256 supplyAmount, bytes32[] memory priceIds, bytes[] calldata updateData, uint256 updateFee) external payable nonReentrant {
+        uint256 actualSupplyAmount = msg.value - updateFee;
+        require(supplyAmount == actualSupplyAmount, "WTG: invalid value");
+        WETH.deposit{value: supplyAmount}();
+
+        WETH.transfer(msg.sender, supplyAmount);
+        primaryLendingPlatform.supplyFromRelatedContract{value: updateFee}(address(WETH), supplyAmount, msg.sender, priceIds, updateData);
     }
 
     /**
@@ -70,14 +75,14 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
      */
-    function redeem(uint256 bLendingTokenAmount, bytes32[] memory priceIds, bytes[] calldata updateData) external nonReentrant {
+    function redeem(uint256 bLendingTokenAmount, bytes32[] memory priceIds, bytes[] calldata updateData) external payable nonReentrant {
         address fWETH = primaryLendingPlatform.lendingTokenInfo(address(WETH)).bLendingToken;
         uint256 userBalance = IBLendingToken(fWETH).balanceOf(msg.sender);
         uint256 amountToWithdraw = bLendingTokenAmount;
         if (bLendingTokenAmount == type(uint256).max) {
             amountToWithdraw = userBalance;
         }
-        primaryLendingPlatform.redeemFromRelatedContract(address(WETH), amountToWithdraw, msg.sender, priceIds, updateData);
+        primaryLendingPlatform.redeemFromRelatedContract{value: msg.value}(address(WETH), amountToWithdraw, msg.sender, priceIds, updateData);
         uint256 exchangeRate = IBLendingToken(fWETH).exchangeRateStored();
         uint256 lendingAmountToWithdraw = (amountToWithdraw * exchangeRate) / 1e18;
         WETH.transferFrom(msg.sender, address(this), lendingAmountToWithdraw);
@@ -91,8 +96,14 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
      */
-    function redeemUnderlying(uint256 lendingTokenAmount, bytes32[] memory priceIds, bytes[] calldata updateData) external nonReentrant {
-        primaryLendingPlatform.redeemUnderlyingFromRelatedContract(address(WETH), lendingTokenAmount, msg.sender, priceIds, updateData);
+    function redeemUnderlying(uint256 lendingTokenAmount, bytes32[] memory priceIds, bytes[] calldata updateData) external payable nonReentrant {
+        primaryLendingPlatform.redeemUnderlyingFromRelatedContract{value: msg.value}(
+            address(WETH),
+            lendingTokenAmount,
+            msg.sender,
+            priceIds,
+            updateData
+        );
         _transferETH(lendingTokenAmount);
     }
 
@@ -125,7 +136,7 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
                     receivedWETH += assetAmounts[i];
                 }
             }
-            _internalLiquidateWithProjectETH(receivedWETH);
+            _transferETH(receivedWETH);
         } else if (_prjInfo.addr == address(WETH)) {
             _liquidateWithProjectETH(_account, _lendingInfo, _lendingTokenAmount, priceIds, updateData, buyCalldata);
         } else if (_lendingInfo.addr == address(WETH)) {
@@ -178,7 +189,7 @@ contract PrimaryLendingPlatformWrappedTokenGatewayZksync is PrimaryLendingPlatfo
                 receivedWETH += assetAmounts[i];
             }
         }
-        _internalLiquidateWithProjectETH(receivedWETH);
+        _transferETH(receivedWETH);
     }
 
     /**

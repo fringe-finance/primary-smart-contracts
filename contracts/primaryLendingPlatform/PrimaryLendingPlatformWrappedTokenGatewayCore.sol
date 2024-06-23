@@ -203,16 +203,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Internal function to liquidate a position by providing project tokens in Ether.
-     * @param receivedWETH Amount of lending tokens to liquidate.
-     */
-    function _internalLiquidateWithProjectETH(uint256 receivedWETH) internal {
-        WETH.transferFrom(msg.sender, address(this), receivedWETH);
-        WETH.withdraw(receivedWETH);
-        _safeTransferETH(msg.sender, receivedWETH);
-    }
-
-    /**
      * @dev Internal function to safely transfer ETH to the specified address.
      * @param to Recipient of the transfer.
      * @param value Amount of ETH to transfer.
