@@ -11,6 +11,7 @@ export const sellOnDex = async (
     tokenInAmount: BigNumberish,
     tokenOut: string,
     swapOnDex: Dex,
+    maxDiscrepancy: string,
     receiver: string,
     chainId: string,
     signerOrProvider: any
@@ -25,7 +26,8 @@ export const sellOnDex = async (
             tokenOut,
             tokenOutDecimals,
             receiver,
-            chainId
+            chainId,
+            maxDiscrepancy,
         );
     } else if (swapOnDex === Dex.OpenOcean) {
         return await sellOnOpenOcean(

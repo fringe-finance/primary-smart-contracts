@@ -9,7 +9,6 @@ import { buyOnDex } from "../dex_common/buyOnDex";
 import { ERC20_ABI } from "../abis/ERC20";
 import { loadMulticallInstance } from "../utils/loadMulticallInstance";
 import { ContractCallContext, ContractCallResults } from "ethereum-multicall";
-import { getMaxDiscrepancyAmount } from "../utils/getMaxDiscrepancyAmount";
 
 enum CONTRACT_NAME {
   ERC_4626_TOKEN = "ERC-4626_Token",
@@ -91,8 +90,7 @@ export const estimateBuyERC4626FromERC20 = async (
   const erc4626Instance = loadContractInstance(erc4626Address, ERC4626_ABI, provider);
   const { erc4626Asset, assetDecimals, erc20Decimals, erc20AssetExpectedAmount } = await decodeTokensInfo(erc4626Address, erc4626ExpectedAmount, erc20Address, provider)
   if (erc20Address.toLowerCase() === erc4626Asset.toLowerCase()) {
-    const erc4626AcceptableAmount = getMaxDiscrepancyAmount(toBN(erc4626ExpectedAmount), maxDiscrepancy);
-    const estimateAmountIn = await erc4626Instance.convertToAssets(erc4626AcceptableAmount)
+    const estimateAmountIn = await erc4626Instance.convertToAssets(erc4626ExpectedAmount)
     return {
       tokenIn: erc20Address,
       tokenOut: erc4626Address,
@@ -101,13 +99,12 @@ export const estimateBuyERC4626FromERC20 = async (
       buyCallData: [],
     }
   } else {
-    const erc20AssetAcceptableAmount = getMaxDiscrepancyAmount(toBN(erc20AssetExpectedAmount), maxDiscrepancy);
     const estimation = await buyOnDex(
       erc20Address,
       erc20Decimals,
       erc4626Asset,
       assetDecimals,
-      erc20AssetAcceptableAmount,
+      erc20AssetExpectedAmount,
       dexType,
       receiver,
       chainId,

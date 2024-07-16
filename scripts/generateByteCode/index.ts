@@ -10,6 +10,14 @@ import { estimateBuyERC4626FromLP } from "./swap_on_dex/estimateBuyERC4626FromLP
 import { estimateBuyLPFromERC4626 } from "./swap_on_dex/estimateBuyLPFromERC4626";
 import { estimateBuyERC20FromERC20 } from "./swap_on_dex/estimateBuyERC20FromERC20";
 import { estimateBuyERC4626FromERC4626 } from "./swap_on_dex/estimateBuyERC4626FromERC4626";
+import { estimateSellERC20ToLP } from "./swap_on_dex/estimateSellERC20ToLP";
+import { estimateSellLPToERC20 } from "./swap_on_dex/estimateSellLPToERC20";
+import { estimateSellERC20ToERC4626 } from "./swap_on_dex/estimateSellERC20ToERC4626";
+import { estimateSellERC4626ToERC20 } from "./swap_on_dex/estimateSellERC4626ToERC20";
+import { estimateSellLPToERC4626 } from "./swap_on_dex/estimateSellLPToERC4626";
+import { estimateSellERC4626ToLP } from "./swap_on_dex/estimateSellERC4626ToLP";
+import { estimateSellERC4626ToERC4626 } from "./swap_on_dex/estimateSellERC4626ToERC4626";
+import { estimateSellERC20ToERC20 } from "./swap_on_dex/estimateSellERC20ToERC20";
 
 interface Token { address: string, tokenType: TokenType, pairType?: Pair };
 
@@ -32,7 +40,7 @@ interface Token { address: string, tokenType: TokenType, pairType?: Pair };
  * the token swap.
  * @param {any} provider - The `provider is used to specify the provider for interacting with the blockchain.
  */
-export const estimate = (
+export const estimateBuy = (
   tokenIn: Token,
   tokenOut: Token,
   expectedAmountOut: BigNumberish,
@@ -137,6 +145,120 @@ export const estimate = (
       expectedAmountOut,
       receiver,
       maxDiscrepancy,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  
+  throw new Error("Not implementation")
+}
+
+export const estimateSell = (
+  tokenIn: Token,
+  tokenOut: Token,
+  amountIn: BigNumberish,
+  maxDiscrepancy: string,
+  receiver: string,
+  chainId: string,
+  dexType: Dex,
+  provider: any
+) => {
+  if (tokenIn.tokenType === TokenType.ERC20 && tokenOut.tokenType === TokenType.LP) {
+    return estimateSellERC20ToLP(
+      tokenIn.address,
+      tokenOut.address,
+      tokenOut.pairType ?? Pair.Uniswap,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.LP && tokenOut.tokenType === TokenType.ERC20) {
+    return estimateSellLPToERC20(
+      tokenIn.address,
+      tokenIn.pairType ?? Pair.Uniswap,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.ERC20 && tokenOut.tokenType === TokenType.ERC4626) {
+    return estimateSellERC20ToERC4626(
+      tokenIn.address,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.ERC4626 && tokenOut.tokenType === TokenType.ERC20) {
+    return estimateSellERC4626ToERC20(
+      tokenIn.address,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.LP && tokenOut.tokenType === TokenType.ERC4626) {
+    return estimateSellLPToERC4626(
+      tokenIn.address,
+      tokenIn.pairType ?? Pair.Uniswap,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.ERC4626 && tokenOut.tokenType === TokenType.LP) {
+    return estimateSellERC4626ToLP(
+      tokenIn.address,
+      tokenOut.address,
+      tokenOut.pairType ?? Pair.Uniswap,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.ERC4626 && tokenOut.tokenType === TokenType.ERC4626) {
+    return estimateSellERC4626ToERC4626(
+      tokenIn.address,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
+      chainId,
+      dexType,
+      provider
+    )
+  }
+  if (tokenIn.tokenType === TokenType.ERC20 && tokenOut.tokenType === TokenType.ERC20) {
+    return estimateSellERC20ToERC20(
+      tokenIn.address,
+      tokenOut.address,
+      amountIn,
+      maxDiscrepancy,
+      receiver,
       chainId,
       dexType,
       provider

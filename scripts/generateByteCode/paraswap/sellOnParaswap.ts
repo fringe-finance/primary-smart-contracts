@@ -9,7 +9,8 @@ export const sellOnParaswap = async (
     tokenOut: string,
     tokenOutDecimals: BigNumberish,
     receiver: string,
-    chainId: string
+    chainId: string,
+    maxDiscrepancy: string,
 ) => {
     const { data, amount } = await createCallDataParaswap(
         tokenIn,
@@ -21,7 +22,8 @@ export const sellOnParaswap = async (
         {
             chainId: Number(chainId),
             account: receiver
-        }
+        },
+        maxDiscrepancy,
     );
 
     const amountOut = toBN(amount);

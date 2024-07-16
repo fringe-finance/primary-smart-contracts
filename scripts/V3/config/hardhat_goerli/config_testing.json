@@ -1,0 +1,18 @@
+{
+    "impersonateAccount": {
+        "projectToken": "0x3edef3d7a9b94edb0457613e7cf27e2fb9f5bb3e",
+        "usdc": "0x3edef3d7a9b94edb0457613e7cf27e2fb9f5bb3e",
+        "usb": "0x8c54240Cf91691b1c898B678D61124056b711456",
+        "WETH": "0x08Ff27EDD8CC750d2EE8A44105B3CE6dB2963a5c"
+    },
+    "uniswapFactory": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+    "uniswapV2Router": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "price": {
+        "prj1": "200520",
+        "prj2": "6321489",
+        "prj3": "9248767792291",
+        "usdc": "1000118",
+        "usb": "999660",
+        "weth": "1662906887"
+    }
+}

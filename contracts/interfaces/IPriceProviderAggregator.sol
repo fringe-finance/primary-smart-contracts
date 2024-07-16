@@ -65,47 +65,11 @@ interface IPriceProviderAggregator {
     function getPrice(address token) external view returns (uint8 priceDecimals, uint32 timestamp, uint256 collateralPrice, uint256 capitalPrice);
 
     /**
-     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
+     * @dev Returns the most TWAP price in USD evaluation of token by its `tokenAmount`
      * @param token the address of token to evaluate
      * @param tokenAmount the amount of token to evaluate
      * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
      * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
     function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
-
-    /**
-     * @dev returns the price of token multiplied by 10 ** priceDecimals given by price provider.
-     * price can be calculated as  priceMantissa / (10 ** priceDecimals).
-     * i.e. price = priceMantissa / (10 ** priceDecimals).
-     * @param token the address of token.
-     * @param _priceMantissa - the price of token (used in verifying the signature).
-     * @param _priceDecimals - the price decimals (used in verifying the signature).
-     * @param validTo - the timestamp in seconds (used in verifying the signature).
-     * @param signature - the backend signature of secp256k1. length is 65 bytes.
-     */
-    function getPriceSigned(
-        address token,
-        uint256 _priceMantissa,
-        uint8 _priceDecimals,
-        uint256 validTo,
-        bytes memory signature
-    ) external view returns (uint256 priceMantissa, uint8 priceDecimals);
-
-    /**
-     * @dev Returns the USD evaluation of token by its `tokenAmount`.
-     * @param token the address of token.
-     * @param tokenAmount the amount of token including decimals.
-     * @param priceMantissa - the price of token (used in verifying the signature).
-     * @param priceDecimals - the price decimals (used in verifying the signature).
-     * @param validTo - the timestamp in seconds (used in verifying the signature).
-     * @param signature - the backend signature of secp256k1. length is 65 bytes.
-     */
-    function getEvaluationSigned(
-        address token,
-        uint256 tokenAmount,
-        uint256 priceMantissa,
-        uint8 priceDecimals,
-        uint256 validTo,
-        bytes memory signature
-    ) external view returns (uint256 evaluation);
 }

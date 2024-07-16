@@ -1,7 +1,6 @@
 import { BigNumberish } from "ethers";
 import { ERC20_ABI } from "../abis/ERC20";
 import { Dex } from "../enum/dexType";
-import { getMaxDiscrepancyAmount } from "../utils/getMaxDiscrepancyAmount";
 import { toBN } from "../utils/helpers";
 import { loadContractInstance } from "../utils/loadContract";
 import { buyOnDex } from "../dex_common/buyOnDex";
@@ -24,8 +23,6 @@ export const estimateBuyERC20FromERC20 = async (
     ])
 
 
-    const acceptableAmountOut = getMaxDiscrepancyAmount(toBN(expectedAmountOut), maxDiscrepancy);
-
     const buyOrSellData = tokenInAddress.toLowerCase() === tokenOutAddress.toLowerCase()
     ? { amountIn: expectedAmountOut, buyCallData: null }
     : await buyOnDex(
@@ -33,7 +30,7 @@ export const estimateBuyERC20FromERC20 = async (
       tokenInDecimals,
       tokenOutAddress,
       tokenOutDecimals,
-      acceptableAmountOut,
+      expectedAmountOut,
       dexType,
       receiver,
       chainId,

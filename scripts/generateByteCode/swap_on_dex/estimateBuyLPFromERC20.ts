@@ -45,12 +45,6 @@ export const estimateBuyLPFromERC20 = async (
             lpAcceptableAmount
         );
     
-    console.log(`
-        Need ${lpToken0DesiredAmount} ${lpToken0Address}
-        And ${lpToken1DesiredAmount} ${lpToken1Address}
-        to add liquidate to get 
-        ${lpAcceptableAmount} LP token ${lpAddress}
-    `)
     const { buyOrSellData0: lpToken0BuyData, buyOrSellData1: lpToken1BuyData } = await buyOrEstimateSellOnDex(
         erc20Address,
         erc20Decimals,

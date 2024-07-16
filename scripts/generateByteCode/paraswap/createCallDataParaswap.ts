@@ -16,7 +16,8 @@ export const createCallDataParaswap = async (
     }: {
         chainId: number;
         account: string;
-    }
+    },
+    maxDiscrepancy: string = "0.05"
 ) => {
     try {
         const priceData = await getPriceOnParaswap(
@@ -28,12 +29,12 @@ export const createCallDataParaswap = async (
             side,
             +chainId
         );
-
+        const slippage = Math.round(Number(maxDiscrepancy) * 10000);
         const txDataBody = {
             ...priceData,
             srcToken,
             destToken,
-            slippage: "500",
+            slippage,
             [side === "BUY" ? `destAmount` : `srcAmount`]: amountTokenBN,
             userAddress: account
         };

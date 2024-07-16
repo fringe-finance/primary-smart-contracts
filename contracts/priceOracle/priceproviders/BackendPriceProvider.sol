@@ -251,26 +251,6 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Returns the price of a token as a signed integer, along with the number of decimals for the price.
-     * @param token The address of the token.
-     * @param priceMantissa The price of the token as a mantissa.
-     * @param validTo The timestamp until which the price is valid.
-     * @param signature The signature of the price provided by a moderator.
-     * @return _priceMantissa The price of the token as a mantissa.
-     * @return priceDecimals The number of decimals for the price.
-     */
-    function getPriceSigned(
-        address token,
-        uint256 priceMantissa,
-        uint256 validTo,
-        bytes memory signature
-    ) public view override returns (uint256 _priceMantissa, uint8 priceDecimals) {
-        require(isActive(token), "BackendPriceProvider: Token is not active!");
-        require(verify(token, priceMantissa, validTo, signature), "BackendPriceProvider: Signer is not moderator");
-        return (priceMantissa, getPriceDecimals());
-    }
-
-    /**
      * @dev This function is used to get the evaluation of a token with a given amount.
      * @param token The address of the token to be evaluated.
      * @param tokenAmount The amount of the token to be evaluated.
@@ -282,32 +262,6 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
         tokenAmount;
         evaluation;
         revert("Use getEvaluationSigned(...)");
-    }
-
-    /**
-     * @dev ReturnS the evaluation in $ of `tokenAmount` with signed price.
-     * @param token the address of token to get evaluation in $.
-     * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals.
-     * @param priceMantissa the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token.
-     * @param validTo the timestamp in seconds, when price is gonna be not valid.
-     * @param signature the ECDSA sign on eliptic curve secp256k1.
-     */
-    function getEvaluationSigned(
-        address token,
-        uint256 tokenAmount,
-        uint256 priceMantissa,
-        uint256 validTo,
-        bytes memory signature
-    ) public view override returns (uint256 evaluation) {
-        require(isActive(token), "BackendPriceProvider: Token is not active!");
-        require(verify(token, priceMantissa, validTo, signature), "BackendPriceProvider: Signer is not moderator");
-        evaluation = (tokenAmount * priceMantissa) / (10 ** getPriceDecimals());
-        uint8 tokenDecimals = ERC20Upgradeable(token).decimals();
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
-        }
     }
 
     /**

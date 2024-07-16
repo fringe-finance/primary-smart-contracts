@@ -6,6 +6,7 @@ import { toBN } from "../utils/helpers";
 import { buyOnDex } from "../dex_common/buyOnDex";
 import { ERC20_ABI } from "../abis/ERC20";
 import { getMaxDiscrepancyAmount } from "../utils/getMaxDiscrepancyAmount";
+import { estimateBuyERC20FromERC20 } from "./estimateBuyERC20FromERC20";
 
 
 export const estimateBuyERC20FromERC4626 = async (
@@ -18,46 +19,27 @@ export const estimateBuyERC20FromERC4626 = async (
     dexType: Dex,
     provider: any
 ) => {
-  const erc20Instance = loadContractInstance(erc20Address, ERC20_ABI, provider);
-  const erc20Decimals = await erc20Instance.decimals();
-
   const erc4626Instance = loadContractInstance(erc4626Address, ERC4626_ABI, provider);
   const erc4626AssetAddress = await erc4626Instance.asset();
-  const assetInstance = loadContractInstance(erc4626AssetAddress, ERC20_ABI, provider);
-  const assetDecimals = await assetInstance.decimals();
-
-  const erc20AcceptableAmount = getMaxDiscrepancyAmount(toBN(erc20ExpectedAmount), maxDiscrepancy);
-  if (erc20Address.toLowerCase() === erc4626AssetAddress.toLowerCase()) {
-    const estimateAmountIn = await erc4626Instance.convertToShares(erc20AcceptableAmount)
-    return {
-      tokenIn: erc20Address,
-      tokenOut: erc4626Address,
-      estimateAmountIn: toBN(estimateAmountIn),
-      expectedAmountOut: erc20ExpectedAmount,
-      buyCallData: [],
-    }
-  } else {
-    const estimation = await buyOnDex(
-      erc4626AssetAddress,
-      assetDecimals,
-      erc20Address,
-      erc20Decimals,
-      erc20AcceptableAmount,
-      dexType,
-      receiver,
-      chainId,
-      maxDiscrepancy
-    );
-
-    const estimateAmountIn = await erc4626Instance.convertToShares(estimation.amountIn)
-      
-    return {
-      tokenIn: erc20Address,
-      estimateAmountIn: toBN(estimateAmountIn),
-      tokenOut: erc4626Address,
-      expectedAmountOut: erc20ExpectedAmount,
-      buyCallData: [estimation.buyCallData],
-    };
-  }
+  
+  const estimation = await estimateBuyERC20FromERC20(
+    erc4626AssetAddress,
+    erc20Address,
+    erc20ExpectedAmount,
+    receiver,
+    maxDiscrepancy,
+    chainId,
+    dexType,
+    provider
+  )
+  const estimateAmountIn = await erc4626Instance.convertToShares(estimation.estimateAmountIn)
+  
+  return {
+    tokenIn: erc4626Address,
+    estimateAmountIn: toBN(estimateAmountIn),
+    tokenOut: erc20Address,
+    expectedAmountOut: erc20ExpectedAmount,
+    buyCallData: estimation.buyCallData,
+  };
   
 };

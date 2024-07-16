@@ -17,3 +17,22 @@ export const estimateBuyLPAmountDesired = (
         amount1Desired
     };
 };
+
+
+export const estimateSellLPAmountDesired = (
+    reserve0: BigNumber,
+    reserve1: BigNumber,
+    totalSupply: BigNumber,
+    amountIn: BigNumber
+) => {
+    const amount0Desired = amountIn
+        .mul(reserve0)
+        .div(totalSupply);
+    const amount1Desired = amountIn
+        .mul(reserve1)
+        .div(totalSupply);
+    return {
+        amount0Desired,
+        amount1Desired
+    };
+};

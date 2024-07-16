@@ -8,6 +8,7 @@ export const unwrapAndSellLPOnDex = async (
     tokenIn: string,
     amountIn: BigNumberish,
     tokenOut: string,
+    maxDiscrepancy: string,
     receiver: string,
     chainId: string,
     swapOnDex: Dex,
@@ -19,6 +20,7 @@ export const unwrapAndSellLPOnDex = async (
         unwrapData,
         tokenOut,
         swapOnDex,
+        maxDiscrepancy,
         receiver,
         chainId,
         signerOrProvider

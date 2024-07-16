@@ -4,10 +4,10 @@ import { buyOnDex } from "../dex_common/buyOnDex";
 import { getPriceOnDex } from "../dex_common/getPriceOnDex";
 import { Dex } from "../enum/dexType";
 import { Pair } from "../enum/pairType";
-import { getMaxDiscrepancyAmount } from "../utils/getMaxDiscrepancyAmount";
 import { toBN } from "../utils/helpers";
 import { loadContractInstance } from "../utils/loadContract";
 import { unwrapLP } from "../utils/unwrap";
+import { getMaxDiscrepancyAmount } from "../utils/getMaxDiscrepancyAmount";
 
 export const estimateBuyERC20FromLP = async (
     lpAddress: string,
@@ -38,9 +38,8 @@ export const estimateBuyERC20FromLP = async (
         lpToken1Reserve
     } = await unwrapLP(lpAddress, pairType, provider);
 
-    const erc20AcceptableAmount = getMaxDiscrepancyAmount(toBN(erc20ExpectedAmount), maxDiscrepancy);
-    const erc20EstimatedAmountForToken0 = BigNumber.from(erc20AcceptableAmount).div(2);
-    const erc20EstimatedAmountForToken1 = BigNumber.from(erc20AcceptableAmount).div(2);
+    const erc20EstimatedAmountForToken0 = getMaxDiscrepancyAmount(toBN(BigNumber.from(erc20ExpectedAmount).div(2)), (Number(maxDiscrepancy) / 2).toString());
+    const erc20EstimatedAmountForToken1 = getMaxDiscrepancyAmount(toBN(BigNumber.from(erc20ExpectedAmount).div(2)), (Number(maxDiscrepancy) / 2).toString());
 
     let lpToken0BuyData: {amountIn: BigNumber; buyCallData: any;};
     let lpToken1BuyData: {amountIn: BigNumber; buyCallData: any;};
@@ -72,7 +71,8 @@ export const estimateBuyERC20FromLP = async (
             erc20EstimatedAmountForToken1,
             dexType,
             receiver,
-            chainId
+            chainId,
+            maxDiscrepancy
         );
     } else {
         lpToken1BuyData = {

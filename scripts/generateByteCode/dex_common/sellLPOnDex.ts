@@ -5,6 +5,7 @@ export const sellLPOnDex = async (
     unwrapData: any,
     tokenOut: string,
     swapOnDex: Dex,
+    maxDiscrepancy: string,
     receiver: string,
     chainId: string,
     signerOrProvider: any
@@ -15,6 +16,7 @@ export const sellLPOnDex = async (
         unwrapData.amount0,
         tokenOut,
         swapOnDex,
+        maxDiscrepancy,
         receiver,
         chainId,
         signerOrProvider
@@ -25,6 +27,7 @@ export const sellLPOnDex = async (
         unwrapData.amount0,
         tokenOut,
         swapOnDex,
+        maxDiscrepancy,
         receiver,
         chainId,
         signerOrProvider

@@ -83,27 +83,27 @@ interface IPriceOracle {
     function getEstimatedTWAPprice(address token) external view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice);
     
     /**
-     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`
-     * @param token the address of token to evaluate
-     * @param tokenAmount the amount of token to evaluate
-     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
-     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     * @dev returns the most TWAP price in USD evaluation of token by its `tokenAmount`.
+     * @param token the address of token to evaluate.
+     * @param tokenAmount the amount of token to evaluate.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price.
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price.
      */
     function getEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
 
     /**
-     * @dev returns the non-TWAP price in USD evaluation of token by its `tokenAmount`
-     * @param token the address of token to evaluate
-     * @param tokenAmount the amount of token to evaluate
-     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
-     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     * @dev returns the non-TWAP price in USD evaluation of token by its `tokenAmount`.
+     * @param token the address of token to evaluate.
+     * @param tokenAmount the amount of token to evaluate.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price.
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price.
      */
     function getEstimatedEvaluation(address token, uint256 tokenAmount) external view returns(uint256 collateralEvaluation, uint256 capitalEvaluation);
     
     /**
-     * @dev returns tuple (priceMantissa, priceDecimals)
-     * @notice price = priceMantissa / (10 ** priceDecimals)
-     * @param token the address of token which price is to return
+     * @dev returns tuple (priceMantissa, priceDecimals).
+     * @notice price = priceMantissa / (10 ** priceDecimals).
+     * @param token the address of token which price is to return.
      */
-    function getReportedPrice(address token) external view returns(uint256 priceMantissa, uint8 priceDecimals);
+    function getReportedPrice(address token) external view returns(uint256 priceMantissa);
 }

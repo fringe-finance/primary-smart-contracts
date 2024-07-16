@@ -22,7 +22,8 @@ export const buyOnDex = async (
             tokenDestDecimals,
             tokenDestAmount,
             receiver,
-            chainId
+            chainId,
+            maxDiscrepancy,
         );
     } else if (swapOnDex === Dex.OpenOcean) {
         return await buyOnOpenOcean(
