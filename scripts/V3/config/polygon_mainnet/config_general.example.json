@@ -62,8 +62,8 @@
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
         "isPaused": false,
-        "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": []
+        "borrowLimitPerLendingToken": [],
+        "depositLimitPerProjectAsset": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
