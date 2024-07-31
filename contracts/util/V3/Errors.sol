@@ -29,4 +29,5 @@ library Errors {
     error TotalBorrowExceededLimit();
     error TotalDepositExceededLimit();
     error PitRemainingIsZero();
+    error AvailableAmountToBorrowIsZero();
 }

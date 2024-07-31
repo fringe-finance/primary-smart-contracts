@@ -151,7 +151,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, updatePriceTokens, [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
@@ -160,12 +160,14 @@ describe("PrimaryLendingPlatformV3", function () {
       await platform.contractInstance.plpInstance.borrow(lendingToken.address, lendingTokenAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
 
       const estimateData = await estimateBuy(tokenInfo[prjToken.address], tokenInfo[lendingToken.address], lendingTokenAmount, platform.contractInstance.plpAtomicRepayInstance.address, "0.05", "1", Dex.Paraswap, deployMaster.provider);
+      console.log(estimateData)
       
       const balanceLendingUserBeforeRepay = await lendingToken.balanceOf(deployMaster.address);
       const depositedAmountBefore = await platform.contractInstance.plpInstance.depositedAmount(deployMaster.address, prjToken.address);
       const totalOutstandingBefore = await platform.contractInstance.plpInstance.outstanding(deployMaster.address, lendingToken.address);
 
       const tx = await platform.contractInstance.plpAtomicRepayInstance.repayAtomic(getTokenTuple(tokenInfo[lendingToken.address]), getTokenTuple(tokenInfo[prjToken.address]), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, true, updatePriceTokens, priceIds, updateData, {value: updateFee})
+
       const rs = await tx.wait();
       const event = rs.events.find((x) => x.event === "AtomicRepayment").args;
 

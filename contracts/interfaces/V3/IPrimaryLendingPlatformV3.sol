@@ -379,13 +379,15 @@ interface IPrimaryLendingPlatformV3 {
      * @param lendingTokenAmount The amount of lending tokens to repay.
      * @param repairer The address that initiated the repair transaction.
      * @param borrower The borrower's address.
+     * @param positionId The position ID of the borrower.
      * @return amount of lending tokens actually repaid.
      */
     function repayFromRelatedContract(
         address lendingToken,
         uint256 lendingTokenAmount,
         address repairer,
-        address borrower
+        address borrower,
+        bytes32 positionId
     ) external returns (uint256);
 
     /**
@@ -440,6 +442,196 @@ interface IPrimaryLendingPlatformV3 {
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint256);
+
+    /**
+     * @dev Returns the total PIT (primary lending platform) value for a given account and all project tokens.
+     * @param account Address of the account.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return totalEvaluation total PIT value.
+    */
+    function totalPITWithUpdatePrices(address account, bytes32[] memory priceIds, bytes[] calldata updateData) external payable returns (uint256);
+
+    /**
+     * @dev Returns the total deposited amount in USD for a given account and all project tokens.
+     * @param account Address of the account.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return totalEvaluation total deposited amount.
+     */
+    function totalDepositedAmountInUSDWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Returns the total remaining PIT (primary lending platform) of a given account and all project tokens.
+     * @param account The address of the user's borrow position.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return remaining The remaining PIT of the user's borrow position.
+     */
+    function totalPITRemainingWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Returns the total weighted loan amount of user's all borrow positions to USD.
+     * @param account The address of the user account.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return totalEvaluation total outstanding amount in USD.
+     */
+    function totalWeightedLoanInUSDWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 totalEvaluation);
+
+    /**
+     * @dev Returns the total outstanding amount of a user's borrow position for a specific lending token to USD.
+     * @param account The address of the user's borrow position.
+     * @param lendingToken The address of the lending token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return loanBody The amount of the lending token borrowed by the user.
+     * @return accrual The accrued interest of the borrow position.
+     * @return estimatedOutstandingInUSD estimated outstanding amount in USD.
+     */
+    function getEstimatedOutstandingInUSDWithUpdatePrices(
+        address account,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 loanBody, uint256 accrual, uint256 estimatedOutstandingInUSD);
+
+    /**
+     * @dev Converts the total estimated outstanding amount of all user's borrow positions to USD.
+     * @param account The address of the user account.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return totalEvaluation total outstanding amount in USD.
+     */
+    function totalEstimatedOutstandingInUSDWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 totalEvaluation);
+
+    /**
+     * @dev Converts the total estimated weighted loan amount of all user's borrow positions to USD.
+     * @param account The address of the user account.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return totalEvaluation total weighted loan amount in USD.
+     */
+    function totalEstimatedWeightedLoanInUSDWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 totalEvaluation);
+
+    /**
+     * @dev Returns the total estimated remaining PIT (primary lending platform) of a given account and all project tokens.
+     * @param account The address of the user's borrow position.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return remaining The remaining PIT of the user's borrow position.
+     */
+    function totalEstimatedPITRemainingWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Returns the estimated health factor of a user account at current.
+     * @param account The address of the user's borrow position.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return numerator The numerator of the health factor.
+     * @return denominator The denominator of the health factor.
+     */
+    function healthFactorWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 numerator, uint256 denominator);
+
+    /**
+     * @dev Gets deposited amount in USD for a specific project token.
+     * @param projectToken The address of the project token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return The deposited amount in USD.
+     */
+    function getDepositedPerProjectTokenInUSDWithUpdatePrices(
+        address projectToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Gets borrow amount in USD for a specific lending token.
+     * @param lendingToken The address of the lending token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return The total borrow amount in USD.
+     */
+    function getBorrowedPerLendingTokenInUSDWithUpdatePrices(
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Converts the total estimated remaining pit amount to the corresponding lending token amount.
+     * @param account The address of the user account.
+     * @param lendingToken The address of the lending token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return The converted lending token amount.
+     */
+    function convertEstimatedPitRemainingWithUpdatePrices(
+        address account,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256);
+
+    /**
+     * @dev Calculates the collateral available for withdrawal based on the loan-to-value ratio of a specific project token.
+     * @param account Address of the user.
+     * @param projectToken Address of the project token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return collateralProjectToWithdraw The amount of collateral available for withdrawal in the project token.
+     */
+    function getCollateralAvailableToWithdrawWithUpdatePrices(
+        address account,
+        address projectToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 collateralProjectToWithdraw);
+
+    /**
+     * @dev Calculates the lending token available amount for borrowing after updating related token's prices.
+     * @param user Address of the user.
+     * @param lendingToken Address of the lending token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return availableToBorrow The amount of lending token available to borrow.
+     */
+    function getLendingAvailableToBorrowWithUpdatePrices(
+        address user,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 availableToBorrow);
+
 
     //************* VIEW FUNCTIONS ********************************
     /**

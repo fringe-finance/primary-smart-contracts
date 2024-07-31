@@ -53,7 +53,7 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
         bytes[] calldata updateData
     ) external payable nonReentrant isProjectTokenListed(prjToken.addr) isLendingTokenListed(lendingToken.addr) {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _repayAtomic(msg.sender, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, updatePriceTokens, priceIds, updateData);
+        _repayAtomic(msg.sender, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, bytes32(0), updatePriceTokens, priceIds, updateData);
     }
 
     /**
@@ -83,6 +83,7 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
      * @param collateralAmount The amount of collateral to use.
      * @param buyCalldata The calldata for the swap operation.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     * @param positionId The position ID of the user.
      * @param priceIds An array of bytes32 price identifiers to update.
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      * @return amountReceivedLendingToken The amount of lending tokens received by the user.
@@ -94,6 +95,7 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
         uint256 collateralAmount,
         bytes[] memory buyCalldata,
         bool isRepayFully,
+        bytes32 positionId,
         address[] memory updatePriceTokens,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
@@ -107,7 +109,7 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
         returns (uint256 amountReceivedLendingToken)
     {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        amountReceivedLendingToken = _repayAtomic(user, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, updatePriceTokens, priceIds, updateData);
+        amountReceivedLendingToken = _repayAtomic(user, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, positionId, updatePriceTokens, priceIds, updateData);
     }
 
     /**

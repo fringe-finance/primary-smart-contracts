@@ -10,7 +10,7 @@ import "./core/PrimaryLendingPlatformV3Core.sol";
  */
 contract PrimaryLendingPlatformV3 is PrimaryLendingPlatformV3Core {
     //************* EXTERNAL FUNCTION ********************************
-        /**
+    /**
      * @dev Deposits project tokens and calculates the deposit position.
      *
      * Requirements:
@@ -70,7 +70,7 @@ contract PrimaryLendingPlatformV3 is PrimaryLendingPlatformV3Core {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         _deposit(projectToken, projectTokenAmount, user, beneficiary, updatePriceTokens);
     }
-    
+
     //************* Supply FUNCTION ********************************
 
     /**
@@ -426,38 +426,6 @@ contract PrimaryLendingPlatformV3 is PrimaryLendingPlatformV3Core {
     }
 
     /**
-     * @dev Returns the total remaining PIT (primary lending platform) of a given account and all project tokens.
-     * @param account The address of the user's borrow position.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return remaining The remaining PIT of the user's borrow position.
-     */
-    function totalPITRemainingWithUpdatePrices(
-        address account,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return totalPITRemaining(account);
-    }
-
-    /**
-     * @dev Returns the total weighted loan amount of user's all borrow positions to USD.
-     * @param account The address of the user account.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return totalEvaluation total outstanding amount in USD.
-     */
-    function totalWeightedLoanInUSDWithUpdatePrices(
-        address account,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256 totalEvaluation) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return totalWeightedLoanInUSD(account);
-    }
-
-    /**
      * @dev Returns the total outstanding amount of a user's borrow position for a specific lending token to USD.
      * @param account The address of the user's borrow position.
      * @param lendingToken The address of the lending token.
@@ -626,5 +594,23 @@ contract PrimaryLendingPlatformV3 is PrimaryLendingPlatformV3Core {
     ) external payable returns (uint256 collateralProjectToWithdraw) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return getCollateralAvailableToWithdraw(account, projectToken);
+    }
+
+    /**
+     * @dev Calculates the lending token available amount for borrowing after updating related token's prices.
+     * @param user Address of the user.
+     * @param lendingToken Address of the lending token.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return availableToBorrow The amount of lending token available to borrow.
+     */
+    function getLendingAvailableToBorrowWithUpdatePrices(
+        address user,
+        address lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 availableToBorrow) {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        return getLendingAvailableToBorrow(user, lendingToken);
     }
 }

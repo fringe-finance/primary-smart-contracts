@@ -227,7 +227,7 @@ describe("PrimaryLendingPlatformV3", function () {
     const updatePriceTokens = [collateral.address, lending.address];
     // Deposit collateral token
     await collateral.approve( platform.addresses.plpAddress, hre.ethers.constants.MaxUint256);
-    await platform.contractInstance.plpInstance.deposit(collateral.address, depositAmount, [], [], []);
+    await platform.contractInstance.plpInstance.deposit(collateral.address, depositAmount, updatePriceTokens, [], []);
     // Supply lending token
     const { priceIds, updateFee } = await getPriceId(
       platform.contractInstance.priceProviderAggregatorInstance,

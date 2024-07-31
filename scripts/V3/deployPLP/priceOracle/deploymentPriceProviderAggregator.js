@@ -315,7 +315,7 @@ module.exports = {
         ], "PriceOracleProxy");
 
         //====================== deploy pythPriceProvider =============================
-        if (tokensUsePyth.length > 0) {
+        if (tokensUsePyth.length > 0 || pythOracle) {
             log();
             log("***** PYTH PRICE PROVIDER DEPLOYMENT *****");
 
@@ -1559,7 +1559,7 @@ module.exports = {
             if (tokenPriceProvider.toLowerCase() != erc4626PriceProviderAddress.toLowerCase()) {
                 await priceProviderAggregator.setTokenAndPriceProvider(token, erc4626PriceProviderAddress).then(function (instance) {
                     log("\nTransaction hash: " + instance.hash);
-                    log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + token + " with priceOracle " + lpPriceProviderAddress);
+                    log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + token + " with priceOracle " + erc4626PriceProvider);
                 });
             }
         }

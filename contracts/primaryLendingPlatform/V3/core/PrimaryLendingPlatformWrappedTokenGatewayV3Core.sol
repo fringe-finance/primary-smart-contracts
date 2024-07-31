@@ -290,7 +290,7 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
         uint256 paybackAmount = lendingTokenAmount >= totalOutStanding ? totalOutStanding : lendingTokenAmount;
         require(msg.value >= paybackAmount, "WTG: msg value is less than repayment amount");
         WETH.deposit{value: paybackAmount}();
-        primaryLendingPlatform.repayFromRelatedContract(address(WETH), paybackAmount, address(this), msg.sender);
+        primaryLendingPlatform.repayFromRelatedContract(address(WETH), paybackAmount, address(this), msg.sender, bytes32(0));
 
         // refund remaining dust eth
         if (msg.value > paybackAmount) _safeTransferETH(msg.sender, msg.value - paybackAmount);

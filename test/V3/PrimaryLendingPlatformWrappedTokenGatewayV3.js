@@ -156,17 +156,12 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
 
       let prjToken = weth.address;
 
-      let msgValue = ethers.utils.parseEther("1");
+      const msgValue = ethers.utils.parseEther("10");
+      const updateFee = ethers.utils.parseEther("0");
 
       const balanceUserBeforeDeposit = await deployMaster.getBalance();
 
-      const tx = await platform.contractInstance.plpWTGInstance.deposit(
-        msgValue,
-        [],
-        [],
-        [],
-        0,
-        {
+      const tx = await platform.contractInstance.plpWTGInstance.deposit(msgValue, [prjToken], [], [], updateFee, {
         value: msgValue,
       });
       const receipt = await tx.wait();

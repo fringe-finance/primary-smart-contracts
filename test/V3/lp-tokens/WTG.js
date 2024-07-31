@@ -88,10 +88,12 @@ describe("PrimaryLendingPlatformV3", function () {
     const updateData = await getPriceFeedsUpdateData(priceIds);
 
     const lendingTokenCount = await platform.contractInstance.plpLeverageInstance.calculateLendingTokenCount(lendingInfo.address,  lendingInfo.tokenType === TokenType.LP ? notionalExposure[1].div(1000000) : notionalExposure[1]);
+    console.log(lendingTokenCount.toString())
 
     const addingAmount = await platform.contractInstance.plpLeverageInstance.calculateAddingAmount(deployMaster.address, weth.address, margin);
 
     const estimateData = await estimateSell(lendingInfo, tokenInfo[weth.address], lendingTokenCount, "0.05", plpWTGInstance.address, "1", Dex.Paraswap, deployMaster.provider);
+    console.log(estimateData)
 
     await weth.approve(platform.contractInstance.plpLeverageInstance.address, hre.ethers.constants.MaxUint256);
     await lending.approve(platform.contractInstance.plpLeverageInstance.address, hre.ethers.constants.MaxUint256);
@@ -230,15 +232,10 @@ describe("PrimaryLendingPlatformV3", function () {
   async function setup(lendingAddress) {
     const { platform, tokenInfo, tokenInstances } = await loadFixture();
 
-    const msgValue = ethers.utils.parseEther("1");
-    await platform.contractInstance.plpWTGInstance.deposit(
-      msgValue,
-      [],
-      [],
-      [],
-      0,
-      { value: msgValue }
-    );
+    const msgValue = ethers.utils.parseEther("10");
+    console.log(msgValue.toString())
+    const fee = toBN(0)
+    await platform.contractInstance.plpWTGInstance.deposit(msgValue, [weth.address], [], [], fee, { value: msgValue });
 
     const lending = Object.values(tokenInstances).find((token) => token.address.toLowerCase() === lendingAddress.toLowerCase());
     const lendingAmount = tokenInfo[lending.address].pairType ? 0.001 : 5000;

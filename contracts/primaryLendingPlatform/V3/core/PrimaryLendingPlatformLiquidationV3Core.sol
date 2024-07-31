@@ -57,8 +57,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         address indexed borrower,
         address lendingToken,
         address indexed prjAddress,
-        uint256 amountPrjLiquidated,
-        address[] updatePriceTokens
+        uint256 amountPrjLiquidated
     );
 
     /**
@@ -180,7 +179,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
 
     /**
      * @dev Sets the maximum Liquidation Reserve Factor (LRF) that can be used for liquidation.
-     * 
+     *
      * Requirements:
      * - The denominator must not be zero.
      * - Only the moderator can call this function.
@@ -195,7 +194,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
 
     /**
      * @dev Sets the liquidator reward calculation factor.
-     * 
+     *
      * Requirements:
      * - The caller must have the `MODERATOR_ROLE` role.
      * - The denominatorLRF cannot be zero.
@@ -210,7 +209,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
 
     /**
      * @dev Sets the address of the primary lending platform contract.
-     * 
+     *
      * Requirements:
      * - Only the moderator can call this function.
      * - The new primary lending platform address must not be the zero address.
@@ -224,7 +223,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
 
     /**
      * @dev Sets the target health factor.
-     * 
+     *
      * Requirements:
      * - Only the moderator can call this function.
      * - The denominatorHF cannot be zero.
@@ -520,7 +519,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
             assetAmounts[0] = _liquidateNoBorrow(_account, _prjInfo.addr, _lendingInfo.addr, liquidationAmount, _liquidator);
         }
 
-        emit Liquidate(_liquidator, _account, _lendingInfo.addr, _prjInfo.addr, assetAmounts[0], updatePriceTokens);
+        emit Liquidate(_liquidator, _account, _lendingInfo.addr, _prjInfo.addr, assetAmounts[0]);
     }
 
     /**
@@ -576,7 +575,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         address liquidator
     ) internal returns (uint256) {
         uint256 projectTokenSendToLiquidator = _getProjectTokenToSendToLiquidator(_account, _projectToken, _lendingToken, _lendingTokenAmount);
-        primaryLendingPlatform.repayFromRelatedContract(_lendingToken, _lendingTokenAmount, liquidator, _account);
+        primaryLendingPlatform.repayFromRelatedContract(_lendingToken, _lendingTokenAmount, liquidator, _account, bytes32(0));
 
         uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenSendToLiquidator, liquidator);
         _transferExcessToken(_lendingToken, liquidator);
@@ -616,7 +615,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         _nakedBorrow(_liquidator, _lendingInfo.addr, _lendingTokenAmount);
         uint256 projectTokenSendToLiquidator = _getProjectTokenToSendToLiquidator(_account, _prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount);
 
-        primaryLendingPlatform.repayFromRelatedContract(_lendingInfo.addr, _lendingTokenAmount, _liquidator, _account);
+        primaryLendingPlatform.repayFromRelatedContract(_lendingInfo.addr, _lendingTokenAmount, _liquidator, _account, bytes32(0));
         uint256 projectTokenReward = _distributeReward(_account, _prjInfo.addr, projectTokenSendToLiquidator, address(this));
 
         _swapAndRepayNakedBorrow(_prjInfo, _lendingInfo, projectTokenReward, _lendingTokenAmount, _liquidator, _buyCalldata);
@@ -699,6 +698,6 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
             revert Errors.InvalidReceiveAmount();
         }
         Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(_lendingInfo.addr).bLendingToken, _lendingInfo.addr, amountReceive);
-        primaryLendingPlatform.repayFromRelatedContract(_lendingInfo.addr, _lendingTokenAmount, address(this), _liquidator);
+        primaryLendingPlatform.repayFromRelatedContract(_lendingInfo.addr, _lendingTokenAmount, address(this), _liquidator, bytes32(0));
     }
 }

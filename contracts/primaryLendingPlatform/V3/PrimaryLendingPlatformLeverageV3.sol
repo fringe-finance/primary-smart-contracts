@@ -105,7 +105,7 @@ contract PrimaryLendingPlatformLeverageV3 is PrimaryLendingPlatformLeverageV3Cor
      * If close successfully will delete the opened position from list of position data
      * @param projectToken The address of long asset.
      * @param lendingToken The address of short asset.
-     * @param positionIndex The id of opened position.
+     * @param positionId The id of opened position.
      * @param collateralAmount The long asset amount need to close position.
      * @param buyCalldata Pass to Paraswap to convert from short asset to long asset.
      * @param priceIds An array of bytes32 price identifiers to update.
@@ -114,26 +114,67 @@ contract PrimaryLendingPlatformLeverageV3 is PrimaryLendingPlatformLeverageV3Cor
     function closePositionByLongAsset(
         Asset.Info memory projectToken, //any deposited project token
         Asset.Info memory lendingToken,
-        uint256 positionIndex,
+        bytes32 positionId,
         uint256 collateralAmount,
         address[] memory updatePriceTokens,
         bytes[] memory buyCalldata,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable {
-        uint256 amountReceivedLendingToken = primaryLendingPlatformAtomic.repayAtomicFromRelatedContract{value: msg.value}(
+        uint256 amountReceivedLendingToken = _repayAtomicFromRelatedContract(
             msg.sender,
             lendingToken,
             projectToken,
             collateralAmount,
             buyCalldata,
             false,
+            positionId,
             updatePriceTokens,
             priceIds,
             updateData
         );
 
-        emit ClosePosition(msg.sender, lendingToken.addr, positionIndex, amountReceivedLendingToken);
+        emit ClosePosition(msg.sender, lendingToken.addr, positionId, amountReceivedLendingToken);
+    }
+
+    /**
+     * @notice Repay the loan by using the project token as collateral.
+     * @param user The address of the user.
+     * @param lendingToken The address of the lending token.
+     * @param prjToken The address of the project token.
+     * @param collateralAmount The amount of collateral to use.
+     * @param buyCalldata The calldata for the swap operation.
+     * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     * @param positionId The position ID of the user.
+     * @param updatePriceTokens An array of addresses of the tokens to update the price.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return amountReceivedLendingToken The amount of lending tokens received by the user.
+     */
+    function _repayAtomicFromRelatedContract(
+        address user,
+        Asset.Info memory lendingToken,
+        Asset.Info memory prjToken,
+        uint256 collateralAmount,
+        bytes[] memory buyCalldata,
+        bool isRepayFully,
+        bytes32 positionId,
+        address[] memory updatePriceTokens,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) internal returns (uint256 amountReceivedLendingToken) {
+        return primaryLendingPlatformAtomic.repayAtomicFromRelatedContract{value: msg.value}(
+            user,
+            lendingToken,
+            prjToken,
+            collateralAmount,
+            buyCalldata,
+            isRepayFully,
+            positionId,
+            updatePriceTokens,
+            priceIds,
+            updateData
+        );
     }
 
     /**

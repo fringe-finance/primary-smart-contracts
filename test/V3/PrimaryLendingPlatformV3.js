@@ -153,7 +153,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const depositAmount = toBN("100").pow(tokenInfo[prjToken.address].decimals);
 
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await expect(platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[])).to.be.revertedWith("TotalDepositExceededLimit()");
+      await expect(platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], [])).to.be.revertedWith("TotalDepositExceededLimit()");
 
     }).timeout(1000000)
 
@@ -166,7 +166,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const balancePLPBeforeDeposit = await prjToken.balanceOf(platform.addresses.plpAddress);
 
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[]);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
 
       const balanceAfterDeposit = await prjToken.balanceOf(deployMaster.address);
       const balancePLPAfterDeposit = await prjToken.balanceOf(platform.addresses.plpAddress);
@@ -191,7 +191,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, updatePriceTokens, priceIds, updateData, {value: updateFee});
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
@@ -202,7 +202,7 @@ describe("PrimaryLendingPlatformV3", function () {
       let hf = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
 
       while(hf[0].gt(hf[1])) {
-        await setLowPrice(prjToken.address, tokenInfo[prjToken.address].decimals, platform.contractInstance.priceProviderAggregatorInstance, toBN('900000'))
+        await setHighPrice(lendingToken.address, tokenInfo[lendingToken.address].decimals, platform.contractInstance.priceProviderAggregatorInstance)
         hf = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
       }
 
@@ -223,7 +223,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[]);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
 
       const availableToWithdraw = await platform.contractInstance.plpInstance.getCollateralAvailableToWithdraw(deployMaster.address, prjToken.address);
 
@@ -368,7 +368,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[]);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
@@ -394,7 +394,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[]);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
@@ -420,7 +420,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount,[],[],[]);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})

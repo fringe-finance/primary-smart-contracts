@@ -78,12 +78,13 @@ describe("PrimaryLendingPlatformV3", function () {
     const balanceLendingUserBeforeRepay = await lending.balanceOf(deployMaster.address);
     const depositedAmountBefore = await plpInstance.depositedAmount(deployMaster.address, collateral.address);
     const totalOutstandingBefore = await plpInstance.outstanding(deployMaster.address, lending.address);
-    const updatePriceTokens = [collateral.address, lending.address];
 
+    console.log("lendingTokenAmount: ", lendingTokenAmount.toString())
+    
     const estimateData = await estimateBuy(collateralInfo, lendingInfo, lendingTokenAmount.mul(101).div(100), plpAtomicRepayInstance.address, "0.05", "1", Dex.Paraswap, deployMaster.provider);
     console.log(estimateData)
 
-    const tx = await plpAtomicRepayInstance.repayAtomic(getTokenTuple(lendingInfo), getTokenTuple(collateralInfo), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, true, updatePriceTokens, [], []) 
+    const tx = await plpAtomicRepayInstance.repayAtomic(getTokenTuple(lendingInfo), getTokenTuple(collateralInfo), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, true, [], []) 
 
     const rs = await tx.wait();
     const event = rs.events.find((x) => x.event === "AtomicRepayment").args;
@@ -149,7 +150,7 @@ describe("PrimaryLendingPlatformV3", function () {
     await setBalance( USDT, deployMaster.address, toBN("100000000000000000000000"));
     await setBalance( DAI_USDC, deployMaster.address, toBN("100000000000000000000000"));
     await setBalance( USDC_USDT, deployMaster.address, toBN("100000000000000000000000"));
-    
+
     await tokenInstances.usdc.approve( tokenInstances.usdc_4626.address, hre.ethers.constants.MaxUint256);
     await tokenInstances.usdc_4626.deposit("10000000000", deployMaster.address);
 
@@ -185,6 +186,7 @@ describe("PrimaryLendingPlatformV3", function () {
 
   async function setup(collateralAddress, lendingAddress) {
     const { platform, tokenInfo, tokenInstances } = await loadFixture();
+
     const collateral = Object.values(tokenInstances).find((token) => token.address.toLowerCase() === collateralAddress.toLowerCase());
     const collateralAmount = tokenInfo[collateral.address].pairType ? 0.000000001 : 1000;
     const depositAmount = toBN("10").pow(tokenInfo[collateral.address].decimals).mul(collateralAmount * 10e9).div(10e9);
@@ -196,7 +198,7 @@ describe("PrimaryLendingPlatformV3", function () {
     const updatePriceTokens = [collateral.address, lending.address];
     // Deposit collateral token
     await collateral.approve( platform.addresses.plpAddress, hre.ethers.constants.MaxUint256);
-    await platform.contractInstance.plpInstance.deposit(collateral.address, depositAmount, [], [], []);
+    await platform.contractInstance.plpInstance.deposit(collateral.address, depositAmount);
     // Supply lending token
     const { priceIds, updateFee } = await getPriceId(
       platform.contractInstance.priceProviderAggregatorInstance,
@@ -212,6 +214,7 @@ describe("PrimaryLendingPlatformV3", function () {
     const lendingTokenAmount = amount.div(10);
 
     await platform.contractInstance.plpInstance.borrow(lending.address, lendingTokenAmount, updatePriceTokens, priceIds, updateData, { value: updateFee });
+
     return {
       platform,
       collateral,
@@ -266,6 +269,7 @@ describe("PrimaryLendingPlatformV3", function () {
         lending,
         lendingInfo,
       } = await helpers.loadFixture(borrowERC20AndUsingERC20ToRepayAtomic);
+
       await processing(
         collateral,
         collateralInfo,
@@ -404,20 +408,20 @@ describe("PrimaryLendingPlatformV3", function () {
     }).timeout(1000000);
 
     it("8. Borrow ERC4626 and using ERC20 to repay atomic", async function () {
-    const {
-    platform,
-    lendingTokenAmount,
-    collateral,
-    collateralInfo,
-    lending,
-    lendingInfo,
-    } = await helpers.loadFixture(borrowERC4626AndUsingERC20ToRepayAtomic);
+        const {
+            platform,
+            lendingTokenAmount,
+            collateral,
+            collateralInfo,
+            lending,
+            lendingInfo,
+          } = await helpers.loadFixture(borrowERC4626AndUsingERC20ToRepayAtomic);
     
-    await processing(
-    collateral,
-    collateralInfo,
-    lending,
-    lendingInfo,
+          await processing(
+            collateral,
+            collateralInfo,
+            lending,
+            lendingInfo,
             lendingTokenAmount,
             platform.contractInstance.plpInstance,
             platform.contractInstance.plpAtomicRepayInstance

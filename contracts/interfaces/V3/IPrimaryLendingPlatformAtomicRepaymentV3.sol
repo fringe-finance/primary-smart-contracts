@@ -13,6 +13,7 @@ interface IPrimaryLendingPlatformAtomicRepaymentV3 {
 	 * @param collateralAmount The amount of collateral to use.
 	 * @param buyCalldata The calldata for the swap operation.
 	 * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+	 * @param positionId The position ID of the user.
 	 * @param updatePriceTokens An array of addresses of the tokens to update the price.
 	 * @param priceIds An array of bytes32 price identifiers to update.
 	 * @param updateData An array of bytes update data for the corresponding price identifiers.
@@ -24,6 +25,7 @@ interface IPrimaryLendingPlatformAtomicRepaymentV3 {
 		uint256 collateralAmount,
 		bytes[] memory buyCalldata,
 		bool isRepayFully,
+		bytes32 positionId,
 		address[] memory updatePriceTokens,
         bytes32[] memory priceIds,
         bytes[] calldata updateData

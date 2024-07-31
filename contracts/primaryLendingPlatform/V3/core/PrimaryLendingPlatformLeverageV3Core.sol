@@ -49,7 +49,6 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
      * @param addingAmount The amount of the project token being added to the position.
      * @param totalDepositedAmount The total amount of the project token deposited in the position.
      * @param amountReceive The amount of the lending token received by the user after the leverage.
-     * @param updatePriceTokens The array of tokens to update price
      */
     event LeveragedBorrow(
         address indexed user,
@@ -61,11 +60,10 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
         uint256 addingAmount,
         uint256 totalDepositedAmount,
         uint256 amountReceive,
-        LeverageType leverageType,
-        address[] updatePriceTokens
+        LeverageType leverageType
     );
 
-    event ClosePosition(address indexed borrower, address indexed lendingToken, uint256 positionIndex, uint256 lendingTokenAmount);
+    event ClosePosition(address indexed borrower, address indexed lendingToken, bytes32 indexed positionId, uint256 lendingTokenAmount);
 
     /**
      * @dev Emitted when the primary lending platform address is set.
@@ -206,17 +204,17 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
     /**
      * @notice Allow a user to close the specific leverage position by short asset.
      * If close successfully will delete the opened position from list of position data
-     * @param positionIndex The id of leverage position.
+     * @param positionId The id of leverage position.
      * @param lendingToken The address of short asset.
      * @param lendingTokenAmount The amount of short asset for closing.
      */
-    function closePositionByShortAsset(uint256 positionIndex, address lendingToken, uint256 lendingTokenAmount) external {
+    function closePositionByShortAsset(bytes32 positionId, address lendingToken, uint256 lendingTokenAmount) external {
         ERC20Upgradeable(lendingToken).safeTransferFrom(msg.sender, address(this), lendingTokenAmount);
         address bLendingToken = primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken;
         ERC20Upgradeable(lendingToken).approve(bLendingToken, lendingTokenAmount);
-        primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, address(this), msg.sender);
+        primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, address(this), msg.sender, positionId);
 
-        emit ClosePosition(msg.sender, lendingToken, positionIndex, lendingTokenAmount);
+        emit ClosePosition(msg.sender, lendingToken, positionId, lendingTokenAmount);
     }
 
     //************* PUBLIC VIEW FUNCTIONS ********************************
@@ -427,8 +425,7 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
             addingAmount,
             totalCollateral,
             amountReceive,
-            LeverageType(leverageType),
-            updatePriceTokens
+            LeverageType(leverageType)
         );
     }
 

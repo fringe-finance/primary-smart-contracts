@@ -201,6 +201,11 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the lending token from the exchange aggregator.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     * @param positionId The position ID of the borrower.
+     * @param updatePriceTokens An array of addresses representing the tokens to update the price for.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return amountReceive The total amount of the lending token received after executing the buy transactions.
      */
     function _repayAtomic(
         address user,
@@ -209,6 +214,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
         uint256 collateralAmount,
         bytes[] memory buyCalldata,
         bool isRepayFully,
+        bytes32 positionId,
         address[] memory updatePriceTokens,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
@@ -224,7 +230,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
             priceIds,
             updateData
         );
-        _repayInternal(user, lendingInfo, amountReceive, isRepayFully);
+        _repayInternal(user, lendingInfo, amountReceive, isRepayFully, positionId);
         _afterRepay(user, prjInfo, lendingInfo);
 
         emit AtomicRepayment(user, prjInfo.addr, lendingInfo.addr, collateralAmount - tokenAmountRemaining, amountReceive);
@@ -285,14 +291,15 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      * @param lendingInfo Information about the lending token, including its address and type.
      * @param amountReceive The total amount of the lending token received after the repayment process.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
+     * @param positionId The position ID of the borrower.
      * @dev This function handles the actual repayment, lending token balances, transfers remaining balances to the sender, and defers liquidity checks if the received amount is less than the total outstanding.
      */
-    function _repayInternal(address user, Asset.Info memory lendingInfo, uint256 amountReceive, bool isRepayFully) internal {
+    function _repayInternal(address user, Asset.Info memory lendingInfo, uint256 amountReceive, bool isRepayFully, bytes32 positionId) internal {
         uint256 totalOutStanding = getTotalOutstanding(user, lendingInfo.addr);
         if (isRepayFully) require(amountReceive >= totalOutStanding, "AtomicRepayment: Amount receive not enough to repay fully");
 
         Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(lendingInfo.addr).bLendingToken, lendingInfo.addr, amountReceive);
-        primaryLendingPlatform.repayFromRelatedContract(lendingInfo.addr, amountReceive, address(this), user);
+        primaryLendingPlatform.repayFromRelatedContract(lendingInfo.addr, amountReceive, address(this), user, positionId);
     }
 
     /**

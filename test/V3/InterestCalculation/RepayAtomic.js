@@ -15,6 +15,7 @@ const { estimateBuy } = require("../estimate-scripts");
 const { expect } = require("chai");
 const { EvmPriceServiceConnection } = require("@pythnetwork/pyth-evm-js");
 const { Dex } = require("../estimate-scripts/enum/dexType");
+const { deployment } = require("../../../scripts/V3/deployPLP/deploymentPLP");
 
 const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
@@ -23,6 +24,8 @@ const connection = new EvmPriceServiceConnection("https://hermes.pyth.network")
 describe("PrimaryLendingPlatformV3", function () {
   let signers;
   let deployMaster;
+  let UniswapPriceProviderMock;
+  let uniswapPriceProviderMockInstance;
 
   const getTokenTuple = (tokenInfo) => {
     let tokenIndex;
@@ -41,6 +44,16 @@ describe("PrimaryLendingPlatformV3", function () {
     }
     return [tokenInfo.address, tokenIndex];
   };
+
+  async function setHighPrice(tokenAddress, tokenDecimals, priceProviderAggregatorInstance) {
+    let { collateralEvaluation, } = await priceProviderAggregatorInstance.getEvaluation(tokenAddress, toBN("10").pow(tokenDecimals));
+    await uniswapPriceProviderMockInstance.setTokenAndPrice(tokenAddress, toBN(collateralEvaluation).mul(10));
+    await priceProviderAggregatorInstance.setTokenAndPriceProvider(tokenAddress, uniswapPriceProviderMockInstance.address);
+  }
+  async function setLowPrice(tokenAddress, tokenDecimals, priceProviderAggregatorInstance, price) {
+    await uniswapPriceProviderMockInstance.setTokenAndPrice(tokenAddress, price);
+    await priceProviderAggregatorInstance.setTokenAndPriceProvider(tokenAddress, uniswapPriceProviderMockInstance.address);
+  }
 
   async function getPriceId(PriceContract, tokenAddressList) {
     const { priceIds, updateFee } = await PriceContract.getExpiredPriceFeeds(
@@ -110,6 +123,10 @@ describe("PrimaryLendingPlatformV3", function () {
     console.log("Completed to deploy platform");
     console.log();
 
+    const addresses = await deployment();
+    UniswapPriceProviderMock = await hre.ethers.getContractFactory("UniswapV2PriceProviderMock");
+    uniswapPriceProviderMockInstance = UniswapPriceProviderMock.attach(addresses.uniswapV2PriceProviderMockAddress).connect(deployMaster)
+
     return { platform, tokenInfo, tokenInstances };
   }
 
@@ -151,19 +168,26 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
 
-      const lendingTokenAmount = toBN(100000);
       const pitRemaining = await platform.contractInstance.plpInstance.convertPitRemaining(deployMaster.address, lendingToken.address);
+      const lendingTokenAmount = toBN(100);
 
       await platform.contractInstance.plpInstance.borrow(lendingToken.address, pitRemaining, updatePriceTokens, priceIds, updateData, {value: updateFee})
       
+      let hf = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
+      while(hf[0].gt(hf[1])) {
+        await setHighPrice(lendingToken.address, tokenInfo[lendingToken.address].decimals, platform.contractInstance.priceProviderAggregatorInstance)
+        hf = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
+        console.log(hf[0], hf[1])
+      }
+      
       const estimateData = await estimateBuy(tokenInfo[prjToken.address], tokenInfo[lendingToken.address], lendingTokenAmount, platform.contractInstance.plpAtomicRepayInstance.address, "0.05", "1", Dex.Paraswap, deployMaster.provider);
 
-      await expect(platform.contractInstance.plpAtomicRepayInstance.repayAtomic(lendingToken.address, prjToken.address, estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData[0], false, priceIds, updateData, {value: updateFee})).revertedWith("AtomicRepayment: lendingTokenAmount exceeds pit remaining")
+      await expect(platform.contractInstance.plpAtomicRepayInstance.repayAtomic(getTokenTuple(tokenInfo[lendingToken.address]), getTokenTuple(tokenInfo[prjToken.address]), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, false, updatePriceTokens, priceIds, updateData, {value: updateFee})).revertedWith("AtomicRepayment: lendingTokenAmount exceeds pit remaining")
     }).timeout(1000000)
 
     it("2. Test when add _deferLiquidityCheck function and isRepayFully == true", async function () {
@@ -181,7 +205,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, hre.ethers.constants.MaxUint256);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
@@ -196,18 +220,14 @@ describe("PrimaryLendingPlatformV3", function () {
       const pitRemaining2 = await platform.contractInstance.plpInstance.convertPitRemaining(deployMaster.address, lendingToken2.address);
       await platform.contractInstance.plpInstance.borrow(lendingToken2.address, pitRemaining2, updatePriceTokens, priceIds, updateData, {value: updateFee})
 
-      const lendingTokenAmount = pitRemaining.div(2);
+      const lendingTokenAmount = pitRemaining.add(2);
 
       const hfBefore = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
       
       const estimateData = await estimateBuy(tokenInfo[prjToken.address], tokenInfo[lendingToken.address], lendingTokenAmount, platform.contractInstance.plpAtomicRepayInstance.address, "0.05", "1", Dex.Paraswap, deployMaster.provider);
 
-      await platform.contractInstance.plpAtomicRepayInstance.repayAtomic(lendingToken.address, prjToken.address, estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData[0], true, updatePriceTokens, priceIds, updateData, {value: updateFee})
+      await expect(platform.contractInstance.plpAtomicRepayInstance.repayAtomic(getTokenTuple(tokenInfo[lendingToken.address]), getTokenTuple(tokenInfo[prjToken.address]), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, true, updatePriceTokens, priceIds, updateData, {value: updateFee})).revertedWith('AtomicRepayment: lendingTokenAmount exceeds pit remaining')
 
-      const hfAfter = await platform.contractInstance.plpInstance.healthFactor(deployMaster.address);
-
-      expect(hfBefore[0]).to.be.lt(hfBefore[1])
-      expect(hfAfter[0]).to.be.gt(hfAfter[1])
     }).timeout(1000000)
     it("3. Repay successfully after adding _deferLiquidityCheck function", async function () {
       const { platform, tokenInstances, tokenInfo } = await helpers.loadFixture(setup);
@@ -222,7 +242,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const updateData = await getPriceFeedsUpdateData(priceIds);
       
       await prjToken.approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.deposit(prjToken.address, depositAmount, [prjToken.address], [], []);
       const bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
       await lendingToken.approve(bToken, hre.ethers.constants.MaxUint256);
       await platform.contractInstance.plpInstance.supply(lendingToken.address, supplyAmount, updatePriceTokens, priceIds, updateData, {value: updateFee})
@@ -237,7 +257,7 @@ describe("PrimaryLendingPlatformV3", function () {
       const depositedAmountBefore = await platform.contractInstance.plpInstance.depositedAmount(deployMaster.address, prjToken.address);
       const totalOutstandingBefore = await platform.contractInstance.plpInstance.outstanding(deployMaster.address, lendingToken.address);
 
-      const tx = await platform.contractInstance.plpAtomicRepayInstance.repayAtomic(lendingToken.address, prjToken.address, estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData[0], true, updatePriceTokens, priceIds, updateData, {value: updateFee})
+      const tx = await platform.contractInstance.plpAtomicRepayInstance.repayAtomic(getTokenTuple(tokenInfo[lendingToken.address]), getTokenTuple(tokenInfo[prjToken.address]), estimateData.estimateAmountIn.mul(105).div(100), estimateData.buyCallData, true, updatePriceTokens, priceIds, updateData, {value: updateFee})
 
       const rs = await tx.wait();
       const event = rs.events.find((x) => x.event === "AtomicRepayment").args;

@@ -78,9 +78,8 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param tokenPrj The address of the project token that was deposited.
      * @param prjDepositAmount The amount of project tokens that were deposited.
      * @param beneficiary The address of the beneficiary who will receive the deposited tokens.
-     * @param updatePriceTokens An array of tokens to update the price of.
      */
-    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary, address[] updatePriceTokens);
+    event Deposit(address indexed who, address indexed tokenPrj, uint256 prjDepositAmount, address indexed beneficiary);
 
     /**
      * @dev Emitted when a user withdraws project tokens.
@@ -88,15 +87,8 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param tokenPrj The address of the project token that was withdrawn.
      * @param prjWithdrawAmount The amount of project tokens that were withdrawn.
      * @param beneficiary The address of the beneficiary who will receive the withdrawn tokens.
-     * @param updatePriceTokens An array of tokens to update the price of.
      */
-    event Withdraw(
-        address indexed who,
-        address indexed tokenPrj,
-        uint256 prjWithdrawAmount,
-        address indexed beneficiary,
-        address[] updatePriceTokens
-    );
+    event Withdraw(address indexed who, address indexed tokenPrj, uint256 prjWithdrawAmount, address indexed beneficiary);
 
     /**
      * @dev Emitted when a user supplies lending tokens.
@@ -105,15 +97,13 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param supplyAmount The amount of tokens that were supplied.
      * @param supplyBToken The address of the bToken that was received in exchange for the supplied tokens.
      * @param amountSupplyBTokenReceived The amount of bTokens that were received in exchange for the supplied tokens.
-     * @param updatePriceTokens An array of tokens to update the price of.
      */
     event Supply(
         address indexed who,
         address indexed supplyToken,
         uint256 supplyAmount,
         address indexed supplyBToken,
-        uint256 amountSupplyBTokenReceived,
-        address[] updatePriceTokens
+        uint256 amountSupplyBTokenReceived
     );
 
     /**
@@ -122,9 +112,8 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param redeemToken The address of the token that was redeemed.
      * @param redeemBToken The address of the bToken that was redeemed.
      * @param redeemAmount The amount of bTokens that were redeemed.
-     * @param updatePriceTokens An array of tokens to update the price of.
      */
-    event Redeem(address indexed who, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmount, address[] updatePriceTokens);
+    event Redeem(address indexed who, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmount);
 
     /**
      * @dev Emitted when a user redeems underlying token for the bToken.
@@ -132,15 +121,8 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param redeemToken The address of the token that was redeemed.
      * @param redeemBToken The address of the bToken that was redeemed.
      * @param redeemAmountUnderlying The amount of underlying tokens that were redeemed.
-     * @param updatePriceTokens An array of tokens to update the price of.
      */
-    event RedeemUnderlying(
-        address indexed who,
-        address indexed redeemToken,
-        address indexed redeemBToken,
-        uint256 redeemAmountUnderlying,
-        address[] updatePriceTokens
-    );
+    event RedeemUnderlying(address indexed who, address indexed redeemToken, address indexed redeemBToken, uint256 redeemAmountUnderlying);
 
     /**
      * @dev Emitted when a user borrows lending tokens.
@@ -156,8 +138,9 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param borrowToken The address of the token that was repaid.
      * @param borrowAmount The amount of tokens that were repaid.
      * @param isPositionFullyRepaid A boolean indicating whether the entire borrow position was repaid.
+     * @param positionId The ID of the borrow position.
      */
-    event RepayBorrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, bool isPositionFullyRepaid);
+    event RepayBorrow(address indexed who, address indexed borrowToken, uint256 borrowAmount, bool isPositionFullyRepaid, bytes32 indexed positionId);
 
     /**
      * @dev Emitted when the moderator contract address is updated.
@@ -445,7 +428,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
         ERC20Upgradeable(projectToken).safeTransferFrom(user, address(this), projectTokenAmount);
         _calcDepositPosition(projectToken, projectTokenAmount, beneficiary);
 
-        emit Deposit(user, projectToken, projectTokenAmount, beneficiary, updatePriceTokens);
+        emit Deposit(user, projectToken, projectTokenAmount, beneficiary);
     }
 
     /**
@@ -563,7 +546,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
 
         _calcAndTransferDepositPosition(projectToken, projectTokenAmount, user, beneficiary);
 
-        emit Withdraw(user, projectToken, projectTokenAmount, beneficiary, updatePriceTokens);
+        emit Withdraw(user, projectToken, projectTokenAmount, beneficiary);
         return projectTokenAmount;
     }
 
@@ -595,7 +578,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
             revert Errors.MintedAmountIsZero();
         }
 
-        emit Supply(user, lendingToken, lendingTokenAmount, address(bLendingToken), mintedAmount, updatePriceTokens);
+        emit Supply(user, lendingToken, lendingTokenAmount, address(bLendingToken), mintedAmount);
     }
 
     //************* Redeem FUNCTION ********************************
@@ -623,7 +606,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
             revert Errors.RedeemErrorIsNotZero();
         }
 
-        emit Redeem(user, lendingToken, address(bLendingToken), bLendingTokenAmount, updatePriceTokens);
+        emit Redeem(user, lendingToken, address(bLendingToken), bLendingTokenAmount);
     }
 
     //************* RedeemUnderlying FUNCTION ********************************
@@ -652,7 +635,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
             revert Errors.RedeemUnderlyingErrorIsNotZero();
         }
 
-        emit RedeemUnderlying(user, lendingToken, address(bLendingToken), lendingTokenAmount, updatePriceTokens);
+        emit RedeemUnderlying(user, lendingToken, address(bLendingToken), lendingTokenAmount);
     }
 
     //************* Borrow FUNCTION ********************************
@@ -670,18 +653,13 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
         }
         priceOracle.updateMultiFinalPrices(updatePriceTokens);
         updateInterestInAllBorrowPositions(user);
-        (, uint256 lendingTokenAmountInUSD) = getTokenEvaluation(lendingToken, lendingTokenAmount);
 
-        uint256 pitRemaining = convertPitRemaining(user, lendingToken);
-        if (pitRemaining == 0) {
-            revert Errors.PitRemainingIsZero();
+        uint256 availableToBorrow = getLendingAvailableToBorrow(user, lendingToken);
+        if (availableToBorrow == 0) {
+            revert Errors.AvailableAmountToBorrowIsZero();
         }
-        if (lendingTokenAmount > pitRemaining) {
-            lendingTokenAmount = pitRemaining;
-        }
-
-        if (getBorrowedPerLendingTokenInUSD(lendingToken) + lendingTokenAmountInUSD > borrowLimitPerLendingToken[lendingToken]) {
-            revert Errors.TotalBorrowExceededLimit();
+        if (lendingTokenAmount > availableToBorrow) {
+            lendingTokenAmount = availableToBorrow;
         }
 
         _calcBorrowPosition(user, lendingToken, lendingTokenAmount);
@@ -723,6 +701,26 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
         info.bLendingToken.borrowTo(borrower, lendingTokenAmount);
     }
 
+    /**
+     * @dev Calculates the estimated lending token available amount for borrowing.
+     * @param user The address of the user.
+     * @param lendingToken The address of the lending token.
+     * @return availableToBorrow The lending token available amount for borrowing.
+     */
+    function getLendingAvailableToBorrow(address user, address lendingToken) public view returns (uint256 availableToBorrow) {
+        uint256 pitRemaining = convertEstimatedPitRemaining(user, lendingToken);
+        (, uint256 pitRemainingInUSD) = getTokenEvaluation(lendingToken, pitRemaining);
+        uint256 limitBorrowPerCollateralInUSD = borrowLimitPerLendingToken[lendingToken] - getBorrowedPerLendingTokenInUSD(lendingToken);
+
+        if (pitRemainingInUSD <= limitBorrowPerCollateralInUSD) {
+            availableToBorrow = pitRemaining;
+        } else {
+            uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
+            (, uint256 lendingTokenPrice) = getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
+            availableToBorrow = (limitBorrowPerCollateralInUSD * (10 ** lendingTokenDecimals)) / lendingTokenPrice;
+        }
+    }
+
     //************* Repay FUNCTION ********************************
 
     /**
@@ -744,7 +742,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @return amount of lending tokens actually repaid
      */
     function repay(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant returns (uint256) {
-        return _repay(msg.sender, msg.sender, lendingToken, lendingTokenAmount);
+        return _repay(msg.sender, msg.sender, lendingToken, lendingTokenAmount, bytes32(0));
     }
 
     /**
@@ -766,15 +764,17 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param lendingTokenAmount The amount of lending tokens to repay
      * @param repairer The address that initiated the repair transaction
      * @param borrower The borrower's address
+     * @param positionId The ID of the borrower's position
      * @return amount of lending tokens actually repaid
      */
     function repayFromRelatedContract(
         address lendingToken,
         uint256 lendingTokenAmount,
         address repairer,
-        address borrower
+        address borrower,
+        bytes32 positionId
     ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant returns (uint256) {
-        return _repay(repairer, borrower, lendingToken, lendingTokenAmount); // under normal conditions: repairer == borrower
+        return _repay(repairer, borrower, lendingToken, lendingTokenAmount, positionId); // under normal conditions: repairer == borrower
     }
 
     /**
@@ -783,9 +783,10 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param borrower The borrower's address.
      * @param lendingToken The lending token's address.
      * @param lendingTokenAmount The amount of lending tokens to repay.
+     * @param positionId The ID of the borrower's position.
      * @return amount of lending tokens actually repaid.
      */
-    function _repay(address repairer, address borrower, address lendingToken, uint256 lendingTokenAmount) internal returns (uint256) {
+    function _repay(address repairer, address borrower, address lendingToken, uint256 lendingTokenAmount, bytes32 positionId) internal returns (uint256) {
         if (lendingTokenAmount == 0) {
             revert Errors.InvalidLendingAmount();
         }
@@ -812,7 +813,7 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
             isPositionFullyRepaid = _repayPartially(lendingToken, lendingTokenAmountToRepay, borrowPosition_);
         }
 
-        emit RepayBorrow(borrower, lendingToken, amountRepaid, isPositionFullyRepaid);
+        emit RepayBorrow(borrower, lendingToken, amountRepaid, isPositionFullyRepaid, positionId);
         return amountRepaid;
     }
 

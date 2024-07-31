@@ -21,7 +21,7 @@ const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
 const connection = new EvmPriceServiceConnection("https://hermes.pyth.network")
 
-//-----------------------------------SET UP BEFORE RUN SCRIPT TEST-------------------------------------------
+//-----------------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------
 //------Set file config_general.json:------------------------------------------------------------------------
 //------priceOracle.priceProcessingOracle.volatilityCapUpPercent: 65000--------------------------------------
@@ -205,13 +205,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       weth = tokenInstances.weth;
 
       let msgValue = ethers.utils.parseEther("1");
-      await platform.contractInstance.plpWrappedTokenGatewayInstance.connect(signer1).deposit(
-        msgValue,
-        [],
-        [],
-        [],
-        0,
-        { value: msgValue });
+      await platform.contractInstance.plpWrappedTokenGatewayInstance.connect(signer1).deposit({ value: msgValue });
       console.log(signer1.address + " deposited: ", msgValue.toString());
 
       lendingToken = tokenInstances.usdc;
@@ -557,13 +551,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       let estimatedHfBefore = await platform.contractInstance.plpInstance.healthFactor(signer1.address);
       if (estimatedHfBefore[0] == 0) {
         let msgValue = ethers.utils.parseEther("10");
-        await platform.contractInstance.plpWrappedTokenGatewayInstance.connect(signer1).deposit(
-          msgValue,
-          [],
-          [],
-          [],
-          0,
-          { value: msgValue });
+        await platform.contractInstance.plpWrappedTokenGatewayInstance.connect(signer1).deposit({ value: msgValue });
         console.log(signer1.address + " deposited: ", msgValue.toString());
         const PITRemaining = await platform.contractInstance.plpInstance.convertPitRemaining(signer1.address, lendingToken.address)
         console.log("PITRemaining of signer1: ", PITRemaining.toString());

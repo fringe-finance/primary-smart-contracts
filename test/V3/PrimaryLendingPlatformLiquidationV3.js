@@ -22,7 +22,7 @@ const BN = hre.ethers.BigNumber;
 const toBN = (num) => BN.from(num);
 const connection = new EvmPriceServiceConnection("https://hermes.pyth.network")
 
-//-----------------------------------SET UP BEFORE RUN SCRIPT TEST-------------------------------------------
+//-----------------------------------------------------------------------------------------------------------
 //-----------------------------------------------------------------------------------------------------------
 //------Set file config_general.json:------------------------------------------------------------------------
 //------priceOracle.priceProcessingOracle.volatilityCapUpPercent: 65000--------------------------------------
@@ -142,18 +142,18 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
     await setBalance(USDC, liquidator, toBN("10000000000000000000000000000000000000000"));
     await setBalance(USDC_USDT, liquidator, toBN("10000000000000000000000000000000000000000"));
     await tokenInstances.usdc.connect(liquidator).approve(tokenInstances.usdc_4626.address, hre.ethers.constants.MaxUint256);
-    await tokenInstances.usdc_4626.connect(liquidator).deposit("10000000000", liquidator.address, [], [], []);
+    await tokenInstances.usdc_4626.connect(liquidator).deposit("10000000000", liquidator.address);
 
     await setBalance(DAI, signer1, toBN("10000000000000000000000000000000000000000"));
     await setBalance(USDC, signer1, toBN("10000000000000000000000000000000000000000"));
     await setBalance(USDC_USDT, signer1, toBN("10000000000000000000000000000000000000000"));
     await tokenInstances.usdc.connect(signer1).approve(tokenInstances.usdc_4626.address, hre.ethers.constants.MaxUint256);
-    await tokenInstances.usdc_4626.connect(signer1).deposit("10000000000", signer1.address, [], [], []);
+    await tokenInstances.usdc_4626.connect(signer1).deposit("10000000000", signer1.address);
 
     await setBalance(USDC, signer2, toBN("10000000000000000000000000000000000000000"));
     await setBalance(USDC_USDT, signer2, toBN("10000000000000000000000000000000000000000"));
     await tokenInstances.usdc.connect(signer2).approve(tokenInstances.usdc_4626.address, hre.ethers.constants.MaxUint256);
-    await tokenInstances.usdc_4626.connect(signer2).deposit("10000000000", signer2.address, [], [], []);
+    await tokenInstances.usdc_4626.connect(signer2).deposit("10000000000", signer2.address);
 
     console.log("Completed to set up tokens");
 
@@ -224,7 +224,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
 
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
@@ -754,7 +754,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
 
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(weth.address)).bLendingToken;
@@ -1271,7 +1271,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
       console.log("depositAmount", depositAmount)
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
@@ -1379,7 +1379,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
       console.log("depositAmount", depositAmount)
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
@@ -1488,7 +1488,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
       console.log("depositAmount", depositAmount)
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
@@ -1608,7 +1608,7 @@ describe("PrimaryLendingPlatformLiquidationV3", function () {
       updateData = await getPriceFeedsUpdateData(priceIds);
       console.log("depositAmount", depositAmount)
       await prjToken.connect(signer1).approve(platform.addresses.plpAddress, depositAmount);
-      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount, [], [], []);
+      await platform.contractInstance.plpInstance.connect(signer1).deposit(prjToken.address, depositAmount);
       console.log(signer1.address + " deposited: ", depositAmount.toString());
 
       bToken = (await platform.contractInstance.plpInstance.lendingTokenInfo(lendingToken.address)).bLendingToken;
