@@ -697,7 +697,8 @@ module.exports = {
         }
         //====================================================
         //setting params
-
+        log();
+        log("***** SETTING PROXY PARAMS *****");
         proxyAdmin = ProxyAdmin.attach(proxyAdminAddress).connect(deployMaster);
         priceOracleProvider = PriceOracle.attach(priceOracleAddress).connect(deployMaster);
         pythPriceProvider = PythPriceProvider.attach(pythPriceProviderAddress).connect(deployMaster);
@@ -710,7 +711,9 @@ module.exports = {
         wstETHPriceProvider = WstETHPriceProvider.attach(wstETHPriceProviderAddress).connect(deployMaster);
         priceProviderAggregator = PriceProviderAggregator.attach(priceProviderAggregatorAddress).connect(deployMaster);
         priceOracleProvider = PriceOracle.attach(priceOracleAddress).connect(deployMaster);
-
+        
+        log();
+        log("***** SETTING LOGIC PARAMS *****");
         pythPriceProviderImplementation = PythPriceProvider.attach(pythPriceProviderLogicAddress).connect(deployMaster);
         chainlinkPriceProviderImplementation = ChainlinkPriceProvider.attach(chainlinkPriceProviderLogicAddress).connect(deployMaster);
         backendPriceProviderImplementation = BackendPriceProvider.attach(backendPriceProviderLogicAddress).connect(deployMaster);
@@ -959,7 +962,7 @@ module.exports = {
                         });
                 }
             }
-            
+
             {
                 const tokenDecimal = await chainlinkPriceProvider.getPriceDecimals();
                 const currentImplementation = await proxyAdmin.getProxyImplementation(chainlinkPriceProvider.address);
