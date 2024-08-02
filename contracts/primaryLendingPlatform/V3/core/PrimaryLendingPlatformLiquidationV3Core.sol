@@ -316,9 +316,14 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
             lrfDenominator = 1;
         } else {
             Ratio memory kf = liquidatorRewardCalcFactor;
-            lrfNumerator = (kf.numerator * hfNumerator > kf.numerator * hfDenominator + kf.denominator * hfDenominator)
-                ? 0
-                : (kf.numerator * hfDenominator + kf.denominator * hfDenominator - kf.numerator * hfNumerator);
+            bool isNegativeNumerator = false;
+            (lrfNumerator, isNegativeNumerator) = _checkNegativeNumber(
+                kf.numerator * hfDenominator + kf.denominator * hfDenominator,
+                kf.numerator * hfNumerator
+            );
+            if (isNegativeNumerator) {
+                lrfNumerator = 0;
+            }
             lrfDenominator = kf.denominator * hfDenominator;
             uint256 lrfNumeratorMul = lrfNumerator * maxLRF.denominator;
             uint256 maxLRFNumerator = maxLRF.numerator * lrfDenominator;
@@ -363,14 +368,14 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         maxLAParams.calculatedMaxLA = maxLAParams.denominatorMaxLA > 0 && maxLAParams.numeratorMaxLA > 0
             ? (maxLAParams.numeratorMaxLA * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / maxLAParams.denominatorMaxLA
             : 0;
-        uint256 estimatedOutstandingInUSDMul = estimatedOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
-        maxLAParams.maxLACompare = maxLAParams.calculatedMaxLA > estimatedOutstandingInUSDMul
-            ? estimatedOutstandingInUSD
-            : maxLAParams.calculatedMaxLA / 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
 
-        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        (, uint256 lendingPrice) = getTokenPrice(lendingToken, lendingTokenMultiplier);
-        maxLA = (maxLAParams.maxLACompare * lendingTokenMultiplier) / lendingPrice;
+        if (maxLAParams.calculatedMaxLA >= estimatedOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) {
+            maxLA = estimatedOutstanding;
+        } else {
+            uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
+            (, uint256 lendingPrice) = getTokenPrice(lendingToken, lendingTokenMultiplier);
+            maxLA = (maxLAParams.calculatedMaxLA * lendingTokenMultiplier) / (10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / lendingPrice;
+        }
     }
 
     /**
@@ -466,28 +471,41 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         IPrimaryLendingPlatformV3.Ratio memory lvrProjectToken = primaryLendingPlatform.projectTokenInfo(projectToken).loanToValueRatio;
         IPrimaryLendingPlatformV3.Ratio memory lvrLendingToken = primaryLendingPlatform.lendingTokenInfo(lendingToken).loanToValueRatio;
 
-        numeratorMaxLA =
-            _checkNegativeNumber(totalPIT * targetHf.denominator, targetHf.numerator * totalEstimatedWeightedLoanInUSD) *
-            lrfDenominator *
-            targetHf.denominator *
-            lvrProjectToken.denominator *
-            lvrLendingToken.numerator;
-        denominatorMaxLA =
-            _checkNegativeNumber(
-                lrfNumerator * lvrProjectToken.numerator * targetHf.denominator * lvrLendingToken.numerator,
-                lrfDenominator * lvrProjectToken.denominator * targetHf.numerator * lvrLendingToken.denominator
-            ) *
-            targetHf.denominator;
+        uint256 calculatedNumerator;
+        uint256 calculatedDenominator;
+        bool isNegativeNumerator = false;
+        bool isNegativeDenominator = false;
+
+        (calculatedNumerator, isNegativeNumerator) = _checkNegativeNumber(
+            totalPIT * targetHf.denominator,
+            targetHf.numerator * totalEstimatedWeightedLoanInUSD
+        );
+        (calculatedDenominator, isNegativeDenominator) = _checkNegativeNumber(
+            lrfNumerator * lvrProjectToken.numerator * targetHf.denominator * lvrLendingToken.numerator,
+            lrfDenominator * lvrProjectToken.denominator * targetHf.numerator * lvrLendingToken.denominator
+        );
+
+        if (isNegativeNumerator != isNegativeDenominator) {
+            return (0, 1);
+        }
+        numeratorMaxLA = calculatedNumerator * lrfDenominator * targetHf.denominator * lvrProjectToken.denominator * lvrLendingToken.numerator;
+        denominatorMaxLA = calculatedDenominator * targetHf.denominator;
     }
 
     /**
-     * @dev Computes the absolute difference between two unsigned integers.
-     * @param firstNumber The first unsigned integer.
-     * @param secondNumber The second unsigned integer.
-     * @return result The absolute difference between the two input numbers.
+     * @dev Internal function to check if the difference between two numbers is negative and calculates the absolute difference.
+     * @param firstNumber The first number to compare.
+     * @param secondNumber The second number to compare.
+     * @return result The absolute difference between the two numbers.
+     * @return isNegative A boolean indicating if the difference is negative.
      */
-    function _checkNegativeNumber(uint256 firstNumber, uint256 secondNumber) internal pure returns (uint256 result) {
-        result = secondNumber > firstNumber ? secondNumber - firstNumber : firstNumber - secondNumber;
+    function _checkNegativeNumber(uint256 firstNumber, uint256 secondNumber) internal pure returns (uint256 result, bool isNegative) {
+        if (firstNumber > secondNumber) {
+            result = firstNumber - secondNumber;
+        } else {
+            result = secondNumber - firstNumber;
+            isNegative = true;
+        }
     }
 
     /**
