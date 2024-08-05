@@ -102,4 +102,67 @@ contract PrimaryLendingPlatformLiquidationV3 is PrimaryLendingPlatformLiquidatio
 
         return assetAmounts[0];
     }
+
+    /**
+     * @dev Calculates the liquidator reward factor (LRF) for a given position after after updating related token's prices.
+     * ####Formula:
+     * - LRF = (1 + (1 - HF) * k)
+     * @param account The address of the borrower whose position is being considered.
+     * @return lrfNumerator The numerator of the liquidator reward factor.
+     * @return lrfDenominator The denominator of the liquidator reward factor.
+     */
+    function liquidatorRewardFactorWithUpdatePrices(
+        address account,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 lrfNumerator, uint256 lrfDenominator) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
+        return liquidatorRewardFactor(account);
+    }
+
+    /**
+     * @dev Returns the estimated reward amount for a given parameters.
+     * @param account The address of the account.
+     * @param projectToken The address of the project token.
+     * @param lendingToken The address of the lending token.
+     * @param lendingTokenAmount The amount of lending token.
+     * @return The lending token amount.
+     * @return The project token amount to send to the liquidator.
+     */
+    function getEstimatedRewardAmountWithUpdatePrices(
+        address account,
+        address projectToken,
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256, uint256) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices(priceIds, updateData);
+        return getEstimatedRewardAmount(account, projectToken, lendingToken, lendingTokenAmount);
+    }
+
+    /**
+     * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token after updating related token's prices.
+     *
+     * Formula:
+     * - MinLA = min(MaxLA, MPA)
+     * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
+     * @param _account The account for which to calculate the liquidation amount.
+     * @param _projectToken The project token address.
+     * @param _lendingToken The lending token address.
+     * @param priceIds An array of bytes32 price identifiers to update.
+     * @param updateData An array of bytes update data for the corresponding price identifiers.
+     * @return maxLA The maximum liquidation amount.
+     * @return minLA The minimum liquidation amount.
+     */
+    function getLiquidationAmountWithUpdatePrices(
+        address _account,
+        address _projectToken,
+        address _lendingToken,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable returns (uint256 maxLA, uint256 minLA) {
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
+        return getLiquidationAmount(_account, _projectToken, _lendingToken);
+    }
 }

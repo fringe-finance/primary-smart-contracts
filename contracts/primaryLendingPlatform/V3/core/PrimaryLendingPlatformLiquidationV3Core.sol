@@ -287,7 +287,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         address projectToken,
         address lendingToken,
         uint256 lendingTokenAmount
-    ) external view returns (uint256, uint256) {
+    ) public view returns (uint256, uint256) {
         uint256 projectTokenToSendToLiquidator = _getProjectTokenToSendToLiquidator(account, projectToken, lendingToken, lendingTokenAmount);
 
         uint256 depositedProjectTokenAmount = primaryLendingPlatform.depositedAmount(account, projectToken);
@@ -387,7 +387,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
      * @return maxLA The minimum liquidation amount.
      * @return minLA The maximum liquidation amount.
      */
-    function getLimitLiquidationAmount(
+    function getLiquidationAmount(
         address account,
         address projectToken,
         address lendingToken
@@ -562,7 +562,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
             revert Errors.InvalidHealthFactor();
         }
 
-        (uint256 maxLA, uint256 minLA) = getLimitLiquidationAmount(_account, _projectToken, _lendingToken);
+        (uint256 maxLA, uint256 minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
         if (minLA != maxLA) {
             if (_lendingTokenAmount < minLA || _lendingTokenAmount > maxLA) {
                 revert Errors.NotIncludedAmount();
