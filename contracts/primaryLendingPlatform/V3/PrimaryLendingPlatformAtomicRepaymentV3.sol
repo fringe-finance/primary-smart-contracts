@@ -53,19 +53,19 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
         bytes[] calldata updateData
     ) external payable nonReentrant isProjectTokenListed(prjToken.addr) isLendingTokenListed(lendingToken.addr) {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _repayAtomic(msg.sender, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, bytes32(0), updatePriceTokens, priceIds, updateData);
+        _repayAtomic(msg.sender, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, bytes32(0), updatePriceTokens);
     }
 
     /**
      * @dev Repays a loan atomically using the given project token as collateral.
-     * 
+     *
      * Requirements:
      * - The project token is listed on the platform.
      * - The lending token is listed on the platform.
      * - Collateral amount must be greater than 0.
      * - The user must have a position for the given project token and lending token.
      * - The caller must be a related contract.
-     * 
+     *
      * Effects:
      * - Update price of related tokens.
      * - Transfers the collateral amount from the user to the contract.
@@ -109,7 +109,16 @@ contract PrimaryLendingPlatformAtomicRepaymentV3 is PrimaryLendingPlatformAtomic
         returns (uint256 amountReceivedLendingToken)
     {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        amountReceivedLendingToken = _repayAtomic(user, lendingToken, prjToken, collateralAmount, buyCalldata, isRepayFully, positionId, updatePriceTokens, priceIds, updateData);
+        amountReceivedLendingToken = _repayAtomic(
+            user,
+            lendingToken,
+            prjToken,
+            collateralAmount,
+            buyCalldata,
+            isRepayFully,
+            positionId,
+            updatePriceTokens
+        );
     }
 
     /**

@@ -203,8 +203,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
      * @param positionId The position ID of the borrower.
      * @param updatePriceTokens An array of addresses representing the tokens to update the price for.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
      * @return amountReceive The total amount of the lending token received after executing the buy transactions.
      */
     function _repayAtomic(
@@ -215,21 +213,10 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
         bytes[] memory buyCalldata,
         bool isRepayFully,
         bytes32 positionId,
-        address[] memory updatePriceTokens,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
+        address[] memory updatePriceTokens
     ) internal returns (uint256 amountReceive) {
         uint256 tokenAmountRemaining;
-        (tokenAmountRemaining, amountReceive) = _beforeRepay(
-            user,
-            prjInfo,
-            lendingInfo,
-            collateralAmount,
-            buyCalldata,
-            updatePriceTokens,
-            priceIds,
-            updateData
-        );
+        (tokenAmountRemaining, amountReceive) = _beforeRepay(user, prjInfo, lendingInfo, collateralAmount, buyCalldata, updatePriceTokens);
         _repayInternal(user, lendingInfo, amountReceive, isRepayFully, positionId);
         _afterRepay(user, prjInfo, lendingInfo);
 
@@ -244,8 +231,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for buying the lending token from the exchange aggregator.
      * @param updatePriceTokens An array of addresses representing the tokens to update the price for.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
      * @return tokenAmountRemaining The remaining collateral amount after the repayment process.
      * @return amountReceive The total amount of the lending token received after executing the buy transactions.
      * @dev This function handles collateral deposit, unwrapping project token, buying lending tokens, and managing remaining collateral.
@@ -257,9 +242,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
         Asset.Info memory lendingInfo,
         uint256 collateralAmount,
         bytes[] memory buyCalldata,
-        address[] memory updatePriceTokens,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
+        address[] memory updatePriceTokens
     ) internal returns (uint256 tokenAmountRemaining, uint256 amountReceive) {
         _transferDepositPosition(user, prjInfo, collateralAmount);
 
@@ -274,15 +257,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
         );
 
         //deposit collateral back in the pool, if left after the swap(buy)
-        tokenAmountRemaining = _depositCollateralRemainingAfterSell(
-            user,
-            prjTokens,
-            amountRemaining,
-            prjInfo,
-            updatePriceTokens,
-            priceIds,
-            updateData
-        );
+        tokenAmountRemaining = _depositCollateralRemainingAfterSell(user, prjTokens, amountRemaining, prjInfo, updatePriceTokens);
     }
 
     /**
@@ -345,6 +320,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      * @param assets An array of addresses representing the assets involved in the operation.
      * @param assetAmountRemaining An array of amounts representing the remaining amounts of each asset.
      * @param prjInfo Information about the project token, including its address and type.
+     * @param updatePriceTokens An array of addresses representing the tokens to update the price for.
      * @return tokenAmountRemaining The remaining collateral amount converted and deposited into the primary lending platform.
      * @dev The function calculates the remaining amount for each asset after selling, then converts and deposits the remaining collateral into the primary lending platform.
      * @dev If the remaining collateral amount is greater than 0, it increases the allowance and calls the depositFromRelatedContracts function on the primary lending platform.
@@ -354,22 +330,22 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
         address[] memory assets,
         uint256[] memory assetAmountRemaining,
         Asset.Info memory prjInfo,
-        address[] memory updatePriceTokens,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
+        address[] memory updatePriceTokens
     ) internal returns (uint256 tokenAmountRemaining) {
         tokenAmountRemaining = Asset._wrap(assets, assetAmountRemaining, prjInfo);
+        bytes32[] memory emptyBytes32;
+        bytes[] memory emptyBytes;
 
         if (tokenAmountRemaining > 0) {
             Asset._safeIncreaseAllowance(address(primaryLendingPlatform), prjInfo.addr, tokenAmountRemaining);
-            primaryLendingPlatform.depositFromRelatedContracts{value: msg.value}(
+            primaryLendingPlatform.depositFromRelatedContracts(
                 prjInfo.addr,
                 tokenAmountRemaining,
                 address(this),
                 user,
                 updatePriceTokens,
-                priceIds,
-                updateData
+                emptyBytes32,
+                emptyBytes
             );
         }
     }
