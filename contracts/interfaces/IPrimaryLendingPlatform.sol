@@ -813,19 +813,6 @@ interface IPrimaryLendingPlatform {
         );
 
     /**
-     * @dev Get total borrow amount in USD for a specific lending token after update price
-     * @param lendingToken The address of the lending token
-     * @param priceIds The priceIds need to update.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return The total borrow amount in USD
-     */
-    function getTotalBorrowPerLendingTokenWithUpdatePrices(
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint);
-
-    /**
      * @dev Returns the total estimated outstanding amount of a user's borrow position to USD after update price.
      * @param account The address of the user account
      * @param projectToken The address of the project token

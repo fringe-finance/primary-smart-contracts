@@ -148,19 +148,6 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     }
 
     /**
-     * @dev Returns the evaluation of a given token amount in USD.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
-        uint8 decimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 10
-        evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-    }
-
-    /**
      * @dev Returns the number of decimals used for the USD price.
      * @return The number of decimals used for the USD price.
      */

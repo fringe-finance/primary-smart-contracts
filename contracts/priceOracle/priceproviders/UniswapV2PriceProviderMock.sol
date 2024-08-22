@@ -112,17 +112,6 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
         price = tokenPrice[token].price;
     }
 
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 decimals = tokenPrice[token].tokenDecimals;
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-    }
-
     function getReserves(address uniswapPair, address tokenA, address tokenB) public view returns (uint256 reserveA, uint256 reserveB) {
         (address token0, ) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA); //sort tokens
         (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(uniswapPair).getReserves(); //getting reserves

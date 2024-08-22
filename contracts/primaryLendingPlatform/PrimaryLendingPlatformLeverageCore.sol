@@ -181,20 +181,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @dev Checks if the given margin, exposure, and LVR values form a valid collateralization.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return isValid True if the collateralization is valid, false otherwise.
-     */
-    function isValidCollateralization(uint256 margin, uint256 exp, uint256 lvrNumerator, uint256 lvrDenominator) public pure returns (bool isValid) {
-        uint256 ratioNumerator = (margin + exp) * lvrNumerator;
-        uint256 ratioDenominator = exp * lvrDenominator;
-        isValid = ratioNumerator > ratioDenominator;
-    }
-
-    /**
      * @notice Calculates the lending token count for a given notional value.
      * @param lendingToken The address of the lending token.
      * @param notionalValue The notional value for which the lending token count is to be calculated.
@@ -206,53 +192,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @dev Calculates the health factor numerator and denominator based on the given parameters.
-     * @param expAmount The exposure amount.
-     * @param margin The margin amount.
-     * @param borrowAmount The borrowed amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return hfNumerator The calculated health factor numerator.
-     * @return hfDenominator The calculated health factor denominator.
-     */
-    function calculateHF(
-        uint256 expAmount,
-        uint256 margin,
-        uint256 borrowAmount,
-        uint256 lvrNumerator,
-        uint256 lvrDenominator
-    ) public pure returns (uint256 hfNumerator, uint256 hfDenominator) {
-        hfNumerator = (expAmount + margin) * lvrNumerator;
-        hfDenominator = borrowAmount * lvrDenominator;
-    }
-
-    /**
-     * @dev Calculates the margin amount for a given position and safety margin.
-     *
-     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param safetyMarginNumerator The numerator of the safety margin ratio.
-     * @param safetyMarginDenominator The denominator of the safety margin ratio.
-     * @param expAmount The exposure amount.
-     * @return marginAmount The calculated margin amount.
-     */
-    function calculateMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 safetyMarginNumerator,
-        uint256 safetyMarginDenominator,
-        uint256 expAmount
-    ) public view returns (uint256 marginAmount) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        uint256 margin = ((expAmount *
-            (lvrDenominator * (safetyMarginDenominator + safetyMarginNumerator) - lvrNumerator * safetyMarginDenominator)) /
-            (lvrNumerator * safetyMarginDenominator));
-        (uint256 projectTokenPrice, ) = getTokenPrice(projectToken);
-        marginAmount = (margin * 10 ** ERC20Upgradeable(projectToken).decimals()) / projectTokenPrice;
-    }
-
-    /**
      * @dev Deletes a leverage position for a user and project token.
      * The caller must be the primary lending platform.
      * @param user The address of the user.
@@ -260,29 +199,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      */
     function deleteLeveragePosition(address user, address projectToken) external isPrimaryLendingPlatform {
         delete isLeveragePosition[user][projectToken];
-    }
-
-    /**
-     * @dev Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-     *
-     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @return safetyMarginNumerator The calculated safety margin numerator.
-     * @return safetyMarginDenominator The calculated safety margin denominator.
-     */
-    function calculateSafetyMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 margin,
-        uint256 exp
-    ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
-        safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
-        safetyMarginDenominator = (exp * lvrDenominator);
     }
 
     /**

@@ -170,23 +170,6 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Returns the evaluation of a given amount of ERC-4626 tokens in USD.
-     * @param erc4626Token The address of the ERC-4626 token.
-     * @param tokenAmount The amount of ERC-4626 tokens to evaluate.
-     * @return evaluation The evaluation of the given amount of ERC-4626 tokens in USD.
-     */
-    function getEvaluation(address erc4626Token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(erc4626Token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-        uint8 decimals = IERC4626Upgradeable(erc4626Token).decimals();
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-    }
-
-    /**
      * @dev Returns the number of decimals used for the price provided by this contract.
      * @return The number of decimals used for the price provided by this contract.
      */

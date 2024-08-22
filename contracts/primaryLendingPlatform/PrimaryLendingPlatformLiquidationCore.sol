@@ -645,36 +645,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @notice Calculates the amount of project tokens to send to the liquidator based on the lending token amount used for liquidation.
-     * @param _account The user's address to liquidate.
-     * @param _projectToken The project token address associated with the user's position.
-     * @param _lendingToken The lending token address used for the liquidation.
-     * @param _repayAmount The amount of lending tokens used for the liquidation.
-     * @return projectTokenReward The amount of project tokens to send to the liquidator.
-     */
-    function getEstimatedProjectTokenReward(
-        address _account,
-        address _projectToken,
-        address _lendingToken,
-        uint256 _repayAmount
-    ) public view returns (uint256 projectTokenReward) {
-        (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
-        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
-        (uint256 projectTokenPrice, ) = getTokenPrice(_projectToken, projectTokenMultiplier);
-        (, uint256 repaidInUSD) = getTokenPrice(_lendingToken, _repayAmount);
-
-        uint256 projectTokenEvaluation = (repaidInUSD * projectTokenMultiplier) / projectTokenPrice;
-        projectTokenReward = (projectTokenEvaluation * lrfNumerator) / lrfDenominator;
-        uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(_projectToken, _account);
-        if (projectTokenReward > depositedProjectTokenAmount) {
-            projectTokenReward = depositedProjectTokenAmount;
-        }
-        if (projectTokenReward == 0) {
-            return 0;
-        }
-    }
-
-    /**
      * @dev Internal function to check if the difference between two numbers is negative and calculates the absolute difference.
      * @param firstNumber The first number to compare.
      * @param secondNumber The second number to compare.

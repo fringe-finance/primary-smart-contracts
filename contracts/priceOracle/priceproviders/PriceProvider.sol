@@ -48,35 +48,6 @@ abstract contract PriceProvider {
     function getPrice(address token) public virtual view returns(uint256 priceMantissa, uint8 priceDecimals) {}
 
     /**
-     * @dev Returns the price of a token as a signed integer, along with the number of decimals for the price.
-     * @param token The address of the token to get the price for.
-     * @param priceMantissa The mantissa of the price to be returned.
-     * @param validTo The timestamp until which the price is valid.
-     * @param signature The signature of the price oracle.
-     * @return _priceMantissa The price of the token as a mantissa.
-     * @return _priceDecimals The number of decimals for the price.
-     */
-    function getPriceSigned(address token, uint256 priceMantissa, uint256 validTo, bytes memory signature) public virtual view returns(uint256 _priceMantissa, uint8 _priceDecimals) {}
-
-    /**
-     * @dev Returns the evaluation of a given token amount based on the current price.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public virtual view returns(uint256 evaluation) {}
-    
-    /**
-     * @dev return the evaluation in $ of `tokenAmount` with signed price.
-     * @param token the address of token to get evaluation in $.
-     * @param tokenAmount the amount of token to get evaluation. Amount is scaled by 10 in power token decimals.
-     * @param priceMantissa the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token.
-     * @param validTo the timestamp in seconds, when price is gonna be not valid.
-     * @param signature the ECDSA sign on eliptic curve secp256k1.        
-     */
-    function getEvaluationSigned(address token, uint256 tokenAmount, uint256 priceMantissa, uint256 validTo, bytes memory signature) public virtual view returns(uint256 evaluation) {}
-
-    /**
      * @dev Returns the number of decimal places for the price returned by the price provider.
      * @return priceDecimals The number of decimal places for the price.
      */
