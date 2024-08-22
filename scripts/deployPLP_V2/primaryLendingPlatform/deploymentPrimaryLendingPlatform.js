@@ -661,84 +661,7 @@ module.exports = {
             await upgrade(proxyAdmin, plpWrappedTokenGatewayImplementation, plpWrappedTokenGateway);
         }
 
-        bondtrollerImplementation = Bondtroller.attach(bondtrollerLogicAddress).connect(deployMaster);
-        jumpRateModelImplementation = JumpRateModel.attach(jumpRateModelLogicAddress).connect(deployMaster);
-        blendingImplementation = BLendingToken.attach(blendingTokenLogicAddress).connect(deployMaster);
-        plpImplementation = PrimaryLendingPlatformV2.attach(primaryLendingPlatformV2LogicAddress).connect(deployMaster);
-        plpLiquidationImplementation = PrimaryLendingPlatformLiquidation.attach(primaryLendingPlatformLiquidationLogicAddress).connect(deployMaster);
-        plpAtomicRepaymentImplementation = PrimaryLendingPlatformAtomicRepayment.attach(primaryLendingPlatformAtomicRepaymentLogicAddress).connect(deployMaster);
-        plpLeverageImplementation = PrimaryLendingPlatformLeverage.attach(primaryLendingPlatformLeverageLogicAddress).connect(deployMaster);
-        plpModeratorImplementation = PrimaryLendingPlatformModerator.attach(primaryLendingPlatformModeratorLogicAddress).connect(deployMaster);
-        plpWrappedTokenGatewayImplementation = PrimaryLendingPlatformWrappedTokenGateway.attach(primaryLendingPlatformWrappedTokenGatewayLogicAddress).connect(deployMaster);
-
-        //====================================================
-        // ====================== upgrade bondtroller ======================
-        if (bondtrollerProxyAddress) {
-            log();
-            log("***** UPGRADING BONDTROLLER *****");
-            await upgrade(proxyAdmin, bondtrollerImplementation, bondtroller);
-        }
-
-        // ====================== upgrade jumpRateModel ======================
-        if (jumpRateModelProxyAddress) {
-            log();
-            log("***** UPGRADING JUMP-RATE MODEL *****");
-            await upgrade(proxyAdmin, jumpRateModelImplementation, jumpRateModel);
-        }
-
-        // ====================== upgrade blending token ======================
-        if (blendingTokenProxyAddresses.length > 0) {
-            log();
-            log("***** UPGRADING BLENDING TOKEN *****");
-            for (var i = 0; i < blendingTokenProxyAddresses.length; i++) {
-                log();
-                log("Blending token " + blendingTokenProxyAddresses[i]);
-                await upgrade(proxyAdmin, blendingImplementation, BLendingToken.attach(blendingTokenProxyAddresses[i]));
-            }
-        }
-
-        // ====================== upgrade primary lending platform ======================
-        if (primaryLendingPlatformV2ProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM *****");
-            await upgrade(proxyAdmin, plpImplementation, plp);
-        }
-
-        // ====================== upgrade primary lending platform moderator ======================
-        if (primaryLendingPlatformModeratorProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM MODERATOR *****");
-            await upgrade(proxyAdmin, plpModeratorImplementation, plpModerator);
-        }
-
-        // ====================== upgrade primary lending platform liquidation ======================
-        if (primaryLendingPlatformLiquidationProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM LIQUIDATION *****");
-            await upgrade(proxyAdmin, plpLiquidationImplementation, plpLiquidation);
-        }
-
-        // ====================== upgrade primary lending platform atomic repayment ======================
-        if (primaryLendingPlatformAtomicRepaymentProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM ATOMIC REPAYMENT *****");
-            await upgrade(proxyAdmin, plpAtomicRepaymentImplementation, plpAtomicRepayment);
-        }
-
-        // ====================== upgrade primary lending platform leverage ======================
-        if (primaryLendingPlatformLeverageProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM LEVERAGE *****");
-            await upgrade(proxyAdmin, plpLeverageImplementation, plpLeverage);
-        }
-
-        // ====================== upgrade primary lending platform wrapped token gateway ======================
-        if (primaryLendingPlatformWrappedTokenGatewayProxyAddress) {
-            log();
-            log("***** UPGRADING PRIMARY LENDING PLATFORM WRAPPED TOKEN GATEWAY *****");
-            await upgrade(proxyAdmin, plpWrappedTokenGatewayImplementation, plpWrappedTokenGateway);
-        }
-
+        // ====================== setting bondtroller ======================
         log();
         log("***** 1. Setting Bondtroller *****");
 
@@ -970,7 +893,7 @@ module.exports = {
             if (currentPlpAddress.toLowerCase() != primaryLendingPlatformV2ProxyAddress.toLowerCase()) {
                 await plpModerator.setPrimaryLendingPlatform(primaryLendingPlatformV2ProxyAddress).then(function (instance) {
                     log("PrimaryLendingModerator set primaryLendingPlatformV2 " + primaryLendingPlatformV2ProxyAddress + " at tx hash: " + instance.hash);
-                });
+                    });
             }
         }
 
@@ -1290,7 +1213,7 @@ module.exports = {
                     if (currentPlpAddress.toLowerCase() != primaryLendingPlatformV2ProxyAddress.toLowerCase()) {
                         await plpLiquidation.setPrimaryLendingPlatformAddress(primaryLendingPlatformV2ProxyAddress).then(function (instance) {
                             log("PrimaryLendingPlatformLiquidation set primaryLendingPlatformV2 " + primaryLendingPlatformV2ProxyAddress + " at tx hash: " + instance.hash);
-                        });
+                            });
                     }
                 }
 
@@ -1335,16 +1258,16 @@ module.exports = {
                 }
 
                 {
-                    let currentExchangeAggregator = await plpLiquidation.exchangeAggregator();
-                    let currentRegistryAggregator = await plpLiquidation.registryAggregator();
-                    if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                        await plpLiquidation.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                            .then(function (instance) {
-                                log("\nTransaction hash: " + instance.hash);
-                                log("PrimaryLendingPlatformLiquidation set ExchangeAggregator:");
-                                log("ExchangeAggregator: " + exchangeAggregator);
-                                log("RegistryAggregator: " + registryAggregator);
-                            });
+                let currentExchangeAggregator = await plpLiquidation.exchangeAggregator();
+                let currentRegistryAggregator = await plpLiquidation.registryAggregator();
+                if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+                    await plpLiquidation.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                        .then(function (instance) {
+                            log("\nTransaction hash: " + instance.hash);
+                            log("PrimaryLendingPlatformLiquidation set ExchangeAggregator:");
+                            log("ExchangeAggregator: " + exchangeAggregator);
+                            log("RegistryAggregator: " + registryAggregator);
+                        });
                     }
                 }
             }
@@ -1387,14 +1310,14 @@ module.exports = {
         {
             const currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
             const currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
-            if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function (instance) {
-                        log("\nTransaction hash: " + instance.hash);
-                        log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator:");
-                        log("ExchangeAggregator: " + exchangeAggregator);
-                        log("RegistryAggregator: " + registryAggregator);
-                    });
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+            await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function (instance) {
+                    log("\nTransaction hash: " + instance.hash);
+                    log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator:");
+                    log("ExchangeAggregator: " + exchangeAggregator);
+                    log("RegistryAggregator: " + registryAggregator);
+                });
             }
         }
 
@@ -1438,14 +1361,14 @@ module.exports = {
         {
             const currentExchangeAggregator = await plpLeverage.exchangeAggregator();
             const currentRegistryAggregator = await plpLeverage.registryAggregator();
-            if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function (instance) {
-                        log("\nTransaction hash: " + instance.hash);
-                        log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
-                        log("ExchangeAggregator: " + exchangeAggregator);
-                        log("RegistryAggregator: " + registryAggregator);
-                    });
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+            await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function (instance) {
+                    log("\nTransaction hash: " + instance.hash);
+                    log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
+                    log("ExchangeAggregator: " + exchangeAggregator);
+                    log("RegistryAggregator: " + registryAggregator);
+                });
             }
         }
 
@@ -1486,6 +1409,21 @@ module.exports = {
                         log("PrimaryLendingPlatformWrappedTokenGateway call initialize at " + plpWrappedTokenGateway.address);
                     });
             }
+        }
+
+        {
+            const currentImplementation = await proxyAdmin.getProxyImplementation(plpWrappedTokenGateway.address);
+            if (currentImplementation.toLowerCase() == primaryLendingPlatformWrappedTokenGatewayLogicAddress.toLowerCase()) {
+                let currentWETH = await plpWrappedTokenGateway.WETH();
+                if (currentWETH.toLowerCase() != WETH.toLowerCase()) {
+                    await plpWrappedTokenGateway.setWETH(WETH)
+                        .then(function (instance) {
+                            log("\nTransaction hash: " + instance.hash);
+                            log("PrimaryLendingPlatformWrappedTokenGateway set WETH " + WETH);
+                        });
+                }
+            }
+
         }
 
         {

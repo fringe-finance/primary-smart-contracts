@@ -62,9 +62,6 @@
       "tokensUseUniswap": [],
       "uniswapPairs": []
     },
-    "BackendProvider": {
-      "tokensUseBackendProvider": []
-    },
     "LPProvider": {
       "tokensUseLPProvider": []
     },

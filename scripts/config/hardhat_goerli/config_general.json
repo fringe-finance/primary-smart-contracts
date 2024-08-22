@@ -67,9 +67,6 @@
                 "0xB209b56F0DF053205dF20061044F38A07837cEE7"
             ]
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [
                 "0x557c9280DF3f06D9EBD09985207326c520eaB421",

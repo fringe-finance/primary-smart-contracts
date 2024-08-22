@@ -134,9 +134,6 @@
           "tokensUseUniswap": [],
           "uniswapPairs": []
       },
-      "BackendProvider": {
-          "tokensUseBackendProvider": []
-      },
       "LPProvider": {
           "tokensUseLPProvider": [
             "0xAE461cA67B15dc8dc81CE7615e0320dA1A9aB8D5",

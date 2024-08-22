@@ -55,9 +55,6 @@
                 "0xad5D7a23b47457728463D8F9f73044d359021788"
             ]
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [
             ]

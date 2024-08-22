@@ -73,9 +73,6 @@
             "uniswapPairs": [],
             "priceDecimals": "18"
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [],
             "priceDecimals": "10"

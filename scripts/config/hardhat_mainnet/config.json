@@ -4,8 +4,6 @@
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "",
   "ChainlinkPriceProviderProxy": "",
-  "BackendPriceProviderLogic": "",
-  "BackendPriceProviderProxy": "",
   "PriceProviderAggregatorLogic": "",
   "PriceProviderAggregatorProxy": "",
   "LPPriceProviderLogic": "",

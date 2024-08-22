@@ -665,7 +665,7 @@ module.exports = {
             log("***** UPGRADING PRIMARY LENDING PLATFORM WRAPPED TOKEN GATEWAY *****");
             await upgrade(proxyAdmin, plpWrappedTokenGatewayImplementation, plpWrappedTokenGateway);
         }
-
+        
         log();
         log("***** 1. Setting Bondtroller *****");
 
@@ -1263,18 +1263,18 @@ module.exports = {
                     {
                         const currentExchangeAggregator = await plpLiquidation.exchangeAggregator();
                         const currentRegistryAggregator = await plpLiquidation.registryAggregator();
-                        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                            await plpLiquidation.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                                .then(function (instance) {
-                                    log("\nTransaction hash: " + instance.hash);
-                                    log("PrimaryLendingPlatformLiquidation set ExchangeAggregator:");
-                                    log("ExchangeAggregator: " + exchangeAggregator);
-                                    log("RegistryAggregator: " + registryAggregator);
-                                });
-                        }
+                    if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+                        await plpLiquidation.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                            .then(function (instance) {
+                                log("\nTransaction hash: " + instance.hash);
+                                log("PrimaryLendingPlatformLiquidation set ExchangeAggregator:");
+                                log("ExchangeAggregator: " + exchangeAggregator);
+                                log("RegistryAggregator: " + registryAggregator);
+                            });
                     }
                 }
             }
+        }
         }
 
         log();
@@ -1314,17 +1314,17 @@ module.exports = {
         }
 
         {
-            let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
-            let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
-            if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function (instance) {
-                        log("\nTransaction hash: " + instance.hash);
-                        log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator:");
-                        log("ExchangeAggregator: " + exchangeAggregator);
-                        log("RegistryAggregator: " + registryAggregator);
-                    });
-            }
+        let currentExchangeAggregator = await plpAtomicRepayment.exchangeAggregator();
+        let currentRegistryAggregator = await plpAtomicRepayment.registryAggregator();
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+            await plpAtomicRepayment.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function (instance) {
+                    log("\nTransaction hash: " + instance.hash);
+                    log("PrimaryLendingPlatformAtomicRepayment set ExchangeAggregator:");
+                    log("ExchangeAggregator: " + exchangeAggregator);
+                    log("RegistryAggregator: " + registryAggregator);
+                });
+        }
         }
 
 
@@ -1367,15 +1367,15 @@ module.exports = {
         {
             const currentExchangeAggregator = await plpLeverage.exchangeAggregator();
             const currentRegistryAggregator = await plpLeverage.registryAggregator();
-            if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
-                await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
-                    .then(function (instance) {
-                        log("\nTransaction hash: " + instance.hash);
-                        log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
-                        log("ExchangeAggregator: " + exchangeAggregator);
-                        log("RegistryAggregator: " + registryAggregator);
-                    });
-            }
+        if (exchangeAggregator.toLowerCase() != currentExchangeAggregator.toLowerCase() || registryAggregator.toLowerCase() != currentRegistryAggregator.toLowerCase()) {
+            await plpLeverage.setExchangeAggregator(exchangeAggregator, registryAggregator)
+                .then(function (instance) {
+                    log("\nTransaction hash: " + instance.hash);
+                    log("PrimaryLendingPlatformLeverage set ExchangeAggregator:");
+                    log("ExchangeAggregator: " + exchangeAggregator);
+                    log("RegistryAggregator: " + registryAggregator);
+                });
+        }
         }
 
 

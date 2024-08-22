@@ -4,8 +4,6 @@
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "0x24990CeFf1B47b96a65992FbAacD5C70669714CD",
   "ChainlinkPriceProviderProxy": "0x09b29eBc5FA452eaae39A8a02d6f9695D735D870",
-  "BackendPriceProviderLogic": "",
-  "BackendPriceProviderProxy": "",
   "PriceProviderAggregatorLogic": "0xBd1fb6e716D76edBd8dFbCB613c64DCaf4714FcD",
   "PriceProviderAggregatorProxy": "0xc2a4e377F6eca7F6d78B1762832eB6cC620B635f",
   "LPPriceProviderLogic": "0xD1aA5459Daf65F94d8b1eB71B4c79D608dE4ec82",

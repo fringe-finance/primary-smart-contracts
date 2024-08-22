@@ -106,7 +106,6 @@ module.exports = {
         let PriceOracle;
         let PythPriceProvider;
         let ChainlinkPriceProvider;
-        let BackendPriceProvider;
         let UniswapV2PriceProvider;
         let UniswapV3PriceProvider;
         let UniswapV2PriceProviderMock;
@@ -121,7 +120,6 @@ module.exports = {
         let priceOracleProvider;
         let pythPriceProvider;
         let chainlinkPriceProvider;
-        let backendPriceProvider;
         let uniswapV2PriceProvider;
         let uniswapV3PriceProvider;
         let uniswapV2PriceProviderMock;
@@ -132,7 +130,6 @@ module.exports = {
 
         let pythPriceProviderImplementation;
         let chainlinkPriceProviderImplementation;
-        let backendPriceProviderImplementation;
         let uniswapV2PriceProviderImplementation;
         let uniswapV3PriceProviderImplementation;
         let priceProviderAggregatorImplementation;
@@ -157,7 +154,6 @@ module.exports = {
             Chainlink,
             UniswapV2,
             UniswapV3,
-            BackendProvider,
             LPProvider,
             ERC4626Provider,
             wstETHProvider,
@@ -179,7 +175,6 @@ module.exports = {
         let tokensUseUniswapV3 = UniswapV3.tokensUseUniswap;
         let pricePointTWAPperiodV3 = UniswapV3.pricePointTWAPperiod;
         let uniswapPairsV3 = UniswapV3.uniswapPairs;
-        let tokensUseBackendProvider = BackendProvider.tokensUseBackendProvider;
         let tokensUseLPProvider = LPProvider.tokensUseLPProvider;
         let tokensUseERC4626Provider = ERC4626Provider.tokensUseERC4626Provider;
         let wstETHAggregatorPath = wstETHProvider.wstETHAggregatorPath;
@@ -196,8 +191,6 @@ module.exports = {
             PythPriceProviderProxy,
             ChainlinkPriceProviderLogic,
             ChainlinkPriceProviderProxy,
-            BackendPriceProviderLogic,
-            BackendPriceProviderProxy,
             UniswapV2PriceProviderLogic,
             UniswapV2PriceProviderProxy,
             UniswapV3PriceProviderLogic,
@@ -218,7 +211,6 @@ module.exports = {
         let pythPriceProviderAddress = isTesting ? "" : PythPriceProviderProxy;
         let chainlinkPriceProviderAddress = isTesting ? "" : ChainlinkPriceProviderProxy;
         let priceProviderAggregatorAddress = isTesting ? "" : PriceProviderAggregatorProxy;
-        let backendPriceProviderAddress = isTesting ? "" : BackendPriceProviderProxy;
         let uniswapV2PriceProviderAddress = isTesting ? "" : UniswapV2PriceProviderProxy;
         let uniswapV3PriceProviderAddress = isTesting ? "" : UniswapV3PriceProviderProxy;
         let uniswapV2PriceProviderMockAddress = "";
@@ -226,7 +218,6 @@ module.exports = {
         let erc4626PriceProviderAddress = isTesting ? "" : ERC4626PriceProviderProxy;
         let wstETHPriceProviderAddress = isTesting ? "" : wstETHPriceProviderProxy;
 
-        let backendPriceProviderLogicAddress = isTesting ? "" : BackendPriceProviderLogic;
         let priceOracleLogicAddress = isTesting ? "" : PriceOracleLogic;
         let pythPriceProviderLogicAddress = isTesting ? "" : PythPriceProviderLogic;
         let chainlinkPriceProviderLogicAddress = isTesting ? "" : ChainlinkPriceProviderLogic;
@@ -244,7 +235,6 @@ module.exports = {
         PythPriceProvider = await hre.ethers.getContractFactory("PythPriceProvider");
         ChainlinkPriceProvider = isLayer2 ? await hre.ethers.getContractFactory("ChainlinkPriceProviderL2")
             : await hre.ethers.getContractFactory("ChainlinkPriceProvider");
-        BackendPriceProvider = await hre.ethers.getContractFactory("BackendPriceProvider");
         UniswapV2PriceProvider = await hre.ethers.getContractFactory("UniswapV2PriceProvider");
         UniswapV3PriceProvider = await hre.ethers.getContractFactory("UniswapV3PriceProvider");
         UniswapV2PriceProviderMock = await hre.ethers.getContractFactory("UniswapV2PriceProviderMock");
@@ -388,44 +378,6 @@ module.exports = {
                 proxyAdminAddress,
                 "0x"
             ], "ChainlinkPriceProviderProxy");
-        }
-        //====================================================
-        //deploy backendPriceProvider
-        if (tokensUseBackendProvider.length > 0) {
-            log();
-            log("***** BACKEND PRICE PROVIDER DEPLOYMENT *****");
-
-            if (!backendPriceProviderLogicAddress) {
-                backendPriceProvider = await BackendPriceProvider.connect(deployMaster).deploy();
-                await backendPriceProvider.deployed().then(function (instance) {
-                    log("\nTransaction hash: " + instance.deployTransaction.hash);
-                    backendPriceProviderLogicAddress = instance.address;
-                    config.BackendPriceProviderLogic = backendPriceProviderLogicAddress;
-                    fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
-                });
-            }
-            log("BackendPriceProvider masterCopy address: " + backendPriceProviderLogicAddress);
-            await verify(backendPriceProviderLogicAddress, [], "BackendPriceProviderLogic");
-
-            if (!backendPriceProviderAddress) {
-                let backendPriceProviderProxy = await TransparentUpgradeableProxy.connect(deployMaster).deploy(
-                    backendPriceProviderLogicAddress,
-                    proxyAdminAddress,
-                    "0x"
-                );
-                await backendPriceProviderProxy.deployed().then(function (instance) {
-                    log("\nTransaction hash: " + instance.deployTransaction.hash);
-                    backendPriceProviderAddress = instance.address;
-                    config.BackendPriceProviderProxy = backendPriceProviderAddress;
-                    fs.writeFileSync(path.join(configFile), JSON.stringify(config, null, 2));
-                });
-            }
-            log("\nBackendPriceProvider proxy address: " + backendPriceProviderAddress);
-            await verify(backendPriceProviderAddress, [
-                backendPriceProviderLogicAddress,
-                proxyAdminAddress,
-                "0x"
-            ], "BackendPriceProviderProxy");
         }
         //=========================
         //deploy uniswapV2PriceProvider
@@ -690,7 +642,7 @@ module.exports = {
                 let moderatorRole = await uniswapV2PriceProviderMock.MODERATOR_ROLE();
                 let isModeratorRole = await uniswapV2PriceProviderMock.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await uniswapV2PriceProviderMock.grantModerator(priceProviderAggregatorAddress);
+                    await uniswapV2PriceProviderMock.grantRole(moderatorRole, priceProviderAggregatorAddress);
                 }
             }
         }
@@ -701,7 +653,6 @@ module.exports = {
         priceOracleProvider = PriceOracle.attach(priceOracleAddress).connect(deployMaster);
         pythPriceProvider = PythPriceProvider.attach(pythPriceProviderAddress).connect(deployMaster);
         chainlinkPriceProvider = ChainlinkPriceProvider.attach(chainlinkPriceProviderAddress).connect(deployMaster);
-        backendPriceProvider = BackendPriceProvider.attach(backendPriceProviderAddress).connect(deployMaster);
         uniswapV2PriceProvider = UniswapV2PriceProvider.attach(uniswapV2PriceProviderAddress).connect(deployMaster);
         uniswapV3PriceProvider = UniswapV3PriceProvider.attach(uniswapV3PriceProviderAddress).connect(deployMaster);
         lpPriceProvider = LPPriceProvider.attach(lpPriceProviderAddress).connect(deployMaster);
@@ -712,7 +663,6 @@ module.exports = {
 
         pythPriceProviderImplementation = PythPriceProvider.attach(pythPriceProviderLogicAddress).connect(deployMaster);
         chainlinkPriceProviderImplementation = ChainlinkPriceProvider.attach(chainlinkPriceProviderLogicAddress).connect(deployMaster);
-        backendPriceProviderImplementation = BackendPriceProvider.attach(backendPriceProviderLogicAddress).connect(deployMaster);
         uniswapV2PriceProviderImplementation = UniswapV2PriceProvider.attach(uniswapV2PriceProviderLogicAddress).connect(deployMaster);
         uniswapV3PriceProviderImplementation = UniswapV3PriceProvider.attach(uniswapV3PriceProviderLogicAddress).connect(deployMaster);
         lpPriceProviderImplementation = LPPriceProvider.attach(lpPriceProviderLogicAddress).connect(deployMaster);
@@ -734,13 +684,6 @@ module.exports = {
             log();
             log("***** UPGRADING CHAINLINK PRICE PROVIDER *****");
             await upgrade(proxyAdmin, chainlinkPriceProviderImplementation, chainlinkPriceProvider);
-        }
-
-        // ====================== upgrade backendPriceProvider =============================
-        if (backendPriceProviderAddress) {
-            log();
-            log("***** UPGRADING BACKEND PRICE PROVIDER *****");
-            await upgrade(proxyAdmin, backendPriceProviderImplementation, backendPriceProvider);
         }
 
         // ====================== upgrade uniswapV2PriceProvider =============================
@@ -893,7 +836,7 @@ module.exports = {
                 let moderatorRole = await pythPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await pythPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await pythPriceProvider.grantModerator(priceProviderAggregatorAddress)
+                    await pythPriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress)
                         .then(function (instance) {
                             log("\nTransaction hash: " + instance.hash);
                             log("PythPriceProvider " + pythPriceProvider.address + " granted moderator " + priceProviderAggregatorAddress);
@@ -976,7 +919,7 @@ module.exports = {
                 let moderatorRole = await chainlinkPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await chainlinkPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await chainlinkPriceProvider.grantModerator(priceProviderAggregatorAddress)
+                    await chainlinkPriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress)
                         .then(function (instance) {
                             log("\nTransaction hash: " + instance.hash);
                             log("ChainlinkPriceProvider " + chainlinkPriceProvider.address + " granted moderator " + priceProviderAggregatorAddress);
@@ -1045,58 +988,6 @@ module.exports = {
         }
 
         //==============================
-        //set backendPriceProvider
-        if (backendPriceProviderAddress) {
-            log();
-            log("***** SETTING BACKEND PRICE PROVIDER *****");
-
-            {
-                let usdDecimal = await backendPriceProviderImplementation.usdDecimals();
-                if (usdDecimal == 0) {
-                    await backendPriceProviderImplementation.initialize()
-                        .then(function (instance) {
-                            log("Transaction hash: " + instance.hash);
-                            log("BackendPriceProvider Implementation initialized at: " + backendPriceProviderLogicAddress);
-                        });
-                }
-            }
-
-            {
-                let usdDecimal = await backendPriceProvider.usdDecimals();
-                if (usdDecimal == 0) {
-                    await backendPriceProvider.initialize()
-                        .then(function (instance) {
-                            log("\nTransaction hash: " + instance.hash);
-                            log("BackendPriceProvider initialized at: " + backendPriceProviderAddress);
-                        });
-                }
-            }
-
-            {
-                let moderatorRole = await backendPriceProvider.TRUSTED_BACKEND_ROLE();
-                let isModeratorRole = await backendPriceProvider.hasRole(moderatorRole, deployMasterAddress);
-                if (!isModeratorRole) {
-                    await backendPriceProvider.grantTrustedBackendRole(deployMasterAddress)
-                        .then(function (instance) {
-                            log("\nTransaction hash: " + instance.hash);
-                            log("BackendPriceProvider set trusted backend at " + backendPriceProvider.address);
-                        });
-                }
-            }
-
-
-            for (var i = 0; i < tokensUseBackendProvider.length; i++) {
-                let backendMetadata = await backendPriceProvider.backendMetadata(tokensUseBackendProvider[i]);
-                if (backendMetadata.isListed == false || backendMetadata.isActive == false) {
-                    await backendPriceProvider.setToken(tokensUseBackendProvider[i]).then(function (instance) {
-                        log("\nTransaction hash: " + instance.hash);
-                        log("BackendPriceProvider " + backendPriceProvider.address + " set token " + tokensUseBackendProvider[i]);
-                    });
-                }
-            }
-        }
-
-        //==============================
         //set uniswapV2PriceProvider
         if (uniswapV2PriceProviderAddress) {
             log();
@@ -1139,7 +1030,7 @@ module.exports = {
                 let moderatorRole = await uniswapV2PriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await uniswapV2PriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await uniswapV2PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                    await uniswapV2PriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress).then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
                         log("UniswapV2PriceProvider granted moderator at " + priceProviderAggregatorAddress);
                     });
@@ -1187,28 +1078,27 @@ module.exports = {
                 let moderatorRole = await uniswapV3PriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await uniswapV3PriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await uniswapV3PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                    await uniswapV3PriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress).then(function (instance) {
                         log("UniswapV3PriceProvider granted moderator " + priceProviderAggregatorAddress + " at tx hash " + instance.hash);
                     });
                 }
             }
 
             {
-                let currentPricePointTWAPperiod = await uniswapV3PriceProvider.pricePointTWAPperiod();
-                if (pricePointTWAPperiodV3 != currentPricePointTWAPperiod) {
-                    await uniswapV3PriceProvider.setPricePointTWAPperiod(pricePointTWAPperiodV3).then(function (instance) {
-                        log("UniswapV3PriceProvider set pricePointTWAPperiod: " + pricePointTWAPperiodV3 + " at tx hash " + instance.hash);
-                    });
-                }
-            }
-
-            for (var i = 0; i < tokensUseUniswapV3.length; i++) {
-                let uniswapV3Metadata = await uniswapV3PriceProvider.uniswapV3Metadata(tokensUseUniswapV3[i]);
-                log(tokensUseUniswapV3[i], uniswapPairsV3[i]);
-                if (uniswapV3Metadata.isActive == false || uniswapV3Metadata.pair.toLowerCase() != uniswapPairsV3[i].toLowerCase()) {
-                    await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswapV3[i], uniswapPairsV3[i]).then(function (instance) {
-                        log("UniswapV3PriceProvider  set token " + tokensUseUniswapV3[i] + " and pair " + uniswapPairsV3[i] + " at tx hash: " + instance.hash);
-                    });
+                for (var i = 0; i < tokensUseUniswapV3.length; i++) {
+                    let uniswapV3Metadata = await uniswapV3PriceProvider.getUniswapV3Metadata(tokensUseUniswapV3[i]);
+                    let flag = false;
+                    for (var j = 0; j < uniswapPairsV3[i].length; j++) {
+                        if (uniswapV3Metadata.isActive == false || uniswapV3Metadata.aggregatorPath[j].toLowerCase() != uniswapPairsV3[i][j].toLowerCase()) {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) {
+                        await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswapV3[i], uniswapPairsV3[i], pricePointTWAPperiodV3[i]).then(function (instance) {
+                            log("UniswapV3PriceProvider set token " + tokensUseUniswapV3[i] + " and pair " + uniswapPairsV3[i] + " and price point TWAP period " + pricePointTWAPperiodV3[i] + " at tx hash " + instance.hash);
+                        });
+                    }
                 }
             }
         }
@@ -1256,7 +1146,7 @@ module.exports = {
                 let moderatorRole = await lpPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await lpPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await lpPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                    await lpPriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress).then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
                         log("LPPriceProvider granted moderator " + priceProviderAggregatorAddress);
                     });
@@ -1318,7 +1208,7 @@ module.exports = {
                 let moderatorRole = await erc4626PriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await erc4626PriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await erc4626PriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                    await erc4626PriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress).then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
                         log("ERC4626PriceProvider granted moderator " + priceProviderAggregatorAddress);
                     });
@@ -1379,7 +1269,7 @@ module.exports = {
                 let moderatorRole = await wstETHPriceProvider.MODERATOR_ROLE();
                 let isModeratorRole = await wstETHPriceProvider.hasRole(moderatorRole, priceProviderAggregatorAddress);
                 if (!isModeratorRole) {
-                    await wstETHPriceProvider.grantModerator(priceProviderAggregatorAddress).then(function (instance) {
+                    await wstETHPriceProvider.grantRole(moderatorRole, priceProviderAggregatorAddress).then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
                         log("wstETHPriceProvider granted moderator " + priceProviderAggregatorAddress);
                     });
@@ -1493,7 +1383,7 @@ module.exports = {
             let moderatorRole = await priceProviderAggregator.MODERATOR_ROLE();
             let isModeratorRole = await priceProviderAggregator.hasRole(moderatorRole, deployMasterAddress);
             if (!isModeratorRole) {
-                await priceProviderAggregator.grantModerator(deployMasterAddress).then(function (instance) {
+                await priceProviderAggregator.grantRole(moderatorRole, deployMasterAddress).then(function (instance) {
                     log("\nTransaction hash: " + instance.hash);
                     log("PriceProviderAggregator " + priceProviderAggregator.address + " granted moderator " + deployMasterAddress);
                 });
@@ -1637,7 +1527,6 @@ module.exports = {
             priceOracleAddress: priceOracleAddress,
             pythPriceProviderAddress: pythPriceProviderAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
-            backendPriceProviderAddress: backendPriceProviderAddress,
             uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
             uniswapV3PriceProviderAddress: uniswapV3PriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,

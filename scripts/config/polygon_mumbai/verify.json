@@ -6,8 +6,6 @@
   "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
   "ChainlinkPriceProviderProxy": true,
-  "BackendPriceProviderLogic": false,
-  "BackendPriceProviderProxy": true,
   "PriceProviderAggregatorLogic": true,
   "PriceProviderAggregatorProxy": true,
   "LPPriceProviderLogic": false,

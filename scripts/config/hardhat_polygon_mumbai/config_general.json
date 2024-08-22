@@ -55,9 +55,6 @@
                 "0xa64EFc25A11fdc863642B2473f7Ff9A1f69691AD"
             ]
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [
                 "0x969883C417688D5846BEa78700702A23febC8e88",
