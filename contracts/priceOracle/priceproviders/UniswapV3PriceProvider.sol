@@ -8,7 +8,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 
-
 /**
  * @title UniswapV3 price provider
  */
@@ -19,16 +18,22 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
 
     uint8 public tokenDecimals;
 
-    uint32 public pricePointTWAPperiod;
+    uint8 public constant MAX_PRICE_PATH_LENGTH = 4;
 
-    mapping(address => UniswapV3Metadata) public uniswapV3Metadata; // address of token => metadata for uniswapV3
+    mapping(address => UniswapV3Metadata) public uniswapV3Metadata; // address of token => uniswapV3 metadata for token
+    mapping(address => UniswapV3MetadataPair) public uniswapV3MetadataPair; // pair address => uniswapV3 metadata for pair
 
     struct UniswapV3Metadata {
         bool isActive;
-        address pair;       // address of uniswap liquidity pool token for pair 
-        address pairAsset;  // address of second token in pair with token
-        uint8 tokenDecimals;  // decimals of project token
-        uint8 pairAssetDecimals; // decimals of second token in pair with token
+        address[] aggregatorPath;
+    }
+
+    struct UniswapV3MetadataPair {
+        address token; // address of first token in pair
+        address pairToken; // address of second token in pair with token
+        uint8 tokenDecimals; // decimals of project token
+        uint8 pairTokenDecimals; // decimals of second token in pair with token
+        uint32 pricePointTWAPperiod;
     }
 
     /**
@@ -37,7 +42,7 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @param pair The address of the pair that is set.
      */
     event SetTokenAndPair(address indexed token, address indexed pair);
-    
+
     /**
      * @dev Emitted when the active status of a token changes.
      * @param token The address of the token whose active status has changed.
@@ -50,6 +55,13 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @param newTokenDecimals The new token decimals.
      */
     event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
+     * @dev Emitted when a token and its corresponding UniswapV3 aggregator path are set.
+     * @param token The address of the token.
+     * @param aggregatorPath The array of UniswapV3 aggregator pairs used to get the price of the token.
+     */
+    event SetTokenAndAggregator(address indexed token, address[] aggregatorPath, uint32[] pricePointPeriod);
 
     /**
      * @dev Initializes the contract by setting up the access control roles and the number of decimals for the USD token.
@@ -81,34 +93,51 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
         tokenDecimals = newTokenDecimals;
         emit SetTokenDecimals(newTokenDecimals);
     }
-    
+
     /**
-     * @dev Sets the token and pair addresses for the UniswapV3PriceProvider contract.
+     * @dev Set token and aggregator path.
      * #### Requirements:
-     * - `token` and `pair` addresses must not be zero.
+     * - The token must be listed in the UniswapV3PriceProvider contract.
      * - Only the contract moderator can call this function.
-     * - The `token` and `pair` addresses must be valid.
-     * - The `metadata` struct for the `token` address must be updated with the `pair` address, `pairAsset` address, `tokenDecimals`, and `pairAssetDecimals`.
-     * @param token The address of the token to be set.
-     * @param pair The address of the pair to be set.
+     * @param token The address of the token.
+     * @param aggregatorPath The address of the aggregator path.
+     * @param pricePointPeriod The period for the price point.
      */
-    function setTokenAndPair(address token, address pair) external onlyModerator {
-        require(token != address(0) && pair != address(0),"UniswapV3PriceProvider: Invalid token or pair!");
+    function setTokenAndPair(address token, address[] memory aggregatorPath, uint32[] memory pricePointPeriod) external onlyModerator {
+        require(token != address(0), "UniswapV3PriceProvider: token address is zero!");
+        require(aggregatorPath.length <= MAX_PRICE_PATH_LENGTH, "UniswapV3PriceProvider: Too long path");
+        require(aggregatorPath.length == pricePointPeriod.length, "UniswapV3PriceProvider: Invalid period length!");
+        address nextToken = token;
+        for (uint256 i = 0; i < aggregatorPath.length; i++) {
+            address token0 = IUniswapV3Pool(aggregatorPath[i]).token0();
+            address token1 = IUniswapV3Pool(aggregatorPath[i]).token1();
+            if (nextToken == token0) {
+                nextToken = token1;
+            } else if (nextToken == token1) {
+                nextToken = token0;
+            } else {
+                revert("UniswapV3PriceProvider: Token and pair token do not match!");
+            }
+            UniswapV3MetadataPair storage pair = uniswapV3MetadataPair[aggregatorPath[i]];
+            if (pair.token != token0 || pair.pairToken != token1) {
+                require(pricePointPeriod[i] > 0, "UniswapV3PriceProvider: Invalid period!");
+                pair.pricePointTWAPperiod = pricePointPeriod[i];
+                pair.token = token0;
+                pair.pairToken = token1;
+                pair.tokenDecimals = ERC20Upgradeable(token0).decimals();
+                pair.pairTokenDecimals = ERC20Upgradeable(token1).decimals();
+            }
+        }
         UniswapV3Metadata storage metadata = uniswapV3Metadata[token];
         metadata.isActive = true;
-        metadata.pair = pair;
-        address pairAsset = IUniswapV3Pool(pair).token0();
-        if(pairAsset == token){
-            pairAsset = IUniswapV3Pool(pair).token1();
-        }
-        metadata.pairAsset = pairAsset;
-        metadata.tokenDecimals = ERC20Upgradeable(token).decimals();
-        metadata.pairAssetDecimals = ERC20Upgradeable(pairAsset).decimals();
-        emit SetTokenAndPair(token, pair);
+        metadata.aggregatorPath = aggregatorPath;
+
+        emit SetTokenAndAggregator(token, aggregatorPath, pricePointPeriod);
     }
 
     /**
-     * @dev Changes the active status of a token in the UniswapV3PriceProvider contract.
+     * @dev Changes the active status of a token in the UniswapV3PriceProvider con
+     tract.
      * #### Requirements:
      * - The token must be listed in the UniswapV3PriceProvider contract.
      * - Only the contract moderator can call this function.
@@ -116,20 +145,9 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @param active The new active status of the token.
      */
     function changeActive(address token, bool active) public override onlyModerator {
-        require(uniswapV3Metadata[token].pair != address(0), "UniswapV3PriceProvider: token is not listed!");
+        require(uniswapV3Metadata[token].aggregatorPath[0] != address(0), "UniswapV3PriceProvider: token is not listed!");
         uniswapV3Metadata[token].isActive = active;
         emit ChangeActive(token, active);
-    }
-
-    /**
-     * @dev Sets the price point TWAP period for the UniswapV3PriceProvider contract.
-     * #### Requirements:
-     * - Only the contract moderator can call this function.
-     * @param period The new price point TWAP period.
-     */
-    function setPricePointTWAPperiod(uint32 period) public onlyModerator {
-        require(period > 0, "UniswapV3PriceProvider: Invalid period!");
-        pricePointTWAPperiod = period;
     }
 
     /****************** view functions ****************** */
@@ -137,12 +155,12 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
     /**
      * @dev Check if a token is listed on UniswapV3.
      * @param token The address of the token to check.
-     * @return A boolean indicating whether the token is listed or not.
+     * @return isListed the is listed status of token.
      */
-    function isListed(address token) public override view returns(bool){
-        if(uniswapV3Metadata[token].pair != address(0)){
+    function isListed(address token) public view override returns (bool) {
+        if (uniswapV3Metadata[token].aggregatorPath[0] != address(0)) {
             return true;
-        }else{
+        } else {
             return false;
         }
     }
@@ -152,36 +170,59 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
      * @param token The address of the token to check.
      * @return A boolean indicating whether the token is active or not.
      */
-    function isActive(address token) public override view returns(bool){
+    function isActive(address token) public view override returns (bool) {
         return uniswapV3Metadata[token].isActive;
     }
 
     /**
      * @dev Returns the price of a given token in pairAsset, and the number of decimals for the price.
      * @param token The address of the token to get the price for.
-     * @return price The price of the token in pairAsset.
+     * @return priceMantissa The price of the token in pairAsset.
      * @return priceDecimals The number of decimals for the price.
      * @notice This function requires that the token is active in the price provider.
      */
-    function getPrice(address token) public override view returns (uint256 price, uint8 priceDecimals) {
+    function getPrice(address token) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
         UniswapV3Metadata memory metadata = uniswapV3Metadata[token];
         require(metadata.isActive, "UniswapV3PriceProvider: token is not active");
-        (int24 tick, ) = OracleLibrary.consult(metadata.pair, pricePointTWAPperiod);
+        address[] memory aggregatorPath = metadata.aggregatorPath;
+        priceMantissa = 1;
+        priceDecimals = tokenDecimals * uint8(aggregatorPath.length);
+        address nextToken = token;
+        for (uint8 i = 0; i < aggregatorPath.length; i++) {
+            (uint256 price, , address pairAsset) = getUnderlyingTokenPrice(nextToken, aggregatorPath[i]);
+            priceMantissa *= price;
+            nextToken = pairAsset;
+        }
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
+        } else {
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
+        }
         priceDecimals = tokenDecimals;
-        price = OracleLibrary.getQuoteAtTick(
-            tick,
-            uint128(10 ** (metadata.tokenDecimals + priceDecimals)),
-            token,
-            metadata.pairAsset
-        );
-        price /= 10 ** metadata.pairAssetDecimals;
+    }
+
+    function getUnderlyingTokenPrice(address token, address pair) public view returns (uint256 price, uint8 priceDecimals, address pairAsset) {
+        UniswapV3MetadataPair memory metadata = uniswapV3MetadataPair[pair];
+        (int24 tick, ) = OracleLibrary.consult(pair, metadata.pricePointTWAPperiod);
+        priceDecimals = tokenDecimals;
+        if (token == metadata.token) {
+            price = OracleLibrary.getQuoteAtTick(tick, uint128(10 ** (metadata.tokenDecimals + priceDecimals)), token, metadata.pairToken);
+            price /= 10 ** metadata.pairTokenDecimals;
+            pairAsset = metadata.pairToken;
+        } else if (token == metadata.pairToken) {
+            price = OracleLibrary.getQuoteAtTick(tick, uint128(10 ** (metadata.pairTokenDecimals + priceDecimals)), token, metadata.token);
+            price /= 10 ** metadata.tokenDecimals;
+            pairAsset = metadata.token;
+        } else {
+            revert("UniswapV3PriceProvider: Invalid token address");
+        }
     }
 
     /**
      * @dev Returns the number of decimals used for the USD price.
      * @return The number of decimals used for the USD price.
      */
-    function getPriceDecimals() public override view returns (uint8) {
+    function getPriceDecimals() public view override returns (uint8) {
         return tokenDecimals;
     }
 
