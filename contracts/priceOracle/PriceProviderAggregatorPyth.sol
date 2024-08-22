@@ -65,7 +65,7 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
-        if (tokenPriceProvider[token] == pythPriceProvider) {
+        if (pythPriceProvider != address(0)) {
             PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
         }
         return getPrice(token);
@@ -82,7 +82,9 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
         address[] memory token,
         uint256 timeBeforeExpiration
     ) external view returns (bytes32[] memory priceIds, uint256 updateFee) {
-        (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
+        if (pythPriceProvider != address(0)) {
+            (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
+        }
     }
 
     /**
@@ -91,7 +93,7 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
      * @param updateData The updateData provided by PythNetwork.
      */
     function _updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) internal {
-        if (priceIds.length > 0) {
+        if (priceIds.length > 0 && pythPriceProvider != address(0)) {
             PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
         } else {
             require(msg.value == 0, "PriceProviderAggregatorPyth: Msg.value!=0!");
