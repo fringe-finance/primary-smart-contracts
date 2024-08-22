@@ -31,18 +31,6 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the LPToken and its corresponding price provider are set.
      * @param token The address of the LPToken.
      * @param priceProvider The address of the price provider contract.
@@ -61,7 +49,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      * @param newTokenDecimals The new token decimals.
      */
     event SetTokenDecimals(uint8 newTokenDecimals);
-    
+
     /**
      * @dev Initializes the LPPriceProvider contract by setting up the access control roles and the number of decimals for the USD price.
      */
@@ -73,44 +61,12 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the contract's moderator.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the MODERATOR_ROLE to a new address.
-     * Caller must be the admin.
-     * @param newModerator The address to grant the role to.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the MODERATOR_ROLE from an address.
-     * Caller must be the admin.
-     * @param moderator The address to revoke the role from.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
-    }
-
-    /****************** end Admin functions ****************** */
 
     /****************** Moderator functions ****************** */
 
@@ -157,7 +113,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         emit ChangeActive(token, active);
     }
 
-    /****************** View functions ****************** */
+    /****************** View functions *******************/
 
     /**
      * @dev Checks if a token is listed in the LPPriceProvider.

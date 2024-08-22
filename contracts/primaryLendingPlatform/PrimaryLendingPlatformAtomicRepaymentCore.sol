@@ -69,14 +69,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Throws if the caller is not the admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AtomicRepayment: Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Throws if the caller is not the moderator.
      */
     modifier onlyModerator() {

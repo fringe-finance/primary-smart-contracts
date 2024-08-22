@@ -68,14 +68,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Modifier that allows only the admin to execute the function.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "WTG: Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier that allows only the moderator to execute the function.
      */
     modifier onlyModerator() {

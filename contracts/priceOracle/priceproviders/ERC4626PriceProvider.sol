@@ -31,18 +31,6 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the ERC-4626P token and its corresponding price provider are set.
      * @param token The address of the ERC-4626 token.
      * @param priceProvider The address of the price provider contract.
@@ -73,44 +61,12 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the contract's moderator.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the MODERATOR_ROLE to a new address.
-     * Caller must be the admin.
-     * @param newModerator The address to grant the role to.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the MODERATOR_ROLE from an address.
-     * Caller must be the admin.
-     * @param moderator The address to revoke the role from.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
-    }
-
-    /****************** end Admin functions ****************** */
 
     /****************** Moderator functions ****************** */
 
@@ -187,7 +143,7 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
      * @param token The address of the token to convert.
      * @return The price of the token in USD, represented as a mantissa.
      */
-     function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
+    function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
         address priceProvider = IPriceProviderAggregator(priceBase).tokenPriceProvider(token);
         (uint256 priceMantissa, uint8 priceDecimals) = PriceProvider(priceProvider).getPrice(token);
         uint8 decimals = ERC20Upgradeable(token).decimals();
@@ -206,10 +162,10 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     function getPrice(address erc4626Token) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
         uint8 decimals = IERC4626Upgradeable(erc4626Token).decimals();
         address assetToken = IERC4626Upgradeable(erc4626Token).asset();
-        uint256 assets = IERC4626Upgradeable(erc4626Token).convertToAssets(10**decimals);
+        uint256 assets = IERC4626Upgradeable(erc4626Token).convertToAssets(10 ** decimals);
         ERC4626Metadata memory metadata = erc4626Metadata[erc4626Token];
         uint256 price = _convertToUSD(metadata.base, assetToken);
-        priceMantissa = price.mul(assets).div(2**112);
+        priceMantissa = price.mul(assets).div(2 ** 112);
         priceDecimals = tokenDecimals;
     }
 

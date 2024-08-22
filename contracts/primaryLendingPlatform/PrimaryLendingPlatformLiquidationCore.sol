@@ -118,14 +118,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier that only allows access to accounts with the MODERATOR_ROLE.
      */
     modifier onlyModerator() {

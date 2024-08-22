@@ -23,18 +23,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     mapping(address => address) public tokenPriceProvider; // address of project token => priceProvider address
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the price provider is set to a token.
      * @param token The address of the token whose price provider is set.
      * @param priceProvider The address of the price provider.
@@ -74,39 +62,11 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @dev Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to check if the caller has the MODERATOR_ROLE.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** end Admin functions ****************** */
@@ -208,7 +168,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
                     address lendingToken = primaryLendingPlatform.lendingTokens(i);
 
                     if (primaryLendingPlatform.totalBorrow(projectToken, lendingToken) > 0 || lendingToken == actualLendingToken) {
-                        lendingTokensUpdateFinalPrice[lendingTokensIndex++] = lendingToken; 
+                        lendingTokensUpdateFinalPrice[lendingTokensIndex++] = lendingToken;
                     }
                 }
                 // The length of the array includes the lendingTokens that need to be updated final price and projectToken.

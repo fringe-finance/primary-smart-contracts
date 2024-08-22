@@ -91,14 +91,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
-     * @dev Modifier to restrict access to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PITLeverage: Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to only the contract moderator.
      */
     modifier onlyModerator() {
