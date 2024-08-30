@@ -7,8 +7,7 @@
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
-            "priceIdPath": [],
-            "priceDecimals": ""
+            "priceIdPath": []
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",
@@ -22,8 +21,13 @@
             ],
             "priceDecimals": ""
         },
-        "Uniswap": {
-            "pricePointTWAPperiod": "",
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": [],
+            "priceDecimals": ""
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": [],
             "tokensUseUniswap": [],
             "uniswapPairs": [],
             "priceDecimals": ""
@@ -32,9 +36,6 @@
             "tokensUseMute": [],
             "mutePairs": [],
             "priceDecimals": ""
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
         },
         "LPProvider": {
             "tokensUseLPProvider": [],

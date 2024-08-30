@@ -1053,12 +1053,22 @@ module.exports = {
             log();
             log("***** SETTING UNISWAPV3 PRICE PROVIDER *****");
 
-            decimals = await uniswapV3PriceProvider.getPriceDecimals();
+            {
+                let decimals = await uniswapV3PriceProviderImplementation.getPriceDecimals();
+                if (decimals == 0) {
+                    await uniswapV3PriceProviderImplementation.initialize().then(function (instance) {
+                        log("UniswapV3PriceProvider Implementation initialized at " + uniswapV3PriceProviderLogicAddress + " at tx hash " + instance.hash);
+                    });
+                }
+            }
 
-            if (decimals == 0) {
-                await uniswapV3PriceProvider.initialize().then(function (instance) {
-                    log("UniswapV3PriceProvider initialized at " + uniswapV3PriceProviderAddress + " at tx hash " + instance.hash);
-                });
+            {
+                let decimals = await uniswapV3PriceProvider.getPriceDecimals();
+                if (decimals == 0) {
+                    await uniswapV3PriceProvider.initialize().then(function (instance) {
+                        log("UniswapV3PriceProvider initialized at " + uniswapV3PriceProviderAddress + " at tx hash " + instance.hash);
+                    })
+                }
             }
 
             {
@@ -1176,7 +1186,7 @@ module.exports = {
                     await erc4626PriceProviderImplementation.initialize()
                         .then(function (instance) {
                             log("Transaction hash: " + instance.hash);
-                            log("ERC4626PriceProvider Implementation initialized at " + lpPriceProviderLogicAddress);
+                            log("ERC4626PriceProvider Implementation initialized at " + erc4626PriceProviderLogicAddress);
                         });
                 }
             }
@@ -1186,7 +1196,7 @@ module.exports = {
                 if (usdDecimal == 0) {
                     await erc4626PriceProvider.initialize().then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
-                        log("ERC4626PriceProvider initialized at " + lpPriceProviderAddress);
+                        log("ERC4626PriceProvider initialized at " + erc4626PriceProviderAddress);
                     });
                 }
             }
@@ -1194,7 +1204,7 @@ module.exports = {
             {
                 const tokenDecimal = await erc4626PriceProvider.getPriceDecimals();
                 const currentImplementation = await proxyAdmin.getProxyImplementation(erc4626PriceProvider.address);
-                const priceDecimals = erc4626PriceProvider?.priceDecimals;
+                const priceDecimals = ERC4626Provider?.priceDecimals;
                 if (priceDecimals && tokenDecimal != priceDecimals && currentImplementation.toLowerCase() == erc4626PriceProviderLogicAddress.toLowerCase()) {
                     await erc4626PriceProvider.setTokenDecimals(priceDecimals)
                         .then(function (instance) {
@@ -1448,7 +1458,7 @@ module.exports = {
             if (tokenPriceProvider.toLowerCase() != erc4626PriceProviderAddress.toLowerCase()) {
                 await priceProviderAggregator.setTokenAndPriceProvider(token, erc4626PriceProviderAddress).then(function (instance) {
                     log("\nTransaction hash: " + instance.hash);
-                    log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + token + " with priceOracle " + lpPriceProviderAddress);
+                    log("PriceProviderAggregator " + priceProviderAggregator.address + " set token " + token + " with priceOracle " + erc4626PriceProviderAddress);
                 });
             }
         }
