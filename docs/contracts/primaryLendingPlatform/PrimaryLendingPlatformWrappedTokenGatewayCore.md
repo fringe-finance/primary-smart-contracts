@@ -50,6 +50,21 @@ Parameters:
 | :------------- | :------ | :-------------------------------------------- |
 | newPITLeverage | address | The address of the new PIT leverage contract. |
 
+### SetWETH
+
+```solidity
+event SetWETH(address newWETH)
+```
+
+Emitted when the WETH address is set.
+
+
+Parameters:
+
+| Name    | Type    | Description                           |
+| :------ | :------ | :------------------------------------ |
+| newWETH | address | The address of the new WETH contract. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -91,13 +106,6 @@ contract IPrimaryLendingPlatformLeverage pitLeverage
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier that allows only the admin to execute the function.
 ### onlyModerator
 
 ```solidity
@@ -159,6 +167,25 @@ Parameters:
 | weth                  | address | Address of the wrapped Ether (WETH) token contract.        |
 | pitLiquidationAddress | address | Address of the primary index token liquidation contract.   |
 | pitLeverageAddress    | address | Address of the primary index token leverage contract.      |
+
+### setWETH (0x5b769f3c)
+
+```solidity
+function setWETH(address _weth) external onlyModerator
+```
+
+Sets the address of the WETH contract.
+
+Requirements:
+- `newWETH` cannot be the zero address.
+- Caller must be a moderator.
+
+
+Parameters:
+
+| Name  | Type    | Description                           |
+| :---- | :------ | :------------------------------------ |
+| _weth | address | The address of the new WETH contract. |
 
 ### setPrimaryLendingPlatform (0xe801734a)
 
@@ -252,45 +279,6 @@ function deposit() external payable nonReentrant
 ```
 
 Deposits Ether into the PrimaryLendingPlatformWrappedTokenGatewayCore contract and wraps it into WETH.
-### supply (0x047fc9aa)
-
-```solidity
-function supply() external payable nonReentrant
-```
-
-Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
-The ETH is converted to WETH and then transferred to the user's address.
-The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
-### redeem (0xdb006a75)
-
-```solidity
-function redeem(uint256 bLendingTokenAmount) external nonReentrant
-```
-
-Redeems the specified amount of bLendingToken for the underlying asset (WETH) and transfers it to the caller.
-
-
-Parameters:
-
-| Name                | Type    | Description                                                                                                                |
-| :------------------ | :------ | :------------------------------------------------------------------------------------------------------------------------- |
-| bLendingTokenAmount | uint256 | The amount of bLendingToken to redeem. If set to `type(uint256).max`, redeems all the bLendingToken balance of the caller. |
-
-### redeemUnderlying (0x852a12e3)
-
-```solidity
-function redeemUnderlying(uint256 lendingTokenAmount) external nonReentrant
-```
-
-Redeems the underlying asset from the Primary Lending Platform and transfers it to the caller.
-
-
-Parameters:
-
-| Name               | Type    | Description                                |
-| :----------------- | :------ | :----------------------------------------- |
-| lendingTokenAmount | uint256 | The amount of the lending token to redeem. |
-
 ### repay (0x22867d78)
 
 ```solidity

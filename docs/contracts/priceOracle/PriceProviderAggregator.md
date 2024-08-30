@@ -13,36 +13,6 @@ The PriceProviderAggregator contract is the contract that provides the functiona
 Contract that provides the functionality of getting the latest price from different price providers.
 ## Events info
 
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new account.
-
-
-Parameters:
-
-| Name         | Type    | Description                                     |
-| :----------- | :------ | :---------------------------------------------- |
-| newModerator | address | The address to which moderator role is granted. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an account.
-
-
-Parameters:
-
-| Name      | Type    | Description                                       |
-| :-------- | :------ | :------------------------------------------------ |
-| moderator | address | The address from which moderator role is revoked. |
-
 ### SetTokenAndPriceProvider
 
 ```solidity
@@ -139,13 +109,6 @@ mapping(address => address) tokenPriceProvider
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
 ### onlyModerator
 
 ```solidity
@@ -170,36 +133,6 @@ Parameters:
 | Name           | Type    | Description                                    |
 | :------------- | :------ | :--------------------------------------------- |
 | newPriceOracle | address | The address of the new PriceOracle contract.   |
-
-### grantModerator (0x6981c7ae)
-
-```solidity
-function grantModerator(address newModerator) public onlyAdmin
-```
-
-Grants the moderator role to a new address.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) public onlyAdmin
-```
-
-Revokes the moderator role from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
 
 ### setTokenAndPriceProvider (0x072f27b0)
 

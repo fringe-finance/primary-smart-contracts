@@ -57,6 +57,73 @@ Parameters:
 | priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
 | updateData         | bytes[]   | An array of update data used to update the price oracle.         |
 
+### supply (0xbb27018d)
+
+```solidity
+function supply(
+    uint256 supplyAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData,
+    uint256 updateFee
+) external payable nonReentrant
+```
+
+Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
+The ETH is converted to WETH and then transferred to the user's address.
+The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
+
+
+Parameters:
+
+| Name         | Type      | Description                                                      |
+| :----------- | :-------- | :--------------------------------------------------------------- |
+| supplyAmount | uint256   | The amount of ETH to supply.                                     |
+| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
+| updateFee    | uint256   | Update fee pays for updating price.                              |
+
+### redeem (0x964ccc4d)
+
+```solidity
+function redeem(
+    uint256 bLendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable nonReentrant
+```
+
+Redeems the specified amount of bLendingToken for the underlying asset (WETH) and transfers it to the caller.
+
+
+Parameters:
+
+| Name                | Type      | Description                                                                                                                  |
+| :------------------ | :-------- | :--------------------------------------------------------------------------------------------------------------------------- |
+| bLendingTokenAmount | uint256   | The amount of bLendingToken to redeem. If set to `type(uint256).max`, redeems all the bLendingToken balance of the caller.   |
+| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.                                                               |
+| updateData          | bytes[]   | An array of update data used to update the price oracle.                                                                     |
+
+### redeemUnderlying (0x0c2e2ed6)
+
+```solidity
+function redeemUnderlying(
+    uint256 lendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable nonReentrant
+```
+
+Redeems the underlying asset from the Primary Lending Platform and transfers it to the caller.
+
+
+Parameters:
+
+| Name               | Type      | Description                                                      |
+| :----------------- | :-------- | :--------------------------------------------------------------- |
+| lendingTokenAmount | uint256   | The amount of the lending token to redeem.                       |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.         |
+
 ### liquidate (0xeca52d59)
 
 ```solidity

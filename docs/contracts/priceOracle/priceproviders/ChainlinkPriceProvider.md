@@ -23,36 +23,6 @@ struct ChainlinkMetadata {
 
 ## Events info
 
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new address.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
-
 ### SetTokenAndAggregator
 
 ```solidity
@@ -164,13 +134,6 @@ mapping(address => struct ChainlinkPriceProvider.ChainlinkMetadata) chainlinkMet
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to restrict access to functions to only the contract's admin.
 ### onlyModerator
 
 ```solidity
@@ -189,35 +152,21 @@ function initialize() public initializer
 Initializes the contract by setting up the access control roles and assigning them to the contract deployer.
 The `DEFAULT_ADMIN_ROLE` and `MODERATOR_ROLE` roles are set up with the contract deployer as the initial role bearer.
 `decimals` is set to 8.
-### grantModerator (0x6981c7ae)
+### setTokenDecimals (0xf2cf47be)
 
 ```solidity
-function grantModerator(address newModerator) public onlyAdmin
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
 ```
 
-Grants the moderator role to a new address.
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
 
 
 Parameters:
 
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) public onlyAdmin
-```
-
-Revokes the moderator role from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setTimeOut (0x60c74154)
 
@@ -354,7 +303,7 @@ function getPrice(
 ) public view override returns (uint256 priceMantissa, uint8 priceDecimals)
 ```
 
-Returns the latest asset price mantissa and price decimals. 
+Returns the latest asset price mantissa and price decimals.
 
 [price] = USD/token
 - First step is get priceMantissa with priceDecimals by this formula:

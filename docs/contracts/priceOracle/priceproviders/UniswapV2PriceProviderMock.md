@@ -258,32 +258,6 @@ Return values:
 | priceMantissa | uint256 | The price of the token, represented as a mantissa.   |
 | priceDecimals | uint8   | The number of decimal places in the token's price.   |
 
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the current price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
-
 ### getReserves (0x32749461)
 
 ```solidity

@@ -25,36 +25,6 @@ struct ERC4626Metadata {
 
 ## Events info
 
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new account.
-
-
-Parameters:
-
-| Name         | Type    | Description                                     |
-| :----------- | :------ | :---------------------------------------------- |
-| newModerator | address | The address to which moderator role is granted. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an account.
-
-
-Parameters:
-
-| Name      | Type    | Description                                       |
-| :-------- | :------ | :------------------------------------------------ |
-| moderator | address | The address from which moderator role is revoked. |
-
 ### SetERC4626TokenAndPriceProvider
 
 ```solidity
@@ -129,13 +99,6 @@ mapping(address => struct ERC4626PriceProvider.ERC4626Metadata) erc4626Metadata
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to restrict access to functions to only the contract's admin.
 ### onlyModerator
 
 ```solidity
@@ -152,38 +115,6 @@ function initialize() public initializer
 ```
 
 Initializes the LPPriceProvider contract by setting up the access control roles and the number of decimals for the USD price.
-### grantModerator (0x6981c7ae)
-
-```solidity
-function grantModerator(address newModerator) public onlyAdmin
-```
-
-Grants the MODERATOR_ROLE to a new address.
-Caller must be the admin.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address to grant the role to. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) public onlyAdmin
-```
-
-Revokes the MODERATOR_ROLE from an address.
-Caller must be the admin.
-
-
-Parameters:
-
-| Name      | Type    | Description                          |
-| :-------- | :------ | :----------------------------------- |
-| moderator | address | The address to revoke the role from. |
-
 ### setTokenDecimals (0xf2cf47be)
 
 ```solidity
@@ -311,32 +242,6 @@ Return values:
 | :------------ | :------ | :------------------------------------------------------------------- |
 | priceMantissa | uint256 | The price of the ERC-4626 token in USD, represented as a mantissa.   |
 | priceDecimals | uint8   | The number of decimals in the price of the ERC-4626 token in USD.    |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address erc4626Token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given amount of ERC-4626 tokens in USD.
-
-
-Parameters:
-
-| Name         | Type    | Description                                  |
-| :----------- | :------ | :------------------------------------------- |
-| erc4626Token | address | The address of the ERC-4626 token.           |
-| tokenAmount  | uint256 | The amount of ERC-4626 tokens to evaluate.   |
-
-
-Return values:
-
-| Name       | Type    | Description                                                   |
-| :--------- | :------ | :------------------------------------------------------------ |
-| evaluation | uint256 | The evaluation of the given amount of ERC-4626 tokens in USD. |
 
 ### getPriceDecimals (0x1b30aafc)
 
