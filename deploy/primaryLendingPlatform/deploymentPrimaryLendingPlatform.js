@@ -901,12 +901,15 @@ module.exports = {
         }
 
         {
-            let priceOracle = await plp.priceOracle();
-            if (priceOracle.toLowerCase() != PriceProviderAggregatorProxy.toLowerCase()) {
-                await plpModerator.setPriceOracle(PriceProviderAggregatorProxy).then(function (instance) {
-                    log("\nTransaction hash: " + instance.hash);
-                    log("PrimaryLendingModerator set priceOracle " + PriceProviderAggregatorProxy);
-                });
+            const currentPLPImplementation = await proxyAdmin.getProxyImplementation(primaryLendingPlatformV2ProxyAddress);
+            if (currentPLPImplementation.toLowerCase() == primaryLendingPlatformV2LogicAddress.toLowerCase()) {
+                let priceOracle = await plp.priceOracle();
+                if (priceOracle.toLowerCase() != PriceProviderAggregatorProxy.toLowerCase()) {
+                    await plpModerator.setPriceOracle(PriceProviderAggregatorProxy).then(function (instance) {
+                        log("\nTransaction hash: " + instance.hash);
+                        log("PrimaryLendingModerator set priceOracle: " + PriceProviderAggregatorProxy);
+                    });
+                }
             }
         }
 
