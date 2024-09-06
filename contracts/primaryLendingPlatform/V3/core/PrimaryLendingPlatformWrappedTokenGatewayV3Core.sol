@@ -47,6 +47,12 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
     event SetPITLeverage(address newPITLeverage);
 
     /**
+     * @dev Emitted when the WETH address is set.
+     * @param newWETH The address of the new WETH contract.
+     */
+    event SetWETH(address newWETH);
+
+    /**
      * @dev Initializes the PrimaryLendingPlatformWrappedTokenGateway contract.
      * @param pit Address of the primary index token contract.
      * @param weth Address of the wrapped Ether (WETH) token contract.
@@ -64,14 +70,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
         IWETH(weth).approve(fWETH, type(uint256).max);
         primaryLendingPlatformLiquidation = IPrimaryLendingPlatformLiquidationV3(pitLiquidationAddress);
         primaryLendingPlatformLeverage = IPrimaryLendingPlatformLeverageV3(pitLeverageAddress);
-    }
-
-    /**
-     * @dev Modifier that allows only the admin to execute the function.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "WTG: Caller is not the Admin");
-        _;
     }
 
     /**
@@ -115,6 +113,22 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
     }
 
     //************* MODERATOR FUNCTIONS ********************************
+
+    /**
+     * @dev Sets the address of the WETH contract.
+     *
+     * Requirements:
+     * - `newWETH` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param _weth The address of the new WETH contract.
+     */
+    function setWETH(address _weth) external onlyModerator {
+        require(_weth != address(0), "WTG: Invalid address");
+        address fWETH = primaryLendingPlatform.lendingTokenInfo(_weth).bLendingToken;
+        IWETH(_weth).approve(fWETH, type(uint256).max);
+        WETH = IWETH(_weth);
+        emit SetWETH(_weth);
+    }
 
     /**
      * @dev Sets the address of the primary lending platform contract.
@@ -296,6 +310,28 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
         if (msg.value > paybackAmount) _safeTransferETH(msg.sender, msg.value - paybackAmount);
     }
 
+    /**
+     * @notice Allows a user to deposit Ether to receive WETH and close a specific leverage position by WETH.
+     * If close successfully will delete the opened position from list of position data.
+     * @param positionId The id of leverage position.
+     * @param lendingTokenAmount The amount of short asset for closing.
+     */
+    function closePositionByShortAsset(bytes32 positionId, uint256 lendingTokenAmount) external payable nonReentrant {
+        require(msg.value >= lendingTokenAmount, "WTG: msg value is less than repayment amount");
+        WETH.deposit{value: lendingTokenAmount}();
+        uint256 amountRemaining = primaryLendingPlatformLeverage.closePositionByShortAssetFromRelatedContract(
+            address(this),
+            positionId,
+            address(WETH),
+            lendingTokenAmount,
+            msg.sender
+        );
+        if (amountRemaining > 0) {
+            WETH.withdraw(amountRemaining);
+            _safeTransferETH(msg.sender, amountRemaining);
+        }
+    }
+
     //************* PUBLIC VIEW FUNCTIONS ********************************
 
     /**
@@ -304,7 +340,8 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
      * @return outstanding Total outstanding amount.
      */
     function getTotalOutstanding(address user) public view returns (uint256 outstanding) {
-        outstanding = primaryLendingPlatform.outstanding(user, address(WETH));
+        (uint256 loanBody, uint256 accrual) = primaryLendingPlatform.getEstimatedOutstanding(user, address(WETH));
+        outstanding = loanBody + accrual;
     }
 
     //************* INTERNAL FUNCTIONS ********************************

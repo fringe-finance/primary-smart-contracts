@@ -74,42 +74,12 @@ contract PriceProviderAggregatorV3 is Initializable, AccessControlUpgradeable {
     }
 
     /**
-     * @dev Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to check if the caller has the MODERATOR_ROLE.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
-    }
-
-    /****************** end Admin functions ****************** */
 
     /****************** Moderator functions ****************** */
 

@@ -65,7 +65,7 @@ contract PriceProviderAggregatorPythV3 is PriceProviderAggregatorV3 {
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
-        if (tokenPriceProvider[token] == pythPriceProvider) {
+        if (pythPriceProvider != address(0)) {
             PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
         }
         return getPrice(token);

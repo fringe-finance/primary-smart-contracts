@@ -251,20 +251,6 @@ contract BackendPriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev This function is used to get the evaluation of a token with a given amount.
-     * @param token The address of the token to be evaluated.
-     * @param tokenAmount The amount of the token to be evaluated.
-     * @return evaluation The evaluation of the token with the given amount.
-     * @notice This function is deprecated. Use getEvaluationSigned(...) instead.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public pure override returns (uint256 evaluation) {
-        token;
-        tokenAmount;
-        evaluation;
-        revert("Use getEvaluationSigned(...)");
-    }
-
-    /**
      * @dev Returns the number of decimals used for the price returned by this price provider.
      * @return The number of decimals used for the price returned by this price provider.
      */

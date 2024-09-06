@@ -10,12 +10,12 @@
     "Pyth": {
       "pythOracle": "0xff1a0f4744e8582df1ae09d5611b887b6a12925c",
       "tokensUsePyth": [
-        "0xa7480B62a657555f6727bCdb96953bCC211FFbaC",
-        "0xDf66AB853Fc112Ec955531bd76E9079db30A0e27",
-        "0xF816b7FfDa4a8aB6B68540D1993fCa98E462b3bc",
-        "0x2D6E6A6430F0121d6949D743DF54730b40C5c74F",
-        "0xDB259fa7d7f9F68aE3ffC3c748516ba9567a7576",
-        "0x71d75C9A9e1a4fFa5a16556b51D6e630A4FA902A",
+        "0x5A61c51C6745b3F509f4a1BF54BFD04e04aF430a",
+        "0x832092FDF1D32A3A1b196270590fB0E25DF129FF",
+        "0x8729c0238b265BaCF6fE397E8309897BB5c40473",
+        "0x2ac430E52F47420A00984E11Ef0DDba80652419a",
+        "0x0Ff833129533546D96A5847C22b57AACccD00FD5",
+        "0x26320DE63415e5AAf2BA617D97C39444eDb6F741",
         "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
       ],
       "priceIdPath": [
@@ -54,26 +54,26 @@
       ]
     },
     "UniswapV2": {
-      "tokensUseUniswap": [],
-      "uniswapPairs": []
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
     },
     "UniswapV3": {
-      "pricePointTWAPperiod": "",
+      "pricePointTWAPperiod": [],
       "tokensUseUniswap": [],
       "uniswapPairs": []
-    },
-    "BackendProvider": {
-      "tokensUseBackendProvider": []
     },
     "LPProvider": {
       "tokensUseLPProvider": []
+    },
+    "ERC4626Provider": {
+      "tokensUseERC4626Provider": []
     },
     "wstETHProvider": {
       "wstETHAggregatorPath": [],
       "timeOuts": []
     },
-    "wstETH": "0x2D6E6A6430F0121d6949D743DF54730b40C5c74F",
-    "usdc": "0xDB259fa7d7f9F68aE3ffC3c748516ba9567a7576",
+    "wstETH": "0x2ac430E52F47420A00984E11Ef0DDba80652419a",
+    "usdc": "0x0Ff833129533546D96A5847C22b57AACccD00FD5",
     "WETH": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
   },
   "exchangeAggregatorParams": {
@@ -82,9 +82,9 @@
   },
   "plpModeratorParams": {
     "projectTokens": [
-      "0xa7480B62a657555f6727bCdb96953bCC211FFbaC",
-      "0xDf66AB853Fc112Ec955531bd76E9079db30A0e27",
-      "0xF816b7FfDa4a8aB6B68540D1993fCa98E462b3bc",
+      "0x5A61c51C6745b3F509f4a1BF54BFD04e04aF430a",
+      "0x832092FDF1D32A3A1b196270590fB0E25DF129FF",
+      "0x8729c0238b265BaCF6fE397E8309897BB5c40473",
       "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
     ],
     "loanToValueRatioNumerator": [
@@ -106,7 +106,7 @@
       "10"
     ],
     "isPaused": false,
-    "borrowLimitPerCollateral": [
+    "depositLimitPerProjectAsset": [
       "1000000000000",
       "1000000000000",
       "1000000000000",
@@ -129,8 +129,8 @@
     ],
     "reserveFactorMantissa": [],
     "lendingTokens": [
-      "0xDB259fa7d7f9F68aE3ffC3c748516ba9567a7576",
-      "0x71d75C9A9e1a4fFa5a16556b51D6e630A4FA902A",
+      "0x0Ff833129533546D96A5847C22b57AACccD00FD5",
+      "0x26320DE63415e5AAf2BA617D97C39444eDb6F741",
       "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270"
     ],
     "symbol": [

@@ -139,7 +139,7 @@ library Asset {
                 if (_tokenAmount > 0) {
                     // Some ERC-4626 do not allow minting and burning in the same transaction
                     // In this case, ERC-4626 will be sent to the receiver
-                    try IERC4626Upgradeable(_tokenInfo.addr).redeem(_tokenAmount, _receiver, address(this)) returns(uint256 amount) {
+                    try IERC4626Upgradeable(_tokenInfo.addr).redeem(_tokenAmount, _receiver, address(this)) returns (uint256 amount) {
                         assets[0] = IERC4626Upgradeable(_tokenInfo.addr).asset();
                         assetAmounts[0] = amount;
                     } catch {
@@ -151,7 +151,9 @@ library Asset {
             } else {
                 assets[0] = _tokenInfo.addr;
                 assetAmounts[0] = _tokenAmount;
-                ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
+                if (_tokenAmount > 0) {
+                    ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
+                }
             }
         }
     }

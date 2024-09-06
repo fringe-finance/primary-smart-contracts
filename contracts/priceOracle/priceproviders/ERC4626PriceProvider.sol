@@ -31,18 +31,6 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the ERC-4626P token and its corresponding price provider are set.
      * @param token The address of the ERC-4626 token.
      * @param priceProvider The address of the price provider contract.
@@ -73,44 +61,12 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the contract's moderator.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
     }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the MODERATOR_ROLE to a new address.
-     * Caller must be the admin.
-     * @param newModerator The address to grant the role to.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the MODERATOR_ROLE from an address.
-     * Caller must be the admin.
-     * @param moderator The address to revoke the role from.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
-    }
-
-    /****************** end Admin functions ****************** */
 
     /****************** Moderator functions ****************** */
 
@@ -211,23 +167,6 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
         uint256 price = _convertToUSD(metadata.base, assetToken);
         priceMantissa = price.mul(assets).div(2**112);
         priceDecimals = tokenDecimals;
-    }
-
-    /**
-     * @dev Returns the evaluation of a given amount of ERC-4626 tokens in USD.
-     * @param erc4626Token The address of the ERC-4626 token.
-     * @param tokenAmount The amount of ERC-4626 tokens to evaluate.
-     * @return evaluation The evaluation of the given amount of ERC-4626 tokens in USD.
-     */
-    function getEvaluation(address erc4626Token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(erc4626Token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-        uint8 decimals = IERC4626Upgradeable(erc4626Token).decimals();
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
     }
 
     /**

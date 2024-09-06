@@ -114,16 +114,6 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
     }
 
     /**
-     * @dev Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
-            revert Errors.CallerIsNotAdmin();
-        }
-        _;
-    }
-
-    /**
      * @dev Modifier that only allows access to accounts with the MODERATOR_ROLE.
      */
     modifier onlyModerator() {
@@ -274,36 +264,6 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
     }
 
     /**
-     * @dev Returns the estimated reward amount for a given parameters.
-     * @param account The address of the account.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param lendingTokenAmount The amount of lending token.
-     * @return The lending token amount.
-     * @return The project token amount to send to the liquidator.
-     */
-    function getEstimatedRewardAmount(
-        address account,
-        address projectToken,
-        address lendingToken,
-        uint256 lendingTokenAmount
-    ) public view returns (uint256, uint256) {
-        uint256 projectTokenToSendToLiquidator = _getProjectTokenToSendToLiquidator(account, projectToken, lendingToken, lendingTokenAmount);
-
-        uint256 depositedProjectTokenAmount = primaryLendingPlatform.depositedAmount(account, projectToken);
-        (uint256 estimatedOutstanding, ) = getEstimatedOutstandingInUSD(account, lendingToken);
-        if (lendingTokenAmount > estimatedOutstanding) {
-            lendingTokenAmount = estimatedOutstanding;
-        }
-        if (depositedProjectTokenAmount == 0) {
-            projectTokenToSendToLiquidator = 0;
-        } else if (projectTokenToSendToLiquidator > depositedProjectTokenAmount) {
-            projectTokenToSendToLiquidator = depositedProjectTokenAmount;
-        }
-        return (lendingTokenAmount, projectTokenToSendToLiquidator);
-    }
-
-    /**
      * @dev Calculates the liquidator reward factor (LRF) for a given position.
      * @param account The address of the borrower whose position is being considered.
      * @return lrfNumerator The numerator of the liquidator reward factor.
@@ -387,11 +347,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
      * @return maxLA The minimum liquidation amount.
      * @return minLA The maximum liquidation amount.
      */
-    function getLiquidationAmount(
-        address account,
-        address projectToken,
-        address lendingToken
-    ) public view returns (uint256 maxLA, uint256 minLA) {
+    function getLiquidationAmount(address account, address projectToken, address lendingToken) public view returns (uint256 maxLA, uint256 minLA) {
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
         (, uint256 lendingPrice) = getTokenPrice(lendingToken, projectTokenMultiplier);
         maxLA = getMaxLiquidationAmount(account, projectToken, lendingToken);
@@ -404,22 +360,25 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
      * @param account The user's address to liquidate.
      * @param projectToken The project token address associated with the user's position.
      * @param lendingToken The lending token address used for the liquidation.
-     * @param repaidAmount The amount of lending tokens was used for the liquidation.
+     * @param liquidator The address of the liquidator.
+     * @param lendingTokenAmount The lending token amount used for liquidation.
      * @return projectTokenToSendToLiquidator The amount of project tokens to send to the liquidator.
      */
-    function _getProjectTokenToSendToLiquidator(
+    function _getProjectTokenSendToLiquidator(
         address account,
         address projectToken,
         address lendingToken,
-        uint256 repaidAmount
-    ) internal view returns (uint256 projectTokenToSendToLiquidator) {
-        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(projectToken).decimals();
+        address liquidator,
+        uint256 lendingTokenAmount
+    ) internal returns (uint256 projectTokenToSendToLiquidator) {
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(account);
+        uint256 repaidAmount = primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, liquidator, account, bytes32(0));
 
-        (, uint256 capitalEvaluation) = getTokenPrice(lendingToken, repaidAmount);
+        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(projectToken).decimals();
         (uint256 collateralPrice, ) = getTokenPrice(projectToken, projectTokenMultiplier);
-        uint256 projectTokenEvaluation = (capitalEvaluation * projectTokenMultiplier) / collateralPrice;
+        (, uint256 capitalEvaluation) = getTokenPrice(lendingToken, repaidAmount);
 
+        uint256 projectTokenEvaluation = (capitalEvaluation * projectTokenMultiplier) / collateralPrice;
         projectTokenToSendToLiquidator = (projectTokenEvaluation * lrfNumerator) / lrfDenominator;
     }
 
@@ -438,10 +397,11 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         address liquidator
     ) internal returns (uint256) {
         uint256 depositedProjectTokenAmount = primaryLendingPlatform.depositedAmount(account, projectToken);
-        if (depositedProjectTokenAmount == 0 || projectTokenToSendToLiquidator == 0) {
-            return 0;
-        } else if (projectTokenToSendToLiquidator > depositedProjectTokenAmount) {
+        if (projectTokenToSendToLiquidator > depositedProjectTokenAmount) {
             projectTokenToSendToLiquidator = depositedProjectTokenAmount;
+        }
+        if (projectTokenToSendToLiquidator == 0) {
+            return 0;
         }
         return primaryLendingPlatform.calcAndTransferDepositPosition(projectToken, projectTokenToSendToLiquidator, account, liquidator);
     }
@@ -536,8 +496,6 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
             assets[0] = _prjInfo.addr;
             assetAmounts[0] = _liquidateNoBorrow(_account, _prjInfo.addr, _lendingInfo.addr, liquidationAmount, _liquidator);
         }
-
-        emit Liquidate(_liquidator, _account, _lendingInfo.addr, _prjInfo.addr, assetAmounts[0]);
     }
 
     /**
@@ -582,7 +540,7 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
      * @param _projectToken The project token address associated with the user's position.
      * @param _lendingToken The lending token address used for the liquidation.
      * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
-     * @param liquidator The address of the liquidator (usually the msg.sender).
+     * @param _liquidator The address of the liquidator (usually the msg.sender).
      * @return The amount of project tokens sent to the liquidator as a result of the liquidation.
      */
     function _liquidateNoBorrow(
@@ -590,13 +548,19 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
         address _projectToken,
         address _lendingToken,
         uint256 _lendingTokenAmount,
-        address liquidator
+        address _liquidator
     ) internal returns (uint256) {
-        uint256 projectTokenSendToLiquidator = _getProjectTokenToSendToLiquidator(_account, _projectToken, _lendingToken, _lendingTokenAmount);
-        primaryLendingPlatform.repayFromRelatedContract(_lendingToken, _lendingTokenAmount, liquidator, _account, bytes32(0));
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(
+            _account,
+            _projectToken,
+            _lendingToken,
+            _liquidator,
+            _lendingTokenAmount
+        );
+        uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenSendToLiquidator, _liquidator);
+        _transferExcessToken(_lendingToken, _liquidator);
 
-        uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenSendToLiquidator, liquidator);
-        _transferExcessToken(_lendingToken, liquidator);
+        emit Liquidate(_liquidator, _account, _lendingToken, _projectToken, projectTokenSendToLiquidator);
         return projectTokenLiquidatorReceived;
     }
 
@@ -631,14 +595,20 @@ abstract contract PrimaryLendingPlatformLiquidationV3Core is Initializable, Acce
     ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
         //User need to approve lending token berfore call this function
         _nakedBorrow(_liquidator, _lendingInfo.addr, _lendingTokenAmount);
-        uint256 projectTokenSendToLiquidator = _getProjectTokenToSendToLiquidator(_account, _prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount);
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(
+            _account,
+            _prjInfo.addr,
+            _lendingInfo.addr,
+            _liquidator,
+            _lendingTokenAmount
+        );
 
-        primaryLendingPlatform.repayFromRelatedContract(_lendingInfo.addr, _lendingTokenAmount, _liquidator, _account, bytes32(0));
         uint256 projectTokenReward = _distributeReward(_account, _prjInfo.addr, projectTokenSendToLiquidator, address(this));
 
         _swapAndRepayNakedBorrow(_prjInfo, _lendingInfo, projectTokenReward, _lendingTokenAmount, _liquidator, _buyCalldata);
-
         (assets, assetAmounts) = _redeemExcessToken(_prjInfo, _lendingInfo, _liquidator);
+
+        emit Liquidate(_liquidator, _account, _lendingInfo.addr, _prjInfo.addr, projectTokenSendToLiquidator);
     }
 
     /**

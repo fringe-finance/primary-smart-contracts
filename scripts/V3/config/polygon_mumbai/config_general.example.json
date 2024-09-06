@@ -10,43 +10,33 @@
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
-            "priceIdPath": [],
-            "priceDecimals": ""
+            "priceIdPath": []
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [],
-            "chainlinkAggregatorV3": [
-                []
-            ],
-            "timeOuts": [
-                []
-            ],
-            "priceDecimals": ""
+            "chainlinkAggregatorV3": [],
+            "timeOuts": []
         },
         "UniswapV2": {
             "tokensUseUniswap": [],
-            "uniswapPairs": [],
-            "priceDecimals": ""
+            "uniswapPairs": []
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "",
+            "pricePointTWAPperiod": [],
             "tokensUseUniswap": [],
-            "uniswapPairs": [],
-            "priceDecimals": ""
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
+            "uniswapPairs": []
         },
         "LPProvider": {
-            "tokensUseLPProvider": [],
-            "priceDecimals": ""
+            "tokensUseLPProvider": []
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": []
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [],
-            "timeOuts": [],
-            "priceDecimals": ""
+            "timeOuts": []
         },
         "wstETH": "",
         "usdc": "",
@@ -61,18 +51,18 @@
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
         "isPaused": false,
-        "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": []
+        "borrowLimitPerLendingToken": [],
+        "depositLimitPerProjectAsset": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
-        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
+        "reserveFactorMantissa": [],
         "initialSupplyAmount": []
     },
     "jumRateModel": {

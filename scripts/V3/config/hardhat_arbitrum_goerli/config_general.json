@@ -42,7 +42,7 @@
             "10"
         ]
       },
-      "Uniswap": {
+      "UniswapV2": {
           "tokensUseUniswap": [
             "0xA0126016B2cFcAf60df67579C81F68C02bc237d8",
             "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
@@ -54,8 +54,10 @@
             "0x7A4680dF7759A12ea0A7636e0EAC448F90CA6cb5"
           ]
       },
-      "BackendProvider": {
-          "tokensUseBackendProvider": []
+      "UniswapV3": {
+        "pricePointTWAPperiod": [],
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
       },
       "LPProvider": {
           "tokensUseLPProvider": [
@@ -63,6 +65,9 @@
             "0x531F9b3df4B7d92D581771252fB3B066Ba08ff06"
           ]
       },
+      "ERC4626Provider": {
+            "tokensUseERC4626Provider": []
+        },
       "wstETHProvider": {
           "wstETHAggregatorPath": []
       },
@@ -103,7 +108,7 @@
         "10"
     ],
     "isPaused": false,
-    "borrowLimitPerCollateral": [
+    "depositLimitPerProjectAsset": [
         "1000000000000",
         "1000000000000",
         "1000000000000",

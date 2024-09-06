@@ -59,13 +59,6 @@ contract PrimaryLendingPlatformModeratorV3 is Initializable, AccessControlUpgrad
     event SetPausedLendingToken(address indexed lendingToken, bool isPaused);
 
     /**
-     * @dev Emitted when the borrow limit per collateral asset is set for a project token.
-     * @param projectToken The address of the project token.
-     * @param borrowLimit The borrow limit per collateral asset.
-     */
-    event SetBorrowLimitPerCollateralAsset(address indexed projectToken, uint256 borrowLimit);
-
-    /**
      * @dev Emitted when the borrow limit per lending asset is set for a lending token.
      * @param lendingToken The address of the lending token.
      * @param borrowLimit The borrow limit per lending asset.
@@ -98,6 +91,12 @@ contract PrimaryLendingPlatformModeratorV3 is Initializable, AccessControlUpgrad
      * @param moderator The address of the moderator.
      */
     event RevokeModerator(address indexed moderator);
+
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new primary lending platform address.
+     */
+    event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
 
     /**
      * @dev Emitted when the leverage of the PrimaryLendingPlatform contract is set.
@@ -226,6 +225,20 @@ contract PrimaryLendingPlatformModeratorV3 is Initializable, AccessControlUpgrad
         require(currentAdmin != address(0) && newAdmin != address(0), "PLPModerator: Invalid addresses");
         primaryLendingPlatform.grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         primaryLendingPlatform.revokeRole(DEFAULT_ADMIN_ROLE, currentAdmin);
+    }
+
+    /**
+     * @dev Sets the address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - Only the moderator can call this function.
+     * - The new primary lending platform address cannot be the zero address.
+     * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
+     */
+    function setPrimaryLendingPlatform(address newPrimaryLendingPlatform) external onlyModerator {
+        require(newPrimaryLendingPlatform != address(0), "PITModerator: Invalid address");
+        primaryLendingPlatform = IPrimaryLendingPlatformV3(newPrimaryLendingPlatform);
+        emit SetPrimaryLendingPlatform(newPrimaryLendingPlatform);
     }
 
     /**
@@ -388,7 +401,7 @@ contract PrimaryLendingPlatformModeratorV3 is Initializable, AccessControlUpgrad
 
     /**
      * @dev Sets the deposit limit per project asset for a given project token.
-     * 
+     *
      * Requirements:
      * - The function can only be called by the moderator.
      * - The project token must be listed on the primary lending platform.

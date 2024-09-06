@@ -1,48 +1,61 @@
 {
-  "priceOracle": {
+    "priceOracle": {
+      "priceProcessingOracle": {
+        "volatilityCapUpPercent": "",
+        "volatilityCapDownPercent": ""
+      },
       "Pyth": {
-          "pythOracle": "",
-          "tokensUsePyth": [],
-          "priceIdPath": []
+        "pythOracle": "",
+        "tokensUsePyth": [],
+        "priceIdPath": []
       },
       "Chainlink": {
-          "sequencerUptimeFeed": "",
-          "gracePeriodTime": "",
-          "tokensUseChainlink": [],
-          "chainlinkAggregatorV3": [[]],
-          "timeOuts": [[]]
+        "sequencerUptimeFeed": "",
+        "gracePeriodTime": "",
+        "tokensUseChainlink": [],
+        "chainlinkAggregatorV3": [[]],
+        "timeOuts": [[]]
       },
-      "Uniswap": {
-          "tokensUseUniswap": [],
-          "uniswapPairs": []
+      "UniswapV2": {
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
       },
-      "BackendProvider": {
-          "tokensUseBackendProvider": []
+      "UniswapV3": {
+        "pricePointTWAPperiod": [],
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
       },
       "LPProvider": {
-          "tokensUseLPProvider": []
+        "tokensUseLPProvider": []
+      },
+      "ERC4626Provider": {
+        "tokensUseERC4626Provider": []
+      },
+      "Mute:": {
+        "tokensUseMute": [],
+        "mutePairs": []
       },
       "wstETHProvider": {
-          "wstETHAggregatorPath": [],
-          "timeOuts": []
+        "wstETHAggregatorPath": [],
+        "timeOuts": []
       },
       "wstETH": "",
       "usdc": "",
       "WETH": ""
-  },
-  "exchangeAggregatorParams": {
+    },
+    "exchangeAggregatorParams": {
       "exchangeAggregator": "",
       "registryAggregator": ""
-  },
-  "plpModeratorParams": {
+    },
+    "plpModeratorParams": {
       "projectTokens": [],
-        "loanToValueRatioNumerator": [],
-        "loanToValueRatioDenominator": [],
-        "isPaused": false,
-        "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": []
-  },
-  "blendingToken": {
+      "loanToValueRatioNumerator": [],
+      "loanToValueRatioDenominator": [],
+      "isPaused": false,
+      "depositLimitPerProjectAsset": [],
+      "borrowLimitPerLendingToken": []
+    },
+    "blendingToken": {
       "initialExchangeRateMantissa": [],
       "reserveFactorMantissa": [],
       "lendingTokens": [],
@@ -68,4 +81,5 @@
       "targetHFNumerator": "",
       "targetHFDenominator": ""
     }
-}
+  }
+  

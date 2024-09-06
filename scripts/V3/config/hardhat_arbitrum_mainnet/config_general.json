@@ -15,15 +15,20 @@
           "chainlinkAggregatorV3": [[]],
           "timeOuts": [[]]
       },
-      "Uniswap": {
+      "UniswapV2": {
           "tokensUseUniswap": [],
           "uniswapPairs": []
       },
-      "BackendProvider": {
-          "tokensUseBackendProvider": []
-      },
+        "UniswapV3": {
+            "pricePointTWAPperiod": [],
+            "tokensUseUniswap": [],
+            "uniswapPairs": []
+        },
       "LPProvider": {
           "tokensUseLPProvider": []
+      },
+      "ERC4626Provider": {
+          "tokensUseERC4626Provider": []
       },
       "wstETHPriceProvider": {
           "wstETHAggregatorPath": []
@@ -41,7 +46,7 @@
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
         "isPaused": false,
-        "borrowLimitPerCollateral": [],
+        "depositLimitPerProjectAsset": [],
         "borrowLimitPerLendingToken": []
   },
   "blendingToken": {

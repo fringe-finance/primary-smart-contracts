@@ -41,7 +41,7 @@
             "uniswapPairs": []
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "10",
+            "pricePointTWAPperiod": [["10"]],
             "tokensUseUniswap": [
                 "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
                 "0xC5Dd0a058C28eA9E8a7268225dE3E9ce53c10923",
@@ -49,20 +49,20 @@
                 "0xC0a63a09504f38672F3a901d931Fc1017F18c759"
             ],
             "uniswapPairs": [
-                "0x1270A5F57De8415Dea019ADEB26B15547822fbc5",
-                "0x8C44bE1917B5dDf8bA6E8E459B6BD48Ca9AAaF92",
-                "0x85b09bc7a2cD43f30044A8A21495C901B66A1BFA",
-                "0x6744DD44AB8E6Ebb071197d3a569F3bE90eEF20A"
+                ["0x1270A5F57De8415Dea019ADEB26B15547822fbc5"],
+                ["0x8C44bE1917B5dDf8bA6E8E459B6BD48Ca9AAaF92"],
+                ["0x85b09bc7a2cD43f30044A8A21495C901B66A1BFA"],
+                ["0x6744DD44AB8E6Ebb071197d3a569F3bE90eEF20A"]
             ]
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
         },
         "LPProvider": {
             "tokensUseLPProvider": [
                 "0x9De2C1A2384B825A22bbd09fA4ED41Bfa5bf2D24",
                 "0x1270A5F57De8415Dea019ADEB26B15547822fbc5"
             ]
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": []
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [
@@ -109,7 +109,7 @@
             "10"
         ],
         "isPaused": false,
-        "borrowLimitPerCollateral": [
+        "depositLimitPerProjectAsset": [
             "1000000000000",
             "1000000000000",
             "1000000000000",

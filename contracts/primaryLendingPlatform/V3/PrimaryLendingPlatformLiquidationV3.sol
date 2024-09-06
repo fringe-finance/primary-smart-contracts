@@ -50,9 +50,16 @@ contract PrimaryLendingPlatformLiquidationV3 is PrimaryLendingPlatformLiquidatio
         bytes32[] memory priceIds,
         bytes[] calldata updateData,
         bytes[] memory buyCalldata
-    ) external payable isProjectTokenListed(prjInfo.addr) isLendingTokenListed(lendingInfo.addr) nonReentrant {
+    )
+        external
+        payable
+        isProjectTokenListed(prjInfo.addr)
+        isLendingTokenListed(lendingInfo.addr)
+        nonReentrant
+        returns (address[] memory assets, uint256[] memory assetAmounts)
+    {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _liquidate(account, prjInfo, lendingInfo, lendingTokenAmount, msg.sender, buyCalldata, updatePriceTokens);
+        return _liquidate(account, prjInfo, lendingInfo, lendingTokenAmount, msg.sender, buyCalldata, updatePriceTokens);
     }
 
     /**
@@ -84,7 +91,6 @@ contract PrimaryLendingPlatformLiquidationV3 is PrimaryLendingPlatformLiquidatio
      * @param priceIds An array of bytes32 price identifiers to update.
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      * @param buyCalldata the buy calldata for hot borrow.
-     * @return projectTokenLiquidatorReceived The amount of project tokens received by the liquidator.
      */
     function liquidateFromModerator(
         address account,
@@ -96,11 +102,17 @@ contract PrimaryLendingPlatformLiquidationV3 is PrimaryLendingPlatformLiquidatio
         bytes32[] memory priceIds,
         bytes[] calldata updateData,
         bytes[] memory buyCalldata
-    ) external payable isProjectTokenListed(prjInfo.addr) isLendingTokenListed(lendingInfo.addr) onlyRelatedContracts nonReentrant returns (uint256) {
+    )
+        external
+        payable
+        isProjectTokenListed(prjInfo.addr)
+        isLendingTokenListed(lendingInfo.addr)
+        onlyRelatedContracts
+        nonReentrant
+        returns (address[] memory assets, uint256[] memory assetAmounts)
+    {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        (, uint256[] memory assetAmounts) = _liquidate(account, prjInfo, lendingInfo, lendingTokenAmount, liquidator, buyCalldata, updatePriceTokens);
-
-        return assetAmounts[0];
+        return _liquidate(account, prjInfo, lendingInfo, lendingTokenAmount, liquidator, buyCalldata, updatePriceTokens);
     }
 
     /**
@@ -118,27 +130,6 @@ contract PrimaryLendingPlatformLiquidationV3 is PrimaryLendingPlatformLiquidatio
     ) external payable returns (uint256 lrfNumerator, uint256 lrfDenominator) {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
         return liquidatorRewardFactor(account);
-    }
-
-    /**
-     * @dev Returns the estimated reward amount for a given parameters.
-     * @param account The address of the account.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param lendingTokenAmount The amount of lending token.
-     * @return The lending token amount.
-     * @return The project token amount to send to the liquidator.
-     */
-    function getEstimatedRewardAmountWithUpdatePrices(
-        address account,
-        address projectToken,
-        address lendingToken,
-        uint256 lendingTokenAmount,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256, uint256) {
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices(priceIds, updateData);
-        return getEstimatedRewardAmount(account, projectToken, lendingToken, lendingTokenAmount);
     }
 
     /**

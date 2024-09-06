@@ -30,18 +30,6 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the token and pair addresses are set for the UniswapV2PriceProvider contract.
      * @param token The address of the token that is set.
      * @param pair The address of the pair that is set.
@@ -72,39 +60,11 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the contract moderator.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
@@ -201,23 +161,6 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
         uint8 pairAssetDecimals = uniswapV2metadata.pairAssetDecimals;
         priceDecimals = 18;
         price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** decimals));
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD using the UniswapV2 price oracle.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 decimals = uniswapV2Metadata[token].tokenDecimals;
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
     }
 
     /**

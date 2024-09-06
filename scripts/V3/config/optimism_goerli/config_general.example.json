@@ -16,27 +16,23 @@
             "sequencerUptimeFeed": "",
             "gracePeriodTime": "",
             "tokensUseChainlink": [],
-            "chainlinkAggregatorV3": [
-                []
-            ],
-            "timeOuts": [
-                []
-            ]
+            "chainlinkAggregatorV3": [],
+            "timeOuts": []
         },
         "UniswapV2": {
             "tokensUseUniswap": [],
             "uniswapPairs": []
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "",
+            "pricePointTWAPperiod": [],
             "tokensUseUniswap": [],
             "uniswapPairs": []
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": []
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": []
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [],
@@ -55,18 +51,18 @@
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
         "isPaused": false,
-        "borrowLimitPerCollateral": [],
-        "borrowLimitPerLendingToken": []
+        "borrowLimitPerLendingToken": [],
+        "depositLimitPerProjectAsset": []
     },
     "blendingToken": {
         "initialExchangeRateMantissa": [],
-        "reserveFactorMantissa": [],
         "lendingTokens": [],
         "symbol": [],
         "decimals": [],
         "name": [],
         "loanToValueRatioNumerator": [],
         "loanToValueRatioDenominator": [],
+        "reserveFactorMantissa": [],
         "initialSupplyAmount": []
     },
     "jumRateModel": {

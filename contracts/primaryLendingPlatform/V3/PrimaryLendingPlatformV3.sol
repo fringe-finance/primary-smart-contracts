@@ -545,22 +545,6 @@ contract PrimaryLendingPlatformV3 is PrimaryLendingPlatformV3Core {
     }
 
     /**
-     * @dev Gets borrow amount in USD for a specific lending token
-     * @param lendingToken The address of the lending token
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return The total borrow amount in USD
-     */
-    function getBorrowedPerLendingTokenInUSDWithUpdatePrices(
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getBorrowedPerLendingTokenInUSD(lendingToken);
-    }
-
-    /**
      * @dev Converts the total estimated remaining pit amount to the corresponding lending token amount
      * @param account The address of the user account
      * @param lendingToken The address of the lending token

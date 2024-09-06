@@ -62,14 +62,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
     }
 
     /**
-     * @dev Throws if the caller is not the admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AtomicRepayment: Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Throws if the caller is not the moderator.
      */
     modifier onlyModerator() {
@@ -173,22 +165,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentV3Core is Initializable, 
      */
     function getRemainingDeposit(address user, address projectToken) public view returns (uint256 remainingDeposit) {
         remainingDeposit = primaryLendingPlatform.depositedAmount(user, projectToken);
-    }
-
-    /**
-     * @dev Computes the available lending token amount that a user can repay for a given project token.
-     * @param user The user for which to compute the available lending token amount.
-     * @param projectToken The project token for which to compute the available lending token amount.
-     * @param lendingToken The lending token for which to compute the available lending token amount.
-     * @return availableLendingAmount The available lending token amount that the user can repay.
-     */
-    function getAvailableRepaidAmount(address user, address projectToken, address lendingToken) public view returns (uint256 availableLendingAmount) {
-        uint256 remainingDeposit = getRemainingDeposit(user, projectToken);
-        // convert remainingDeposit to lending token
-        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        (uint256 collateralEvaluation, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, remainingDeposit);
-        (, uint256 capitalPrice) = primaryLendingPlatform.getTokenEvaluation(lendingToken, lendingTokenMultiplier);
-        availableLendingAmount = (collateralEvaluation * lendingTokenMultiplier) / capitalPrice;
     }
 
     //************* INTERNAL FUNCTIONS ********************************

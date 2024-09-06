@@ -1,5 +1,9 @@
 {
   "priceOracle": {
+    "priceProcessingOracle": {
+      "volatilityCapUpPercent": "",
+      "volatilityCapDownPercent": ""
+    },
     "Pyth": {
       "pythOracle": "0xC38B1dd611889Abc95d4E0a472A667c3671c08DE",
       "tokensUsePyth": [
@@ -30,7 +34,7 @@
         []
       ]
     },
-    "Uniswap": {
+    "UniswapV2": {
       "tokensUseUniswap": [
         "0x8141bbE65f611711EcF1e42A50E00bBE669A17CF",
         "0x2199b5009998e69e0B6Cb574C7c2f4a8954d9acA",
@@ -46,11 +50,20 @@
         "0xe85821575174502511aB9A9383136f1f26E0b6a9"
       ]
     },
-    "BackendProvider": {
-      "tokensUseBackendProvider": []
+    "UniswapV3": {
+      "pricePointTWAPperiod": [],
+      "tokensUseUniswap": [],
+      "uniswapPairs": []
     },
     "LPProvider": {
       "tokensUseLPProvider": []
+    },
+    "ERC4626Provider": {
+      "tokensUseERC4626Provider": []
+    },
+    "Mute:": {
+      "tokensUseMute": [],
+      "mutePairs": []
     },
     "wstETHProvider": {
       "wstETHAggregatorPath": [],
@@ -65,7 +78,7 @@
     "registryAggregator": ""
   },
   "plpModeratorParams": {
-    "tokens": [
+    "projectTokens": [
       "0x8141bbE65f611711EcF1e42A50E00bBE669A17CF",
       "0x2199b5009998e69e0B6Cb574C7c2f4a8954d9acA",
       "0x9b968333cBF98DDfc3daBCD25f8Ee5B2d3FC7e2D",
@@ -85,34 +98,6 @@
       "10",
       "10",
       "10"
-    ],
-    "liquidationTresholdFactorNumerator": [
-      "1",
-      "1",
-      "1",
-      "1",
-      "1"
-    ],
-    "liquidationTresholdFactorDenominator": [
-      "1",
-      "1",
-      "1",
-      "1",
-      "1"
-    ],
-    "liquidationIncentiveNumerator": [
-      "115",
-      "115",
-      "115",
-      "115",
-      "115"
-    ],
-    "liquidationIncentiveDenominator": [
-      "100",
-      "100",
-      "100",
-      "100",
-      "100"
     ],
     "isPaused": false,
     "depositLimitPerProjectToken": [

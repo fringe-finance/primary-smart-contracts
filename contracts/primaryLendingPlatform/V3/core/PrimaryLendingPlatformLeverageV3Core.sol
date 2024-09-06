@@ -63,6 +63,13 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
         LeverageType leverageType
     );
 
+    /**
+     * @dev Emitted when user closes the leverage position.
+     * @param borrower The address of the borrower.
+     * @param lendingToken The address of the short asset.
+     * @param positionId The id of leverage position.
+     * @param lendingTokenAmount The amount of short asset for closing.
+     */
     event ClosePosition(address indexed borrower, address indexed lendingToken, bytes32 indexed positionId, uint256 lendingTokenAmount);
 
     /**
@@ -97,14 +104,6 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
         _setupRole(MODERATOR_ROLE, msg.sender);
         primaryLendingPlatform = IPrimaryLendingPlatformV3(pit);
         primaryLendingPlatformAtomic = IPrimaryLendingPlatformAtomicRepaymentV3(pitAtomicRepayment);
-    }
-
-    /**
-     * @dev Modifier to restrict access to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PLPLeverage: Caller is not the Admin");
-        _;
     }
 
     /**
@@ -202,19 +201,34 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
     //************* EXTERNAL FUNCTIONS ********************************
 
     /**
-     * @notice Allow a user to close the specific leverage position by short asset.
-     * If close successfully will delete the opened position from list of position data
+     * @notice Allows a user to close the specific leverage position by short asset.
+     * If close successfully will delete the opened position from list of position data.
      * @param positionId The id of leverage position.
      * @param lendingToken The address of short asset.
      * @param lendingTokenAmount The amount of short asset for closing.
      */
     function closePositionByShortAsset(bytes32 positionId, address lendingToken, uint256 lendingTokenAmount) external {
-        ERC20Upgradeable(lendingToken).safeTransferFrom(msg.sender, address(this), lendingTokenAmount);
-        address bLendingToken = primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken;
-        ERC20Upgradeable(lendingToken).approve(bLendingToken, lendingTokenAmount);
-        primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, address(this), msg.sender, positionId);
+        _closePositionByShortAsset(msg.sender, positionId, lendingToken, lendingTokenAmount, msg.sender);
+    }
 
-        emit ClosePosition(msg.sender, lendingToken, positionId, lendingTokenAmount);
+    /**
+     * @notice Allows a related contract to close the specific leverage position by short asset.
+     * If close successfully will delete the opened position from list of position data.
+     * @param user The address of the repairer.
+     * @param positionId The id of leverage position.
+     * @param lendingToken The address of short asset.
+     * @param lendingTokenAmount The amount of short asset for closing.
+     * @param borrower The address of the borrower.
+     * @return amountRemaining The remaining amount of short asset.
+     */
+    function closePositionByShortAssetFromRelatedContract(
+        address user,
+        bytes32 positionId,
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        address borrower
+    ) external onlyRelatedContracts returns (uint256 amountRemaining) {
+        amountRemaining = _closePositionByShortAsset(user, positionId, lendingToken, lendingTokenAmount, borrower);
     }
 
     //************* PUBLIC VIEW FUNCTIONS ********************************
@@ -231,25 +245,6 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
     }
 
     /**
-     * @notice Checks if the given margin, exposure, and LVR values form a valid collateralization.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return isValid True if the collateralization is valid, false otherwise.
-     */
-    function isValidCollateralization(
-        uint256 margin,
-        uint256 exp,
-        uint256 lvrNumerator,
-        uint256 lvrDenominator
-    ) external pure returns (bool isValid) {
-        uint256 ratioNumerator = (margin + exp) * lvrNumerator;
-        uint256 ratioDenominator = exp * lvrDenominator;
-        isValid = ratioNumerator > ratioDenominator ? true : false;
-    }
-
-    /**
      * @notice Calculates the lending token count for a given notional value.
      * @param lendingToken The address of the lending token.
      * @param notionalValue The notional value for which the lending token count is to be calculated.
@@ -258,76 +253,6 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
     function calculateLendingTokenCount(address lendingToken, uint256 notionalValue) public view returns (uint256 lendingTokenCount) {
         (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken);
         lendingTokenCount = (notionalValue * 10 ** ERC20Upgradeable(lendingToken).decimals()) / lendingTokenPrice;
-    }
-
-    /**
-     * @notice Calculates the health factor numerator and denominator based on the given parameters.
-     * @param expAmount The exposure amount.
-     * @param margin The margin amount.
-     * @param borrowAmount The borrowed amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return hfNumerator The calculated health factor numerator.
-     * @return hfDenominator The calculated health factor denominator.
-     */
-    function calculateHF(
-        uint256 expAmount,
-        uint256 margin,
-        uint256 borrowAmount,
-        uint256 lvrNumerator,
-        uint256 lvrDenominator
-    ) external pure returns (uint256 hfNumerator, uint256 hfDenominator) {
-        hfNumerator = (expAmount + margin) * lvrNumerator;
-        hfDenominator = borrowAmount * lvrDenominator;
-    }
-
-    /**
-     * @dev Calculates the margin amount for a given position and safety margin.
-     *
-     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param safetyMarginNumerator The numerator of the safety margin ratio.
-     * @param safetyMarginDenominator The denominator of the safety margin ratio.
-     * @param expAmount The exposure amount.
-     * @return marginAmount The calculated margin amount.
-     */
-    function calculateMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 safetyMarginNumerator,
-        uint256 safetyMarginDenominator,
-        uint256 expAmount
-    ) public view returns (uint256 marginAmount) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        uint256 margin = ((expAmount *
-            (lvrDenominator * (safetyMarginDenominator + safetyMarginNumerator) - lvrNumerator * safetyMarginDenominator)) /
-            (lvrNumerator * safetyMarginDenominator));
-        (uint256 projectTokenPrice, ) = getTokenPrice(projectToken);
-        marginAmount = (margin * 10 ** ERC20Upgradeable(projectToken).decimals()) / projectTokenPrice;
-    }
-
-    /**
-     * @dev Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-     *
-     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @return safetyMarginNumerator The calculated safety margin numerator.
-     * @return safetyMarginDenominator The calculated safety margin denominator.
-     */
-    function calculateSafetyMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 margin,
-        uint256 exp
-    ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        (uint256 marginPrice, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
-        safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
-        safetyMarginDenominator = (exp * lvrDenominator);
     }
 
     /**
@@ -451,6 +376,34 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
         if (addingAmount > 0) {
             ERC20Upgradeable(projectToken).safeTransferFrom(user, address(primaryLendingPlatform), addingAmount);
         }
+    }
+
+    /**
+     * @notice Closes the specified leverage position by short asset.
+     * @param user The address of the repairer.
+     * @param positionId The id of leverage position.
+     * @param lendingToken The address of short asset.
+     * @param lendingTokenAmount The amount of short asset for closing.
+     * @param borrower The address of the borrower.
+     * @return amountRemaining The remaining amount of short asset.
+     */
+    function _closePositionByShortAsset(
+        address user,
+        bytes32 positionId,
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        address borrower
+    ) internal returns (uint256 amountRemaining){
+        ERC20Upgradeable(lendingToken).safeTransferFrom(user, address(this), lendingTokenAmount);
+        address bLendingToken = primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken;
+        ERC20Upgradeable(lendingToken).approve(bLendingToken, lendingTokenAmount);
+        uint256 amountRepaid = primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, address(this), borrower, positionId);
+        amountRemaining = lendingTokenAmount - amountRepaid;
+        if (amountRemaining > 0) {
+            ERC20Upgradeable(lendingToken).safeTransfer(user, amountRemaining);
+        }
+
+        emit ClosePosition(borrower, lendingToken, positionId, amountRepaid);
     }
 
     //************* INTERNAL VIEW FUNCTIONS ********************************

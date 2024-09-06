@@ -68,16 +68,17 @@
             "priceDecimals": "10"
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "",
+            "pricePointTWAPperiod": [],
             "tokensUseUniswap": [],
             "uniswapPairs": [],
             "priceDecimals": "18"
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [],
+            "priceDecimals": "10"
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": [],
             "priceDecimals": "10"
         },
         "wstETHProvider": {
@@ -127,7 +128,7 @@
             "10"
         ],
         "isPaused": false,
-        "borrowLimitPerCollateral": [
+        "depositLimitPerProjectAsset": [
             "1000000000000",
             "2000000000000",
             "1000000000000",
