@@ -133,25 +133,34 @@ library Asset {
                 ERC20Upgradeable(assets[1]).safeTransfer(_receiver, _token1Amount);
             }
         } else {
-            assets = new address[](1);
-            assetAmounts = new uint256[](1);
             if (_tokenInfo.tokenType == Type.ERC4626) {
+                assets = new address[](2);
+                assetAmounts = new uint256[](2);
+                assets[0] = _tokenInfo.addr;
+                assets[1] = IERC4626Upgradeable(_tokenInfo.addr).asset();
                 if (_tokenAmount > 0) {
                     // Some ERC-4626 do not allow minting and burning in the same transaction
                     // In this case, ERC-4626 will be sent to the receiver
-                    try IERC4626Upgradeable(_tokenInfo.addr).redeem(_tokenAmount, _receiver, address(this)) returns(uint256 amount) {
-                        assets[0] = IERC4626Upgradeable(_tokenInfo.addr).asset();
-                        assetAmounts[0] = amount;
+                    try IERC4626Upgradeable(_tokenInfo.addr).redeem(_tokenAmount, _receiver, address(this)) returns (uint256 amount) {
+                        assetAmounts[1] = amount;
                     } catch {
                         ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
-                        assets[0] = _tokenInfo.addr;
                         assetAmounts[0] = _tokenAmount;
                     }
                 }
+                uint256 _underlyingTokenAmount = ERC20Upgradeable(assets[1]).balanceOf(address(this));
+                if (_underlyingTokenAmount > 0) {
+                    ERC20Upgradeable(assets[1]).safeTransfer(_receiver, _underlyingTokenAmount);
+                    assetAmounts[1] += _underlyingTokenAmount;
+                }
             } else {
+                assets = new address[](1);
+                assetAmounts = new uint256[](1);
                 assets[0] = _tokenInfo.addr;
                 assetAmounts[0] = _tokenAmount;
-                ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
+                if (_tokenAmount > 0) {
+                    ERC20Upgradeable(_tokenInfo.addr).safeTransfer(_receiver, _tokenAmount);
+                }
             }
         }
     }
