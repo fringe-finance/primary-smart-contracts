@@ -1,0 +1,25 @@
+{
+    "info": {
+        "assets": [
+            "0x5A7d6b2F92C77FAD6CCaBd7EE0624E64907Eaf3E",
+            "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+            "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C"
+        ],
+        "names": [
+            "erc4626-ZK",
+            "erc4626-USDC",
+            "erc4626-USDT"
+        ],
+        "symbols": [
+            "erc4626-ZK",
+            "erc4626-USDC",
+            "erc4626-USDT"
+        ],
+        "interestPercents": [
+            "1000",
+            "1000",
+            "1200"
+        ]
+    },
+    "tokenVault": []
+}
