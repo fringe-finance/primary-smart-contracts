@@ -118,14 +118,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier that only allows access to accounts with the MODERATOR_ROLE.
      */
     modifier onlyModerator() {
@@ -650,36 +642,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         (, uint256 lendingTokenPrice) = getTokenPrice(_lendingToken, lendingTokenMultiplier);
         maxLA = getMaxLiquidationAmount(_account, _projectToken, _lendingToken);
         minLA = Math.min(maxLA, (minPartialLiquidationAmount * lendingTokenMultiplier) / lendingTokenPrice);
-    }
-
-    /**
-     * @notice Calculates the amount of project tokens to send to the liquidator based on the lending token amount used for liquidation.
-     * @param _account The user's address to liquidate.
-     * @param _projectToken The project token address associated with the user's position.
-     * @param _lendingToken The lending token address used for the liquidation.
-     * @param _repayAmount The amount of lending tokens used for the liquidation.
-     * @return projectTokenReward The amount of project tokens to send to the liquidator.
-     */
-    function getEstimatedProjectTokenReward(
-        address _account,
-        address _projectToken,
-        address _lendingToken,
-        uint256 _repayAmount
-    ) public view returns (uint256 projectTokenReward) {
-        (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
-        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
-        (uint256 projectTokenPrice, ) = getTokenPrice(_projectToken, projectTokenMultiplier);
-        (, uint256 repaidInUSD) = getTokenPrice(_lendingToken, _repayAmount);
-
-        uint256 projectTokenEvaluation = (repaidInUSD * projectTokenMultiplier) / projectTokenPrice;
-        projectTokenReward = (projectTokenEvaluation * lrfNumerator) / lrfDenominator;
-        uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(_projectToken, _account);
-        if (projectTokenReward > depositedProjectTokenAmount) {
-            projectTokenReward = depositedProjectTokenAmount;
-        }
-        if (projectTokenReward == 0) {
-            return 0;
-        }
     }
 
     /**

@@ -31,18 +31,6 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     uint256 internal constant PRECISION = 10 ** 18;
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the wstETH address and aggregator path are set.
      * @param token The address of the wstETH token contract.
      * @param aggregatorPath The array of aggregator addresses to get the price feed for wstETH in USD.
@@ -71,40 +59,12 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the moderator role.
      * The caller must have the moderator role to execute the function.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
@@ -157,7 +117,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @dev Returns the price of stETH in USD.
      * @return priceMantissa The price of stETH in USD as a mantissa value.
      */
-     function getPriceSTETH() public view returns (uint256 priceMantissa) {
+    function getPriceSTETH() public view returns (uint256 priceMantissa) {
         address[] memory _aggregatorPath = aggregatorPath;
         priceMantissa = 1;
         uint256 priceDecimals = 0;
@@ -188,26 +148,13 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     }
 
     /**
-     * @dev Returns the evaluation of a given token amount in USD.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
-        uint8 decimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 10
-        evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-    }
-
-    /**
      * @dev Returns the number of decimals used for the USD price.
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public view override returns (uint8) {
         return tokenDecimals;
     }
-    
+
     /**
      * @dev Returns the latest price after performing sanity check and staleness check.
      * @param aggregatorPath_ The address of chainlink aggregator contract.

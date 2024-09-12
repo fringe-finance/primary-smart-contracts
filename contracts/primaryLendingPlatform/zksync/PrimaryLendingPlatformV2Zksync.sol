@@ -397,22 +397,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     }
 
     /**
-     * @dev Gets total borrow amount in USD for a specific lending token after updating related token's prices.
-     * @param lendingToken The address of the lending token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The total borrow amount in USD.
-     */
-    function getTotalBorrowPerLendingTokenWithUpdatePrices(
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getTotalBorrowPerLendingToken(lendingToken);
-    }
-
-    /**
      * @dev Calculates the collateral available for withdrawal based on the loan-to-value ratio of a specific project token after updating related token's prices.
      * @param account Address of the user.
      * @param projectToken Address of the project token.

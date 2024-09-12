@@ -69,14 +69,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Throws if the caller is not the admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "AtomicRepayment: Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Throws if the caller is not the moderator.
      */
     modifier onlyModerator() {
@@ -142,16 +134,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
     }
 
     /**
-     * @dev Returns the actual lending token address for a user and project token.
-     * @param user The user address.
-     * @param projectToken The project token address.
-     * @return actualLendingToken The actual lending token address.
-     */
-    function getLendingToken(address user, address projectToken) public view returns (address actualLendingToken) {
-        actualLendingToken = primaryLendingPlatform.getLendingToken(user, projectToken);
-    }
-
-    /**
      * @dev Returns the remaining deposit of a user for a specific project token.
      * @param user The address of the user.
      * @param projectToken The address of the project token.
@@ -159,22 +141,6 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
      */
     function getRemainingDeposit(address user, address projectToken) public view returns (uint256 remainingDeposit) {
         remainingDeposit = primaryLendingPlatform.getDepositedAmount(projectToken, user);
-    }
-
-    /**
-     * @dev Returns the available repaid amount for a user in a specific project token and lending token.
-     * @param user The address of the user.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @return availableLendingAmount The available repaid amount in the lending token.
-     */
-    function getAvailableRepaidAmount(address user, address projectToken, address lendingToken) public view returns (uint256 availableLendingAmount) {
-        uint256 remainingDeposit = getRemainingDeposit(user, projectToken);
-        // convert remainingDeposit to lending token
-        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        (uint256 projectTokenAmountInUSD, ) = primaryLendingPlatform.getTokenEvaluation(projectToken, remainingDeposit);
-        (, uint256 lendingTokenAmountInUSD) = primaryLendingPlatform.getTokenEvaluation(lendingToken, lendingTokenMultiplier);
-        availableLendingAmount = (projectTokenAmountInUSD * lendingTokenMultiplier) / lendingTokenAmountInUSD;
     }
 
     /**
@@ -284,7 +250,7 @@ abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, Ac
         bytes[] memory buyCalldata
     ) internal returns (uint256 tokenAmountRemaining, uint256 amountReceive) {
         require(collateralAmount > 0, "AtomicRepayment: CollateralAmount must be greater than 0");
-        require(lendingInfo.addr == getLendingToken(msg.sender, prjInfo.addr), "AtomicRepayment: Invalid lending token");
+        require(lendingInfo.addr == primaryLendingPlatform.getLendingToken(msg.sender, prjInfo.addr), "AtomicRepayment: Invalid lending token");
 
         uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(prjInfo.addr, msg.sender);
         if (collateralAmount > depositedProjectTokenAmount) {

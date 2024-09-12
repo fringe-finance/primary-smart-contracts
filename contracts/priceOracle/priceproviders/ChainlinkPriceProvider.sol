@@ -29,18 +29,6 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when a token and its corresponding Chainlink aggregator path are set.
      * @param token The address of the token.
      * @param aggregatorPath The array of Chainlink aggregator addresses used to get the price of the token.
@@ -80,39 +68,11 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
-    }
-
-    /**
      * @dev Modifier to restrict access to functions to only the contract's moderator.
      */
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
@@ -126,7 +86,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
         tokenDecimals = newTokenDecimals;
         emit SetTokenDecimals(newTokenDecimals);
     }
-    
+
     /**
      * @notice Sets the timeout value corresponding to the aggregatorPath.
      * @dev Example: ETH/USD have a new answer is written when the off-chain data moves more than the
@@ -151,7 +111,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     function setTokenAndAggregator(address token, address[] memory aggregatorPath) public onlyModerator {
         ChainlinkMetadata storage metadata = chainlinkMetadata[token];
         metadata.isActive = true;
-        require(aggregatorPath.length <= 5, "ChainlinkPriceProvider: Too long path");
+        require(aggregatorPath.length <= MAX_PRICE_PATH_LENGTH, "ChainlinkPriceProvider: Too long path");
         metadata.aggregatorPath = aggregatorPath;
         emit SetTokenAndAggregator(token, aggregatorPath);
     }
@@ -206,7 +166,7 @@ contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @notice Returns the latest asset price mantissa and price decimals. 
+     * @notice Returns the latest asset price mantissa and price decimals.
      * @dev [price] = USD/token
      * - First step is get priceMantissa with priceDecimals by this formula:
      *      price = 1 * 10 ** tokenDecimals * (chainlinkPrice_1 / 10 ** priceDecimals_1) * ... * (chainlinkPrice_n / 10 ** priceDecimals_n) =

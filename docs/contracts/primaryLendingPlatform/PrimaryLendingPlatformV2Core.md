@@ -257,13 +257,6 @@ mapping(address => uint256) totalDepositedProjectToken
 ```
 
 
-### depositedAmount (0xe0c32ec4)
-
-```solidity
-mapping(address => mapping(address => uint256)) depositedAmount
-```
-
-
 ### borrowPosition (0xa9ce9417)
 
 ```solidity
@@ -275,13 +268,6 @@ mapping(address => mapping(address => mapping(address => struct PrimaryLendingPl
 
 ```solidity
 mapping(address => mapping(address => uint256)) totalBorrow
-```
-
-
-### borrowLimit (0x676573bf)
-
-```solidity
-mapping(address => mapping(address => uint256)) borrowLimit
 ```
 
 
@@ -303,13 +289,6 @@ mapping(address => uint256) totalBorrowPerLendingToken
 
 ```solidity
 mapping(address => uint256) borrowLimitPerLendingToken
-```
-
-
-### lendingTokenPerCollateral (0x6705fb1b)
-
-```solidity
-mapping(address => mapping(address => address)) lendingTokenPerCollateral
 ```
 
 
@@ -595,30 +574,6 @@ Parameters:
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio for the project token.          |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the project token.        |
 
-### setPausedProjectToken (0x2c67c660)
-
-```solidity
-function setPausedProjectToken(
-    address projectToken,
-    bool isDepositPaused,
-    bool isWithdrawPaused
-) external onlyModeratorContract
-```
-
-Sets the deposit and withdraw pause status for a given project token.
-
-Requirements:
-- The caller must be the moderator contract.
-
-
-Parameters:
-
-| Name             | Type    | Description                                                      |
-| :--------------- | :------ | :--------------------------------------------------------------- |
-| projectToken     | address | The address of the project token.                                |
-| isDepositPaused  | bool    | The boolean value indicating whether deposit is paused or not.   |
-| isWithdrawPaused | bool    | The boolean value indicating whether withdraw is paused or not.  |
-
 ### setLendingTokenInfo (0x821363a0)
 
 ```solidity
@@ -646,29 +601,6 @@ Parameters:
 | isPaused                    | bool    | A boolean indicating whether the lending token is paused or not.   |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio for the lending token.    |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the lending token.  |
-
-### setPausedLendingToken (0x58841bee)
-
-```solidity
-function setPausedLendingToken(
-    address lendingToken,
-    bool isPaused
-) external onlyModeratorContract isLendingTokenListed(lendingToken)
-```
-
-Sets the pause status of a lending token.
-
-Requirements:
-- The caller must be the moderator contract.
-- The lending token must be listed.
-
-
-Parameters:
-
-| Name         | Type    | Description                         |
-| :----------- | :------ | :---------------------------------- |
-| lendingToken | address | The address of the lending token.   |
-| isPaused     | bool    | The pause status to be set.         |
 
 ### deposit (0x47e7ef24)
 
@@ -829,182 +761,6 @@ Return values:
 | Name                        | Type    | Description                                     |
 | :-------------------------- | :------ | :---------------------------------------------- |
 | collateralProjectToWithdraw | uint256 | The amount of collateral available to withdraw. |
-
-### supply (0xf2b9fdb8)
-
-```solidity
-function supply(
-    address lendingToken,
-    uint256 lendingTokenAmount
-) external isLendingTokenListed(lendingToken) nonReentrant
-```
-
-Supplies a specified amount of a lending token to the platform.
-
-Allows a user to supply a specified amount of a lending token to the platform.
-
-
-Parameters:
-
-| Name               | Type    | Description                                                                                                                                                                                                                                                                                                                                                  |
-| :----------------- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| lendingToken       | address | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                             |
-| lendingTokenAmount | uint256 | The amount of the lending token being supplied.  Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0.  Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
-
-### supplyFromRelatedContract (0xb3c38b6e)
-
-```solidity
-function supplyFromRelatedContract(
-    address lendingToken,
-    uint256 lendingTokenAmount,
-    address user
-) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant
-```
-
-Supplies a certain amount of lending tokens to the platform from a specific user.
-
-Requirements:
-- The lending token is listed.
-- Called by a related contract.
-- The lending token is not paused.
-- The lending token amount is greater than 0.
-- Minting the bLendingTokens is successful and the minted amount is greater than 0.
-
-Effects:
-- Mints the corresponding bLendingTokens and credits them to the user.
-
-
-Parameters:
-
-| Name               | Type    | Description                                |
-| :----------------- | :------ | :----------------------------------------- |
-| lendingToken       | address | Address of the lending token.              |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be supplied.   |
-| user               | address | Address of the user.                       |
-
-### redeem (0x1e9a6950)
-
-```solidity
-function redeem(
-    address lendingToken,
-    uint256 bLendingTokenAmount
-) external isLendingTokenListed(lendingToken) nonReentrant
-```
-
-Redeems a specified amount of bLendingToken from the platform.
-
-Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
-
-Requirements:
-- The lendingToken is listed.
-- The lending token should not be paused.
-- The bLendingTokenAmount should be greater than zero.
-- The redemption of bLendingToken should not result in a redemption error.
-
-Effects:
-- Burns the bLendingTokens from the user.
-- Transfers the corresponding lending tokens to the user.
-
-
-Parameters:
-
-| Name                | Type    | Description                               |
-| :------------------ | :------ | :---------------------------------------- |
-| lendingToken        | address | Address of the lending token.             |
-| bLendingTokenAmount | uint256 | Amount of bLending tokens to be redeemed. |
-
-### redeemFromRelatedContract (0x0bf6bd2f)
-
-```solidity
-function redeemFromRelatedContract(
-    address lendingToken,
-    uint256 bLendingTokenAmount,
-    address user
-) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant
-```
-
-Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
-
-Requirements:
-- The lendingToken is listed.
-     _ - Called by a related contract.
-- The lending token should not be paused.
-- The bLendingTokenAmount should be greater than zero.
-- The redemption of bLendingToken should not result in a redemption error.
-
-Effects:
-- Burns the bLendingTokens from the user.
-- Transfers the corresponding lending tokens to the user.
-
-
-Parameters:
-
-| Name                | Type    | Description                                 |
-| :------------------ | :------ | :------------------------------------------ |
-| lendingToken        | address | Address of the lending token.               |
-| bLendingTokenAmount | uint256 | Amount of bLending tokens to be redeemed.   |
-| user                | address | Address of the user.                        |
-
-### redeemUnderlying (0x96294178)
-
-```solidity
-function redeemUnderlying(
-    address lendingToken,
-    uint256 lendingTokenAmount
-) external isLendingTokenListed(lendingToken) nonReentrant
-```
-
-Redeems a specified amount of lendingToken from the platform.
-
-Function that performs the redemption of lending token and returns the corresponding underlying token to user.
-
-Requirements:
-- The lending token is listed.
-- The lending token should not be paused.
-- The lendingTokenAmount should be greater than zero.
-- The redemption of lendingToken should not result in a redemption error.
-
-Effects:
-- Transfers the corresponding underlying tokens to the user.
-
-
-Parameters:
-
-| Name               | Type    | Description                              |
-| :----------------- | :------ | :--------------------------------------- |
-| lendingToken       | address | Address of the lending token.            |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be redeemed. |
-
-### redeemUnderlyingFromRelatedContract (0xbdedb76c)
-
-```solidity
-function redeemUnderlyingFromRelatedContract(
-    address lendingToken,
-    uint256 lendingTokenAmount,
-    address user
-) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant
-```
-
-Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
-
-Requirements:
-- The lending token is listed.
-- Called by a related contract.
-- The lending token should not be paused.
-- The lendingTokenAmount should be greater than zero.
-- The redemption of lendingToken should not result in a redemption error.
-
-Effects:
-- Transfers the corresponding underlying tokens to the user.
-
-
-Parameters:
-
-| Name               | Type    | Description                                |
-| :----------------- | :------ | :----------------------------------------- |
-| lendingToken       | address | Address of the lending token.              |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be redeemed.   |
-| user               | address | Address of the user.                       |
 
 ### calcBorrowPosition (0x2dfee307)
 

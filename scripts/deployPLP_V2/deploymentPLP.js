@@ -17,7 +17,6 @@ module.exports = {
 
         //contracts addresses
         let proxyAdminAddress;
-        let backendPriceProviderAddress;
         let chainlinkPriceProviderAddress;
         let uniswapV3PriceProviderAddress;
         let uniswapV2PriceProviderMockAddress;
@@ -35,7 +34,6 @@ module.exports = {
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
         priceOracleAddress = priceOracleAddresses.priceOracleAddress;
         chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
-        backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
         uniswapV3PriceProviderAddress = priceOracleAddresses.uniswapV3PriceProviderAddress;
         uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
         pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress;
@@ -71,7 +69,6 @@ module.exports = {
             proxyAdminAddress: proxyAdminAddress,
             priceOracleAddress: priceOracleAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
-            backendPriceProviderAddress: backendPriceProviderAddress,
             uniswapV3PriceProviderAddress: uniswapV3PriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
             pythPriceProviderAddress: pythPriceProviderAddress,

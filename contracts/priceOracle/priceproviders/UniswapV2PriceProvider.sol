@@ -204,23 +204,6 @@ contract UniswapV2PriceProvider is PriceProvider, Initializable, AccessControlUp
     }
 
     /**
-     * @dev Returns the evaluation of a given token amount in USD using the UniswapV2 price oracle.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 decimals = uniswapV2Metadata[token].tokenDecimals;
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-    }
-
-    /**
      * @dev Returns the reserves of the specified Uniswap V2 pair for the given tokens.
      * @param uniswapPair The address of the Uniswap V2 pair.
      * @param tokenA The address of the first token.

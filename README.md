@@ -38,6 +38,7 @@ POLYGONSCAN_API_KEY=    // --> Update here (the perpose of the key)
 OPTIMISM_API_KEY=       // --> Update here (the perpose of the key)
 ARBISCAN_API_KEY=       // --> Update here (the perpose of the key)
 INFURA_KEY=             // --> Update here (the perpose of the key)
+ALCHEMY_KEY=            // --> Update here (the perpose of the key)
 PRIVATE_KEY=            // --> Update here (the perpose of the key)
 ```
 
@@ -115,7 +116,7 @@ Each subfolder contains:
             "priceDecimals": ""                 // The number of decimals for the price.
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "",         // The price point TWAP period.
+            "pricePointTWAPperiod": [],         // List of the price point TWAP period.
 
             "tokensUseUniswap": [],             // List of address tokens uses prices from UniswapV3.
 
@@ -123,10 +124,6 @@ Each subfolder contains:
                                                 each corresponding token in List tokensUseUniswapV3.
 
             "priceDecimals": ""                 // The number of decimals for the price.
-                                                (Recommended: 18)
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []      // List of address tokens uses prices from Backend.
         },
         "LPProvider": {
             "tokensUseLPProvider": [],          // List of address tokens uses prices from LPProvider.
@@ -299,22 +296,17 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
             "priceDecimals": "10"
         },
         "UniswapV3": {
-            "pricePointTWAPperiod": "10",
+            "pricePointTWAPperiod": ["10"],
             "tokensUseUniswap": [
               "0xA0126016B2cFcAf60df67579C81F68C02bc237d8",
               "0x2A36e1454f333fCB866009AF058c2B2B985dF8f7",
               "0x2fCabB640BDc5E23dD469f2b8F625236d063456c"
             ],
             "uniswapPairs": [
-              "0x9DE6200BAA0BFfEC839647B6d9C8FE28c91Ee60E",
-              "0x591A038bB59174535dc898c4f90B8C5C5E487Ece",
-              "0x8484E5f7684F5B2F0f61C5C2e1aC7d49c32877C2"
-            ],
-            "priceDecimals": "18"
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": [],
-            "priceDecimals": "10"
+              ["0x9DE6200BAA0BFfEC839647B6d9C8FE28c91Ee60E"],
+              ["0x591A038bB59174535dc898c4f90B8C5C5E487Ece]",
+              ["0x8484E5f7684F5B2F0f61C5C2e1aC7d49c32877C2"]
+            ]
         },
         "LPProvider": {
             "tokensUseLPProvider": [
@@ -471,7 +463,7 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   }
 ```
 
-- `config_example.json:` Copy the entire content from this file to a file named `config.json` to save the addresses of deployed contracts.
+- `config.example.json:` Copy the entire content from this file to a file named `config.json` to save the addresses of deployed contracts.
 
 ```
 {
@@ -482,10 +474,12 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PythPriceProviderProxy": "",
   "ChainlinkPriceProviderLogic": "",
   "ChainlinkPriceProviderProxy": "",
-  "BackendPriceProviderLogic": "",
-  "BackendPriceProviderProxy": "",
   "PriceProviderAggregatorLogic": "",
   "PriceProviderAggregatorProxy": "",
+  "UniswapV2PriceProviderLogic": "",
+  "UniswapV2PriceProviderProxy": "",
+  "UniswapV3PriceProviderLogic": "",
+  "UniswapV3PriceProviderProxy": "",
   "LPPriceProviderLogic": "",
   "LPPriceProviderProxy": "",
   "ERC4626PriceProviderLogic": "",
@@ -496,10 +490,10 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "BondtrollerProxy": "",
   "BLendingTokenLogic": "",
   "BLendingTokenProxies": [],
-  "PrimaryLendingPlatformV2Logic": "",
-  "PrimaryLendingPlatformV2Proxy": "",
   "JumpRateModelLogic": "",
   "JumpRateModelProxy": "",
+  "PrimaryLendingPlatformV2Logic": "",
+  "PrimaryLendingPlatformV2Proxy": "",
   "PrimaryLendingPlatformAtomicRepaymentLogic": "",
   "PrimaryLendingPlatformAtomicRepaymentProxy": "",
   "PrimaryLendingPlatformLiquidationLogic": "",
@@ -511,14 +505,12 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformLeverageLogic": "",
   "PrimaryLendingPlatformLeverageProxy": "",
   "ZERO_ADDRESS": "0x0000000000000000000000000000000000000000",
-  "UniswapV2PriceProviderLogic": "",
-  "UniswapV2PriceProviderProxy": "",
-  "UniswapV3PriceProviderLogic": "",
-  "UniswapV3PriceProviderProxy": ""
+  "PairFlashLogic": "",
+  "PairFlashProxy": ""
 }
 ```
 
-**Note:** When we run the deploy contract script, we will ignore contracts that already have addresses in the `config.json` file. So to deploy all new contracts, copy the content from file `config_example.json` to file `config.json`.
+**Note:** When we run the deploy contract script, we will ignore contracts that already have addresses in the `config.json` file. So to deploy all new contracts, copy the content from file `config.example.json` to file `config.json`.
 
 - `verify.json:` Change the value to `false` for which contracts need to be verified. After the verification is completed, value of contracts which are verified will turn to be `true`.
 
@@ -531,24 +523,26 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PythPriceProviderProxy": true,
   "ChainlinkPriceProviderLogic": true,
   "ChainlinkPriceProviderProxy": true,
-  "BackendPriceProviderLogic": true,
-  "BackendPriceProviderProxy": true,
   "PriceProviderAggregatorLogic": true,
   "PriceProviderAggregatorProxy": true,
+  "UniswapV2PriceProviderLogic": true,
+  "UniswapV2PriceProviderProxy": true,
+  "UniswapV3PriceProviderLogic": true,
+  "UniswapV3PriceProviderProxy": true,
   "LPPriceProviderLogic": true,
   "LPPriceProviderProxy": true,
-  "ERC4626PriceProviderLogic": "",
-  "ERC4626PriceProviderProxy": "",
+  "ERC4626PriceProviderLogic": true,
+  "ERC4626PriceProviderProxy": true,
   "wstETHPriceProviderLogic": true,
   "wstETHPriceProviderProxy": true,
   "BondtrollerLogic": true,
   "BondtrollerProxy": true,
   "BLendingTokenLogic": true,
   "BLendingTokenProxies": true,
-  "PrimaryLendingPlatformV2Logic": true,
-  "PrimaryLendingPlatformV2Proxy": true,
   "JumpRateModelLogic": true,
   "JumpRateModelProxy": true,
+  "PrimaryLendingPlatformV2Logic": true,
+  "PrimaryLendingPlatformV2Proxy": true,
   "PrimaryLendingPlatformAtomicRepaymentLogic": true,
   "PrimaryLendingPlatformAtomicRepaymentProxy": true,
   "PrimaryLendingPlatformLiquidationLogic": true,
@@ -559,10 +553,8 @@ This is an example of the `config_general.json` file used to deploy to the `Arbi
   "PrimaryLendingPlatformWrappedTokenGatewayProxy": true,
   "PrimaryLendingPlatformLeverageLogic": true,
   "PrimaryLendingPlatformLeverageProxy": true,
-  "UniswapV2PriceProviderLogic": true,
-  "UniswapV2PriceProviderProxy": true,
-  "UniswapV3PriceProviderLogic": "",
-  "UniswapV3PriceProviderProxy": ""
+  "PairFlashLogic": true,
+  "PairFlashProxy": true
 }
 ```
 

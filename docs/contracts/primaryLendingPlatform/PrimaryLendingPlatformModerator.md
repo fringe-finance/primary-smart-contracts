@@ -200,6 +200,21 @@ Parameters:
 | :-------------------------------- | :------ | :------------------------------------------------------- |
 | newPrimaryLendingPlatformLeverage | address | The new leverage of the PrimaryLendingPlatform contract. |
 
+### SetPrimaryLendingPlatform
+
+```solidity
+event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform)
+```
+
+Emitted when the primary lending platform address is set.
+
+
+Parameters:
+
+| Name                      | Type    | Description                               |
+| :------------------------ | :------ | :---------------------------------------- |
+| newPrimaryLendingPlatform | address | The new primary lending platform address. |
+
 ### SetPriceOracle
 
 ```solidity
@@ -407,6 +422,27 @@ Parameters:
 | currentAdmin | address | The address of the current admin.   |
 | newAdmin     | address | The address of the new admin.       |
 
+### setPrimaryLendingPlatform (0xe801734a)
+
+```solidity
+function setPrimaryLendingPlatform(
+    address newPrimaryLendingPlatform
+) external onlyModerator
+```
+
+Sets the address of the primary lending platform contract.
+
+Requirements:
+- Only the moderator can call this function.
+- The new primary lending platform address cannot be the zero address.
+
+
+Parameters:
+
+| Name                      | Type    | Description                                               |
+| :------------------------ | :------ | :-------------------------------------------------------- |
+| newPrimaryLendingPlatform | address | The address of the new primary lending platform contract. |
+
 ### addProjectToken (0xf8095cb9)
 
 ```solidity
@@ -600,27 +636,6 @@ Parameters:
 | loanToValueRatioNumerator   | uint8   | The numerator value of the loan-to-value ratio for the project token.            |
 | loanToValueRatioDenominator | uint8   | The denominator value of the loan-to-value ratio for the project token.          |
 
-### setPausedProjectToken (0x2c67c660)
-
-```solidity
-function setPausedProjectToken(
-    address projectToken,
-    bool isDepositPaused,
-    bool isWithdrawPaused
-) public onlyModerator isProjectTokenListed(projectToken)
-```
-
-Sets the deposit and withdraw pause status for a project token.
-
-
-Parameters:
-
-| Name             | Type    | Description                                                      |
-| :--------------- | :------ | :--------------------------------------------------------------- |
-| projectToken     | address | The address of the project token.                                |
-| isDepositPaused  | bool    | The boolean value indicating whether deposit is paused or not.   |
-| isWithdrawPaused | bool    | The boolean value indicating whether withdraw is paused or not.  |
-
 ### setLendingTokenInfo (0x821363a0)
 
 ```solidity
@@ -649,29 +664,6 @@ Parameters:
 | isPaused                    | bool    | A boolean indicating whether the project token is paused or not.   |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio.                          |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio.                        |
-
-### setPausedLendingToken (0x58841bee)
-
-```solidity
-function setPausedLendingToken(
-    address lendingToken,
-    bool isPaused
-) public onlyModerator isLendingTokenListed(lendingToken)
-```
-
-Sets the pause status for a lending token.
-
-Requirements:
-- The function can only be called by the moderator.
-- The lending token must be listed on the primary lending platform.
-
-
-Parameters:
-
-| Name         | Type    | Description                                 |
-| :----------- | :------ | :------------------------------------------ |
-| lendingToken | address | The address of the lending token.           |
-| isPaused     | bool    | The new pause status for the lending token. |
 
 ### setBorrowLimitPerCollateralAsset (0x8e85cdfa)
 

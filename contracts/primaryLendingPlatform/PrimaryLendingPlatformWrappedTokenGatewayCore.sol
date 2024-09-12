@@ -48,6 +48,12 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     event SetPITLeverage(address newPITLeverage);
 
     /**
+     * @dev Emitted when the WETH address is set.
+     * @param newWETH The address of the new WETH contract.
+     */
+    event SetWETH(address newWETH);
+
+    /**
      * @dev Initializes the PrimaryLendingPlatformWrappedTokenGateway contract.
      * @param pit Address of the primary index token contract.
      * @param weth Address of the wrapped Ether (WETH) token contract.
@@ -65,14 +71,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
         IWETH(weth).approve(fWETH, type(uint256).max);
         pitLiquidation = IPrimaryLendingPlatformLiquidation(pitLiquidationAddress);
         pitLeverage = IPrimaryLendingPlatformLeverage(pitLeverageAddress);
-    }
-
-    /**
-     * @dev Modifier that allows only the admin to execute the function.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "WTG: Caller is not the Admin");
-        _;
     }
 
     /**
@@ -99,6 +97,22 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     modifier isLendingTokenListed(address lendingToken) {
         require(primaryLendingPlatform.lendingTokenInfo(lendingToken).isListed, "WTG: Lending token is not listed");
         _;
+    }
+
+    /**
+     * @dev Sets the address of the WETH contract.
+     *
+     * Requirements:
+     * - `newWETH` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param _weth The address of the new WETH contract.
+     */
+    function setWETH(address _weth) external onlyModerator {
+        require(_weth != address(0), "WTG: Invalid address");
+        address fWETH = primaryLendingPlatform.lendingTokenInfo(_weth).bLendingToken;
+        IWETH(_weth).approve(fWETH, type(uint256).max);
+        WETH = IWETH(_weth);
+        emit SetWETH(_weth);
     }
 
     /**

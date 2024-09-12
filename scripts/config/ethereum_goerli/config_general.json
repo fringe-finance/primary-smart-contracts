@@ -60,9 +60,6 @@
                 "0x11eF5a13cDa1738a8543f6A1aCf73908FB8761fE"
             ]
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [
                 "0x913d85f5E8c62A6F7BcbF4a3a2C86Da50A5b3CDc",

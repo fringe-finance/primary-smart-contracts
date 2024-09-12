@@ -7,8 +7,7 @@
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
-            "priceIdPath": [],
-            "priceDecimals": ""
+            "priceIdPath": []
         },
         "Chainlink": {
             "sequencerUptimeFeed": "",
@@ -22,8 +21,13 @@
             ],
             "priceDecimals": ""
         },
-        "Uniswap": {
-            "pricePointTWAPperiod": "",
+        "UniswapV2": {
+            "tokensUseUniswap": [],
+            "uniswapPairs": [],
+            "priceDecimals": ""
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": [],
             "tokensUseUniswap": [],
             "uniswapPairs": [],
             "priceDecimals": ""
@@ -33,11 +37,12 @@
             "mutePairs": [],
             "priceDecimals": ""
         },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
-        },
         "LPProvider": {
             "tokensUseLPProvider": [],
+            "priceDecimals": ""
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": [],
             "priceDecimals": ""
         },
         "wstETHProvider": {
@@ -77,7 +82,7 @@
         "jumGainPerYear": [],
         "targetUtil": [],
         "newMaxBorrow": [],
-        "blocksPerYear": "30660000"
+        "blocksPerYear": ""
     },
     "plpLiquidationParams": {
         "minPA": "",

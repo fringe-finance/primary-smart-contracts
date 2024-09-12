@@ -226,13 +226,6 @@ address registryAggregator
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
 ### onlyModerator
 
 ```solidity
@@ -608,33 +601,3 @@ Return values:
 | :---- | :------ | :-------------------------------- |
 | maxLA | uint256 | The maximum liquidation amount.   |
 | minLA | uint256 | The minimum liquidation amount.   |
-
-### getEstimatedProjectTokenReward (0xdf137e98)
-
-```solidity
-function getEstimatedProjectTokenReward(
-    address _account,
-    address _projectToken,
-    address _lendingToken,
-    uint256 _repayAmount
-) public view returns (uint256 projectTokenReward)
-```
-
-Calculates the amount of project tokens to send to the liquidator based on the lending token amount used for liquidation.
-
-
-Parameters:
-
-| Name          | Type    | Description                                                      |
-| :------------ | :------ | :--------------------------------------------------------------- |
-| _account      | address | The user's address to liquidate.                                 |
-| _projectToken | address | The project token address associated with the user's position.   |
-| _lendingToken | address | The lending token address used for the liquidation.              |
-| _repayAmount  | uint256 | The amount of lending tokens used for the liquidation.           |
-
-
-Return values:
-
-| Name               | Type    | Description                                             |
-| :----------------- | :------ | :------------------------------------------------------ |
-| projectTokenReward | uint256 | The amount of project tokens to send to the liquidator. |
