@@ -103,7 +103,7 @@
     "deploy:v2:erc4626-polygon-mainnet": "npx hardhat run --network polygon_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js",
     "deploy:v2:erc4626-optimism-mainnet": "npx hardhat run --network optimism_mainnet scripts/deployPLP_V2/deployToken/deployERC4626.js",
 
-    "deploy:v2:erc4626-zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deployERC4626.js"
+    "deploy:v2:erc4626-zksync-mainnet": "cross-env ZKSYNC=true npx hardhat deploy-zksync --network mainnet --script deploy/deployERC4626.js"
   },
   "author": "",
   "license": "ISC",
