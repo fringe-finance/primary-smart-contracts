@@ -66,7 +66,7 @@ const main = async function () {
             const tx = await proxy.deployed();
             console.log("Tx hash:", tx.deployTransaction.hash);
             console.log("TokenVault deployed:", proxy.address);
-            await verify(implementation.address, [assets[i], names[i], symbols[i], interestPercents[i]]);
+            await verify(proxy.address, [assets[i], names[i], symbols[i], interestPercents[i]]);
             tokenVaultAddresses[i] = proxy.address;
         } else {
             const implementation = new ethers.Contract(tokenVaultAddresses[i], tokenVaultInterface, wallet);
