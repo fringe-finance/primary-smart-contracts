@@ -6,86 +6,8 @@
     },
     "Pyth": {
       "pythOracle": "0xf087c864AEccFb6A2Bf1Af6A0382B0d0f6c5D834",
-      "tokensUsePyth": [
-        "0x5fE58d975604E6aF62328d9E505181B94Fc0718C",
-        "0x5756a28e2aae01f600fc2c01358395f5c1f8ad3a",
-        "0xfc7e56298657b002b3e656400e746b7212912757",
-        "0x240f765af2273b0cab6caff2880d6d8f8b285fa4",
-        "0xBBeB516fb02a01611cBBE0453Fe3c580D7281011",
-        "0x787c09494ec8bcb24dcaf8659e7d5d69979ee508",
-        "0xC8Ac6191CDc9c7bF846AD6b52aaAA7a0757eE305",
-        "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-        "0x493257fD37EDB34451f62EDf8D2a0C418852bA4C",
-        "0x2039bb4116B4EFc145Ec4f0e2eA75012D6C0f181",
-        "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-        "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
-        "0x47260090ce5e83454d5f05a0abbb2c953835f777",
-        "0x8E86e46278518EFc1C5CEd245cBA2C7e3ef11557",
-        "0x503234F203fC7Eb888EEC8513210612a43Cf6115",
-        "0xdd9f72afED3631a6C85b5369D84875e6c42f1827",
-        "0xf6d9a093a1c69a152d87e269a7d909e9d76b1815",
-        "0xbe9f8c0d6f0fd7e46cdacca340747ea2f247991d",
-        "0x16a9494e257703797d747540f01683952547ee5b",
-        "0xC8Ac6191CDc9c7bF846AD6b52aaAA7a0757eE305"
-      ],
+      "tokensUsePyth": ["0x5fE58d975604E6aF62328d9E505181B94Fc0718C"],
       "priceIdPath": [
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
-        [
-          "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
-        ],
         [
           "0x2a01deaec9e51a579277b34b122399984d0bbf57e2458a7e42fecd2829867a0d"
         ]
@@ -94,33 +16,119 @@
     "Chainlink": {
       "sequencerUptimeFeed": "",
       "gracePeriodTime": "",
-      "tokensUseChainlink": [],
+      "tokensUseChainlink": [
+        "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
+        "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91",
+        "0x47260090ce5e83454d5f05a0abbb2c953835f777",
+        "0x503234F203fC7Eb888EEC8513210612a43Cf6115",
+        "0xdd9f72afED3631a6C85b5369D84875e6c42f1827",
+        "0xbe9f8c0d6f0fd7e46cdacca340747ea2f247991d",
+        "0x16a9494e257703797d747540f01683952547ee5b",
+        "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+      ],
       "chainlinkAggregatorV3": [
-        []
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ],
+        [
+          "0x3aE81863E2F4cdea95b0c96E9C3C71cf1e10EFFE"
+        ]
       ],
       "timeOuts": [
-        []
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ],
+        [
+          "86460"
+        ]
       ]
     },
-    "Uniswap": {
-      "pricePointTWAPperiod": "",
-      "tokensUseUniswap": [],
-      "uniswapPairs": []
+    "UniswapV2": {
+      "tokensUseUniswap": ["0x8E86e46278518EFc1C5CEd245cBA2C7e3ef11557"],
+      "uniswapPairs": [
+        "0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852"
+      ]
+    },
+    "UniswapV3": {
+      "pricePointTWAPperiod": [["3600"]],
+      "tokensUseUniswap": ["0xf6d9a093a1c69a152d87e269a7d909e9d76b1815"],
+      "uniswapPairs": [
+        ["0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168"]
+      ]
     },
     "Mute": {
-      "tokensUseMute": [],
-      "mutePairs": []
-    },
-    "BackendProvider": {
-      "tokensUseBackendProvider": []
+      "tokensUseMute": ["0xC8Ac6191CDc9c7bF846AD6b52aaAA7a0757eE305"],
+      "mutePairs": ["0xDFAaB828f5F515E104BaaBa4d8D554DA9096f0e4"]
     },
     "LPProvider": {
-      "tokensUseLPProvider": []
+      "tokensUseLPProvider": [
+        "0xB4e16d0168e52d35CaCD2c6185b44281Ec28C9Dc",
+        "0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168"
+      ]
+    },
+    "ERC4626Provider": {
+      "tokensUseERC4626Provider": [
+        "0xc3dA79e0De523eEf7AC1e4ca9aBFE3aAc9973133",
+        "0x0c80F31B840C6564e6c5E18f386FaD96b63514cA"
+      ]
     },
     "wstETHProvider": {
-      "wstETHAggregatorPath": [],
-      "timeOuts": []
-    },
+            "wstETHAggregatorPath": [
+                "0x24a0C9404101A8d7497676BE12F10aEa356bAC28"
+            ],
+            "timeOuts": [
+                "86460"
+            ]
+        },
     "wstETH": "0x5fE58d975604E6aF62328d9E505181B94Fc0718C",
     "usdc": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
     "WETH": "0x5AEa5775959fBC2557Cc8789bC1bf90A239D9a91"
@@ -140,21 +148,9 @@
       "6",
       "6",
       "6",
-      "9",
-      "9",
-      "6",
-      "6",
-      "6",
-      "6",
       "9"
     ],
     "loanToValueRatioDenominator": [
-      "10",
-      "10",
-      "10",
-      "10",
-      "10",
-      "10",
       "10",
       "10",
       "10",
@@ -162,16 +158,10 @@
     ],
     "isPaused": false,
     "borrowLimitPerCollateral": [
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000",
-      "1000000000000"
+      1371313000000,
+      2660938400000,
+      171347985000000,
+      171347985000000
     ],
     "borrowLimitPerLendingToken": [
       "1000000000000",
@@ -184,8 +174,7 @@
       "1000000000000",
       "1000000000000",
       "1000000000000"
-    ],
-    "usdc": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4"
+    ]
   },
   "blendingToken": {
     "initialExchangeRateMantissa": [
@@ -203,6 +192,13 @@
     "reserveFactorMantissa": [
       "50000000000000000",
       "70000000000000000",
+      "100000000000000000",
+      "100000000000000000",
+      "100000000000000000",
+      "100000000000000000",
+      "100000000000000000",
+      "100000000000000000",
+      "100000000000000000",
       "100000000000000000"
     ],
     "lendingTokens": [
@@ -229,18 +225,7 @@
       "fTEST",
       "fTEST"
     ],
-    "decimals": [
-      "6",
-      "18",
-      "18",
-      "18",
-      "18",
-      "18",
-      "18",
-      "18",
-      "18",
-      "18"
-    ],
+    "decimals": ["6", "18", "18", "18", "18", "18", "18", "18", "18", "18"],
     "name": [
       "fUSDC",
       "fWETH",
@@ -277,7 +262,18 @@
       "10",
       "10"
     ],
-    "initialSupplyAmount": []
+    "initialSupplyAmount": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+        ]
   },
   "jumRateModel": {
     "gainPerYear": [

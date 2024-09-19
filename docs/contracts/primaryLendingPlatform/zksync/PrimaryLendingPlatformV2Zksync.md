@@ -205,37 +205,218 @@ Return values:
 | :--- | :------ | :-------------------------------- |
 | [0]  | uint256 | amount of lending tokens borrowed |
 
-### pitCollateralWithUpdatePrices (0x902b6286)
+### supply (0xd07ab026)
 
 ```solidity
-function pitCollateralWithUpdatePrices(
-    address account,
-    address projectToken,
+function supply(
+    address lendingToken,
+    uint256 lendingTokenAmount,
     bytes32[] memory priceIds,
     bytes[] calldata updateData
-) external payable returns (uint256)
+) external payable isLendingTokenListed(lendingToken) nonReentrant
 ```
 
-Returns the PIT (primary index token) value for a given account and collateral before a position is opened after updating related token's prices.
+Supplies a specified amount of a lending token to the platform.
 
-Formula: pit = $ * LVR of project token.
+Allows a user to supply a specified amount of a lending token to the platform.
 
 
 Parameters:
 
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| account      | address   | Address of the account.                                          |
-| projectToken | address   | Address of the project token.                                    |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
+| Name               | Type      | Description                                                                                                                                                                                                                                                                                                                                                           |
+| :----------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lendingToken       | address   | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                                      |
+| lendingTokenAmount | uint256   | The amount of the lending token being supplied.                                                                                                                                                                                                                                                                                                                       |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.                                                                                                                                                                                                                                                                                                        |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.  Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0.  Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
+
+### supplyFromRelatedContract (0xac160433)
+
+```solidity
+function supplyFromRelatedContract(
+    address lendingToken,
+    uint256 lendingTokenAmount,
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+)
+    external
+    payable
+    isLendingTokenListed(lendingToken)
+    onlyRelatedContracts
+    nonReentrant
+```
+
+Supplies a certain amount of lending tokens to the platform from a specific user.
+
+Requirements:
+- The lending token is listed.
+- Called by a related contract.
+- The lending token is not paused.
+- The lending token amount is greater than 0.
+- Minting the bLendingTokens is successful and the minted amount is greater than 0.
+
+Effects:
+- Mints the corresponding bLendingTokens and credits them to the user.
 
 
-Return values:
+Parameters:
 
-| Name | Type    | Description    |
-| :--- | :------ | :------------- |
-| [0]  | uint256 | The PIT value. |
+| Name               | Type      | Description                                                      |
+| :----------------- | :-------- | :--------------------------------------------------------------- |
+| lendingToken       | address   | Address of the lending token.                                    |
+| lendingTokenAmount | uint256   | Amount of lending tokens to be supplied.                         |
+| user               | address   | Address of the user.                                             |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeem (0xe9bae8a8)
+
+```solidity
+function redeem(
+    address lendingToken,
+    uint256 bLendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable isLendingTokenListed(lendingToken) nonReentrant
+```
+
+Redeems a specified amount of bLendingToken from the platform.
+
+Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
+
+Requirements:
+- The lendingToken is listed.
+- The lending token should not be paused.
+- The bLendingTokenAmount should be greater than zero.
+- The redemption of bLendingToken should not result in a redemption error.
+
+Effects:
+- Burns the bLendingTokens from the user.
+- Transfers the corresponding lending tokens to the user.
+
+
+Parameters:
+
+| Name                | Type      | Description                                                      |
+| :------------------ | :-------- | :--------------------------------------------------------------- |
+| lendingToken        | address   | Address of the lending token.                                    |
+| bLendingTokenAmount | uint256   | Amount of bLending tokens to be redeemed.                        |
+| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeemFromRelatedContract (0xa62b7bd7)
+
+```solidity
+function redeemFromRelatedContract(
+    address lendingToken,
+    uint256 bLendingTokenAmount,
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+)
+    external
+    payable
+    isLendingTokenListed(lendingToken)
+    onlyRelatedContracts
+    nonReentrant
+```
+
+Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
+
+Requirements:
+- The lendingToken is listed.
+     _ - Called by a related contract.
+- The lending token should not be paused.
+- The bLendingTokenAmount should be greater than zero.
+- The redemption of bLendingToken should not result in a redemption error.
+
+Effects:
+- Burns the bLendingTokens from the user.
+- Transfers the corresponding lending tokens to the user.
+
+
+Parameters:
+
+| Name                | Type      | Description                                                      |
+| :------------------ | :-------- | :--------------------------------------------------------------- |
+| lendingToken        | address   | Address of the lending token.                                    |
+| bLendingTokenAmount | uint256   | Amount of bLending tokens to be redeemed.                        |
+| user                | address   | Address of the user.                                             |
+| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeemUnderlying (0xb78deb78)
+
+```solidity
+function redeemUnderlying(
+    address lendingToken,
+    uint256 lendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable isLendingTokenListed(lendingToken) nonReentrant
+```
+
+Redeems a specified amount of lendingToken from the platform.
+
+Function that performs the redemption of lending token and returns the corresponding underlying token to user.
+
+Requirements:
+- The lending token is listed.
+- The lending token should not be paused.
+- The lendingTokenAmount should be greater than zero.
+- The redemption of lendingToken should not result in a redemption error.
+
+Effects:
+- Transfers the corresponding underlying tokens to the user.
+
+
+Parameters:
+
+| Name               | Type      | Description                                                      |
+| :----------------- | :-------- | :--------------------------------------------------------------- |
+| lendingToken       | address   | Address of the lending token.                                    |
+| lendingTokenAmount | uint256   | Amount of lending tokens to be redeemed.                         |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeemUnderlyingFromRelatedContract (0x3898b641)
+
+```solidity
+function redeemUnderlyingFromRelatedContract(
+    address lendingToken,
+    uint256 lendingTokenAmount,
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+)
+    external
+    payable
+    isLendingTokenListed(lendingToken)
+    onlyRelatedContracts
+    nonReentrant
+```
+
+Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
+
+Requirements:
+- The lending token is listed.
+- Called by a related contract.
+- The lending token should not be paused.
+- The lendingTokenAmount should be greater than zero.
+- The redemption of lendingToken should not result in a redemption error.
+
+Effects:
+- Transfers the corresponding underlying tokens to the user.
+
+
+Parameters:
+
+| Name               | Type    | Description                                |
+| :----------------- | :------ | :----------------------------------------- |
+| lendingToken       | address | Address of the lending token.              |
+| lendingTokenAmount | uint256 | Amount of lending tokens to be redeemed.   |
+| user               | address | Address of the user.                       |
 
 ### pitRemainingWithUpdatePrices (0xe662d5c5)
 
@@ -347,34 +528,6 @@ Return values:
 | accrual                     | uint256 | The accrued interest of the borrow position.            |
 | healthFactorNumerator       | uint256 | The numerator of the health factor.                     |
 | healthFactorDenominator     | uint256 | The denominator of the health factor.                   |
-
-### getTotalBorrowPerLendingTokenWithUpdatePrices (0x6ae013a5)
-
-```solidity
-function getTotalBorrowPerLendingTokenWithUpdatePrices(
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Gets total borrow amount in USD for a specific lending token after updating related token's prices.
-
-
-Parameters:
-
-| Name         | Type      | Description                                                      |
-| :----------- | :-------- | :--------------------------------------------------------------- |
-| lendingToken | address   | The address of the lending token.                                |
-| priceIds     | bytes32[] | An array of price identifiers used to update the price oracle.   |
-| updateData   | bytes[]   | An array of update data used to update the price oracle.         |
-
-
-Return values:
-
-| Name | Type    | Description                     |
-| :--- | :------ | :------------------------------ |
-| [0]  | uint256 | The total borrow amount in USD. |
 
 ### getCollateralAvailableToWithdrawWithUpdatePrices (0x45f0219c)
 

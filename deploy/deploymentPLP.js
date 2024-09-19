@@ -17,6 +17,7 @@ module.exports = {
         let priceOracleAddress;
         let chainlinkPriceProviderAddress;
         let uniswapV2PriceProviderAddress;
+        let uniswapV3PriceProviderAddress;
         let uniswapV2PriceProviderMockAddress;
         let priceProviderAggregatorAddress;
         let pythPriceProviderAddress;
@@ -35,9 +36,10 @@ module.exports = {
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
         priceOracleAddress = priceOracleAddresses.priceOracleAddress;
         pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress,
-            chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
+        chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
         uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
-        mutePriceProviderAddress = priceOracleAddresses.mutePriceProviderAddress;
+        uniswapV3PriceProviderAddress = priceOracleAddresses.uniswapV3PriceProviderAddress;
+        mutePriceProviderAddress =  priceOracleAddresses.mutePriceProviderAddress;
         uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
@@ -75,6 +77,7 @@ module.exports = {
             uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
             mutePriceProviderAddress: mutePriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
+            uniswapV3PriceProviderAddress: uniswapV3PriceProviderAddress,
             priceProviderAggregatorAddress: priceProviderAggregatorAddress,
             bondtrollerAddress: bondtrollerAddress,
             blendingAddress: blendingAddress,

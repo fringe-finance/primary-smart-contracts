@@ -263,27 +263,6 @@ Parameters:
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio for the project token   |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the project token |
 
-### setPausedProjectToken (0x2c67c660)
-
-```solidity
-function setPausedProjectToken(
-    address projectToken,
-    bool isDepositPaused,
-    bool isWithdrawPaused
-) external
-```
-
-Pauses or unpauses deposits and withdrawals of a project token.
-
-
-Parameters:
-
-| Name             | Type    | Description                                                    |
-| :--------------- | :------ | :------------------------------------------------------------- |
-| projectToken     | address | The address of the project token.                              |
-| isDepositPaused  | bool    | Boolean indicating whether deposits are paused or unpaused.    |
-| isWithdrawPaused | bool    | Boolean indicating whether withdrawals are paused or unpaused. |
-
 ### setLendingTokenInfo (0x821363a0)
 
 ```solidity
@@ -308,22 +287,6 @@ Parameters:
 | isPaused                    | bool    | Boolean indicating whether the lending token is paused or unpaused.   |
 | loanToValueRatioNumerator   | uint8   | The numerator of the loan-to-value ratio for the lending token.       |
 | loanToValueRatioDenominator | uint8   | The denominator of the loan-to-value ratio for the lending token.     |
-
-### setPausedLendingToken (0x58841bee)
-
-```solidity
-function setPausedLendingToken(address lendingToken, bool isPaused) external
-```
-
-Pauses or unpauses a lending token.
-
-
-Parameters:
-
-| Name         | Type    | Description                                                         |
-| :----------- | :------ | :------------------------------------------------------------------ |
-| lendingToken | address | The address of the lending token.                                   |
-| isPaused     | bool    | Boolean indicating whether the lending token is paused or unpaused. |
 
 ### deposit (0x47e7ef24)
 
@@ -625,43 +588,6 @@ Return values:
 | :----- | :------ | :------------------------- |
 | amount | uint256 | of lending tokens borrowed |
 
-### supply (0xf2b9fdb8)
-
-```solidity
-function supply(address lendingToken, uint256 lendingTokenAmount) external
-```
-
-Supplies a certain amount of lending tokens to the platform.
-
-
-Parameters:
-
-| Name               | Type    | Description                              |
-| :----------------- | :------ | :--------------------------------------- |
-| lendingToken       | address | Address of the lending token.            |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be supplied. |
-
-### supplyFromRelatedContract (0xb3c38b6e)
-
-```solidity
-function supplyFromRelatedContract(
-    address lendingToken,
-    uint256 lendingTokenAmount,
-    address user
-) external
-```
-
-Supplies a certain amount of lending tokens to the platform from a specific user.
-
-
-Parameters:
-
-| Name               | Type    | Description                                |
-| :----------------- | :------ | :----------------------------------------- |
-| lendingToken       | address | Address of the lending token.              |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be supplied.   |
-| user               | address | Address of the user.                       |
-
 ### getCollateralAvailableToWithdraw (0x72620613)
 
 ```solidity
@@ -690,73 +616,194 @@ Return values:
 | :-------------------------- | :------ | :---------------------------------------------------------------------- |
 | collateralProjectToWithdraw | uint256 | The amount of collateral available for withdrawal in the project token. |
 
-### redeem (0x1e9a6950)
+### supply (0xd07ab026)
 
 ```solidity
-function redeem(address lendingToken, uint256 bLendingTokenAmount) external
+function supply(
+    address lendingToken,
+    uint256 lendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
 ```
 
-Function that performs the redemption of bLendingToken and returns the corresponding lending token to the msg.sender.
+Supplies a specified amount of a lending token to the platform.
+
+Allows a user to supply a specified amount of a lending token to the platform.
 
 
 Parameters:
 
-| Name                | Type    | Description                               |
-| :------------------ | :------ | :---------------------------------------- |
-| lendingToken        | address | Address of the lending token.             |
-| bLendingTokenAmount | uint256 | Amount of bLending tokens to be redeemed. |
+| Name               | Type      | Description                                                                                                                                                                                                                                                                                                                                                           |
+| :----------------- | :-------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| lendingToken       | address   | The address of the lending token being supplied.                                                                                                                                                                                                                                                                                                                      |
+| lendingTokenAmount | uint256   | The amount of the lending token being supplied.                                                                                                                                                                                                                                                                                                                       |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.                                                                                                                                                                                                                                                                                                        |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.  Requirements: - The lending token is listed. - The lending token is not paused. - The lending token amount is greater than 0. - Minting the bLendingTokens is successful and the minted amount is greater than 0.  Effects: - Mints the corresponding bLendingTokens and credits them to the user. |
 
-### redeemFromRelatedContract (0x0bf6bd2f)
+### supplyFromRelatedContract (0xac160433)
+
+```solidity
+function supplyFromRelatedContract(
+    address lendingToken,
+    uint256 lendingTokenAmount,
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
+```
+
+Supplies a certain amount of lending tokens to the platform from a specific user.
+
+Requirements:
+- The lending token is listed.
+- Called by a related contract.
+- The lending token is not paused.
+- The lending token amount is greater than 0.
+- Minting the bLendingTokens is successful and the minted amount is greater than 0.
+
+Effects:
+- Mints the corresponding bLendingTokens and credits them to the user.
+
+
+Parameters:
+
+| Name               | Type      | Description                                                      |
+| :----------------- | :-------- | :--------------------------------------------------------------- |
+| lendingToken       | address   | Address of the lending token.                                    |
+| lendingTokenAmount | uint256   | Amount of lending tokens to be supplied.                         |
+| user               | address   | Address of the user.                                             |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeem (0xe9bae8a8)
+
+```solidity
+function redeem(
+    address lendingToken,
+    uint256 bLendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
+```
+
+Redeems a specified amount of bLendingToken from the platform.
+
+Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
+
+Requirements:
+- The lendingToken is listed.
+- The lending token should not be paused.
+- The bLendingTokenAmount should be greater than zero.
+- The redemption of bLendingToken should not result in a redemption error.
+
+Effects:
+- Burns the bLendingTokens from the user.
+- Transfers the corresponding lending tokens to the user.
+
+
+Parameters:
+
+| Name                | Type      | Description                                                      |
+| :------------------ | :-------- | :--------------------------------------------------------------- |
+| lendingToken        | address   | Address of the lending token.                                    |
+| bLendingTokenAmount | uint256   | Amount of bLending tokens to be redeemed.                        |
+| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
+
+### redeemFromRelatedContract (0xa62b7bd7)
 
 ```solidity
 function redeemFromRelatedContract(
     address lendingToken,
     uint256 bLendingTokenAmount,
-    address user
-) external
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
 ```
 
 Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
 
+Requirements:
+- The lendingToken is listed.
+     _ - Called by a related contract.
+- The lending token should not be paused.
+- The bLendingTokenAmount should be greater than zero.
+- The redemption of bLendingToken should not result in a redemption error.
+
+Effects:
+- Burns the bLendingTokens from the user.
+- Transfers the corresponding lending tokens to the user.
+
 
 Parameters:
 
-| Name                | Type    | Description                                 |
-| :------------------ | :------ | :------------------------------------------ |
-| lendingToken        | address | Address of the lending token.               |
-| bLendingTokenAmount | uint256 | Amount of bLending tokens to be redeemed.   |
-| user                | address | Address of the user.                        |
+| Name                | Type      | Description                                                      |
+| :------------------ | :-------- | :--------------------------------------------------------------- |
+| lendingToken        | address   | Address of the lending token.                                    |
+| bLendingTokenAmount | uint256   | Amount of bLending tokens to be redeemed.                        |
+| user                | address   | Address of the user.                                             |
+| priceIds            | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData          | bytes[]   | An array of update data used to update the price oracle.         |
 
-### redeemUnderlying (0x96294178)
+### redeemUnderlying (0xb78deb78)
 
 ```solidity
 function redeemUnderlying(
     address lendingToken,
-    uint256 lendingTokenAmount
-) external
+    uint256 lendingTokenAmount,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
 ```
 
-Function that performs the redemption of lending token and returns the corresponding underlying token to the msg.sender.
+Redeems a specified amount of lendingToken from the platform.
+
+Function that performs the redemption of lending token and returns the corresponding underlying token to user.
+
+Requirements:
+- The lending token is listed.
+- The lending token should not be paused.
+- The lendingTokenAmount should be greater than zero.
+- The redemption of lendingToken should not result in a redemption error.
+
+Effects:
+- Transfers the corresponding underlying tokens to the user.
 
 
 Parameters:
 
-| Name               | Type    | Description                              |
-| :----------------- | :------ | :--------------------------------------- |
-| lendingToken       | address | Address of the lending token.            |
-| lendingTokenAmount | uint256 | Amount of lending tokens to be redeemed. |
+| Name               | Type      | Description                                                      |
+| :----------------- | :-------- | :--------------------------------------------------------------- |
+| lendingToken       | address   | Address of the lending token.                                    |
+| lendingTokenAmount | uint256   | Amount of lending tokens to be redeemed.                         |
+| priceIds           | bytes32[] | An array of price identifiers used to update the price oracle.   |
+| updateData         | bytes[]   | An array of update data used to update the price oracle.         |
 
-### redeemUnderlyingFromRelatedContract (0xbdedb76c)
+### redeemUnderlyingFromRelatedContract (0x3898b641)
 
 ```solidity
 function redeemUnderlyingFromRelatedContract(
     address lendingToken,
     uint256 lendingTokenAmount,
-    address user
-) external
+    address user,
+    bytes32[] memory priceIds,
+    bytes[] calldata updateData
+) external payable
 ```
 
 Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
+
+Requirements:
+- The lending token is listed.
+- Called by a related contract.
+- The lending token should not be paused.
+- The lendingTokenAmount should be greater than zero.
+- The redemption of lendingToken should not result in a redemption error.
+
+Effects:
+- Transfers the corresponding underlying tokens to the user.
 
 
 Parameters:
@@ -1655,34 +1702,6 @@ Return values:
 | accrual                     | uint256 | The accrued interest of the borrow position            |
 | healthFactorNumerator       | uint256 | The numerator of the health factor                     |
 | healthFactorDenominator     | uint256 | The denominator of the health factor                   |
-
-### getTotalBorrowPerLendingTokenWithUpdatePrices (0x6ae013a5)
-
-```solidity
-function getTotalBorrowPerLendingTokenWithUpdatePrices(
-    address lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256)
-```
-
-Get total borrow amount in USD for a specific lending token after update price
-
-
-Parameters:
-
-| Name         | Type      | Description                               |
-| :----------- | :-------- | :---------------------------------------- |
-| lendingToken | address   | The address of the lending token          |
-| priceIds     | bytes32[] | The priceIds need to update.              |
-| updateData   | bytes[]   | The updateData provided by PythNetwork.   |
-
-
-Return values:
-
-| Name | Type    | Description                    |
-| :--- | :------ | :----------------------------- |
-| [0]  | uint256 | The total borrow amount in USD |
 
 ### totalEstimatedOutstandingInUSDWithUpdatePrices (0x7b78a351)
 

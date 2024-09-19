@@ -16,45 +16,25 @@ contract UniswapV3PriceProvider is PriceProvider, Initializable, AccessControlUp
 ```solidity
 struct UniswapV3Metadata {
 	bool isActive;
-	address pair;
-	address pairAsset;
+	address[] aggregatorPath;
+}
+```
+
+
+### UniswapV3MetadataPair
+
+```solidity
+struct UniswapV3MetadataPair {
+	address token;
+	address pairToken;
 	uint8 tokenDecimals;
-	uint8 pairAssetDecimals;
+	uint8 pairTokenDecimals;
+	uint32 pricePointTWAPperiod;
 }
 ```
 
 
 ## Events info
-
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new account.
-
-
-Parameters:
-
-| Name         | Type    | Description                                     |
-| :----------- | :------ | :---------------------------------------------- |
-| newModerator | address | The address to which moderator role is granted. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an account.
-
-
-Parameters:
-
-| Name      | Type    | Description                                       |
-| :-------- | :------ | :------------------------------------------------ |
-| moderator | address | The address from which moderator role is revoked. |
 
 ### SetTokenAndPair
 
@@ -103,6 +83,22 @@ Parameters:
 | :--------------- | :---- | :---------------------- |
 | newTokenDecimals | uint8 | The new token decimals. |
 
+### SetTokenAndAggregator
+
+```solidity
+event SetTokenAndAggregator(address indexed token, address[] aggregatorPath, uint32[] pricePointPeriod)
+```
+
+Emitted when a token and its corresponding UniswapV3 aggregator path are set.
+
+
+Parameters:
+
+| Name           | Type      | Description                                                                 |
+| :------------- | :-------- | :-------------------------------------------------------------------------- |
+| token          | address   | The address of the token.                                                   |
+| aggregatorPath | address[] | The array of UniswapV3 aggregator pairs used to get the price of the token. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -119,19 +115,19 @@ string constant DESCRIPTION = "Price provider that uses uniswapV3"
 ```
 
 
+### MAX_PRICE_PATH_LENGTH (0x01a9a5d3)
+
+```solidity
+uint8 constant MAX_PRICE_PATH_LENGTH = 4
+```
+
+
 ## State variables info
 
 ### tokenDecimals (0x3b97e856)
 
 ```solidity
 uint8 tokenDecimals
-```
-
-
-### pricePointTWAPperiod (0x3c941d5b)
-
-```solidity
-uint32 pricePointTWAPperiod
 ```
 
 
@@ -142,15 +138,15 @@ mapping(address => struct UniswapV3PriceProvider.UniswapV3Metadata) uniswapV3Met
 ```
 
 
-## Modifiers info
-
-### onlyAdmin
+### uniswapV3MetadataPair (0x918d7a98)
 
 ```solidity
-modifier onlyAdmin()
+mapping(address => struct UniswapV3PriceProvider.UniswapV3MetadataPair) uniswapV3MetadataPair
 ```
 
-Modifier to restrict access to functions to only the contract admin.
+
+## Modifiers info
+
 ### onlyModerator
 
 ```solidity
@@ -168,36 +164,6 @@ function initialize() public initializer
 
 Initializes the contract by setting up the access control roles and the number of decimals for the USD token.
 `decimals` is set to 18.
-### grantModerator (0x6981c7ae)
-
-```solidity
-function grantModerator(address newModerator) external onlyAdmin
-```
-
-Grants the moderator role to a new address.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) external onlyAdmin
-```
-
-Revokes the moderator role from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
-
 ### setTokenDecimals (0xf2cf47be)
 
 ```solidity
@@ -214,26 +180,29 @@ Parameters:
 | :--------------- | :---- | :-------------------------------------------- |
 | newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
-### setTokenAndPair (0xa6ff9e94)
+### setTokenAndPair (0x8d46526f)
 
 ```solidity
-function setTokenAndPair(address token, address pair) external onlyModerator
+function setTokenAndPair(
+    address token,
+    address[] memory aggregatorPath,
+    uint32[] memory pricePointPeriod
+) external onlyModerator
 ```
 
-Sets the token and pair addresses for the UniswapV3PriceProvider contract.
+Set token and aggregator path.
 #### Requirements:
-- `token` and `pair` addresses must not be zero.
+- The token must be listed in the UniswapV3PriceProvider contract.
 - Only the contract moderator can call this function.
-- The `token` and `pair` addresses must be valid.
-- The `metadata` struct for the `token` address must be updated with the `pair` address, `pairAsset` address, `tokenDecimals`, and `pairAssetDecimals`.
 
 
 Parameters:
 
-| Name  | Type    | Description                           |
-| :---- | :------ | :------------------------------------ |
-| token | address | The address of the token to be set.   |
-| pair  | address | The address of the pair to be set.    |
+| Name             | Type      | Description                           |
+| :--------------- | :-------- | :------------------------------------ |
+| token            | address   | The address of the token.             |
+| aggregatorPath   | address[] | The address of the aggregator path.   |
+| pricePointPeriod | uint32[]  | The period for the price point.       |
 
 ### changeActive (0x258a4532)
 
@@ -241,7 +210,8 @@ Parameters:
 function changeActive(address token, bool active) public override onlyModerator
 ```
 
-Changes the active status of a token in the UniswapV3PriceProvider contract.
+Changes the active status of a token in the UniswapV3PriceProvider con
+     tract.
 #### Requirements:
 - The token must be listed in the UniswapV3PriceProvider contract.
 - Only the contract moderator can call this function.
@@ -253,23 +223,6 @@ Parameters:
 | :----- | :------ | :---------------------------------------------------------- |
 | token  | address | The address of the token to change the active status for.   |
 | active | bool    | The new active status of the token.                         |
-
-### setPricePointTWAPperiod (0x391c02c6)
-
-```solidity
-function setPricePointTWAPperiod(uint32 period) public onlyModerator
-```
-
-Sets the price point TWAP period for the UniswapV3PriceProvider contract.
-#### Requirements:
-- Only the contract moderator can call this function.
-
-
-Parameters:
-
-| Name   | Type   | Description                      |
-| :----- | :----- | :------------------------------- |
-| period | uint32 | The new price point TWAP period. |
 
 ### isListed (0xf794062e)
 
@@ -289,9 +242,9 @@ Parameters:
 
 Return values:
 
-| Name | Type | Description                                              |
-| :--- | :--- | :------------------------------------------------------- |
-| [0]  | bool | A boolean indicating whether the token is listed or not. |
+| Name | Type | Description                             |
+| :--- | :--- | :-------------------------------------- |
+| [0]  | bool | isListed the is listed status of token. |
 
 ### isActive (0x9f8a13d7)
 
@@ -320,7 +273,7 @@ Return values:
 ```solidity
 function getPrice(
     address token
-) public view override returns (uint256 price, uint8 priceDecimals)
+) public view override returns (uint256 priceMantissa, uint8 priceDecimals)
 ```
 
 This function requires that the token is active in the price provider.
@@ -338,8 +291,18 @@ Return values:
 
 | Name          | Type    | Description                             |
 | :------------ | :------ | :-------------------------------------- |
-| price         | uint256 | The price of the token in pairAsset.    |
+| priceMantissa | uint256 | The price of the token in pairAsset.    |
 | priceDecimals | uint8   | The number of decimals for the price.   |
+
+### getUnderlyingTokenPrice (0x8020c854)
+
+```solidity
+function getUnderlyingTokenPrice(
+    address token,
+    address pair
+) public view returns (uint256 price, uint8 priceDecimals, address pairAsset)
+```
+
 
 ### getPriceDecimals (0x1b30aafc)
 

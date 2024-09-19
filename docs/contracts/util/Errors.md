@@ -157,3 +157,45 @@ error NoBorrowPosition()
 error TokensListIsEmpty()
 ```
 
+
+### InvalidEqualAmount
+
+```solidity
+error InvalidEqualAmount()
+```
+
+
+### InvalidValue
+
+```solidity
+error InvalidValue()
+```
+
+
+### InvalidHealthFactor
+
+```solidity
+error InvalidHealthFactor()
+```
+
+
+### InvalidAugustusAddress
+
+```solidity
+error InvalidAugustusAddress()
+```
+
+
+### InvalidReceiveAmount
+
+```solidity
+error InvalidReceiveAmount()
+```
+
+
+### NotIncludedAmount
+
+```solidity
+error NotIncludedAmount()
+```
+

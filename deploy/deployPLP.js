@@ -1,11 +1,8 @@
 const { deployment } = require("./deploymentPLP")
 
 async function try_deployment() {
-    try {
-        await deployment();
-    } catch (error) {
-        await try_deployment();
-    }
+    await deployment();
+    process.exit();
 }
 
 module.exports = async function () {
