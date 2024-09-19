@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/proxy/transparent/ProxyAdmin.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
@@ -11,6 +9,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../interfaces/IPriceProviderAggregator.sol";
 import "../bToken/BLendingToken.sol";
 import "../interfaces/IPrimaryLendingPlatformLeverage.sol";
+import "../util/Errors.sol";
 
 /**
  * @title PrimaryLendingPlatformV2Core.
@@ -31,16 +30,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     mapping(address => LendingTokenInfo) public lendingTokenInfo; // lending token address => LendingTokenInfo
 
     mapping(address => uint256) public totalDepositedProjectToken; // tokenAddress => PRJ token staked
-    mapping(address => mapping(address => uint256)) public depositedAmount; // user address => PRJ token address => PRJ token deposited
+    mapping(address => mapping(address => uint256)) private depositedAmount; // user address => PRJ token address => PRJ token deposited
     mapping(address => mapping(address => mapping(address => BorrowPosition))) public borrowPosition; // user address => project token address => lending token address => BorrowPosition
 
     mapping(address => mapping(address => uint256)) public totalBorrow; //project token address => total borrow by project token [] = prjToken
-    mapping(address => mapping(address => uint256)) public borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
+    mapping(address => mapping(address => uint256)) private borrowLimit; //project token address => limit of borrowing; [borrowLimit]=$
     mapping(address => uint256) public borrowLimitPerCollateral; //project token address => limit of borrowing; [borrowLimit]=$
 
     mapping(address => uint256) public totalBorrowPerLendingToken; //lending token address => total borrow by lending token [] - irrespective of the collateral assets used
     mapping(address => uint256) public borrowLimitPerLendingToken; //lending token address => limit of borrowing; [borrowLimit]=$
-    mapping(address => mapping(address => address)) public lendingTokenPerCollateral; // user address => project token address => lending token address
+    mapping(address => mapping(address => address)) internal lendingTokenPerCollateral; // user address => project token address => lending token address
 
     mapping(address => bool) public isRelatedContract;
 
@@ -165,7 +164,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only the admin to call the function.
      */
     modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller isn't Admin");
+        if (!hasRole(DEFAULT_ADMIN_ROLE, msg.sender)) {
+            revert Errors.CallerIsNotAdmin();
+        }
         _;
     }
 
@@ -174,7 +175,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param projectToken The address of the project token.
      */
     modifier isProjectTokenListed(address projectToken) {
-        require(projectTokenInfo[projectToken].isListed, "Prj token isn't listed");
+        if (!projectTokenInfo[projectToken].isListed) {
+            revert Errors.ProjectTokenIsNotListed();
+        }
         _;
     }
 
@@ -183,7 +186,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken The address of the lending token.
      */
     modifier isLendingTokenListed(address lendingToken) {
-        require(lendingTokenInfo[lendingToken].isListed, "Lending token isn't listed");
+        if (!lendingTokenInfo[lendingToken].isListed) {
+            revert Errors.LendingTokenIsNotListed();
+        }
         _;
     }
 
@@ -191,7 +196,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only related contracts to call the function.
      */
     modifier onlyRelatedContracts() {
-        require(isRelatedContract[msg.sender], "Caller isn't related Contract");
+        if (!isRelatedContract[msg.sender]) {
+            revert Errors.CallerIsNotRelatedContract();
+        }
         _;
     }
 
@@ -199,7 +206,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Modifier that allows only the moderator contract to call the function.
      */
     modifier onlyModeratorContract() {
-        require(msg.sender == primaryLendingPlatformModerator, "Caller isn't Moderator");
+        if (msg.sender != primaryLendingPlatformModerator) {
+            revert Errors.CallerIsNotModerator();
+        }
         _;
     }
 
@@ -214,7 +223,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param newModeratorContract The address of the new moderator contract.
      */
     function setPrimaryLendingPlatformModerator(address newModeratorContract) external onlyAdmin {
-        require(newModeratorContract != address(0), "Invalid address");
+        if (newModeratorContract == address(0)) {
+            revert Errors.InvalidAddress();
+        }
         primaryLendingPlatformModerator = newModeratorContract;
         emit SetModeratorContract(newModeratorContract);
     }
@@ -266,7 +277,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param projectToken The address of the project token to remove.
      */
     function removeProjectToken(uint256 projectTokenId, address projectToken) external onlyModeratorContract {
-        require(projectTokens[projectTokenId] == projectToken, "Invalid address");
+        if (projectTokens[projectTokenId] != projectToken) {
+            revert Errors.InvalidAddress();
+        }
         projectTokenInfo[projectToken].isListed = false;
         projectTokens[projectTokenId] = projectTokens[projectTokens.length - 1];
         projectTokens.pop();
@@ -282,7 +295,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param lendingToken The address of the lending token to be removed.
      */
     function removeLendingToken(uint256 lendingTokenId, address lendingToken) external onlyModeratorContract {
-        require(lendingTokens[lendingTokenId] == lendingToken, "Invalid address");
+        if (lendingTokens[lendingTokenId] != lendingToken) {
+            revert Errors.InvalidAddress();
+        }
         lendingTokenInfo[lendingToken].isListed = false;
         lendingTokens[lendingTokenId] = lendingTokens[lendingTokens.length - 1];
         lendingTokens.pop();
@@ -341,20 +356,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     /**
-     * @dev Sets the deposit and withdraw pause status for a given project token.
-     *
-     * Requirements:
-     * - The caller must be the moderator contract.
-     * @param projectToken The address of the project token.
-     * @param isDepositPaused The boolean value indicating whether deposit is paused or not.
-     * @param isWithdrawPaused The boolean value indicating whether withdraw is paused or not.
-     */
-    function setPausedProjectToken(address projectToken, bool isDepositPaused, bool isWithdrawPaused) external onlyModeratorContract {
-        projectTokenInfo[projectToken].isDepositPaused = isDepositPaused;
-        projectTokenInfo[projectToken].isWithdrawPaused = isWithdrawPaused;
-    }
-
-    /**
      * @dev Sets the lending token information for a given lending token.
      *
      * Requirements:
@@ -381,19 +382,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         info.isPaused = isPaused;
         info.bLendingToken = BLendingToken(bLendingToken);
         info.loanToValueRatio = Ratio(loanToValueRatioNumerator, loanToValueRatioDenominator);
-    }
-
-    /**
-     * @dev Sets the pause status of a lending token.
-     *
-     * Requirements:
-     * - The caller must be the moderator contract.
-     * - The lending token must be listed.
-     * @param lendingToken The address of the lending token.
-     * @param isPaused The pause status to be set.
-     */
-    function setPausedLendingToken(address lendingToken, bool isPaused) external onlyModeratorContract isLendingTokenListed(lendingToken) {
-        lendingTokenInfo[lendingToken].isPaused = isPaused;
     }
 
     //************* PUBLIC FUNCTIONS ********************************
@@ -452,8 +440,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param beneficiary The address of the beneficiary receiving the deposit.
      */
     function _deposit(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal {
-        require(!projectTokenInfo[projectToken].isDepositPaused, "Token is paused");
-        require(projectTokenAmount > 0, "Invalid amount");
+        if (projectTokenInfo[projectToken].isDepositPaused) {
+            revert Errors.TokenIsPaused();
+        }
+        if (projectTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
         ERC20Upgradeable(projectToken).safeTransferFrom(user, address(this), projectTokenAmount);
         _calcDepositPosition(projectToken, projectTokenAmount, beneficiary);
         emit Deposit(user, projectToken, projectTokenAmount, beneficiary);
@@ -530,10 +522,16 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The amount of project tokens withdrawn.
      */
     function _withdraw(address projectToken, uint256 projectTokenAmount, address user, address beneficiary) internal returns (uint256) {
-        require(!projectTokenInfo[projectToken].isWithdrawPaused, "Token is paused");
+        if (projectTokenInfo[projectToken].isWithdrawPaused) {
+            revert Errors.TokenIsPaused();
+        }
         uint256 depositedProjectTokenAmount = depositedAmount[user][projectToken];
-        require(projectTokenAmount > 0 && depositedProjectTokenAmount > 0, "Invalid amount or deposit doesn't exist");
+        if (!(projectTokenAmount > 0 && depositedProjectTokenAmount > 0)) {
+            revert Errors.InvalidAmountOrDepositDoesNotExist();
+        }
         address actualLendingToken = getLendingToken(user, projectToken);
+
+        priceOracle.updateMultiFinalPrices(getTokensUpdateFinalPrices(projectToken, actualLendingToken, false));
 
         uint256 loanBody = borrowPosition[user][projectToken][actualLendingToken].loanBody;
 
@@ -542,7 +540,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
 
         uint256 withdrawableAmount = getCollateralAvailableToWithdraw(user, projectToken, actualLendingToken);
-        require(withdrawableAmount > 0, "Withdrawable amount is 0");
+        if (withdrawableAmount == 0) {
+            revert Errors.WithdrawableAmountIsZero();
+        }
         if (projectTokenAmount > withdrawableAmount) {
             projectTokenAmount = withdrawableAmount;
         }
@@ -571,13 +571,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
         uint256 depositRemaining = pitRemaining(account, projectToken, lendingToken);
 
-        uint256 projectTokenPrice = getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals());
+        (uint256 projectTokenPrice, ) = getTokenEvaluation(projectToken, 10 ** ERC20Upgradeable(projectToken).decimals());
         uint256 collateralProjectRemaining = (depositRemaining * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals())) /
-            projectTokenPrice / lvrNumerator;
+            projectTokenPrice /
+            lvrNumerator;
 
         uint256 outstandingInUSD = totalOutstandingInUSD(account, projectToken, lendingToken);
         uint256 depositedAmountSatisfyHF = (outstandingInUSD * lvrDenominator * (10 ** ERC20Upgradeable(projectToken).decimals())) /
-            projectTokenPrice / lvrNumerator;
+            projectTokenPrice /
+            lvrNumerator;
         uint256 amountToWithdraw = depositedProjectTokenAmount > depositedAmountSatisfyHF
             ? depositedProjectTokenAmount - depositedAmountSatisfyHF
             : 0;
@@ -586,50 +588,6 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     }
 
     //************* Supply FUNCTION ********************************
-
-    /**
-     * @notice Supplies a specified amount of a lending token to the platform.
-     * @dev Allows a user to supply a specified amount of a lending token to the platform.
-     * @param lendingToken The address of the lending token being supplied.
-     * @param lendingTokenAmount The amount of the lending token being supplied.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - The lending token is not paused.
-     * - The lending token amount is greater than 0.
-     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     *
-     * Effects:
-     * - Mints the corresponding bLendingTokens and credits them to the user.
-     */
-    function supply(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _supply(lendingToken, lendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Supplies a certain amount of lending tokens to the platform from a specific user.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - Called by a related contract.
-     * - The lending token is not paused.
-     * - The lending token amount is greater than 0.
-     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
-     *
-     * Effects:
-     * - Mints the corresponding bLendingTokens and credits them to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be supplied.
-     * @param user Address of the user.
-     */
-    function supplyFromRelatedContract(
-        address lendingToken,
-        uint256 lendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _supply(lendingToken, lendingTokenAmount, user);
-    }
-
     /**
      * @dev Internal function that performs the supply of lending token to the user by minting bLendingToken.
      * @param lendingToken Address of the lending token.
@@ -637,63 +595,28 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _supply(address lendingToken, uint256 lendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
-        require(lendingTokenAmount > 0, "Invalid amount");
+        if (lendingTokenInfo[lendingToken].isPaused) {
+            revert Errors.TokenIsPaused();
+        }
+        if (lendingTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
+
+        priceOracle.updateMultiFinalPrices(getTokensUpdateFinalPrices(lendingToken, address(0), false));
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         (uint256 mintError, uint256 mintedAmount) = bLendingToken.mintTo(user, lendingTokenAmount);
-        require(mintError == 0, "MintError!=0");
-        require(mintedAmount > 0, "MintedAmount==0");
+        if (mintError != 0) {
+            revert Errors.MintErrorIsNotZero();
+        }
+        if (mintedAmount == 0) {
+            revert Errors.MintedAmountIsZero();
+        }
 
         emit Supply(user, lendingToken, lendingTokenAmount, address(bLendingToken), mintedAmount);
     }
 
     //************* Redeem FUNCTION ********************************
-
-    /**
-     * @notice Redeems a specified amount of bLendingToken from the platform.
-     * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
-     *
-     * Requirements:
-     * - The lendingToken is listed.
-     * - The lending token should not be paused.
-     * - The bLendingTokenAmount should be greater than zero.
-     * - The redemption of bLendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Burns the bLendingTokens from the user.
-     * - Transfers the corresponding lending tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
-     */
-    function redeem(address lendingToken, uint256 bLendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _redeem(lendingToken, bLendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
-     *
-     * Requirements:
-     * - The lendingToken is listed.
-     _ - Called by a related contract.
-     * - The lending token should not be paused.
-     * - The bLendingTokenAmount should be greater than zero.
-     * - The redemption of bLendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Burns the bLendingTokens from the user.
-     * - Transfers the corresponding lending tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
-     * @param user Address of the user.
-     */
-    function redeemFromRelatedContract(
-        address lendingToken,
-        uint256 bLendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _redeem(lendingToken, bLendingTokenAmount, user);
-    }
 
     /**
      * @dev Internal function that performs the redemption of bLendingToken and returns the corresponding lending token to the user.
@@ -702,60 +625,25 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _redeem(address lendingToken, uint256 bLendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
-        require(bLendingTokenAmount > 0, "BLendingTokenAmount==0");
+        if (lendingTokenInfo[lendingToken].isPaused) {
+            revert Errors.TokenIsPaused();
+        }
+        if (bLendingTokenAmount == 0) {
+            revert Errors.BLendingTokenAmoutIsZero();
+        }
+
+        priceOracle.updateMultiFinalPrices(getTokensUpdateFinalPrices(lendingToken, address(0), false));
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         uint256 redeemError = bLendingToken.redeemTo(user, bLendingTokenAmount);
-        require(redeemError == 0, "RedeemError!=0. redeem>=supply.");
+        if (redeemError != 0) {
+            revert Errors.RedeemErrorIsNotZero();
+        }
 
         emit Redeem(user, lendingToken, address(bLendingToken), bLendingTokenAmount);
     }
 
     //************* RedeemUnderlying FUNCTION ********************************
-
-    /**
-     * @notice Redeems a specified amount of lendingToken from the platform.
-     * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to user.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - The lending token should not be paused.
-     * - The lendingTokenAmount should be greater than zero.
-     * - The redemption of lendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Transfers the corresponding underlying tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
-     */
-    function redeemUnderlying(address lendingToken, uint256 lendingTokenAmount) external isLendingTokenListed(lendingToken) nonReentrant {
-        _redeemUnderlying(lendingToken, lendingTokenAmount, msg.sender);
-    }
-
-    /**
-     * @dev Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
-     *
-     * Requirements:
-     * - The lending token is listed.
-     * - Called by a related contract.
-     * - The lending token should not be paused.
-     * - The lendingTokenAmount should be greater than zero.
-     * - The redemption of lendingToken should not result in a redemption error.
-     *
-     * Effects:
-     * - Transfers the corresponding underlying tokens to the user.
-     * @param lendingToken Address of the lending token.
-     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
-     * @param user Address of the user.
-     */
-    function redeemUnderlyingFromRelatedContract(
-        address lendingToken,
-        uint256 lendingTokenAmount,
-        address user
-    ) external isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
-        _redeemUnderlying(lendingToken, lendingTokenAmount, user);
-    }
 
     /**
      * @dev Internal function that performs the redemption of lending token and returns the corresponding underlying token to the user.
@@ -764,12 +652,20 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param user Address of the user.
      */
     function _redeemUnderlying(address lendingToken, uint256 lendingTokenAmount, address user) internal {
-        require(!lendingTokenInfo[lendingToken].isPaused, "Token is paused");
-        require(lendingTokenAmount > 0, "Invalid amount");
+        if (lendingTokenInfo[lendingToken].isPaused) {
+            revert Errors.TokenIsPaused();
+        }
+        if (lendingTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
+
+        priceOracle.updateMultiFinalPrices(getTokensUpdateFinalPrices(lendingToken, address(0), false));
 
         BLendingToken bLendingToken = lendingTokenInfo[lendingToken].bLendingToken;
         uint256 redeemUnderlyingError = bLendingToken.redeemUnderlyingTo(user, lendingTokenAmount);
-        require(redeemUnderlyingError == 0, "Redeem>=supply");
+        if (redeemUnderlyingError != 0) {
+            revert Errors.RedeemUnderlyingErrorIsNotZero();
+        }
 
         emit RedeemUnderlying(user, lendingToken, address(bLendingToken), lendingTokenAmount);
     }
@@ -785,19 +681,30 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The amount of `lendingToken` borrowed.
      */
     function _borrow(address projectToken, address lendingToken, uint256 lendingTokenAmount, address user) internal returns (uint256) {
-        require(!primaryLendingPlatformLeverage.isLeveragePosition(user, projectToken), "Invalid position");
-        require(lendingToken != address(0), "Invalid address");
-        require(lendingTokenAmount > 0, "Invalid lending amount");
+        if (primaryLendingPlatformLeverage.isLeveragePosition(user, projectToken)) {
+            revert Errors.InvalidPosition();
+        }
+        if (lendingToken == address(0)) {
+            revert Errors.InvalidAddress();
+        }
+        if (lendingTokenAmount == 0) {
+            revert Errors.InvalidLendingAmount();
+        }
         address _lendingToken = lendingTokenPerCollateral[user][projectToken];
         if (_lendingToken != address(0)) {
-            require(lendingToken == _lendingToken, "Invalid lending token");
+            if (lendingToken != _lendingToken) {
+                revert Errors.InvalidLendingToken();
+            }
         }
+        priceOracle.updateMultiFinalPrices(getTokensUpdateFinalPrices(projectToken, lendingToken, true));
         uint256 loanBody = borrowPosition[user][projectToken][lendingToken].loanBody;
         if (loanBody > 0) {
             updateInterestInBorrowPositions(user, lendingToken);
         }
         uint256 availableToBorrow = getLendingAvailableToBorrow(user, projectToken, lendingToken);
-        require(availableToBorrow > 0, "Available amount to borrow is 0");
+        if (availableToBorrow == 0) {
+            revert Errors.AvailableAmounToBorrowIsZero();
+        }
         if (lendingTokenAmount > availableToBorrow) {
             lendingTokenAmount = availableToBorrow;
         }
@@ -882,7 +789,8 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
 
         uint8 lendingTokenDecimals = ERC20Upgradeable(lendingToken).decimals();
-        availableToBorrow = (availableToBorrowInUSD * (10 ** lendingTokenDecimals)) / getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
+        (, uint256 lendingTokenPrice) = getTokenEvaluation(lendingToken, 10 ** lendingTokenDecimals);
+        availableToBorrow = (availableToBorrowInUSD * (10 ** lendingTokenDecimals)) / lendingTokenPrice;
     }
 
     //************* Repay FUNCTION ********************************
@@ -910,7 +818,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address projectToken,
         address lendingToken,
         uint256 lendingTokenAmount
-    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant() returns (uint256) {
+    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) nonReentrant returns (uint256) {
         return _repay(msg.sender, msg.sender, projectToken, lendingToken, lendingTokenAmount);
     }
 
@@ -941,7 +849,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         uint256 lendingTokenAmount,
         address repairer,
         address borrower
-    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant() returns (uint256) {
+    ) external isProjectTokenListed(projectToken) isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant returns (uint256) {
         return _repay(repairer, borrower, projectToken, lendingToken, lendingTokenAmount); // under normal conditions: repairer == borrower
     }
 
@@ -961,7 +869,9 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         address lendingToken,
         uint256 lendingTokenAmount
     ) internal returns (uint256) {
-        require(lendingTokenAmount > 0, "Invalid amount");
+        if (lendingTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
         uint256 borrowPositionsAmount = 0;
         for (uint256 i = 0; i < projectTokens.length; i++) {
             if (borrowPosition[borrower][projectTokens[i]][lendingToken].loanBody > 0) {
@@ -970,7 +880,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
         BorrowPosition storage _borrowPosition = borrowPosition[borrower][projectToken][lendingToken];
         if (borrowPositionsAmount == 0 || _borrowPosition.loanBody == 0) {
-            revert("No borrow position");
+            revert Errors.NoBorrowPosition();
         }
         LendingTokenInfo memory info = lendingTokenInfo[lendingToken];
         updateInterestInBorrowPositions(borrower, lendingToken);
@@ -1099,6 +1009,20 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
 
     //************* VIEW FUNCTIONS ********************************
 
+    /**@dev This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+     * @param projectToken Address of the project token.
+     * @param actualLendingToken Address of the lending token.
+     * @param isBorrow Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.
+     * @return tokens Array of tokens that need to update final price.
+     */
+    function getTokensUpdateFinalPrices(
+        address projectToken,
+        address actualLendingToken,
+        bool isBorrow
+    ) public view returns (address[] memory tokens) {
+        return priceOracle.getTokensUpdateFinalPrices(projectToken, actualLendingToken, isBorrow);
+    }
+
     /**
      * @dev Returns the PIT (primary index token) value for a given account and position after a position is opened.
      *
@@ -1110,7 +1034,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      */
     function pit(address account, address projectToken, address lendingToken) public view returns (uint256) {
         (uint256 lvrNumerator, uint256 lvrDenominator) = getLoanToValueRatio(projectToken, lendingToken);
-        uint256 evaluation = getTokenEvaluation(projectToken, (depositedAmount[account][projectToken] * lvrNumerator) / lvrDenominator);
+        (uint256 evaluation, ) = getTokenEvaluation(projectToken, (depositedAmount[account][projectToken] * lvrNumerator) / lvrDenominator);
         return evaluation;
     }
 
@@ -1125,7 +1049,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     function pitCollateral(address account, address projectToken) public view returns (uint256) {
         uint8 lvrNumerator = projectTokenInfo[projectToken].loanToValueRatio.numerator;
         uint8 lvrDenominator = projectTokenInfo[projectToken].loanToValueRatio.denominator;
-        uint256 evaluation = getTokenEvaluation(projectToken, (depositedAmount[account][projectToken] * lvrNumerator) / lvrDenominator);
+        (uint256 evaluation, ) = getTokenEvaluation(projectToken, (depositedAmount[account][projectToken] * lvrNumerator) / lvrDenominator);
         return evaluation;
     }
 
@@ -1199,10 +1123,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @dev Returns the price of a specific token amount in USD.
      * @param token The address of the token to evaluate.
      * @param tokenAmount The amount of the token to evaluate.
-     * @return The evaluated token amount in USD.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getTokenEvaluation(address token, uint256 tokenAmount) public view returns (uint256) {
-        return priceOracle.getEvaluation(token, tokenAmount);
+    function getTokenEvaluation(address token, uint256 tokenAmount) public view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        (collateralEvaluation, capitalEvaluation) = priceOracle.getEvaluation(token, tokenAmount);
     }
 
     /**
@@ -1265,7 +1190,7 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
         }
         healthFactorNumerator = pit(account, projectToken, lendingToken);
         uint256 amount = loanBody + accrual;
-        healthFactorDenominator = getTokenEvaluation(lendingToken, amount);
+        (, healthFactorDenominator) = getTokenEvaluation(lendingToken, amount);
     }
 
     /**
@@ -1293,12 +1218,15 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @return The total borrow amount in USD.
      */
     function getTotalBorrowPerCollateral(address projectToken) public view returns (uint) {
-        require(lendingTokensLength() > 0, "Tokens list is empty");
+        if (lendingTokensLength() == 0) {
+            revert Errors.TokensListIsEmpty();
+        }
         uint256 totalBorrowInUSD;
         for (uint256 i = 0; i < lendingTokensLength(); i++) {
             uint256 amount = totalBorrow[projectToken][lendingTokens[i]];
             if (amount > 0) {
-                totalBorrowInUSD += getTokenEvaluation(lendingTokens[i], amount);
+                (, uint256 totalBorrowPerLendingTokenInUSD) = getTokenEvaluation(lendingTokens[i], amount);
+                totalBorrowInUSD += totalBorrowPerLendingTokenInUSD;
             }
         }
         return totalBorrowInUSD;
@@ -1307,11 +1235,11 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
     /**
      * @dev Gets total borrow amount in USD for a specific lending token.
      * @param lendingToken The address of the lending token.
-     * @return The total borrow amount in USD.
+     * @return amountInUSD The total borrow amount in USD.
      */
-    function getTotalBorrowPerLendingToken(address lendingToken) public view returns (uint) {
+    function getTotalBorrowPerLendingToken(address lendingToken) public view returns (uint256 amountInUSD) {
         uint256 amount = totalBorrowPerLendingToken[lendingToken];
-        return getTokenEvaluation(lendingToken, amount);
+        (, amountInUSD) = getTokenEvaluation(lendingToken, amount);
     }
 
     /**
@@ -1319,12 +1247,12 @@ abstract contract PrimaryLendingPlatformV2Core is Initializable, AccessControlUp
      * @param account The address of the user account.
      * @param projectToken The address of the project token.
      * @param lendingToken The address of the lending token.
-     * @return The total outstanding amount in USD.
+     * @return amountInUSD The total outstanding amount in USD.
      */
-    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) public view returns (uint256) {
+    function totalOutstandingInUSD(address account, address projectToken, address lendingToken) public view returns (uint256 amountInUSD) {
         (, uint256 loanBody, uint256 accrual, , ) = getPosition(account, projectToken, lendingToken);
         uint256 estimatedAmount = loanBody + accrual;
-        return getTokenEvaluation(lendingToken, estimatedAmount);
+        (, amountInUSD) = getTokenEvaluation(lendingToken, estimatedAmount);
     }
 
     /**

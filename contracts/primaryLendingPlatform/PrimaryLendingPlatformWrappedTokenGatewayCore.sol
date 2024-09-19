@@ -12,6 +12,7 @@ import "../interfaces/IWETH.sol";
 import "../interfaces/IBLendingToken.sol";
 import "../interfaces/IPrimaryLendingPlatformLiquidation.sol";
 import "../interfaces/IPrimaryLendingPlatformLeverage.sol";
+import "../util/Asset.sol";
 
 /**
  * @title PrimaryLendingPlatformWrappedTokenGatewayCore.
@@ -39,12 +40,18 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
      * @dev Emitted when the PIT liquidation address is set.
      */
     event SetPITLiquidation(address newPITLiquidation);
-    
+
     /**
      * @dev Emitted when the PIT (Pool Interest Token) leverage is set to a new address.
      * @param newPITLeverage The address of the new PIT leverage contract.
      */
     event SetPITLeverage(address newPITLeverage);
+
+    /**
+     * @dev Emitted when the WETH address is set.
+     * @param newWETH The address of the new WETH contract.
+     */
+    event SetWETH(address newWETH);
 
     /**
      * @dev Initializes the PrimaryLendingPlatformWrappedTokenGateway contract.
@@ -64,14 +71,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
         IWETH(weth).approve(fWETH, type(uint256).max);
         pitLiquidation = IPrimaryLendingPlatformLiquidation(pitLiquidationAddress);
         pitLeverage = IPrimaryLendingPlatformLeverage(pitLeverageAddress);
-    }
-
-    /**
-     * @dev Modifier that allows only the admin to execute the function.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "WTG: Caller is not the Admin");
-        _;
     }
 
     /**
@@ -98,6 +97,22 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     modifier isLendingTokenListed(address lendingToken) {
         require(primaryLendingPlatform.lendingTokenInfo(lendingToken).isListed, "WTG: Lending token is not listed");
         _;
+    }
+
+    /**
+     * @dev Sets the address of the WETH contract.
+     *
+     * Requirements:
+     * - `newWETH` cannot be the zero address.
+     * - Caller must be a moderator.
+     * @param _weth The address of the new WETH contract.
+     */
+    function setWETH(address _weth) external onlyModerator {
+        require(_weth != address(0), "WTG: Invalid address");
+        address fWETH = primaryLendingPlatform.lendingTokenInfo(_weth).bLendingToken;
+        IWETH(_weth).approve(fWETH, type(uint256).max);
+        WETH = IWETH(_weth);
+        emit SetWETH(_weth);
     }
 
     /**
@@ -176,47 +191,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Allows users to supply ETH to the PrimaryLendingPlatformWrappedTokenGatewayCore contract.
-     * The ETH is converted to WETH and then transferred to the user's address.
-     * The supplyFromRelatedContract function of the PrimaryLendingPlatform contract is called to supply the WETH to the user.
-     */
-    function supply() external payable nonReentrant {
-        WETH.deposit{value: msg.value}();
-        WETH.transfer(msg.sender, msg.value);
-        primaryLendingPlatform.supplyFromRelatedContract(address(WETH), msg.value, msg.sender);
-    }
-
-    /**
-     * @dev Redeems the specified amount of bLendingToken for the underlying asset (WETH) and transfers it to the caller.
-     * @param bLendingTokenAmount The amount of bLendingToken to redeem. If set to `type(uint256).max`, redeems all the bLendingToken balance of the caller.
-     */
-    function redeem(uint256 bLendingTokenAmount) external nonReentrant {
-        address fWETH = primaryLendingPlatform.lendingTokenInfo(address(WETH)).bLendingToken;
-        uint256 userBalance = IBLendingToken(fWETH).balanceOf(msg.sender);
-        uint256 amountToWithdraw = bLendingTokenAmount;
-        if (bLendingTokenAmount == type(uint256).max) {
-            amountToWithdraw = userBalance;
-        }
-        primaryLendingPlatform.redeemFromRelatedContract(address(WETH), amountToWithdraw, msg.sender);
-        uint256 exchangeRate = IBLendingToken(fWETH).exchangeRateStored();
-        uint256 lendingAmountToWithdraw = (amountToWithdraw * exchangeRate) / 1e18;
-        WETH.transferFrom(msg.sender, address(this), lendingAmountToWithdraw);
-        WETH.withdraw(lendingAmountToWithdraw);
-        _safeTransferETH(msg.sender, lendingAmountToWithdraw);
-    }
-
-    /**
-     * @dev Redeems the underlying asset from the Primary Lending Platform and transfers it to the caller.
-     * @param lendingTokenAmount The amount of the lending token to redeem.
-     */
-    function redeemUnderlying(uint256 lendingTokenAmount) external nonReentrant {
-        primaryLendingPlatform.redeemUnderlyingFromRelatedContract(address(WETH), lendingTokenAmount, msg.sender);
-        WETH.transferFrom(msg.sender, address(this), lendingTokenAmount);
-        WETH.withdraw(lendingTokenAmount);
-        _safeTransferETH(msg.sender, lendingTokenAmount);
-    }
-
-    /**
      * @dev Repays the specified amount of the project token's Ether outstanding debt using the lending token.
      * @param projectToken The address of the project token.
      * @param lendingTokenAmount The amount of the lending token to be used for repayment.
@@ -236,20 +210,10 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
      * @dev Internal function to borrow WETH from the Primary Lending Platform.
      * @param lendingTokenAmount The amount of WETH to be borrowed.
      */
-    function _borrow(uint256 lendingTokenAmount) internal {
+    function _transferETH(uint256 lendingTokenAmount) internal {
         WETH.transferFrom(msg.sender, address(this), lendingTokenAmount);
         WETH.withdraw(lendingTokenAmount);
         _safeTransferETH(msg.sender, lendingTokenAmount);
-    }
-
-    /**
-     * @dev Internal function to liquidate a position by providing project tokens in Ether.
-     * @param receivedWETH Amount of lending tokens to liquidate.
-     */
-    function _liquidateWithProjectETH(uint256 receivedWETH) internal {
-        WETH.transferFrom(msg.sender, address(this), receivedWETH);
-        WETH.withdraw(receivedWETH);
-        _safeTransferETH(msg.sender, receivedWETH);
     }
 
     /**

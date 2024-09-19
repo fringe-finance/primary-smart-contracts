@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformLiquidationZksync is PrimaryLendingPlatformLiquidationCore
 ```
@@ -15,27 +13,29 @@ The PrimaryLendingPlatformLiquidationZksync contract is the contract that allows
 Contract that allows users to liquidate positions. Inherit from PrimaryLendingPlatformLiquidationCore.
 ## Functions info
 
-### liquidate (0x39cb5c2a)
+### liquidate (0xb44055fc)
 
 ```solidity
 function liquidate(
     address _account,
-    address _projectToken,
-    address _lendingToken,
+    Asset.Info memory _prjInfo,
+    Asset.Info memory _lendingInfo,
     uint256 _lendingTokenAmount,
     bytes32[] memory priceIds,
-    bytes[] calldata updateData
+    bytes[] calldata updateData,
+    bytes[] memory buyCalldata
 )
     external
     payable
-    isProjectTokenListed(_projectToken)
-    isLendingTokenListed(_lendingToken)
+    isProjectTokenListed(_prjInfo.addr)
+    isLendingTokenListed(_lendingInfo.addr)
     nonReentrant
+    returns (address[] memory assets, uint256[] memory assetAmounts)
 ```
 
 Liquidates a user's position based on the specified lending token amount and update related token's prices.
 
-The function to be called when a user wants to liquidate their position.
+The function to be called when a user wants to liquidate their position. Support liquidation with hot borrowing or not.
 
 Requirements:
 - The project token is listed on the platform.
@@ -57,37 +57,41 @@ Effects:
 
 Parameters:
 
-| Name                | Type      | Description                                                            |
-| :------------------ | :-------- | :--------------------------------------------------------------------- |
-| _account            | address   | The address of the borrower                                            |
-| _projectToken       | address   | The address of the project token                                       |
-| _lendingToken       | address   | The address of the lending token                                       |
-| _lendingTokenAmount | uint256   | The amount of lending tokens to be used for liquidation                |
-| priceIds            | bytes32[] | An array of bytes32 price identifiers to update.                       |
-| updateData          | bytes[]   | An array of bytes update data for the corresponding price identifiers. |
+| Name                | Type              | Description                                                                                                                                                       |
+| :------------------ | :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| _account            | address           | The address of the borrower                                                                                                                                       |
+| _prjInfo            | struct Asset.Info | Information about the project token, including its address and type.                                                                                              |
+| _lendingInfo        | struct Asset.Info | Information about the lending token, including its address and type.                                                                                              |
+| _lendingTokenAmount | uint256           | The amount of lending tokens to be used for liquidation                                                                                                           |
+| priceIds            | bytes32[]         | An array of bytes32 price identifiers to update.                                                                                                                  |
+| updateData          | bytes[]           | An array of bytes update data for the corresponding price identifiers.                                                                                            |
+| buyCalldata         | bytes[]           | The calldata for buying the lending token from the exchange aggregator. If the calldata is empty, the liquidation will execute liquidation without hot borrowing. |
 
-### liquidateFromModerator (0x6cc6d47e)
+### liquidateFromModerator (0xc8359268)
 
 ```solidity
 function liquidateFromModerator(
     address _account,
-    address _projectToken,
-    address _lendingToken,
+    Asset.Info memory _prjInfo,
+    Asset.Info memory _lendingInfo,
     uint256 _lendingTokenAmount,
     address liquidator,
     bytes32[] memory priceIds,
-    bytes[] calldata updateData
+    bytes[] calldata updateData,
+    bytes[] memory buyCalldata
 )
     external
     payable
-    isProjectTokenListed(_projectToken)
-    isLendingTokenListed(_lendingToken)
+    isProjectTokenListed(_prjInfo.addr)
+    isLendingTokenListed(_lendingInfo.addr)
     onlyRelatedContracts
     nonReentrant
-    returns (uint256)
+    returns (address[] memory assets, uint256[] memory assetAmounts)
 ```
 
 Liquidates a portion of the borrower's debt using the lending token, called by a related contract and update related token's prices.
+
+The function to be called when a user wants to liquidate their position. Support liquidation with hot borrowing or not.
 
 Requirements:
 - The project token is listed on the platform.
@@ -110,88 +114,16 @@ Effects:
 
 Parameters:
 
-| Name                | Type      | Description                                                              |
-| :------------------ | :-------- | :----------------------------------------------------------------------- |
-| _account            | address   | The address of the borrower                                              |
-| _projectToken       | address   | The address of the project token                                         |
-| _lendingToken       | address   | The address of the lending token                                         |
-| _lendingTokenAmount | uint256   | The amount of lending tokens to be used for liquidation                  |
-| liquidator          | address   | The address of the liquidator                                            |
-| priceIds            | bytes32[] | An array of bytes32 price identifiers to update.                         |
-| updateData          | bytes[]   | An array of bytes update data for the corresponding price identifiers.   |
-
-
-Return values:
-
-| Name | Type    | Description                                                                         |
-| :--- | :------ | :---------------------------------------------------------------------------------- |
-| [0]  | uint256 | The amount of project tokens sent to the liquidator as a result of the liquidation. |
-
-### getCurrentHealthFactorWithUpdatePrices (0xf9b5315f)
-
-```solidity
-function getCurrentHealthFactorWithUpdatePrices(
-    address _account,
-    address _projectToken,
-    address _lendingToken,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-)
-    external
-    payable
-    returns (uint256 healthFactorNumerator, uint256 healthFactorDenominator)
-```
-
-Gets the current health factor of a specific account's position after updating related token's prices.
-
-
-Parameters:
-
-| Name          | Type      | Description                                                              |
-| :------------ | :-------- | :----------------------------------------------------------------------- |
-| _account      | address   | The address of the account.                                              |
-| _projectToken | address   | The address of the project token.                                        |
-| _lendingToken | address   | The address of the lending token.                                        |
-| priceIds      | bytes32[] | An array of bytes32 price identifiers to update.                         |
-| updateData    | bytes[]   | An array of bytes update data for the corresponding price identifiers.   |
-
-
-Return values:
-
-| Name                    | Type    | Description                           |
-| :---------------------- | :------ | :------------------------------------ |
-| healthFactorNumerator   | uint256 | The numerator of the health factor.   |
-| healthFactorDenominator | uint256 | The denominator of the health factor. |
-
-### getTokenPriceWithUpdatePrices (0xd0ddd846)
-
-```solidity
-function getTokenPriceWithUpdatePrices(
-    address token,
-    uint256 amount,
-    bytes32[] memory priceIds,
-    bytes[] calldata updateData
-) external payable returns (uint256 price)
-```
-
-Gets the price of a token in USD after updating related token's prices.
-
-
-Parameters:
-
-| Name       | Type      | Description                                                              |
-| :--------- | :-------- | :----------------------------------------------------------------------- |
-| token      | address   | The address of the token.                                                |
-| amount     | uint256   | The amount of the token.                                                 |
-| priceIds   | bytes32[] | An array of bytes32 price identifiers to update.                         |
-| updateData | bytes[]   | An array of bytes update data for the corresponding price identifiers.   |
-
-
-Return values:
-
-| Name  | Type    | Description                    |
-| :---- | :------ | :----------------------------- |
-| price | uint256 | The price of the token in USD. |
+| Name                | Type              | Description                                                                                                                                                       |
+| :------------------ | :---------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| _account            | address           | The address of the borrower                                                                                                                                       |
+| _prjInfo            | struct Asset.Info | Information about the project token, including its address and type.                                                                                              |
+| _lendingInfo        | struct Asset.Info | Information about the lending token, including its address and type.                                                                                              |
+| _lendingTokenAmount | uint256           | The amount of lending tokens to be used for liquidation                                                                                                           |
+| liquidator          | address           | The address of the liquidator                                                                                                                                     |
+| priceIds            | bytes32[]         | An array of bytes32 price identifiers to update.                                                                                                                  |
+| updateData          | bytes[]           | An array of bytes update data for the corresponding price identifiers.                                                                                            |
+| buyCalldata         | bytes[]           | The calldata for buying the lending token from the exchange aggregator. If the calldata is empty, the liquidation will execute liquidation without hot borrowing. |
 
 ### liquidatorRewardFactorWithUpdatePrices (0xe7f63838)
 
@@ -206,7 +138,7 @@ function liquidatorRewardFactorWithUpdatePrices(
 ```
 
 Calculates the liquidator reward factor (LRF) for a given position after after updating related token's prices.
-####Formula: 
+####Formula:
 - LRF = (1 + (1 - HF) * k)
 
 
@@ -241,7 +173,7 @@ function getMaxLiquidationAmountWithUpdatePrices(
 ```
 
 Calculates the maximum liquidation amount (MaxLA) for a given position after updating related token's prices.
-####Formula: 
+####Formula:
 - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
 
 
@@ -276,7 +208,7 @@ function getLiquidationAmountWithUpdatePrices(
 
 Returns the minimum and maximum liquidation amount for a given account, project token, and lending token after updating related token's prices.
 
-Formula: 
+Formula:
 - MinLA = min(MaxLA, MPA)
 - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
 

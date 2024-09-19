@@ -9,6 +9,8 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeab
 import "../paraswap/interfaces/IParaSwapAugustus.sol";
 import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
 import "../interfaces/IPrimaryLendingPlatform.sol";
+import "../interfaces/IPriceProviderAggregator.sol";
+import "../util/Asset.sol";
 
 /**
  * @title PrimaryLendingPlatformLeverageCore.
@@ -37,7 +39,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         AMPLIFY,
         MARGIN_TRADE
     }
-
 
     /**
      * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
@@ -87,14 +88,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
         primaryLendingPlatform = IPrimaryLendingPlatform(pit);
-    }
-
-    /**
-     * @dev Modifier to restrict access to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "PITLeverage: Caller is not the Admin");
-        _;
     }
 
     /**
@@ -152,7 +145,10 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
         require(exchangeAggregatorAddress != address(0), "PrimaryLendingPlatformLeverage: Invalid address");
         if (registryAggregatorAddress != address(0)) {
-            require(IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress), "AtomicRepayment: Invalid Augustus");
+            require(
+                IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress),
+                "AtomicRepayment: Invalid Augustus"
+            );
         }
         registryAggregator = registryAggregatorAddress;
         exchangeAggregator = exchangeAggregatorAddress;
@@ -176,25 +172,12 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     /**
      * @dev Returns the price of a given token in USD.
      * @param token The address of the token to get the price of.
-     * @return price The price of the token in USD.
+     * @return collateralPrice The price of the token in USD.
+     * @return capitalPrice The price of the token in USD.
      */
-    function getTokenPrice(address token) public view returns (uint256 price) {
+    function getTokenPrice(address token) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
         uint256 tokenMultiplier = 10 ** ERC20Upgradeable(token).decimals();
-        price = primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
-    }
-
-    /**
-     * @dev Checks if the given margin, exposure, and LVR values form a valid collateralization.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return isValid True if the collateralization is valid, false otherwise.
-     */
-    function isValidCollateralization(uint256 margin, uint256 exp, uint256 lvrNumerator, uint256 lvrDenominator) public pure returns (bool isValid) {
-        uint256 ratioNumerator = (margin + exp) * lvrNumerator;
-        uint256 ratioDenominator = exp * lvrDenominator;
-        isValid = ratioNumerator > ratioDenominator;
+        return primaryLendingPlatform.getTokenEvaluation(token, tokenMultiplier);
     }
 
     /**
@@ -204,53 +187,8 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @return lendingTokenCount The calculated lending token count.
      */
     function calculateLendingTokenCount(address lendingToken, uint256 notionalValue) public view returns (uint256 lendingTokenCount) {
-        lendingTokenCount = (notionalValue * 10 ** ERC20Upgradeable(lendingToken).decimals()) / getTokenPrice(lendingToken);
-    }
-
-    /**
-     * @dev Calculates the health factor numerator and denominator based on the given parameters.
-     * @param expAmount The exposure amount.
-     * @param margin The margin amount.
-     * @param borrowAmount The borrowed amount.
-     * @param lvrNumerator The numerator of the loan-to-value ratio.
-     * @param lvrDenominator The denominator of the loan-to-value ratio.
-     * @return hfNumerator The calculated health factor numerator.
-     * @return hfDenominator The calculated health factor denominator.
-     */
-    function calculateHF(
-        uint256 expAmount,
-        uint256 margin,
-        uint256 borrowAmount,
-        uint256 lvrNumerator,
-        uint256 lvrDenominator
-    ) public pure returns (uint256 hfNumerator, uint256 hfDenominator) {
-        hfNumerator = (expAmount + margin) * lvrNumerator;
-        hfDenominator = borrowAmount * lvrDenominator;
-    }
-
-    /**
-     * @dev Calculates the margin amount for a given position and safety margin.
-     *
-     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param safetyMarginNumerator The numerator of the safety margin ratio.
-     * @param safetyMarginDenominator The denominator of the safety margin ratio.
-     * @param expAmount The exposure amount.
-     * @return marginAmount The calculated margin amount.
-     */
-    function calculateMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 safetyMarginNumerator,
-        uint256 safetyMarginDenominator,
-        uint256 expAmount
-    ) public view returns (uint256 marginAmount) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        uint256 margin = ((expAmount *
-            (lvrDenominator * (safetyMarginDenominator + safetyMarginNumerator) - lvrNumerator * safetyMarginDenominator)) /
-            (lvrNumerator * safetyMarginDenominator));
-        marginAmount = (margin * 10 ** ERC20Upgradeable(projectToken).decimals()) / getTokenPrice(projectToken);
+        (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken);
+        lendingTokenCount = (notionalValue * 10 ** ERC20Upgradeable(lendingToken).decimals()) / lendingTokenPrice;
     }
 
     /**
@@ -261,29 +199,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      */
     function deleteLeveragePosition(address user, address projectToken) external isPrimaryLendingPlatform {
         delete isLeveragePosition[user][projectToken];
-    }
-
-    /**
-     * @dev Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-     *
-     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @return safetyMarginNumerator The calculated safety margin numerator.
-     * @return safetyMarginDenominator The calculated safety margin denominator.
-     */
-    function calculateSafetyMargin(
-        address projectToken,
-        address lendingToken,
-        uint256 margin,
-        uint256 exp
-    ) public view returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator) {
-        (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
-        uint256 marginPrice = primaryLendingPlatform.getTokenEvaluation(projectToken, margin);
-        safetyMarginNumerator = (marginPrice + exp) * lvrNumerator - exp * lvrDenominator;
-        safetyMarginDenominator = (exp * lvrDenominator);
     }
 
     /**
@@ -330,14 +245,36 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
         ERC20Upgradeable(lendingToken).safeTransferFrom(user, address(this), lendingTokenAmount);
     }
 
+    function _buyOnExchangeAggregatorWithMultiAsset(
+        address[] memory tokensFrom,
+        Asset.Info memory tokenToInfo,
+        bytes[] memory buyCalldata
+    ) internal returns (uint256[] memory assetAmountRemainings, uint256 assetAmountReceive) {
+        (address[] memory unwrapTokensTo, ) = Asset._unwrap(tokenToInfo, 0);
+
+        for (uint8 i = 0; i < buyCalldata.length; i++) {
+            _buyOnExchangeAggregator(buyCalldata[i]);
+        }
+
+        uint256[] memory assetAmountReceives = new uint256[](unwrapTokensTo.length);
+        for (uint8 i = 0; i < unwrapTokensTo.length; i++) {
+            assetAmountReceives[i] = ERC20Upgradeable(unwrapTokensTo[i]).balanceOf(address(this));
+        }
+        assetAmountReceive = Asset._wrap(unwrapTokensTo, assetAmountReceives, tokenToInfo);
+
+        assetAmountRemainings = new uint256[](tokensFrom.length);
+        for (uint8 i = 0; i < tokensFrom.length; i++) {
+            if (tokensFrom[i] != tokenToInfo.addr) {
+                assetAmountRemainings[i] = ERC20Upgradeable(tokensFrom[i]).balanceOf(address(this));
+            }
+        }
+    }
+
     /**
-     * @dev Internal function to execute a buy order on the exchange aggregator contract and returns the amount of tokens received.
-     * @param tokenTo The address of the token to buy.
-     * @param buyCalldata The calldata required for the ParaSwap operation.
-     * @return amountReceive The amount of tokens received after the ParaSwap operation.
+     * @dev Internal function to execute a buy order on the exchange aggregator contract.
+     * @param buyCalldata The calldata for the buy operation.
      */
-    function _buyOnExchangeAggregator(address tokenTo, bytes memory buyCalldata) internal returns (uint256 amountReceive) {
-        uint256 beforeBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
+    function _buyOnExchangeAggregator(bytes memory buyCalldata) internal {
         // solium-disable-next-line security/no-call-value
         (bool success, ) = exchangeAggregator.call(buyCalldata);
         if (!success) {
@@ -347,8 +284,6 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
                 revert(0, returndatasize())
             }
         }
-        uint256 afterBalanceTo = ERC20Upgradeable(tokenTo).balanceOf(address(this));
-        amountReceive = afterBalanceTo - beforeBalanceTo;
     }
 
     /**
@@ -447,9 +382,28 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
     }
 
     /**
+     * @notice Unwraps the given token, converting it into its underlying assets, and approves their transfer.
+     * @param info Information about the token, including its address and type.
+     * @param amount The amount of token to be unwrapped and approved for transfer.
+     * @return assets An array containing the addresses of the underlying assets.
+     * @return assetAmounts An array containing the amounts of the underlying assets corresponding to the unwrapped project token.
+     */
+    function _unwrapTokenAndApprove(
+        Asset.Info memory info,
+        uint256 amount
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        (assets, assetAmounts) = Asset._unwrap(info, amount);
+
+        for (uint8 i = 0; i < assets.length; i++) {
+            uint256 approvalAmount = (assetAmounts[i] * (10000 + BUFFER_PERCENTAGE)) / 10000;
+            _approveTokenTransfer(assets[i], approvalAmount);
+        }
+    }
+
+    /**
      * @dev Internal function to be called when a user wants to leverage their position.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
@@ -457,42 +411,53 @@ abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessCon
      * @param leverageType The type of leverage position.
      */
     function _leveragedBorrow(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint256 notionalExposure,
         uint256 marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         address borrower,
         uint8 leverageType
     ) internal {
         require(notionalExposure > 0, "PITLeverage: Invalid amount");
-        address currentLendingToken = primaryLendingPlatform.getLendingToken(borrower, projectToken);
+        address currentLendingToken = primaryLendingPlatform.getLendingToken(borrower, prjInfo.addr);
         if (currentLendingToken != address(0)) {
-            require(lendingToken == currentLendingToken, "PITLeverage: Invalid lending token");
+            require(lendingInfo.addr == currentLendingToken, "PITLeverage: Invalid lending token");
         }
-        _checkIsValidPosition(borrower, projectToken, lendingToken, marginCollateralAmount);
-
-        uint256 lendingTokenCount = calculateLendingTokenCount(lendingToken, notionalExposure);
-
-        _nakedBorrow(borrower, lendingToken, lendingTokenCount, projectToken, currentLendingToken);
-
-        uint256 approvalAmount = (lendingTokenCount * (10000 + BUFFER_PERCENTAGE)) / 10000;
-        _approveTokenTransfer(lendingToken, approvalAmount);
-
-        uint256 amountReceive = _buyOnExchangeAggregator(projectToken, buyCalldata);
-
-        (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, projectToken, amountReceive, marginCollateralAmount);
-
-        _deferLiquidityCheck(borrower, projectToken, lendingToken);
-
-        if (!isLeveragePosition[borrower][projectToken]) {
-            isLeveragePosition[borrower][projectToken] = true;
+        {
+            address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(prjInfo.addr, lendingInfo.addr, true);
+            IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
         }
-        typeOfLeveragePosition[borrower][projectToken] = LeverageType(leverageType);
+
+        _checkIsValidPosition(borrower, prjInfo.addr, lendingInfo.addr, marginCollateralAmount);
+
+        uint256 lendingTokenCount = calculateLendingTokenCount(lendingInfo.addr, notionalExposure);
+
+        _nakedBorrow(borrower, lendingInfo.addr, lendingTokenCount, prjInfo.addr, currentLendingToken);
+
+        (address[] memory lendingAssets, ) = _unwrapTokenAndApprove(lendingInfo, lendingTokenCount);
+
+        uint256 amountReceive;
+        {
+            uint256[] memory amountRemaining;
+            (amountRemaining, amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(lendingAssets, prjInfo, buyCalldata);
+            for (uint8 i = 0; i < amountRemaining.length; i++) {
+                ERC20Upgradeable(lendingAssets[i]).safeTransfer(borrower, amountRemaining[i]);
+            }
+        }
+
+        (uint256 totalCollateral, uint256 addingAmount) = _collateralizeLoan(borrower, prjInfo.addr, amountReceive, marginCollateralAmount);
+
+        _deferLiquidityCheck(borrower, prjInfo.addr, lendingInfo.addr);
+
+        if (!isLeveragePosition[borrower][prjInfo.addr]) {
+            isLeveragePosition[borrower][prjInfo.addr] = true;
+        }
+        typeOfLeveragePosition[borrower][prjInfo.addr] = LeverageType(leverageType);
         emit LeveragedBorrow(
             borrower,
-            projectToken,
-            lendingToken,
+            prjInfo.addr,
+            lendingInfo.addr,
             notionalExposure,
             lendingTokenCount,
             marginCollateralAmount,

@@ -32,8 +32,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The desired notional exposure for the leverage position.
      * @param marginCollateralAmount The amount of collateral to be added to the position as margin.
      * @param buyCalldata The calldata for buying the project token on the exchange aggregator.
@@ -42,17 +42,17 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function leveragedBorrow(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint notionalExposure,
         uint marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         uint8 leverageType,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, msg.sender, leverageType);
     }
 
     /**
@@ -75,8 +75,8 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * - Collateralizes the loan with the received tokens using `_collateralizeLoan` function.
      * - Defers liquidity check using `_deferLiquidityCheck` function.
      * - Sets the leveraged position flag and type for the borrower.
-     * @param projectToken The address of the project token the user wants to invest in.
-     * @param lendingToken The address of the lending token used for collateral.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
      * @param notionalExposure The notional exposure of the user's investment.
      * @param marginCollateralAmount The amount of collateral to be deposited by the user.
      * @param buyCalldata The calldata used for buying the project token on the DEX.
@@ -86,34 +86,18 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function leveragedBorrowFromRelatedContract(
-        address projectToken,
-        address lendingToken,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
         uint notionalExposure,
         uint marginCollateralAmount,
-        bytes memory buyCalldata,
+        bytes[] memory buyCalldata,
         address borrower,
         uint8 leverageType,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant onlyRelatedContracts {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _leveragedBorrow(projectToken, lendingToken, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
-    }
-
-    /**
-     * @dev Returns the price of a given token in USD after updating related token's prices.
-     * @param token The address of the token to get the price of.
-     * @return price The price of the token in USD.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     */
-    function getTokenPriceWithUpdatePrices(
-        address token,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint price) {
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        return getTokenPrice(token);
+        _leveragedBorrow(prjInfo, lendingInfo, notionalExposure, marginCollateralAmount, buyCalldata, borrower, leverageType);
     }
 
     /**
@@ -132,56 +116,5 @@ contract PrimaryLendingPlatformLeverageZksync is PrimaryLendingPlatformLeverageC
     ) external payable returns (uint lendingTokenCount) {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
         return calculateLendingTokenCount(_lendingToken, notionalValue);
-    }
-
-    /**
-     * @notice Calculates the margin amount for a given position and safety margin after updating related token's prices.
-     *
-     * Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param safetyMarginNumerator The numerator of the safety margin ratio.
-     * @param safetyMarginDenominator The denominator of the safety margin ratio.
-     * @param expAmount The exposure amount.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return marginAmount The calculated margin amount.
-     */
-    function calculateMarginWithUpdatePrices(
-        address projectToken,
-        address lendingToken,
-        uint safetyMarginNumerator,
-        uint safetyMarginDenominator,
-        uint expAmount,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint marginAmount) {
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        return calculateMargin(projectToken, lendingToken, safetyMarginNumerator, safetyMarginDenominator, expAmount);
-    }
-
-    /**
-     * @notice Calculates the safety margin numerator and denominator for a given position, margin, and exposure after updating related token's prices.
-     *
-     * Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
-     * @param projectToken The address of the project token.
-     * @param lendingToken The address of the lending token.
-     * @param margin The margin amount.
-     * @param exp The exposure amount.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return safetyMarginNumerator The calculated safety margin numerator.
-     * @return safetyMarginDenominator The calculated safety margin denominator.
-     */
-    function calculateSafetyMarginWithUpdatePrices(
-        address projectToken,
-        address lendingToken,
-        uint margin,
-        uint exp,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint safetyMarginNumerator, uint safetyMarginDenominator) {
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        return calculateSafetyMargin(projectToken, lendingToken, margin, exp);
     }
 }

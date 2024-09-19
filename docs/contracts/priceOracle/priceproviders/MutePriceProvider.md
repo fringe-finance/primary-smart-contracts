@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -91,6 +89,21 @@ Parameters:
 | token  | address | The address of the token whose active status has changed.   |
 | active | bool    | The new active status of the token.                         |
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+Emitted when the token decimals is set.
+
+
+Parameters:
+
+| Name             | Type  | Description             |
+| :--------------- | :---- | :---------------------- |
+| newTokenDecimals | uint8 | The new token decimals. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -109,10 +122,10 @@ string constant DESCRIPTION = "Price provider that uses mute.io"
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 
@@ -177,6 +190,22 @@ Parameters:
 | Name      | Type    | Description                                 |
 | :-------- | :------ | :------------------------------------------ |
 | moderator | address | The address of the moderator to be revoked. |
+
+### setTokenDecimals (0xf2cf47be)
+
+```solidity
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
+```
+
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
+
+
+Parameters:
+
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setTokenAndPair (0xa6ff9e94)
 
@@ -289,32 +318,6 @@ Return values:
 | :------------ | :------ | :-------------------------------------- |
 | price         | uint256 | The price of the token in pairAsset.    |
 | priceDecimals | uint8   | The number of decimals for the price.   |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount in USD using the Mute price oracle.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                                |
-| :--------- | :------ | :----------------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount in USD. |
 
 ### getReserves (0x32749461)
 

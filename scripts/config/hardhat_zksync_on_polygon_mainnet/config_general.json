@@ -1,5 +1,12 @@
 {
+  "liquidationBot": {
+    "uniswapV2Factory": ""
+  },
   "priceOracle": {
+    "priceProcessingOracle": {
+      "volatilityCapUpPercent": "",
+      "volatilityCapDownPercent": ""
+    },
     "Pyth": {
       "pythOracle": "0xff1a0f4744e8582df1ae09d5611b887b6a12925c",
       "tokensUsePyth": [
@@ -46,12 +53,14 @@
         []
       ]
     },
-    "Uniswap": {
+    "UniswapV2": {
+        "tokensUseUniswap": [],
+        "uniswapPairs": []
+    },
+    "UniswapV3": {
+      "pricePointTWAPperiod": "",
       "tokensUseUniswap": [],
       "uniswapPairs": []
-    },
-    "BackendProvider": {
-      "tokensUseBackendProvider": []
     },
     "LPProvider": {
       "tokensUseLPProvider": []

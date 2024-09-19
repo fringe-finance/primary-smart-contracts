@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformLeverageCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -148,13 +146,6 @@ mapping(address => mapping(address => enum PrimaryLendingPlatformLeverageCore.Le
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to restrict access to only the contract admin.
 ### onlyModerator
 
 ```solidity
@@ -272,7 +263,9 @@ Parameters:
 ### getTokenPrice (0xd02641a0)
 
 ```solidity
-function getTokenPrice(address token) public view returns (uint256 price)
+function getTokenPrice(
+    address token
+) public view returns (uint256 collateralPrice, uint256 capitalPrice)
 ```
 
 Returns the price of a given token in USD.
@@ -287,39 +280,10 @@ Parameters:
 
 Return values:
 
-| Name  | Type    | Description                    |
-| :---- | :------ | :----------------------------- |
-| price | uint256 | The price of the token in USD. |
-
-### isValidCollateralization (0x2de0f093)
-
-```solidity
-function isValidCollateralization(
-    uint256 margin,
-    uint256 exp,
-    uint256 lvrNumerator,
-    uint256 lvrDenominator
-) public pure returns (bool isValid)
-```
-
-Checks if the given margin, exposure, and LVR values form a valid collateralization.
-
-
-Parameters:
-
-| Name           | Type    | Description                                   |
-| :------------- | :------ | :-------------------------------------------- |
-| margin         | uint256 | The margin amount.                            |
-| exp            | uint256 | The exposure amount.                          |
-| lvrNumerator   | uint256 | The numerator of the loan-to-value ratio.     |
-| lvrDenominator | uint256 | The denominator of the loan-to-value ratio.   |
-
-
-Return values:
-
-| Name    | Type | Description                                              |
-| :------ | :--- | :------------------------------------------------------- |
-| isValid | bool | True if the collateralization is valid, false otherwise. |
+| Name            | Type    | Description                      |
+| :-------------- | :------ | :------------------------------- |
+| collateralPrice | uint256 | The price of the token in USD.   |
+| capitalPrice    | uint256 | The price of the token in USD.   |
 
 ### calculateLendingTokenCount (0xcc65e637)
 
@@ -347,73 +311,6 @@ Return values:
 | :---------------- | :------ | :---------------------------------- |
 | lendingTokenCount | uint256 | The calculated lending token count. |
 
-### calculateHF (0x2b32311b)
-
-```solidity
-function calculateHF(
-    uint256 expAmount,
-    uint256 margin,
-    uint256 borrowAmount,
-    uint256 lvrNumerator,
-    uint256 lvrDenominator
-) public pure returns (uint256 hfNumerator, uint256 hfDenominator)
-```
-
-Calculates the health factor numerator and denominator based on the given parameters.
-
-
-Parameters:
-
-| Name           | Type    | Description                                   |
-| :------------- | :------ | :-------------------------------------------- |
-| expAmount      | uint256 | The exposure amount.                          |
-| margin         | uint256 | The margin amount.                            |
-| borrowAmount   | uint256 | The borrowed amount.                          |
-| lvrNumerator   | uint256 | The numerator of the loan-to-value ratio.     |
-| lvrDenominator | uint256 | The denominator of the loan-to-value ratio.   |
-
-
-Return values:
-
-| Name          | Type    | Description                               |
-| :------------ | :------ | :---------------------------------------- |
-| hfNumerator   | uint256 | The calculated health factor numerator.   |
-| hfDenominator | uint256 | The calculated health factor denominator. |
-
-### calculateMargin (0x6324eb4e)
-
-```solidity
-function calculateMargin(
-    address projectToken,
-    address lendingToken,
-    uint256 safetyMarginNumerator,
-    uint256 safetyMarginDenominator,
-    uint256 expAmount
-) public view returns (uint256 marginAmount)
-```
-
-Calculates the margin amount for a given position and safety margin.
-
-Formula: Margin = ((Notional / LVR) * (1 + SafetyMargin)) - Notional
-
-
-Parameters:
-
-| Name                    | Type    | Description                                   |
-| :---------------------- | :------ | :-------------------------------------------- |
-| projectToken            | address | The address of the project token.             |
-| lendingToken            | address | The address of the lending token.             |
-| safetyMarginNumerator   | uint256 | The numerator of the safety margin ratio.     |
-| safetyMarginDenominator | uint256 | The denominator of the safety margin ratio.   |
-| expAmount               | uint256 | The exposure amount.                          |
-
-
-Return values:
-
-| Name         | Type    | Description                   |
-| :----------- | :------ | :---------------------------- |
-| marginAmount | uint256 | The calculated margin amount. |
-
 ### deleteLeveragePosition (0x0614a25a)
 
 ```solidity
@@ -433,42 +330,6 @@ Parameters:
 | :----------- | :------ | :-------------------------------- |
 | user         | address | The address of the user.          |
 | projectToken | address | The address of the project token. |
-
-### calculateSafetyMargin (0x3d1aabdc)
-
-```solidity
-function calculateSafetyMargin(
-    address projectToken,
-    address lendingToken,
-    uint256 margin,
-    uint256 exp
-)
-    public
-    view
-    returns (uint256 safetyMarginNumerator, uint256 safetyMarginDenominator)
-```
-
-Calculates the safety margin numerator and denominator for a given position, margin, and exposure.
-
-Formula: Safety Margin = ((Margin + Notional) / (Notional / LVR)) - 1
-
-
-Parameters:
-
-| Name         | Type    | Description                         |
-| :----------- | :------ | :---------------------------------- |
-| projectToken | address | The address of the project token.   |
-| lendingToken | address | The address of the lending token.   |
-| margin       | uint256 | The margin amount.                  |
-| exp          | uint256 | The exposure amount.                |
-
-
-Return values:
-
-| Name                    | Type    | Description                               |
-| :---------------------- | :------ | :---------------------------------------- |
-| safetyMarginNumerator   | uint256 | The calculated safety margin numerator.   |
-| safetyMarginDenominator | uint256 | The calculated safety margin denominator. |
 
 ### calculateAddingAmount (0x545c5699)
 

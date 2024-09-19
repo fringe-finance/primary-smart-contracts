@@ -17,7 +17,7 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
 
     string public constant DESCRIPTION = "Price provider that uses mute.io";
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     mapping(address => MuteMetadata) public muteMetadata; // address of token => metadata for mute
 
@@ -56,13 +56,19 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     event ChangeActive(address indexed token, bool active);
 
     /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
      * @dev Initializes the contract by setting up the access control roles and the number of decimals for the USD token.
      */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
+        tokenDecimals = 10;
     }
 
     /**
@@ -102,6 +108,16 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /****************** Moderator functions ****************** */
+
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
 
     /**
      * @dev Sets the token and pair addresses for the MutePriceProvider contract.
@@ -181,27 +197,10 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
         address mutePair = metadata.pair;
         address pairAsset = metadata.pairAsset;
         (uint256 tokenReserve, uint256 pairAssetReserve) = getReserves(mutePair, token, pairAsset);
-        uint8 tokenDecimals = metadata.tokenDecimals;
+        uint8 decimals = metadata.tokenDecimals;
         uint8 pairAssetDecimals = metadata.pairAssetDecimals;
         priceDecimals = 18;
-        price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** tokenDecimals));
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD using the Mute price oracle.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 tokenDecimals = muteMetadata[token].tokenDecimals;
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
-        }
+        price = ((10 ** priceDecimals) * ((pairAssetReserve * 1e12) / (10 ** pairAssetDecimals))) / ((tokenReserve * 1e12) / (10 ** decimals));
     }
 
     /**
@@ -223,6 +222,6 @@ contract MutePriceProvider is PriceProvider, Initializable, AccessControlUpgrade
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
 }

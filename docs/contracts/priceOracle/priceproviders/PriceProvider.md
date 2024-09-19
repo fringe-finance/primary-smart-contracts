@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PriceProvider
 ```
@@ -47,33 +45,6 @@ Parameters:
 | :--------- | :-------- | :-------------------------------------- |
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
-
-### getUpdatedPrice (0xe8ad2b23)
-
-```solidity
-function getUpdatedPrice(
-    address token,
-    bytes[] calldata updateData
-) external payable virtual returns (uint256 priceMantissa, uint8 priceDecimals)
-```
-
-Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
-
-
-Parameters:
-
-| Name       | Type    | Description                                     |
-| :--------- | :------ | :---------------------------------------------- |
-| token      | address | The address of the token to get the price of.   |
-| updateData | bytes[] | The updateData provided by PythNetwork.         |
-
-
-Return values:
-
-| Name          | Type    | Description                                                 |
-| :------------ | :------ | :---------------------------------------------------------- |
-| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
-| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
 
 ### isActive (0x9f8a13d7)
 
@@ -143,114 +114,6 @@ Return values:
 | :------------ | :------ | :--------------------------------------------------- |
 | priceMantissa | uint256 | The price of the token, represented as a mantissa.   |
 | priceDecimals | uint8   | The number of decimal places in the token's price.   |
-
-### getPriceSigned (0x19ed931d)
-
-```solidity
-function getPriceSigned(
-    address token,
-    uint256 priceMantissa,
-    uint256 validTo,
-    bytes memory signature
-) public view virtual returns (uint256 _priceMantissa, uint8 _priceDecimals)
-```
-
-Returns the price of a token as a signed integer, along with the number of decimals for the price.
-
-
-Parameters:
-
-| Name          | Type    | Description                                      |
-| :------------ | :------ | :----------------------------------------------- |
-| token         | address | The address of the token to get the price for.   |
-| priceMantissa | uint256 | The mantissa of the price to be returned.        |
-| validTo       | uint256 | The timestamp until which the price is valid.    |
-| signature     | bytes   | The signature of the price oracle.               |
-
-
-Return values:
-
-| Name           | Type    | Description                             |
-| :------------- | :------ | :-------------------------------------- |
-| _priceMantissa | uint256 | The price of the token as a mantissa.   |
-| _priceDecimals | uint8   | The number of decimals for the price.   |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view virtual returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the current price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
-
-### getEvaluationUnsafe (0xb03ec98d)
-
-```solidity
-function getEvaluationUnsafe(
-    address token,
-    uint256 tokenAmount
-) public view virtual returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the last updated price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
-
-### getEvaluationSigned (0xa5c68226)
-
-```solidity
-function getEvaluationSigned(
-    address token,
-    uint256 tokenAmount,
-    uint256 priceMantissa,
-    uint256 validTo,
-    bytes memory signature
-) public view virtual returns (uint256 evaluation)
-```
-
-return the evaluation in $ of `tokenAmount` with signed price.
-
-
-Parameters:
-
-| Name          | Type    | Description                                                                                |
-| :------------ | :------ | :----------------------------------------------------------------------------------------- |
-| token         | address | the address of token to get evaluation in $.                                               |
-| tokenAmount   | uint256 | the amount of token to get evaluation. Amount is scaled by 10 in power token decimals.     |
-| priceMantissa | uint256 | the price multiplied by priceDecimals. The dimension of priceMantissa should be $/token.   |
-| validTo       | uint256 | the timestamp in seconds, when price is gonna be not valid.                                |
-| signature     | bytes   | the ECDSA sign on eliptic curve secp256k1.                                                 |
 
 ### getPriceDecimals (0x1b30aafc)
 

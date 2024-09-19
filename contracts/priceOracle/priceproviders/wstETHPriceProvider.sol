@@ -20,7 +20,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
 
     uint8 public constant MAX_PRICE_PATH_LENGTH = 5;
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     address public wstETH;
 
@@ -29,18 +29,6 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     mapping(address => uint256) public timeOuts; // address of aggregatorPath => timeout of aggregatorPath
 
     uint256 internal constant PRECISION = 10 ** 18;
-
-    /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
 
     /**
      * @dev Emitted when the wstETH address and aggregator path are set.
@@ -67,15 +55,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
         _setupRole(MODERATOR_ROLE, msg.sender);
         wstETH = _wstETH;
         aggregatorPath = _aggregatorPath;
-        usdDecimals = 6;
-    }
-
-    /**
-     * @dev Modifier to restrict access to functions to only the contract admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
+        tokenDecimals = 10;
     }
 
     /**
@@ -85,26 +65,6 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
@@ -157,7 +117,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @dev Returns the price of stETH in USD.
      * @return priceMantissa The price of stETH in USD as a mantissa value.
      */
-     function getPriceSTETH() public view returns (uint256 priceMantissa) {
+    function getPriceSTETH() public view returns (uint256 priceMantissa) {
         address[] memory _aggregatorPath = aggregatorPath;
         priceMantissa = 1;
         uint256 priceDecimals = 0;
@@ -165,10 +125,10 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
             priceMantissa *= getLatestPrice(_aggregatorPath[i]); // earn price
             priceDecimals += AggregatorV3Interface(_aggregatorPath[i]).decimals(); // earn price decimals
         }
-        if (priceDecimals >= usdDecimals) {
-            priceMantissa /= 10 ** (priceDecimals - usdDecimals);
+        if (priceDecimals >= tokenDecimals) {
+            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
         } else {
-            priceMantissa *= 10 ** (usdDecimals - priceDecimals);
+            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
         }
     }
 
@@ -184,20 +144,7 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
         assert(wstETHToStETH > 0);
         uint256 stETHToUSD = getPriceSTETH();
         priceMantissa = (wstETHToStETH * stETHToUSD) / PRECISION;
-        priceDecimals = usdDecimals;
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals (decimal = 18)
-        uint8 tokenDecimals = ERC20Upgradeable(token).decimals(); // decimal = 18 > usdc = 6
-        evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
+        priceDecimals = tokenDecimals;
     }
 
     /**
@@ -205,9 +152,9 @@ contract wstETHPriceProvider is PriceProvider, Initializable, AccessControlUpgra
      * @return The number of decimals used for the USD price.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
-    
+
     /**
      * @dev Returns the latest price after performing sanity check and staleness check.
      * @param aggregatorPath_ The address of chainlink aggregator contract.

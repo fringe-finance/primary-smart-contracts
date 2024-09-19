@@ -1,0 +1,20 @@
+import { BigNumber } from "ethers";
+import { toBN } from "./helpers";
+
+export const checkDiscrepancy = (
+    expectedAmountOut: BigNumber,
+    actualAmountOut: BigNumber,
+    maxDiscrepancy: string
+): boolean => {
+    let discrepancy = actualAmountOut.sub(expectedAmountOut);
+    let maxDiscrepancyLen = maxDiscrepancy.length;
+    let numerator = (
+        Number(maxDiscrepancy) * 10 ** (maxDiscrepancyLen - 2) +
+        10 ** (maxDiscrepancyLen - 2)
+    ).toString();
+    let denominator = (10 ** (maxDiscrepancyLen - 2)).toString();
+    return (
+        discrepancy.gte(toBN(0)) &&
+        discrepancy.lte(expectedAmountOut.mul(toBN(numerator)).div(toBN(denominator)).sub(expectedAmountOut))
+    );
+};

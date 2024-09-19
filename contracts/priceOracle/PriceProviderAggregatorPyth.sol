@@ -31,34 +31,44 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
     }
 
     /**
+     * @dev Calculates and update multiple the final TWAP prices of a token after update price.
+     * @param token The token array needs to update the price.
+     * @param priceIds The priceIds need to update.
+     * @param updateData The updateData provided by PythNetwork.
+     */
+    function updateMultiFinalPricesWithUpdatePrice(address[] memory token, bytes32[] memory priceIds, bytes[] calldata updateData) external payable {
+        _updatePrices(priceIds, updateData);
+        _updateMultiFinalPrices(token);
+    }
+
+    /**
      * @dev Performs a price update if the price is no longer valid.
      * @param priceIds The priceIds need to update.
      * @param updateData The updateData provided by PythNetwork.
      */
     function updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) external payable {
-        if (priceIds.length > 0) {
-            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
-        } else {
-            require(msg.value == 0, "PriceProviderAggregatorPyth: Msg.value!=0!");
-        }
+        _updatePrices(priceIds, updateData);
     }
 
     /**
      * @dev Returns the latest price of a given token in USD after update price if price provider is pythPriceProvider.
      * @param token The address of the token to get the price of.
+     * @param priceIds The priceIds need to update price.
      * @param updateData The updateData provided by PythNetwork.
-     * @return priceMantissa The price of the token in USD, represented as a mantissa.
      * @return priceDecimals The number of decimal places in the price of the token.
+     * @return timestamp The timestamp of the price.
+     * @return collateralPrice The price of the token in USD, represented as a mantissa.
+     * @return capitalPrice The price of the token in USD, represented as a mantissa.
      */
     function getUpdatedPrice(
         address token,
+        bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable returns (uint256 priceMantissa, uint8 priceDecimals) {
-        if (tokenPriceProvider[token].priceProvider == pythPriceProvider) {
-            return PriceProvider(pythPriceProvider).getUpdatedPrice{ value: msg.value }(token, updateData);    
-        } else {
-            return getPrice(token);
+    ) external payable returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        if (pythPriceProvider != address(0)) {
+            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
         }
+        return getPrice(token);
     }
 
     /**
@@ -72,18 +82,21 @@ contract PriceProviderAggregatorPyth is PriceProviderAggregator {
         address[] memory token,
         uint256 timeBeforeExpiration
     ) external view returns (bytes32[] memory priceIds, uint256 updateFee) {
-        (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
+        if (pythPriceProvider != address(0)) {
+            (priceIds, updateFee) = PriceProvider(pythPriceProvider).getExpiredPriceFeeds(token, timeBeforeExpiration);
+        }
     }
 
     /**
-     * @dev Returns the evaluation of a given token amount based on the last updated price.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount.
+     * @dev Internal function to performs a price update if the price is no longer valid.
+     * @param priceIds The priceIds need to update.
+     * @param updateData The updateData provided by PythNetwork.
      */
-    function getEvaluationUnsafe(address token, uint256 tokenAmount) public view returns (uint256 evaluation) {
-        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getEvaluationWithSign()");
-        return PriceProvider(priceProviderInfo.priceProvider).getEvaluationUnsafe(token, tokenAmount);
+    function _updatePrices(bytes32[] memory priceIds, bytes[] calldata updateData) internal {
+        if (priceIds.length > 0 && pythPriceProvider != address(0)) {
+            PriceProvider(pythPriceProvider).updatePrices{value: msg.value}(priceIds, updateData);
+        } else {
+            require(msg.value == 0, "PriceProviderAggregatorPyth: Msg.value!=0!");
+        }
     }
 }

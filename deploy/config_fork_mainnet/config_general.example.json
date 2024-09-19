@@ -1,5 +1,9 @@
 {
     "priceOracle": {
+        "priceProcessingOracle": {
+            "volatilityCapUpPercent": "",
+            "volatilityCapDownPercent": ""
+        },
         "Pyth": {
             "pythOracle": "",
             "tokensUsePyth": [],
@@ -14,25 +18,37 @@
             ],
             "timeOuts": [
                 []
-            ]
+            ],
+            "priceDecimals": ""
         },
-        "Uniswap": {
+        "UniswapV2": {
             "tokensUseUniswap": [],
-            "uniswapPairs": []
+            "uniswapPairs": [],
+            "priceDecimals": ""
+        },
+        "UniswapV3": {
+            "pricePointTWAPperiod": [],
+            "tokensUseUniswap": [],
+            "uniswapPairs": [],
+            "priceDecimals": ""
         },
         "Mute": {
             "tokensUseMute": [],
-            "mutePairs": []
-        },
-        "BackendProvider": {
-            "tokensUseBackendProvider": []
+            "mutePairs": [],
+            "priceDecimals": ""
         },
         "LPProvider": {
-            "tokensUseLPProvider": []
+            "tokensUseLPProvider": [],
+            "priceDecimals": ""
+        },
+        "ERC4626Provider": {
+            "tokensUseERC4626Provider": [],
+            "priceDecimals": ""
         },
         "wstETHProvider": {
             "wstETHAggregatorPath": [],
-            "timeOuts": []
+            "timeOuts": [],
+            "priceDecimals": ""
         },
         "wstETH": "",
         "usdc": "",

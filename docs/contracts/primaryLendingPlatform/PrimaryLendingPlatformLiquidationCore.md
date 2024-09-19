@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -91,7 +89,7 @@ Parameters:
 ### SetMaxLRF
 
 ```solidity
-event SetMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF)
+event SetMaxLRF(uint8 indexed numeratorLRF, uint8 indexed denominatorLRF)
 ```
 
 Emitted when the maximum Liquidation Reserve Factor (LRF) is set.
@@ -107,7 +105,7 @@ Parameters:
 ### SetLiquidatorRewardCalculationFactor
 
 ```solidity
-event SetLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF)
+event SetLiquidatorRewardCalculationFactor(uint8 indexed numeratorLRF, uint8 indexed denominatorLRF)
 ```
 
 Emitted when the liquidator reward calculation factor is set.
@@ -136,6 +134,22 @@ Parameters:
 | numeratorHF   | uint8 | The numerator of the target health factor.   |
 | denominatorHF | uint8 | The denominator of the target health factor. |
 
+### SetExchangeAggregator
+
+```solidity
+event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator)
+```
+
+Emitted when the exchange aggregator and registry aggregator addresses are set.
+
+
+Parameters:
+
+| Name               | Type    | Description                               |
+| :----------------- | :------ | :---------------------------------------- |
+| exchangeAggregator | address | The address of the exchange aggregator.   |
+| registryAggregator | address | The address of the registry aggregator.   |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -149,6 +163,13 @@ bytes32 constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE")
 
 ```solidity
 uint256 constant LIQUIDATOR_REWARD_FACTOR_DECIMAL = 18
+```
+
+
+### BUFFER_PERCENTAGE (0x952038c2)
+
+```solidity
+uint16 constant BUFFER_PERCENTAGE = 500
 ```
 
 
@@ -189,15 +210,22 @@ contract IPrimaryLendingPlatform primaryLendingPlatform
 ```
 
 
-## Modifiers info
-
-### onlyAdmin
+### exchangeAggregator (0x60df4f35)
 
 ```solidity
-modifier onlyAdmin()
+address exchangeAggregator
 ```
 
-Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
+
+### registryAggregator (0xf38cb29a)
+
+```solidity
+address registryAggregator
+```
+
+
+## Modifiers info
+
 ### onlyModerator
 
 ```solidity
@@ -369,6 +397,30 @@ Parameters:
 | numeratorHF   | uint8 | The numerator for the target health factor.   |
 | denominatorHF | uint8 | The denominator for the target health factor. |
 
+### setExchangeAggregator (0x3c4841b4)
+
+```solidity
+function setExchangeAggregator(
+    address exchangeAggregatorAddress,
+    address registryAggregatorAddress
+) external onlyModerator
+```
+
+Updates the Exchange Aggregator contract and registry contract addresses.
+
+Requirements:
+- The caller must be the moderator.
+- `exchangeAggregatorAddress` must not be the zero address.
+- `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+
+
+Parameters:
+
+| Name                      | Type    | Description                                            |
+| :------------------------ | :------ | :----------------------------------------------------- |
+| exchangeAggregatorAddress | address | The new address of the Exchange Aggregator contract.   |
+| registryAggregatorAddress | address | The new address of the Aggregator registry contract.   |
+
 ### getCurrentHealthFactor (0xb398f0e7)
 
 ```solidity
@@ -401,13 +453,41 @@ Return values:
 | healthFactorNumerator   | uint256 | The numerator of the health factor.   |
 | healthFactorDenominator | uint256 | The denominator of the health factor. |
 
+### getCurrentOutstanding (0x9bfeb5d5)
+
+```solidity
+function getCurrentOutstanding(
+    address _account,
+    address _projectToken,
+    address _lendingToken
+) public view returns (uint256)
+```
+
+Gets the current outstanding amount of a specific account's position.
+
+
+Parameters:
+
+| Name          | Type    | Description                         |
+| :------------ | :------ | :---------------------------------- |
+| _account      | address | The address of the account.         |
+| _projectToken | address | The address of the project token.   |
+| _lendingToken | address | The address of the lending token.   |
+
+
+Return values:
+
+| Name | Type    | Description                                                                  |
+| :--- | :------ | :--------------------------------------------------------------------------- |
+| [0]  | uint256 | currentOutstanding The current outstanding amount of the account's position. |
+
 ### getTokenPrice (0xc9f7153c)
 
 ```solidity
 function getTokenPrice(
     address token,
     uint256 amount
-) public view returns (uint256 price)
+) public view returns (uint256 collateralPrice, uint256 capitalPrice)
 ```
 
 Gets the price of a token in USD.
@@ -423,9 +503,10 @@ Parameters:
 
 Return values:
 
-| Name  | Type    | Description                    |
-| :---- | :------ | :----------------------------- |
-| price | uint256 | The price of the token in USD. |
+| Name            | Type    | Description                      |
+| :-------------- | :------ | :------------------------------- |
+| collateralPrice | uint256 | The price of the token in USD.   |
+| capitalPrice    | uint256 | The price of the token in USD.   |
 
 ### liquidatorRewardFactor (0x894c4d5b)
 
@@ -500,7 +581,7 @@ function getLiquidationAmount(
 
 Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
 
-Formula: 
+Formula:
 - MinLA = min(MaxLA, MPA)
 - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
 

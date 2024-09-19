@@ -1,7 +1,13 @@
 require("dotenv").config();
-const isTesting = Object.keys(process.env).includes('TESTING');
+const isTesting = process.env.TESTING === "true";
 
-
+const log = (...args) => {
+    if (isTesting) {
+        return
+    } else {
+        console.log(...args);
+    }
+}
 
 module.exports = {
 
@@ -11,9 +17,8 @@ module.exports = {
 
         //contracts addresses
         let proxyAdminAddress;
-        let backendPriceProviderAddress;
         let chainlinkPriceProviderAddress;
-        let uniswapV2PriceProviderAddress;
+        let uniswapV3PriceProviderAddress;
         let uniswapV2PriceProviderMockAddress;
         let priceProviderAggregatorAddress;
 
@@ -26,18 +31,17 @@ module.exports = {
 
         const { deploymentPriceOracle } = require("./priceOracle/deploymentPriceProviderAggregator.js");
         let priceOracleAddresses = await deploymentPriceOracle();
-        console.log({ priceOracleAddresses });
         proxyAdminAddress = priceOracleAddresses.proxyAdminAddress;
+        priceOracleAddress = priceOracleAddresses.priceOracleAddress;
         chainlinkPriceProviderAddress = priceOracleAddresses.chainlinkPriceProviderAddress;
-        backendPriceProviderAddress = priceOracleAddresses.backendPriceProviderAddress;
-        uniswapV2PriceProviderAddress = priceOracleAddresses.uniswapV2PriceProviderAddress;
+        uniswapV3PriceProviderAddress = priceOracleAddresses.uniswapV3PriceProviderAddress;
         uniswapV2PriceProviderMockAddress = priceOracleAddresses.uniswapV2PriceProviderMockAddress;
         pythPriceProviderAddress = priceOracleAddresses.pythPriceProviderAddress;
         priceProviderAggregatorAddress = priceOracleAddresses.priceProviderAggregatorAddress;
 
-        console.log();
-        console.log();
-        console.log();
+        log();
+        log();
+        log();
 
         //====================================================================
         //deploy all system of USBPlatform
@@ -45,7 +49,7 @@ module.exports = {
         const { deploymentPrimaryLendingPlatform } = require("./primaryLendingPlatform/deploymentPrimaryLendingPlatform.js");
         let primaryLendingPlatformAddresses = await deploymentPrimaryLendingPlatform();
 
-        console.log({ primaryLendingPlatformAddresses });
+        log({ primaryLendingPlatformAddresses });
         bondtrollerAddress = primaryLendingPlatformAddresses.bondtrollerAddress;
         busdcAddress = primaryLendingPlatformAddresses.blendingAddress;
         plpAddress = primaryLendingPlatformAddresses.plpAddress;
@@ -63,9 +67,9 @@ module.exports = {
 
         let addresses = {
             proxyAdminAddress: proxyAdminAddress,
+            priceOracleAddress: priceOracleAddress,
             chainlinkPriceProviderAddress: chainlinkPriceProviderAddress,
-            backendPriceProviderAddress: backendPriceProviderAddress,
-            uniswapV2PriceProviderAddress: uniswapV2PriceProviderAddress,
+            uniswapV3PriceProviderAddress: uniswapV3PriceProviderAddress,
             uniswapV2PriceProviderMockAddress: uniswapV2PriceProviderMockAddress,
             pythPriceProviderAddress: pythPriceProviderAddress,
             priceProviderAggregatorAddress: priceProviderAggregatorAddress,
@@ -84,8 +88,9 @@ module.exports = {
         if (isTesting) {
             return addresses;
         } else {
-            console.log(addresses);
-            console.log("<========================== DONE! ==========================>");
+            log(addresses);
+            log("<========================== DONE! ==========================>");
+            return addresses;
         }
     }
 

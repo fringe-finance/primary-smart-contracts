@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract BTokenInterface is BTokenStorage
 ```

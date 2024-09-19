@@ -17,7 +17,7 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
 
     string public constant DESCRIPTION = "Price provider that uses uniswapV2";
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     mapping(address => UniswapV2Metadata) public uniswapV2Metadata; // address of token => metadata for uniswapV2
     mapping(address => PriceInfo) public tokenPrice;
@@ -37,12 +37,13 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
     event RevokeModeratorRole(address indexed moderator);
     event SetTokenAndPrice(address indexed token, uint256 price);
     event ChangeActive(address indexed token, bool active);
+    event SetTokenDecimals(uint8 newTokenDecimals);
 
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
+        tokenDecimals = 6;
     }
 
     modifier onlyAdmin() {
@@ -69,6 +70,16 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
 
     /****************** Moderator functions ****************** */
 
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
+    
     function setTokenAndPrice(address token, uint256 price) public onlyModerator {
         require(token != address(0), "UniswapV2PriceProvider: Invalid token!");
         tokenPrice[token].price = price;
@@ -101,17 +112,6 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
         price = tokenPrice[token].price;
     }
 
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 price, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * price) / (10 ** priceDecimals);
-        uint8 tokenDecimals = tokenPrice[token].tokenDecimals;
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
-        }
-    }
-
     function getReserves(address uniswapPair, address tokenA, address tokenB) public view returns (uint256 reserveA, uint256 reserveB) {
         (address token0, ) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA); //sort tokens
         (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(uniswapPair).getReserves(); //getting reserves
@@ -119,6 +119,6 @@ contract UniswapV2PriceProviderMock is PriceProvider, Initializable, AccessContr
     }
 
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
 }

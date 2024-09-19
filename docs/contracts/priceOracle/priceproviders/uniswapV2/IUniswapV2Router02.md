@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 interface IUniswapV2Router02
 ```

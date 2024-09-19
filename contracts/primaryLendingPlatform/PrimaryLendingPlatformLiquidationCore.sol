@@ -8,6 +8,11 @@ import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../interfaces/IPrimaryLendingPlatform.sol";
+import "../interfaces/IPriceProviderAggregator.sol";
+import "../paraswap/interfaces/IParaSwapAugustus.sol";
+import "../paraswap/interfaces/IParaSwapAugustusRegistry.sol";
+import "../util/Asset.sol";
+import "../util/Errors.sol";
 
 /**
  * @title PrimaryLendingPlatformLiquidationCore.
@@ -25,6 +30,11 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     Ratio public maxLRF;
 
     IPrimaryLendingPlatform public primaryLendingPlatform;
+
+    address public exchangeAggregator;
+    address public registryAggregator;
+
+    uint16 public constant BUFFER_PERCENTAGE = 500;
 
     struct Ratio {
         uint8 numerator;
@@ -71,14 +81,14 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param numeratorLRF The numerator of the LRF fraction.
      * @param denominatorLRF The denominator of the LRF fraction.
      */
-    event SetMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF);
+    event SetMaxLRF(uint8 indexed numeratorLRF, uint8 indexed denominatorLRF);
 
     /**
      * @dev Emitted when the liquidator reward calculation factor is set.
      * @param numeratorLRF The numerator of the liquidator reward calculation factor.
      * @param denominatorLRF The denominator of the liquidator reward calculation factor.
      */
-    event SetLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF);
+    event SetLiquidatorRewardCalculationFactor(uint8 indexed numeratorLRF, uint8 indexed denominatorLRF);
 
     /**
      * @dev Emitted when the target health factor is set.
@@ -86,6 +96,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorHF The denominator of the target health factor.
      */
     event SetTargetHealthFactor(uint8 numeratorHF, uint8 denominatorHF);
+
+    /**
+     * @dev Emitted when the exchange aggregator and registry aggregator addresses are set.
+     * @param exchangeAggregator The address of the exchange aggregator.
+     * @param registryAggregator The address of the registry aggregator.
+     */
+    event SetExchangeAggregator(address indexed exchangeAggregator, address indexed registryAggregator);
 
     /**
      * @notice Initializes the contract with the provided PIT address.
@@ -98,14 +115,6 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
         primaryLendingPlatform = IPrimaryLendingPlatform(pit);
-    }
-
-    /**
-     * @dev Modifier that only allows access to accounts with the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
     }
 
     /**
@@ -162,7 +171,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorLRF The denominator of the LRF ratio.
      */
     function setMaxLRF(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
-        require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorLRF == 0) {
+            revert Errors.InvalidValue();
+        }
         maxLRF = Ratio(numeratorLRF, denominatorLRF);
         emit SetMaxLRF(numeratorLRF, denominatorLRF);
     }
@@ -177,7 +188,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorLRF The denominator of the liquidator reward calculation factor.
      */
     function setLiquidatorRewardCalculationFactor(uint8 numeratorLRF, uint8 denominatorLRF) external onlyModerator {
-        require(denominatorLRF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorLRF == 0) {
+            revert Errors.InvalidValue();
+        }
         liquidatorRewardCalcFactor = Ratio(numeratorLRF, denominatorLRF);
         emit SetLiquidatorRewardCalculationFactor(numeratorLRF, denominatorLRF);
     }
@@ -191,7 +204,9 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param newPrimaryLendingPlatform The address of the new primary lending platform contract.
      */
     function setPrimaryLendingPlatformAddress(address newPrimaryLendingPlatform) external onlyModerator {
-        require(newPrimaryLendingPlatform != address(0), "PITLiquidation: Invalid address");
+        if (newPrimaryLendingPlatform == address(0)) {
+            revert Errors.InvalidAddress();
+        }
         primaryLendingPlatform = IPrimaryLendingPlatform(newPrimaryLendingPlatform);
         emit SetPrimaryLendingPlatform(newPrimaryLendingPlatform);
     }
@@ -206,9 +221,35 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param denominatorHF The denominator for the target health factor.
      */
     function setTargetHealthFactor(uint8 numeratorHF, uint8 denominatorHF) external onlyModerator {
-        require(denominatorHF != 0, "PITLiquidation: Invalid denominator");
+        if (denominatorHF == 0) {
+            revert Errors.InvalidValue();
+        }
         targetHealthFactor = Ratio(numeratorHF, denominatorHF);
         emit SetTargetHealthFactor(numeratorHF, denominatorHF);
+    }
+
+    /**
+     * @dev Updates the Exchange Aggregator contract and registry contract addresses.
+     *
+     * Requirements:
+     * - The caller must be the moderator.
+     * - `exchangeAggregatorAddress` must not be the zero address.
+     * - `registryAggregatorAddress` must be a valid Augustus contract if it is not the zero address.
+     * @param exchangeAggregatorAddress The new address of the Exchange Aggregator contract.
+     * @param registryAggregatorAddress The new address of the Aggregator registry contract.
+     */
+    function setExchangeAggregator(address exchangeAggregatorAddress, address registryAggregatorAddress) external onlyModerator {
+        if (exchangeAggregatorAddress == address(0)) {
+            revert Errors.InvalidAddress();
+        }
+        if (registryAggregatorAddress != address(0)) {
+            if (!IParaSwapAugustusRegistry(registryAggregatorAddress).isValidAugustus(exchangeAggregatorAddress)) {
+                revert Errors.InvalidAugustusAddress();
+            }
+        }
+        registryAggregator = registryAggregatorAddress;
+        exchangeAggregator = exchangeAggregatorAddress;
+        emit SetExchangeAggregator(exchangeAggregatorAddress, registryAggregatorAddress);
     }
 
     /**
@@ -228,17 +269,118 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Gets the price of a token in USD.
-     * @param token The address of the token.
-     * @param amount The amount of the token.
-     * @return price The price of the token in USD.
+     * @dev Gets the current outstanding amount of a specific account's position.
+     * @param _account The address of the account.
+     * @param _projectToken The address of the project token.
+     * @param _lendingToken The address of the lending token.
+     * @return currentOutstanding The current outstanding amount of the account's position.
      */
-    function getTokenPrice(address token, uint256 amount) public view returns (uint256 price) {
-        price = primaryLendingPlatform.getTokenEvaluation(token, amount);
+    function getCurrentOutstanding(address _account, address _projectToken, address _lendingToken) public view returns (uint256) {
+        (, uint256 loanBody, uint256 accural, , ) = primaryLendingPlatform.getPosition(_account, _projectToken, _lendingToken);
+        return loanBody + accural;
     }
 
     /**
-     * @dev Internal function that allow a user to liquidate their position.
+     * @dev Gets the price of a token in USD.
+     * @param token The address of the token.
+     * @param amount The amount of the token.
+     * @return collateralPrice The price of the token in USD.
+     * @return capitalPrice The price of the token in USD.
+     */
+    function getTokenPrice(address token, uint256 amount) public view returns (uint256 collateralPrice, uint256 capitalPrice) {
+        return primaryLendingPlatform.getTokenEvaluation(token, amount);
+    }
+
+    /**
+     * @dev Internal function that allow a user to liquidate their position. Support liquidation with hot borrowing or not.
+     * @param _account The user's address to liquidate.
+     * @param _prjInfo Information about the project token, including its address and type.
+     * @param _lendingInfo Information about the lending token, including its address and type.
+     * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
+     * @param _liquidator The address of the liquidator (usually the msg.sender).
+     * @param _buyCalldata The calldata for buying the lending token from the exchange aggregator. If the calldata is empty, the liquidation will execute liquidation without hot borrowing.
+     */
+    function _liquidate(
+        address _account,
+        Asset.Info memory _prjInfo,
+        Asset.Info memory _lendingInfo,
+        uint256 _lendingTokenAmount,
+        address _liquidator,
+        bytes[] memory _buyCalldata
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        address[] memory tokensUpdateFinalPrice = primaryLendingPlatform.getTokensUpdateFinalPrices(_prjInfo.addr, _lendingInfo.addr, true);
+        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updateMultiFinalPrices(tokensUpdateFinalPrice);
+
+        uint256 liquidationAmount = _validateLiquidationAmount(_account, _prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount);
+        if (_buyCalldata.length > 0) {
+            (assets, assetAmounts) = _liquidateWithBorrow(_account, _prjInfo, _lendingInfo, liquidationAmount, _liquidator, _buyCalldata);
+        } else {
+            assets = new address[](1);
+            assetAmounts = new uint256[](1);
+            assets[0] = _prjInfo.addr;
+            assetAmounts[0] = _liquidateNoBorrow(_account, _prjInfo.addr, _lendingInfo.addr, liquidationAmount, _liquidator);
+        }
+    }
+
+    /**
+     * @dev Internal function that allows a user to liquidate their position with a borrow operation.
+     * @param _account The user's address to liquidate.
+     * @param _prjInfo Information about the project token, including its address and type.
+     * @param _lendingInfo Information about the lending token, including its address and type.
+     * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
+     * @param _liquidator The address of the liquidator (usually the msg.sender).
+     * @param _buyCalldata The calldata for buying the lending token from the exchange aggregator.
+     */
+    function _liquidateWithBorrow(
+        address _account,
+        Asset.Info memory _prjInfo,
+        Asset.Info memory _lendingInfo,
+        uint256 _lendingTokenAmount,
+        address _liquidator,
+        bytes[] memory _buyCalldata
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        _nakedBorrow(_liquidator, _lendingInfo.addr, _lendingTokenAmount, _prjInfo.addr);
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(_account, _prjInfo.addr, _lendingInfo.addr, _liquidator, _lendingTokenAmount);
+        uint256 projectTokenReward = _distributeReward(_account, _prjInfo.addr, projectTokenSendToLiquidator, address(this));
+
+        _swapAndRepayNakedBorrow(_prjInfo, _lendingInfo, projectTokenReward, _lendingTokenAmount, _liquidator, _buyCalldata);
+        (assets, assetAmounts) = _redeemExcessToken(_prjInfo, _lendingInfo, _liquidator);
+
+        emit Liquidate(_liquidator, _account, _lendingInfo.addr, _prjInfo.addr, projectTokenSendToLiquidator);
+    }
+
+    /**
+     * @dev Internal function that redeems the excess tokens after liquidation.
+     * @param _prjInfo Information about the project token, including its address and type.
+     * @param _lendingInfo Information about the lending token, including its address and type.
+     * @param _liquidator The address of the liquidator (usually the msg.sender).
+     * @return assets The addresses of the tokens to redeem.
+     * @return assetAmounts The amounts of the tokens to redeem.
+     */
+    function _redeemExcessToken(
+        Asset.Info memory _prjInfo,
+        Asset.Info memory _lendingInfo,
+        address _liquidator
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        (address[] memory prjAssets, uint256[] memory prjAssetAmounts) = Asset._redeem(_prjInfo, _liquidator);
+        (address[] memory lendingAssets, uint256[] memory lendingAssetAmounts) = Asset._redeem(_lendingInfo, _liquidator);
+
+        uint256 assetsCount = prjAssets.length + lendingAssets.length;
+        assets = new address[](assetsCount);
+        assetAmounts = new uint256[](assetsCount);
+
+        for (uint256 i = 0; i < prjAssets.length; i++) {
+            assets[i] = prjAssets[i];
+            assetAmounts[i] = prjAssetAmounts[i];
+        }
+        for (uint256 j = 0; j < lendingAssets.length; j++) {
+            assets[j + prjAssets.length] = lendingAssets[j];
+            assetAmounts[j + prjAssets.length] = lendingAssetAmounts[j];
+        }
+    }
+
+    /**
+     * @dev Internal function that allows a user to liquidate their position without a borrow operation.
      * @param _account The user's address to liquidate.
      * @param _projectToken The project token address associated with the user's position.
      * @param _lendingToken The lending token address used for the liquidation.
@@ -246,34 +388,92 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param liquidator The address of the liquidator (usually the msg.sender).
      * @return The amount of project tokens sent to the liquidator as a result of the liquidation.
      */
-    function _liquidate(
+    function _liquidateNoBorrow(
         address _account,
         address _projectToken,
         address _lendingToken,
         uint256 _lendingTokenAmount,
         address liquidator
     ) internal returns (uint256) {
-        require(_lendingTokenAmount > 0, "PITLiquidation: LendingTokenAmount must be greater than 0");
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(_account, _projectToken, _lendingToken, liquidator, _lendingTokenAmount);
+        uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenSendToLiquidator, liquidator);
+        _transferExcessToken(_lendingToken, liquidator);
 
-        (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
-        require(healthFactorNumerator < healthFactorDenominator, "PITLiquidation: HealthFactor>=1");
-
-        // under normal conditions: liquidator == msg.sender
-        (uint256 maxLA, uint256 minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
-        require(_lendingTokenAmount >= minLA && _lendingTokenAmount <= maxLA, "PITLiquidation: Invalid amount");
-
-        uint256 projectTokenToSendToLiquidator = _getProjectTokenToSendToLiquidator(
-            _account,
-            _projectToken,
-            _lendingToken,
-            _lendingTokenAmount,
-            liquidator
-        );
-
-        uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenToSendToLiquidator, liquidator);
-
-        emit Liquidate(liquidator, _account, _lendingToken, _projectToken, projectTokenToSendToLiquidator);
+        emit Liquidate(liquidator, _account, _lendingToken, _projectToken, projectTokenSendToLiquidator);
         return projectTokenLiquidatorReceived;
+    }
+
+    function _swapAndRepayNakedBorrow(
+        Asset.Info memory _prjInfo,
+        Asset.Info memory _lendingInfo,
+        uint256 _projectTokenReward,
+        uint256 _lendingTokenAmount,
+        address _liquidator,
+        bytes[] memory _buyCalldata
+    ) internal {
+        (address[] memory prjTokens, ) = _unwrapTokenAndApprove(_prjInfo, _projectTokenReward);
+
+        (, uint256 amountReceive) = _buyOnExchangeAggregatorWithMultiAsset(prjTokens, _lendingInfo, _buyCalldata);
+        if (amountReceive < _lendingTokenAmount) {
+            revert Errors.InvalidReceiveAmount();
+        }
+
+        Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(_lendingInfo.addr).bLendingToken, _lendingInfo.addr, amountReceive);
+        primaryLendingPlatform.repayFromRelatedContract(_prjInfo.addr, _lendingInfo.addr, _lendingTokenAmount, address(this), _liquidator);
+    }
+
+    /**
+     * @dev Internal function to validate the liquidation amount.
+     * @param _account The user's address to liquidate.
+     * @param _projectToken The project token address associated with the user's position.
+     * @param _lendingToken The lending token address used for the liquidation.
+     * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
+     * @return The validated liquidation amount.
+     */
+    function _validateLiquidationAmount(
+        address _account,
+        address _projectToken,
+        address _lendingToken,
+        uint256 _lendingTokenAmount
+    ) internal view returns (uint256) {
+        if (_lendingTokenAmount == 0) {
+            revert Errors.InvalidAmount();
+        }
+        (uint256 healthFactorNumerator, uint256 healthFactorDenominator) = getCurrentHealthFactor(_account, _projectToken, _lendingToken);
+        if (healthFactorNumerator >= healthFactorDenominator) {
+            revert Errors.InvalidHealthFactor();
+        }
+
+        (uint256 maxLA, uint256 minLA) = getLiquidationAmount(_account, _projectToken, _lendingToken);
+        if (minLA != maxLA) {
+            if (_lendingTokenAmount < minLA || _lendingTokenAmount > maxLA) {
+                revert Errors.NotIncludedAmount();
+            }
+            return _lendingTokenAmount;
+        } else {
+            if (_lendingTokenAmount < minLA) {
+                revert Errors.InvalidEqualAmount();
+            }
+            return maxLA;
+        }
+    }
+
+    /**
+     * @dev Internal function to execute a naked borrow operation, updating the interest in borrow positions for the user and calculating the borrow position.
+     * @param user The address of the user performing the borrow operation.
+     * @param lendingToken The address of the token being borrowed.
+     * @param lendingTokenAmount The amount of the token being borrowed.
+     * @param projectToken The address of the project token.
+     */
+    function _nakedBorrow(address user, address lendingToken, uint256 lendingTokenAmount, address projectToken) internal {
+        address currentLendingToken = primaryLendingPlatform.getLendingToken(user, projectToken);
+        if (currentLendingToken != address(0)) {
+            if (lendingToken != currentLendingToken) {
+                revert Errors.InvalidAddress();
+            }
+        }
+        primaryLendingPlatform.updateInterestInBorrowPositions(user, lendingToken);
+        primaryLendingPlatform.calcBorrowPosition(user, projectToken, lendingToken, lendingTokenAmount, currentLendingToken);
     }
 
     /**
@@ -281,49 +481,62 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
      * @param _account The user's address to liquidate.
      * @param _projectToken The project token address associated with the user's position.
      * @param _lendingToken The lending token address used for the liquidation.
-     * @param _lendingTokenAmount The amount of lending tokens used for the liquidation.
-     * @param liquidator The address of the liquidator.
-     * @return projectTokenToSendToLiquidator The amount of project tokens to send to the liquidator.
+     * @param _liquidator The address of the liquidator.
+     * @param _lendingTokenAmount The lending token amount used for liquidation.
+     * @return projectTokenRewardSendToLiquidator The amount of project tokens to send to the liquidator.
      */
-    function _getProjectTokenToSendToLiquidator(
+    function _getProjectTokenSendToLiquidator(
         address _account,
         address _projectToken,
         address _lendingToken,
-        uint256 _lendingTokenAmount,
-        address liquidator
-    ) internal returns (uint256 projectTokenToSendToLiquidator) {
+        address _liquidator,
+        uint256 _lendingTokenAmount
+    ) internal returns (uint256 projectTokenRewardSendToLiquidator) {
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(_account, _projectToken, _lendingToken);
-        uint256 repaid = primaryLendingPlatform.repayFromRelatedContract(_projectToken, _lendingToken, _lendingTokenAmount, liquidator, _account);
-
+        uint256 repaidAmount = primaryLendingPlatform.repayFromRelatedContract(
+            _projectToken,
+            _lendingToken,
+            _lendingTokenAmount,
+            _liquidator,
+            _account
+        );
         uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(_projectToken).decimals();
-        uint256 projectTokenEvaluation = (getTokenPrice(_lendingToken, repaid) * projectTokenMultiplier) /
-            getTokenPrice(_projectToken, projectTokenMultiplier);
+        (uint256 projectTokenPrice, ) = getTokenPrice(_projectToken, projectTokenMultiplier);
+        (, uint256 repaidInUSD) = getTokenPrice(_lendingToken, repaidAmount);
 
-        projectTokenToSendToLiquidator = (projectTokenEvaluation * lrfNumerator) / lrfDenominator;
+        uint256 projectTokenEvaluation = (repaidInUSD * projectTokenMultiplier) / projectTokenPrice;
+        projectTokenRewardSendToLiquidator = (projectTokenEvaluation * lrfNumerator) / lrfDenominator;
     }
 
     /**
      * @dev Internal function to distribute the liquidation reward to the liquidator.
      * @param _account The address of the borrower whose position is being liquidated.
      * @param _projectToken The address of the project token.
-     * @param projectTokenToSendToLiquidator The amount of project tokens to be sent to the liquidator.
-     * @param liquidator The address of the liquidator.
+     * @param projectTokenReward The amount of project tokens reward.
+     * @param receiver The address of the receiver.
      * @return The amount of project token transferred to the liquidator.
      */
-    function _distributeReward(
-        address _account,
-        address _projectToken,
-        uint256 projectTokenToSendToLiquidator,
-        address liquidator
-    ) internal returns (uint256) {
+    function _distributeReward(address _account, address _projectToken, uint256 projectTokenReward, address receiver) internal returns (uint256) {
         uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(_projectToken, _account);
-        if (projectTokenToSendToLiquidator > depositedProjectTokenAmount) {
-            projectTokenToSendToLiquidator = depositedProjectTokenAmount;
+        if (projectTokenReward > depositedProjectTokenAmount) {
+            projectTokenReward = depositedProjectTokenAmount;
         }
-        if (projectTokenToSendToLiquidator == 0) {
+        if (projectTokenReward == 0) {
             return 0;
         }
-        return primaryLendingPlatform.calcAndTransferDepositPosition(_projectToken, projectTokenToSendToLiquidator, _account, liquidator);
+        return primaryLendingPlatform.calcAndTransferDepositPosition(_projectToken, projectTokenReward, _account, receiver);
+    }
+
+    /**
+     * @dev Internal function to transfer excess tokens to the receiver.
+     * @param token The address of the token to transfer.
+     * @param receiver The address of the receiver.
+     */
+    function _transferExcessToken(address token, address receiver) internal {
+        uint256 excessBalance = ERC20Upgradeable(token).balanceOf(address(this));
+        if (excessBalance > 0) {
+            ERC20Upgradeable(token).safeTransfer(receiver, excessBalance);
+        }
     }
 
     /**
@@ -377,8 +590,7 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         uint256 totalOutstandingInUSD = primaryLendingPlatform.totalOutstandingInUSD(account, projectToken, lendingToken);
         if (totalOutstandingInUSD == 0) return 0;
 
-        uint256 depositedProjectTokenAmount = primaryLendingPlatform.getDepositedAmount(projectToken, account);
-        uint256 depositedProjectTokenAmountInUSD = getTokenPrice(projectToken, depositedProjectTokenAmount);
+        (uint256 depositedProjectTokenAmountInUSD, ) = getTokenPrice(projectToken, primaryLendingPlatform.getDepositedAmount(projectToken, account));
         (uint256 lrfNumerator, uint256 lrfDenominator) = liquidatorRewardFactor(account, projectToken, lendingToken);
         (uint256 lvrNumerator, uint256 lvrDenominator) = primaryLendingPlatform.getLoanToValueRatio(projectToken, lendingToken);
         Ratio memory targetHf = targetHealthFactor;
@@ -404,14 +616,32 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
             ? (maxLAParams.numeratorMaxLA * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / maxLAParams.denominatorMaxLA
             : 0;
 
-        uint256 totalOutstandingInUSDMul = totalOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
+        if (maxLAParams.calculatedMaxLA >= totalOutstandingInUSD * 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) {
+            maxLA = getCurrentOutstanding(account, projectToken, lendingToken);
+        } else {
+            uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
+            (, uint256 lendingTokenPrice) = getTokenPrice(lendingToken, lendingTokenMultiplier);
+            maxLA = (maxLAParams.calculatedMaxLA * lendingTokenMultiplier) / (10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL) / lendingTokenPrice;
+        }
+    }
 
-        maxLAParams.maxLACompare = maxLAParams.calculatedMaxLA > totalOutstandingInUSDMul
-            ? totalOutstandingInUSD
-            : maxLAParams.calculatedMaxLA / 10 ** LIQUIDATOR_REWARD_FACTOR_DECIMAL;
-
-        uint256 projectTokenMultiplier = 10 ** ERC20Upgradeable(lendingToken).decimals();
-        maxLA = (maxLAParams.maxLACompare * projectTokenMultiplier) / getTokenPrice(lendingToken, projectTokenMultiplier);
+    /**
+     * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
+     *
+     * Formula:
+     * - MinLA = min(MaxLA, MPA)
+     * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
+     * @param _account The account for which to calculate the liquidation amount.
+     * @param _projectToken The project token address.
+     * @param _lendingToken The lending token address.
+     * @return maxLA The maximum liquidation amount.
+     * @return minLA The minimum liquidation amount.
+     */
+    function getLiquidationAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA, uint256 minLA) {
+        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(_lendingToken).decimals();
+        (, uint256 lendingTokenPrice) = getTokenPrice(_lendingToken, lendingTokenMultiplier);
+        maxLA = getMaxLiquidationAmount(_account, _projectToken, _lendingToken);
+        minLA = Math.min(maxLA, (minPartialLiquidationAmount * lendingTokenMultiplier) / lendingTokenPrice);
     }
 
     /**
@@ -431,20 +661,109 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
     }
 
     /**
-     * @dev Returns the minimum and maximum liquidation amount for a given account, project token, and lending token.
-     *
-     * Formula: 
-     * - MinLA = min(MaxLA, MPA)
-     * - MaxLA = (LVR * CVc - THF * LVc) / (LRF * LVR - THF)
-     * @param _account The account for which to calculate the liquidation amount.
-     * @param _projectToken The project token address.
-     * @param _lendingToken The lending token address.
-     * @return maxLA The maximum liquidation amount.
-     * @return minLA The minimum liquidation amount.
+     * @notice Unwraps the given token, converting it into its underlying assets, and approves their transfer.
+     * @param info Information about the token, including its address and type.
+     * @param amount The amount of token to be unwrapped and approved for transfer.
+     * @return assets An array containing the addresses of the underlying assets.
+     * @return assetAmounts An array containing the amounts of the underlying assets corresponding to the unwrapped project token.
      */
-    function getLiquidationAmount(address _account, address _projectToken, address _lendingToken) public view returns (uint256 maxLA, uint256 minLA) {
-        uint256 lendingTokenMultiplier = 10 ** ERC20Upgradeable(_lendingToken).decimals();
-        maxLA = getMaxLiquidationAmount(_account, _projectToken, _lendingToken);
-        minLA = Math.min(maxLA, (minPartialLiquidationAmount * lendingTokenMultiplier) / getTokenPrice(_lendingToken, lendingTokenMultiplier));
+    function _unwrapTokenAndApprove(
+        Asset.Info memory info,
+        uint256 amount
+    ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
+        (assets, assetAmounts) = Asset._unwrap(info, amount);
+
+        for (uint8 i = 0; i < assets.length; i++) {
+            uint256 approvalAmount = (assetAmounts[i] * (10000 + BUFFER_PERCENTAGE)) / 10000;
+            _approveTokenTransfer(assets[i], approvalAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransfer(address token, uint256 tokenAmount) internal {
+        if (exchangeAggregator == address(0)) {
+            revert Errors.InvalidAddress();
+        }
+        if (registryAggregator != address(0)) {
+            _approveTokenTransferPara(token, tokenAmount);
+        } else {
+            _approveTokenTransferOO(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the Open Ocean exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferOO(address token, uint256 tokenAmount) internal {
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), exchangeAggregator);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(exchangeAggregator, tokenAmount - allowanceAmount);
+        }
+    }
+
+    /**
+     * @dev Internal function to approve a token transfer if the current allowance is less than the specified amount for the ParaSwap exchange aggregator.
+     * @param token The address of the ERC20 token to be approved.
+     * @param tokenAmount The amount of tokens to be approved for transfer.
+     */
+    function _approveTokenTransferPara(address token, uint256 tokenAmount) internal {
+        address tokenTransferProxy = IParaSwapAugustus(exchangeAggregator).getTokenTransferProxy();
+        uint256 allowanceAmount = ERC20Upgradeable(token).allowance(address(this), tokenTransferProxy);
+        if (allowanceAmount < tokenAmount) {
+            ERC20Upgradeable(token).safeIncreaseAllowance(tokenTransferProxy, tokenAmount - allowanceAmount);
+        }
+    }
+
+    /**
+     * @notice Executes a buy order on the exchange aggregators contract for multiple assets.
+     * @param tokensFrom An array of addresses representing the assets to sell on the exchange aggregator.
+     * @param tokenToInfo Information about the token to buy on the exchange aggregator, including its address and type.
+     * @param buyCalldata An array of calldata for the buy operations.
+     * @return assetAmountRemainings An array of amounts representing the remaining amounts of each asset after executing.
+     * @dev This function handles the buy operations for multiple assets, including selling tokens, buying the target token, and wrapping the received amount.
+     */
+    function _buyOnExchangeAggregatorWithMultiAsset(
+        address[] memory tokensFrom,
+        Asset.Info memory tokenToInfo,
+        bytes[] memory buyCalldata
+    ) internal returns (uint256[] memory assetAmountRemainings, uint256 assetAmountReceive) {
+        (address[] memory unwrapTokensTo, ) = Asset._unwrap(tokenToInfo, 0);
+
+        for (uint8 i = 0; i < buyCalldata.length; i++) {
+            _buyOnExchangeAggregator(buyCalldata[i]);
+        }
+
+        uint256[] memory assetAmountReceives = new uint256[](unwrapTokensTo.length);
+        for (uint8 i = 0; i < unwrapTokensTo.length; i++) {
+            assetAmountReceives[i] = ERC20Upgradeable(unwrapTokensTo[i]).balanceOf(address(this));
+        }
+        assetAmountReceive = Asset._wrap(unwrapTokensTo, assetAmountReceives, tokenToInfo);
+
+        assetAmountRemainings = new uint256[](tokensFrom.length);
+        for (uint8 i = 0; i < tokensFrom.length; i++) {
+            assetAmountRemainings[i] = ERC20Upgradeable(tokensFrom[i]).balanceOf(address(this));
+        }
+    }
+
+    /**
+     * @dev Internal function to execute a buy order on the exchange aggregator contract.
+     * @param buyCalldata The calldata for the buy operation.
+     */
+    function _buyOnExchangeAggregator(bytes memory buyCalldata) internal {
+        // solium-disable-next-line security/no-call-value
+        (bool success, ) = exchangeAggregator.call(buyCalldata);
+        if (!success) {
+            // Copy revert reason from call
+            assembly {
+                returndatacopy(0, 0, returndatasize())
+                revert(0, returndatasize())
+            }
+        }
     }
 }

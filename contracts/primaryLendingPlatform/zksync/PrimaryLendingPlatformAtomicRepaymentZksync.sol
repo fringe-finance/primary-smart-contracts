@@ -32,26 +32,6 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
     }
 
     /**
-     * @dev Returns the available repaid amount for a user in a specific project token and lending token after updating related token's prices.
-     * @param user The user for which to compute the available lending token amount.
-     * @param projectToken The project token for which to compute the available lending token amount.
-     * @param lendingToken The lending token for which to compute the available lending token amount.
-     * @param priceIds An array of bytes32 price identifiers to update.
-     * @param updateData An array of bytes update data for the corresponding price identifiers.
-     * @return availableLendingAmount The available lending token amount that the user can repay.
-     */
-    function getAvailableRepaidAmountWithUpdatePrices(
-        address user,
-        address projectToken,
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint256 availableLendingAmount) {
-        IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        return getAvailableRepaidAmount(user, projectToken, lendingToken);
-    }
-
-    /**
      * @notice Repays a loan atomically using the given project token as collateral.
      * @dev Repays the loan in a single atomic transaction and update related token's prices.
      *
@@ -72,22 +52,24 @@ contract PrimaryLendingPlatformAtomicRepaymentZksync is PrimaryLendingPlatformAt
      * - Repays the lending token amount to the primary lending platform contract.
      * - Transfers the remaining lending token amount to the user.
      * - Defers the liquidity check for the user, project token, and lending token.
-     * @param prjToken The project token to use as collateral.
-     * @param collateralAmount The amount of collateral to use.
+     * @param prjInfo Information about the project token, including its address and type.
+     * @param lendingInfo Information about the lending token, including its address and type.
+     * @param collateralAmount The amount of collateral to use for repayment.
      * @param buyCalldata The calldata for the swap operation.
      * @param isRepayFully A boolean indicating whether the loan should be repaid fully or partially.
      * @param priceIds An array of bytes32 price identifiers to update.
      * @param updateData An array of bytes update data for the corresponding price identifiers.
      */
     function repayAtomic(
-        address prjToken,
-        uint collateralAmount,
-        bytes memory buyCalldata,
+        Asset.Info memory prjInfo,
+        Asset.Info memory lendingInfo,
+        uint256 collateralAmount,
+        bytes[] memory buyCalldata,
         bool isRepayFully,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
     ) external payable nonReentrant {
         IPriceProviderAggregator(address(primaryLendingPlatform.priceOracle())).updatePrices{value: msg.value}(priceIds, updateData);
-        _repayAtomic(prjToken, collateralAmount, buyCalldata, isRepayFully);
+        _repayAtomic(prjInfo, lendingInfo, collateralAmount, buyCalldata, isRepayFully);
     }
 }

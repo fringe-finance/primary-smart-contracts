@@ -149,24 +149,178 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
         return _borrow(projectToken, lendingToken, lendingTokenAmount, user);
     }
 
+    //************* Supply FUNCTION ********************************
+
     /**
-     * @dev Returns the PIT (primary index token) value for a given account and collateral before a position is opened after updating related token's prices.
-     *
-     * Formula: pit = $ * LVR of project token.
-     * @param account Address of the account.
-     * @param projectToken Address of the project token.
+     * @notice Supplies a specified amount of a lending token to the platform.
+     * @dev Allows a user to supply a specified amount of a lending token to the platform.
+     * @param lendingToken The address of the lending token being supplied.
+     * @param lendingTokenAmount The amount of the lending token being supplied.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
-     * @return The PIT value.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - The lending token is not paused.
+     * - The lending token amount is greater than 0.
+     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
+     *
+     * Effects:
+     * - Mints the corresponding bLendingTokens and credits them to the user.
      */
-    function pitCollateralWithUpdatePrices(
-        address account,
-        address projectToken,
+    function supply(
+        address lendingToken,
+        uint256 lendingTokenAmount,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable returns (uint256) {
+    ) external payable isLendingTokenListed(lendingToken) nonReentrant {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return pitCollateral(account, projectToken);
+        _supply(lendingToken, lendingTokenAmount, msg.sender);
+    }
+
+    /**
+     * @dev Supplies a certain amount of lending tokens to the platform from a specific user.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - Called by a related contract.
+     * - The lending token is not paused.
+     * - The lending token amount is greater than 0.
+     * - Minting the bLendingTokens is successful and the minted amount is greater than 0.
+     *
+     * Effects:
+     * - Mints the corresponding bLendingTokens and credits them to the user.
+     * @param lendingToken Address of the lending token.
+     * @param lendingTokenAmount Amount of lending tokens to be supplied.
+     * @param user Address of the user.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     */
+    function supplyFromRelatedContract(
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        address user,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        _supply(lendingToken, lendingTokenAmount, user);
+    }
+
+    //************* Redeem FUNCTION ********************************
+
+    /**
+     * @notice Redeems a specified amount of bLendingToken from the platform.
+     * @dev Function that performs the redemption of bLendingToken and returns the corresponding lending token to user.
+     *
+     * Requirements:
+     * - The lendingToken is listed.
+     * - The lending token should not be paused.
+     * - The bLendingTokenAmount should be greater than zero.
+     * - The redemption of bLendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Burns the bLendingTokens from the user.
+     * - Transfers the corresponding lending tokens to the user.
+     * @param lendingToken Address of the lending token.
+     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     */
+    function redeem(
+        address lendingToken,
+        uint256 bLendingTokenAmount,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable isLendingTokenListed(lendingToken) nonReentrant {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        _redeem(lendingToken, bLendingTokenAmount, msg.sender);
+    }
+    
+    /**
+     * @dev Function that performs the redemption of bLendingToken on behalf of a user and returns the corresponding lending token to the user by related contract.
+     *
+     * Requirements:
+     * - The lendingToken is listed.
+     _ - Called by a related contract.
+     * - The lending token should not be paused.
+     * - The bLendingTokenAmount should be greater than zero.
+     * - The redemption of bLendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Burns the bLendingTokens from the user.
+     * - Transfers the corresponding lending tokens to the user.
+     * @param lendingToken Address of the lending token.
+     * @param bLendingTokenAmount Amount of bLending tokens to be redeemed.
+     * @param user Address of the user.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     */
+    function redeemFromRelatedContract(
+        address lendingToken,
+        uint256 bLendingTokenAmount,
+        address user,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        _redeem(lendingToken, bLendingTokenAmount, user);
+    }
+
+    //************* RedeemUnderlying FUNCTION ********************************
+
+    /**
+     * @notice Redeems a specified amount of lendingToken from the platform.
+     * @dev Function that performs the redemption of lending token and returns the corresponding underlying token to user.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - The lending token should not be paused.
+     * - The lendingTokenAmount should be greater than zero.
+     * - The redemption of lendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Transfers the corresponding underlying tokens to the user.
+     * @param lendingToken Address of the lending token.
+     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
+     * @param priceIds An array of price identifiers used to update the price oracle.
+     * @param updateData An array of update data used to update the price oracle.
+     */
+    function redeemUnderlying(
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable isLendingTokenListed(lendingToken) nonReentrant {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        _redeemUnderlying(lendingToken, lendingTokenAmount, msg.sender);
+    }
+
+    /**
+     * @dev Function that performs the redemption of lending token on behalf of a user and returns the corresponding underlying token to the user by related contract.
+     *
+     * Requirements:
+     * - The lending token is listed.
+     * - Called by a related contract.
+     * - The lending token should not be paused.
+     * - The lendingTokenAmount should be greater than zero.
+     * - The redemption of lendingToken should not result in a redemption error.
+     *
+     * Effects:
+     * - Transfers the corresponding underlying tokens to the user.
+     * @param lendingToken Address of the lending token.
+     * @param lendingTokenAmount Amount of lending tokens to be redeemed.
+     * @param user Address of the user.
+     */
+    function redeemUnderlyingFromRelatedContract(
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        address user,
+        bytes32[] memory priceIds,
+        bytes[] calldata updateData
+    ) external payable isLendingTokenListed(lendingToken) onlyRelatedContracts nonReentrant {
+        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
+        _redeemUnderlying(lendingToken, lendingTokenAmount, user);
     }
 
     /**
@@ -195,14 +349,15 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
      * @param tokenAmount The amount of the token to evaluate.
      * @param priceIds An array of price identifiers used to update the price oracle.
      * @param updateData An array of update data used to update the price oracle.
-     * @return The evaluated token amount in USD.
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
     function getTokenEvaluationWithUpdatePrices(
         address token,
         uint256 tokenAmount,
         bytes32[] memory priceIds,
         bytes[] calldata updateData
-    ) external payable returns (uint256) {
+    ) external payable returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return getTokenEvaluation(token, tokenAmount);
     }
@@ -239,22 +394,6 @@ contract PrimaryLendingPlatformV2Zksync is PrimaryLendingPlatformV2Core {
     {
         priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
         return getPosition(account, projectToken, lendingToken);
-    }
-
-    /**
-     * @dev Gets total borrow amount in USD for a specific lending token after updating related token's prices.
-     * @param lendingToken The address of the lending token.
-     * @param priceIds An array of price identifiers used to update the price oracle.
-     * @param updateData An array of update data used to update the price oracle.
-     * @return The total borrow amount in USD.
-     */
-    function getTotalBorrowPerLendingTokenWithUpdatePrices(
-        address lendingToken,
-        bytes32[] memory priceIds,
-        bytes[] calldata updateData
-    ) external payable returns (uint) {
-        priceOracle.updatePrices{value: msg.value}(priceIds, updateData);
-        return getTotalBorrowPerLendingToken(lendingToken);
     }
 
     /**

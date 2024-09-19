@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract BLendingToken is Initializable, BErc20, AccessControlUpgradeable
 ```

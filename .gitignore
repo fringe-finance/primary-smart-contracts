@@ -16,3 +16,4 @@ yarn.lock
 deployments
 .DS_Store
 deploymentLogs
+scripts/generateByteCode/dist

@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -26,36 +24,6 @@ struct PythMetadata {
 
 
 ## Events info
-
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new account.
-
-
-Parameters:
-
-| Name         | Type    | Description                                     |
-| :----------- | :------ | :---------------------------------------------- |
-| newModerator | address | The address to which moderator role is granted. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an account.
-
-
-Parameters:
-
-| Name      | Type    | Description                                       |
-| :-------- | :------ | :------------------------------------------------ |
-| moderator | address | The address from which moderator role is revoked. |
 
 ### SetTokenAndPriceIdPath
 
@@ -174,13 +142,6 @@ mapping(address => struct PythPriceProvider.PythMetadata) pythMetadata
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to restrict access to functions to only the contract's admin.
 ### onlyModerator
 
 ```solidity
@@ -197,36 +158,6 @@ function initialize() public initializer
 ```
 
 Initializes the contract by setting up the access control roles and default values for tokenDecimals and validTimePeriod.
-### grantModerator (0x6981c7ae)
-
-```solidity
-function grantModerator(address newModerator) public onlyAdmin
-```
-
-Grants the moderator role to a new address.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) public onlyAdmin
-```
-
-Revokes the moderator role from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
-
 ### setTokenDecimals (0xf2cf47be)
 
 ```solidity
@@ -336,37 +267,6 @@ Parameters:
 | priceIds   | bytes32[] | The priceIds need to update.            |
 | updateData | bytes[]   | The updateData provided by PythNetwork. |
 
-### getUpdatedPrice (0xe8ad2b23)
-
-```solidity
-function getUpdatedPrice(
-    address token,
-    bytes[] calldata updateData
-)
-    external
-    payable
-    override
-    returns (uint256 priceMantissa, uint8 priceDecimals)
-```
-
-Returns the latest price of a given token in USD after update price.
-
-
-Parameters:
-
-| Name       | Type    | Description                                     |
-| :--------- | :------ | :---------------------------------------------- |
-| token      | address | The address of the token to get the price of.   |
-| updateData | bytes[] | The updateData provided by PythNetwork.         |
-
-
-Return values:
-
-| Name          | Type    | Description                                                 |
-| :------------ | :------ | :---------------------------------------------------------- |
-| priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
-| priceDecimals | uint8   | The number of decimal places in the price of the token.     |
-
 ### isListed (0xf794062e)
 
 ```solidity
@@ -441,58 +341,6 @@ Return values:
 | :------------ | :------ | :---------------------------------------------------------- |
 | priceMantissa | uint256 | The price of the token in USD, represented as a mantissa.   |
 | priceDecimals | uint8   | The number of decimal places in the price of the token.     |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount in USD.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                                |
-| :--------- | :------ | :----------------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount in USD. |
-
-### getEvaluationUnsafe (0xb03ec98d)
-
-```solidity
-function getEvaluationUnsafe(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount based on the last updated price.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                         |
-| :--------- | :------ | :---------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount. |
 
 ### getPriceDecimals (0x1b30aafc)
 

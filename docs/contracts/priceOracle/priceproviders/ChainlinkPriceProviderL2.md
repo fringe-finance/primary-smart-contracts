@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract ChainlinkPriceProviderL2 is ChainlinkPriceProvider
 ```

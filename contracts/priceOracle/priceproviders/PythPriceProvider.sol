@@ -33,18 +33,6 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     }
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the token and its corresponding price ID path are set.
      * @param token The address of the token.
      * @param priceIdPath The array of bytes32 representing the path to the token's price ID.
@@ -77,16 +65,8 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        tokenDecimals = 6;
+        tokenDecimals = 10;
         validTimePeriod = 60;
-    }
-
-    /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
     }
 
     /**
@@ -95,26 +75,6 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** Moderator functions ****************** */
@@ -206,23 +166,6 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
         }
     }
 
-    /**
-     * @dev Returns the latest price of a given token in USD after update price.
-     * @param token The address of the token to get the price of.
-     * @param updateData The updateData provided by PythNetwork.
-     * @return priceMantissa The price of the token in USD, represented as a mantissa.
-     * @return priceDecimals The number of decimal places in the price of the token.
-     */
-    function getUpdatedPrice(
-        address token,
-        bytes[] calldata updateData
-    ) external payable override returns (uint256 priceMantissa, uint8 priceDecimals) {
-        if (updateData.length > 0) {
-            IPyth(pythOracle).updatePriceFeeds{value: msg.value}(updateData);
-        }
-        return getPrice(token);    
-    }
-
     /****************** View functions ****************** */
 
     /**
@@ -288,62 +231,6 @@ contract PythPriceProvider is PriceProvider, Initializable, AccessControlUpgrade
             priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
         }
         priceDecimals = tokenDecimals;
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount in USD.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount in USD.
-     */
-    function getEvaluation(address token, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(token);
-        evaluation = (tokenAmount * priceMantissa);
-        uint8 decimals = ERC20Upgradeable(token).decimals();
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-        evaluation = evaluation / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-    }
-
-    /**
-     * @dev Returns the evaluation of a given token amount based on the last updated price.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount.
-     */
-    function getEvaluationUnsafe(address token, uint256 tokenAmount) public override view returns(uint256 evaluation) {
-        PythMetadata memory metadata = pythMetadata[token];
-        require(metadata.isActive, "PythPriceProvider: Token is not available!");
-
-        uint256 priceMantissa = 1;
-        uint256 priceDecimals = 0;
-
-        for (uint256 i = 0; i < metadata.priceIdPath.length; i++) {
-            bytes32 priceId = metadata.priceIdPath[i];
-
-            PythStructs.Price memory emaPrice = IPyth(pythOracle).getEmaPriceUnsafe(priceId);
-
-            priceMantissa *= uint256(uint64(emaPrice.price));
-            priceDecimals += uint8(uint32(-emaPrice.expo));
-        }
-        if (priceDecimals >= tokenDecimals) {
-            priceMantissa /= 10 ** (priceDecimals - tokenDecimals);
-        } else {
-            priceMantissa *= 10 ** (tokenDecimals - priceDecimals);
-        }
-        priceDecimals = tokenDecimals;
-
-        evaluation = (tokenAmount * priceMantissa);
-        uint8 decimals = ERC20Upgradeable(token).decimals();
-        if (decimals >= tokenDecimals) {
-            evaluation = evaluation / (10 ** (decimals - tokenDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (tokenDecimals - decimals));
-        }
-        evaluation = evaluation / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
     }
 
     /**

@@ -18,6 +18,7 @@ require("dotenv").config();
 
 const {
   INFURA_KEY,
+  ALCHEMY_KEY,
   PRIVATE_KEY,
   ETHERSCAN_API_KEY,
   POLYGONSCAN_API_KEY,
@@ -26,6 +27,8 @@ const {
   ZKSYNCSCAN_API_KEY
 } = process.env;
 const isZksync = Object.keys(process.env).includes('ZKSYNC');
+const isBase = Object.keys(process.env).includes('BASE');
+
 let hardhatConfig;
 if (isZksync) {
   hardhatConfig = {
@@ -81,7 +84,7 @@ if (isZksync) {
 
       hardhat: {
         forking: {
-          url: `https://${process.env.CHAIN?.replace("_", "-")}.infura.io/v3/${INFURA_KEY}`,
+          url: !isBase ? `https://${process.env.CHAIN?.replace("_", "-")}.infura.io/v3/${INFURA_KEY}` : `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`,
           blockNumber: Number(process.env.BLOCK_NUMBER)
         },
         allowUnlimitedContractSize: true
@@ -120,16 +123,19 @@ if (isZksync) {
         timeout: 99999999,
         gasPrice: 1_500_000_000
       },
-
       ethereum_goerli: {
         url:  `https://goerli.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
         accounts: [PRIVATE_KEY]
       },
       arbitrum_goerli: {
-        url: "https://goerli-rollup.arbitrum.io/rpc",
+        url: `https://arbitrum-goerli.infura.io/v3/${INFURA_KEY}`,
         accounts: [PRIVATE_KEY]
       },
+      base: {
+        url: `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+        accounts: [PRIVATE_KEY]
+      }
     },
     gasReporter: {
       enabled: process.env.REPORT_GAS !== undefined,

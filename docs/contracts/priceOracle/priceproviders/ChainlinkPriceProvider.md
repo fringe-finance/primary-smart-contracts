@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract ChainlinkPriceProvider is PriceProvider, Initializable, AccessControlUpgradeable
 ```
@@ -24,36 +22,6 @@ struct ChainlinkMetadata {
 
 
 ## Events info
-
-### GrantModeratorRole
-
-```solidity
-event GrantModeratorRole(address indexed newModerator)
-```
-
-Emitted when the moderator role is granted to a new address.
-
-
-Parameters:
-
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### RevokeModeratorRole
-
-```solidity
-event RevokeModeratorRole(address indexed moderator)
-```
-
-Emitted when the moderator role is revoked from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
 
 ### SetTokenAndAggregator
 
@@ -103,6 +71,21 @@ Parameters:
 | aggregatorPath | address | The address of the Chainlink aggregator path.   |
 | newTimeOut     | uint256 | The new time out value in seconds.              |
 
+### SetTokenDecimals
+
+```solidity
+event SetTokenDecimals(uint8 newTokenDecimals)
+```
+
+Emitted when the token decimals is set.
+
+
+Parameters:
+
+| Name             | Type  | Description             |
+| :--------------- | :---- | :---------------------- |
+| newTokenDecimals | uint8 | The new token decimals. |
+
 ## Constants info
 
 ### MODERATOR_ROLE (0x797669c9)
@@ -128,10 +111,10 @@ uint8 constant MAX_PRICE_PATH_LENGTH = 5
 
 ## State variables info
 
-### usdDecimals (0x66a4b6c0)
+### tokenDecimals (0x3b97e856)
 
 ```solidity
-uint8 usdDecimals
+uint8 tokenDecimals
 ```
 
 
@@ -151,13 +134,6 @@ mapping(address => struct ChainlinkPriceProvider.ChainlinkMetadata) chainlinkMet
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Modifier to restrict access to functions to only the contract's admin.
 ### onlyModerator
 
 ```solidity
@@ -175,36 +151,22 @@ function initialize() public initializer
 
 Initializes the contract by setting up the access control roles and assigning them to the contract deployer.
 The `DEFAULT_ADMIN_ROLE` and `MODERATOR_ROLE` roles are set up with the contract deployer as the initial role bearer.
-`usdDecimals` is set to 6.
-### grantModerator (0x6981c7ae)
+`decimals` is set to 8.
+### setTokenDecimals (0xf2cf47be)
 
 ```solidity
-function grantModerator(address newModerator) public onlyAdmin
+function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator
 ```
 
-Grants the moderator role to a new address.
+Sets the number of decimals used by the token.
+Only the moderator can call this function.
 
 
 Parameters:
 
-| Name         | Type    | Description                       |
-| :----------- | :------ | :-------------------------------- |
-| newModerator | address | The address of the new moderator. |
-
-### revokeModerator (0x36445636)
-
-```solidity
-function revokeModerator(address moderator) public onlyAdmin
-```
-
-Revokes the moderator role from an address.
-
-
-Parameters:
-
-| Name      | Type    | Description                                 |
-| :-------- | :------ | :------------------------------------------ |
-| moderator | address | The address of the moderator to be revoked. |
+| Name             | Type  | Description                                   |
+| :--------------- | :---- | :-------------------------------------------- |
+| newTokenDecimals | uint8 | The new number of decimals used by the token. |
 
 ### setTimeOut (0x60c74154)
 
@@ -228,8 +190,7 @@ Parameters:
 | Name           | Type    | Description                                                                                                                                                                                                   |
 | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | aggregatorPath | address | The address of chainlink aggregator contract.                                                                                                                                                                 |
-| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified
- amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
+| newTimeOut     | uint256 | It is the amount of time it takes for a new round of aggregation to start after a specified amount of time since the last update plus a period of time waiting for new price update transactions to execute. |
 
 ### setTokenAndAggregator (0xedc607b0)
 
@@ -342,7 +303,7 @@ function getPrice(
 ) public view override returns (uint256 priceMantissa, uint8 priceDecimals)
 ```
 
-Returns the latest asset price mantissa and price decimals. 
+Returns the latest asset price mantissa and price decimals.
 
 [price] = USD/token
 - First step is get priceMantissa with priceDecimals by this formula:
@@ -356,32 +317,6 @@ Parameters:
 | Name  | Type    | Description        |
 | :---- | :------ | :----------------- |
 | token | address | the token address. |
-
-### getEvaluation (0x81fd01ea)
-
-```solidity
-function getEvaluation(
-    address token,
-    uint256 tokenAmount
-) public view override returns (uint256 evaluation)
-```
-
-Returns the evaluation of a given token amount in USD using the Chainlink price feed.
-
-
-Parameters:
-
-| Name        | Type    | Description                             |
-| :---------- | :------ | :-------------------------------------- |
-| token       | address | The address of the token to evaluate.   |
-| tokenAmount | uint256 | The amount of tokens to evaluate.       |
-
-
-Return values:
-
-| Name       | Type    | Description                                |
-| :--------- | :------ | :----------------------------------------- |
-| evaluation | uint256 | The evaluation of the token amount in USD. |
 
 ### getPriceDecimals (0x1b30aafc)
 

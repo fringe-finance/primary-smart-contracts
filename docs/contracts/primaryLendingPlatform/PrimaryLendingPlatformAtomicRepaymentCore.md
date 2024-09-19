@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 abstract contract PrimaryLendingPlatformAtomicRepaymentCore is Initializable, AccessControlUpgradeable, ReentrancyGuardUpgradeable
 ```
@@ -106,13 +104,6 @@ address registryAggregator
 
 ## Modifiers info
 
-### onlyAdmin
-
-```solidity
-modifier onlyAdmin()
-```
-
-Throws if the caller is not the admin.
 ### onlyModerator
 
 ```solidity
@@ -189,10 +180,7 @@ Parameters:
 
 | Name | Type    | Description                                                                                                 |
 | :--- | :------ | :---------------------------------------------------------------------------------------------------------- |
-| pit  | address | The address of the primary lending platform contract.
- 
- Requirements:
- - `pit` cannot be the zero address. |
+| pit  | address | The address of the primary lending platform contract.  Requirements: - `pit` cannot be the zero address. |
 
 ### getTotalOutstanding (0x00fe5da3)
 
@@ -222,32 +210,6 @@ Return values:
 | :---------- | :------ | :--------------------------------------------------------------------- |
 | outstanding | uint256 | The outstanding amount for the user, project token, and lending token. |
 
-### getLendingToken (0x2ce36230)
-
-```solidity
-function getLendingToken(
-    address user,
-    address projectToken
-) public view returns (address actualLendingToken)
-```
-
-Returns the actual lending token address for a user and project token.
-
-
-Parameters:
-
-| Name         | Type    | Description                  |
-| :----------- | :------ | :--------------------------- |
-| user         | address | The user address.            |
-| projectToken | address | The project token address.   |
-
-
-Return values:
-
-| Name               | Type    | Description                       |
-| :----------------- | :------ | :-------------------------------- |
-| actualLendingToken | address | The actual lending token address. |
-
 ### getRemainingDeposit (0xf8f8b436)
 
 ```solidity
@@ -273,31 +235,3 @@ Return values:
 | Name             | Type    | Description                                              |
 | :--------------- | :------ | :------------------------------------------------------- |
 | remainingDeposit | uint256 | The remaining deposit of the user for the project token. |
-
-### getAvailableRepaidAmount (0x2c26e154)
-
-```solidity
-function getAvailableRepaidAmount(
-    address user,
-    address projectToken,
-    address lendingToken
-) public view returns (uint256 availableLendingAmount)
-```
-
-Returns the available repaid amount for a user in a specific project token and lending token.
-
-
-Parameters:
-
-| Name         | Type    | Description                         |
-| :----------- | :------ | :---------------------------------- |
-| user         | address | The address of the user.            |
-| projectToken | address | The address of the project token.   |
-| lendingToken | address | The address of the lending token.   |
-
-
-Return values:
-
-| Name                   | Type    | Description                                       |
-| :--------------------- | :------ | :------------------------------------------------ |
-| availableLendingAmount | uint256 | The available repaid amount in the lending token. |

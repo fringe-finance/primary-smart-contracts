@@ -4,8 +4,6 @@
 
 #### License: MIT
 
-## 
-
 ```solidity
 contract PrimaryLendingPlatformProxyAdmin is ProxyAdmin
 ```

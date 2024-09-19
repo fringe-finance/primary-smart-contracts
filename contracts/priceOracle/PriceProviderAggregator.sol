@@ -5,6 +5,8 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "./priceproviders/PriceProvider.sol";
+import "../interfaces/IPriceOracle.sol";
+import "../interfaces/IPrimaryLendingPlatform.sol";
 
 /**
  * @title PriceProviderAggregator
@@ -14,26 +16,11 @@ import "./priceproviders/PriceProvider.sol";
 contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    uint8 public usdDecimals;
+    IPriceOracle public priceOracle;
 
-    mapping(address => PriceProviderInfo) public tokenPriceProvider; // address of project token => priceProvider address
+    IPrimaryLendingPlatform public primaryLendingPlatform;
 
-    struct PriceProviderInfo {
-        address priceProvider;
-        bool hasSignedFunction;
-    }
-
-    /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
+    mapping(address => address) public tokenPriceProvider; // address of project token => priceProvider address
 
     /**
      * @dev Emitted when the price provider is set to a token.
@@ -41,6 +28,18 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @param priceProvider The address of the price provider.
      */
     event SetTokenAndPriceProvider(address indexed token, address indexed priceProvider);
+
+    /**
+     * @dev Emitted when the priceOracle is set.
+     * @param priceOracle The address of priceOracle contract.
+     */
+    event SetPriceOracle(address indexed priceOracle);
+
+    /**
+     * @dev Emitted when the primary lending platform address is set.
+     * @param newPrimaryLendingPlatform The new address of the primary lending platform.
+     */
+    event SetPrimaryLendingPlatform(address indexed newPrimaryLendingPlatform);
 
     /**
      * @dev Emitted when the active status of a token changes.
@@ -51,22 +50,15 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
 
     /**
      * @dev Initializes the contract by setting up the access control roles and assigning the default and moderator roles to the contract deployer.
+     * @param newPriceOracle The address of the new PriceOracle contract.
      * @notice This function should only be called once during contract deployment.
      */
-    function initialize() public initializer {
+    function initialize(address newPriceOracle) public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
-    }
 
-    
-    /**
-     * @dev Modifier to check if the caller has the DEFAULT_ADMIN_ROLE.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
+        priceOracle = IPriceOracle(newPriceOracle);
     }
 
     /**
@@ -75,26 +67,6 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     modifier onlyModerator() {
         require(hasRole(MODERATOR_ROLE, msg.sender), "Caller is not the Moderator");
         _;
-    }
-
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the moderator role to a new address.
-     * @param newModerator The address of the new moderator.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the moderator role from an address.
-     * @param moderator The address of the moderator to be revoked.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
     }
 
     /****************** end Admin functions ****************** */
@@ -110,16 +82,38 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * - `priceProvider` cannot be the zero address.
      * @param token the address of token.
      * @param priceProvider the address of price provider. Should implement the interface of `PriceProvider`.
-     * @param hasFunctionWithSign true - if price provider has function with signatures.
-     *                            false - if price provider does not have function with signatures.
      */
-    function setTokenAndPriceProvider(address token, address priceProvider, bool hasFunctionWithSign) public onlyModerator {
+    function setTokenAndPriceProvider(address token, address priceProvider) public onlyModerator {
         require(token != address(0), "PriceProviderAggregator: Invalid token");
         require(priceProvider != address(0), "PriceProviderAggregator: Invalid priceProvider");
-        PriceProviderInfo storage priceProviderInfo = tokenPriceProvider[token];
-        priceProviderInfo.priceProvider = priceProvider;
-        priceProviderInfo.hasSignedFunction = hasFunctionWithSign;
+        tokenPriceProvider[token] = priceProvider;
         emit SetTokenAndPriceProvider(token, priceProvider);
+    }
+
+    /**
+     * @dev Sets new priceOracle contract.
+     * Requirements:
+     * - The caller must be the moderator.
+     * - `newPriceOracle` cannot be the zero address.
+     * @param newPriceOracle The address of new PriceOracle contract.
+     */
+    function setPriceOracle(address newPriceOracle) external onlyModerator {
+        require(newPriceOracle != address(0), "PriceProviderAggregator: invalid priceOracle");
+        priceOracle = IPriceOracle(newPriceOracle);
+        emit SetPriceOracle(newPriceOracle);
+    }
+
+    /**
+     * @dev Sets the address of the primary lending platform contract.
+     * @param plp The address of the primary lending platform contract.
+     *
+     * Requirements:
+     * - `plp` cannot be the zero address.
+     */
+    function setPrimaryLendingPlatform(address plp) external onlyModerator {
+        require(plp != address(0), "PriceProviderAggregator: Invalid address");
+        primaryLendingPlatform = IPrimaryLendingPlatform(plp);
+        emit SetPrimaryLendingPlatform(plp);
     }
 
     /**
@@ -133,7 +127,7 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
      * @param active The new active status to set for the price provider.
      */
     function changeActive(address priceProvider, address token, bool active) public onlyModerator {
-        require(tokenPriceProvider[token].priceProvider == priceProvider, "PriceProviderAggregator: Mismatch token`s price provider");
+        require(tokenPriceProvider[token] == priceProvider, "PriceProviderAggregator: Mismatch token`s price provider");
         PriceProvider(priceProvider).changeActive(token, active);
         emit ChangeActive(priceProvider, token, active);
     }
@@ -141,77 +135,104 @@ contract PriceProviderAggregator is Initializable, AccessControlUpgradeable {
     /****************** main functions ****************** */
 
     /**
-     * @dev Returns the price of a given token.
-     *
-     * Formula: price = priceMantissa / (10 ** priceDecimals)
-     * @param token The address of the token to get the price for.
-     * @return priceMantissa The price of the token, represented as a mantissa.
-     * @return priceDecimals The number of decimal places in the token's price.
+     * @dev Calculates and update multiple the final TWAP prices of a token.
+     * @param token The token array needs to update the price.
      */
-    function getPrice(address token) public view returns (uint256 priceMantissa, uint8 priceDecimals) {
-        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getPriceWithSign()");
-        return PriceProvider(priceProviderInfo.priceProvider).getPrice(token);
+    function updateMultiFinalPrices(address[] memory token) external {
+        _updateMultiFinalPrices(token);
     }
 
-    /**
-     * @dev Returns the tupple (priceMantissa, priceDecimals) of token multiplied by 10 ** priceDecimals given by price provider.
-     * price can be calculated as  priceMantissa / (10 ** priceDecimals).
-     * i.e. price = priceMantissa / (10 ** priceDecimals).
-     * @param token The address of token.
-     * @param priceMantissa The price of token (used in verifying the signature).
-     * @param validTo The timestamp in seconds (used in verifying the signature).
-     * @param signature The backend signature of secp256k1. length is 65 bytes.
-     * @return priceMantissa_ The price of the token as a signed integer.
-     * @return priceDecimals The number of decimals for the price.
+    /**@dev This function is called when performing operations using token prices, to determine which tokens will need to update their final price.
+     * @param projectToken Address of the project token.
+     * @param actualLendingToken Address of the lending token.
+     * @param isBorrow Whether getting the list of tokens for updateFinalPrices is related to the borrowing operation or not.
+     * @return tokens Array of tokens that need to update final price.
      */
-    function getPriceSigned(
-        address token,
-        uint256 priceMantissa,
-        uint256 validTo,
-        bytes memory signature
-    ) public view returns (uint256 priceMantissa_, uint8 priceDecimals) {
-        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        if (priceProviderInfo.hasSignedFunction) {
-            return PriceProvider(priceProviderInfo.priceProvider).getPriceSigned(token, priceMantissa, validTo, signature);
+    function getTokensUpdateFinalPrices(
+        address projectToken,
+        address actualLendingToken,
+        bool isBorrow
+    ) public view returns (address[] memory tokens) {
+        if (actualLendingToken != address(0)) {
+            if (!isBorrow) {
+                // The array includes of 2 elements are projectToken and actualLendingToken.
+                tokens = new address[](2);
+                tokens[0] = projectToken;
+                tokens[1] = actualLendingToken;
+            } else {
+                uint256 lendingTokensLen = primaryLendingPlatform.lendingTokensLength();
+                address[] memory lendingTokensUpdateFinalPrice = new address[](lendingTokensLen);
+                uint256 lendingTokensIndex = 0;
+
+                for (uint256 i = 0; i < lendingTokensLen; i++) {
+                    address lendingToken = primaryLendingPlatform.lendingTokens(i);
+
+                    if (primaryLendingPlatform.totalBorrow(projectToken, lendingToken) > 0 || lendingToken == actualLendingToken) {
+                        lendingTokensUpdateFinalPrice[lendingTokensIndex++] = lendingToken;
+                    }
+                }
+                // The length of the array includes the lendingTokens that need to be updated final price and projectToken.
+                tokens = new address[](lendingTokensIndex + 1);
+                for (uint256 i = 0; i < lendingTokensIndex; i++) {
+                    tokens[i] = lendingTokensUpdateFinalPrice[i];
+                }
+                tokens[lendingTokensIndex] = projectToken;
+            }
         } else {
-            return PriceProvider(priceProviderInfo.priceProvider).getPrice(token);
+            // The array includes of 1 element is projectToken.
+            tokens = new address[](1);
+            tokens[0] = projectToken;
         }
     }
 
     /**
-     * @dev Returns the evaluation of a given token amount based on the price provided by the registered price provider.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @return evaluation The evaluation of the token amount.
+     * @dev Returns the most recent TWAP price or non-TWAP price of a token.
+     *
+     * Formula: price = priceMantissa / (10 ** priceDecimals)
+     * @param token The address of the token.
+     * @return priceDecimals The decimals of the price.
+     * @return timestamp The last updated timestamp of the price.
+     * @return collateralPrice The collateral price of the token.
+     * @return capitalPrice The capital price of the token.
      */
-    function getEvaluation(address token, uint256 tokenAmount) public view returns (uint256 evaluation) {
-        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        require(priceProviderInfo.hasSignedFunction == false, "PriceProviderAggregator: Call getEvaluationWithSign()");
-        return PriceProvider(priceProviderInfo.priceProvider).getEvaluation(token, tokenAmount);
+    function getPrice(address token) public view returns (uint8 priceDecimals, uint64 timestamp, uint256 collateralPrice, uint256 capitalPrice) {
+        return priceOracle.getEstimatedTWAPprice(token);
     }
 
     /**
-     * @dev Returns the evaluation of a token based on its price and amount, using a price provider that may or may not require a signature.
-     * @param token The address of the token to evaluate.
-     * @param tokenAmount The amount of tokens to evaluate.
-     * @param priceMantissa The price mantissa of the token.
-     * @param validTo The timestamp until which the evaluation is valid.
-     * @param signature The signature required by the price provider, if any.
-     * @return evaluation The evaluation of the token.
+     * @dev returns the most TWAP price or non-TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
      */
-    function getEvaluationSigned(
-        address token,
-        uint256 tokenAmount,
-        uint256 priceMantissa,
-        uint256 validTo,
-        bytes memory signature
-    ) public view returns (uint256 evaluation) {
-        PriceProviderInfo memory priceProviderInfo = tokenPriceProvider[token];
-        if (priceProviderInfo.hasSignedFunction) {
-            return PriceProvider(priceProviderInfo.priceProvider).getEvaluationSigned(token, tokenAmount, priceMantissa, validTo, signature);
+    function getEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        (, uint64 timestamp, , ) = priceOracle.getMostTWAPprice(token);
+        if (timestamp != block.timestamp) {
+            return priceOracle.getEstimatedEvaluation(token, tokenAmount);
         } else {
-            return PriceProvider(priceProviderInfo.priceProvider).getEvaluation(token, tokenAmount);
+            return priceOracle.getEvaluation(token, tokenAmount);
+        }
+    }
+
+    /**
+     * @dev returns the last stored TWAP price in USD evaluation of token by its `tokenAmount`
+     * @param token the address of token to evaluate
+     * @param tokenAmount the amount of token to evaluate
+     * @return collateralEvaluation the USD evaluation of token by its `tokenAmount` in collateral price
+     * @return capitalEvaluation the USD evaluation of token by its `tokenAmount` in capital price
+     */
+    function getMostEvaluation(address token, uint256 tokenAmount) external view returns (uint256 collateralEvaluation, uint256 capitalEvaluation) {
+        return priceOracle.getEvaluation(token, tokenAmount);
+    }
+
+    /**
+     * @dev Internal function to calculates and update multiple the final TWAP prices of a token.
+     * @param token The token array needs to update the price.
+     */
+    function _updateMultiFinalPrices(address[] memory token) internal {
+        for (uint256 i = 0; i < token.length; i++) {
+            priceOracle.updateFinalPrices(token[i]);
         }
     }
 }

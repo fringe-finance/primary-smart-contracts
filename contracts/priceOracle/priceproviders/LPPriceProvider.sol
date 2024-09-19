@@ -5,9 +5,11 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "../../util/HomoraMath.sol";
 import "./uniswapV2/IUniswapV2Pair.sol";
 import "./PriceProvider.sol";
+import "../../interfaces/IPriceProviderAggregator.sol";
 
 /**
  * @title LPPriceProvider
@@ -19,7 +21,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
     using HomoraMath for uint256;
     bytes32 public constant MODERATOR_ROLE = keccak256("MODERATOR_ROLE");
 
-    uint8 public usdDecimals;
+    uint8 public tokenDecimals;
 
     mapping(address => LPMetadata) public lpMetadata; // address of token => metadata of chainlink
 
@@ -27,18 +29,6 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         bool isActive;
         address base;
     }
-
-    /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
 
     /**
      * @dev Emitted when the LPToken and its corresponding price provider are set.
@@ -55,21 +45,19 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
     event ChangeActive(address indexed token, bool active);
 
     /**
+     * @dev Emitted when the token decimals is set.
+     * @param newTokenDecimals The new token decimals.
+     */
+    event SetTokenDecimals(uint8 newTokenDecimals);
+
+    /**
      * @dev Initializes the LPPriceProvider contract by setting up the access control roles and the number of decimals for the USD price.
      */
     function initialize() public initializer {
         __AccessControl_init();
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setupRole(MODERATOR_ROLE, msg.sender);
-        usdDecimals = 6;
-    }
-
-    /**
-     * @dev Modifier to restrict access to functions to only the contract's admin.
-     */
-    modifier onlyAdmin() {
-        require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Caller is not the Admin");
-        _;
+        tokenDecimals = 10;
     }
 
     /**
@@ -80,31 +68,17 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         _;
     }
 
-    /****************** Admin functions ****************** */
-
-    /**
-     * @dev Grants the MODERATOR_ROLE to a new address.
-     * Caller must be the admin.
-     * @param newModerator The address to grant the role to.
-     */
-    function grantModerator(address newModerator) public onlyAdmin {
-        grantRole(MODERATOR_ROLE, newModerator);
-        emit GrantModeratorRole(newModerator);
-    }
-
-    /**
-     * @dev Revokes the MODERATOR_ROLE from an address.
-     * Caller must be the admin.
-     * @param moderator The address to revoke the role from.
-     */
-    function revokeModerator(address moderator) public onlyAdmin {
-        revokeRole(MODERATOR_ROLE, moderator);
-        emit RevokeModeratorRole(moderator);
-    }
-
-    /****************** end Admin functions ****************** */
-
     /****************** Moderator functions ****************** */
+
+    /**
+     * @dev Sets the number of decimals used by the token.
+     * Only the moderator can call this function.
+     * @param newTokenDecimals The new number of decimals used by the token.
+     */
+    function setTokenDecimals(uint8 newTokenDecimals) public onlyModerator {
+        tokenDecimals = newTokenDecimals;
+        emit SetTokenDecimals(newTokenDecimals);
+    }
 
     /**
      * @dev Sets the LP token and price provider for the given LP token address.
@@ -139,7 +113,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         emit ChangeActive(token, active);
     }
 
-    /****************** View functions ****************** */
+    /****************** View functions *******************/
 
     /**
      * @dev Checks if a token is listed in the LPPriceProvider.
@@ -170,6 +144,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      */
     function getUSDPx(address lpToken) public view returns (uint256) {
         uint256 totalSupply = IUniswapV2Pair(lpToken).totalSupply();
+        uint8 decimals = IUniswapV2Pair(lpToken).decimals();
         (uint256 r0, uint256 r1, ) = IUniswapV2Pair(lpToken).getReserves();
         uint256 sqrtK = HomoraMath.sqrt(r0.mul(r1)).fdiv(totalSupply); // in 2**112
         (uint256 px0, uint256 px1) = calcUSDPx112(lpToken); // in 2**112
@@ -177,7 +152,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
         // fair token1 amt: sqrtK * sqrt(px0/px1)
         // fair lp price = 2 * sqrt(px0 * px1)
         // split into 2 sqrts multiplication to prevent uint256 overflow (note the 2**112)
-        return sqrtK.mul(2).mul(HomoraMath.sqrt(px0)).div(2 ** 56).mul(HomoraMath.sqrt(px1)).div(2 ** 56);
+        return sqrtK.mul(2).mul(10 ** decimals).mul(HomoraMath.sqrt(px0)).div(2 ** 56).mul(HomoraMath.sqrt(px1)).div(2 ** 56);
     }
 
     /**
@@ -201,11 +176,13 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      * @return The price of the token in USD, represented as a mantissa.
      */
     function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
-        (uint256 priceMantissa, uint8 priceDecimals) = PriceProvider(priceBase).getPrice(token);
-        priceMantissa = priceDecimals >= usdDecimals
-            ? priceMantissa / (10 ** (priceDecimals - usdDecimals))
-            : priceMantissa / (10 ** (usdDecimals - priceDecimals));
-        return priceMantissa.mul(uint256(2 ** 112));
+        address priceProvider = IPriceProviderAggregator(priceBase).tokenPriceProvider(token);
+        (uint256 priceMantissa, uint8 priceDecimals) = PriceProvider(priceProvider).getPrice(token);
+        uint8 decimals = ERC20Upgradeable(token).decimals();
+        priceMantissa = decimals + priceDecimals >= tokenDecimals
+            ? priceMantissa.mul(uint256(2 ** 112)) / (10 ** (decimals + priceDecimals - tokenDecimals))
+            : priceMantissa.mul(uint256(2 ** 112)) * (10 ** (tokenDecimals - decimals - priceDecimals));
+        return priceMantissa;
     }
 
     /**
@@ -217,24 +194,7 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
     function getPrice(address lpToken) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
         uint256 usdPrice = getUSDPx(lpToken);
         priceMantissa = usdPrice.div(uint256(2 ** 112));
-        priceDecimals = usdDecimals;
-    }
-
-    /**
-     * @dev Returns the evaluation of a given amount of LP tokens in USD.
-     * @param lpToken The address of the LP token.
-     * @param tokenAmount The amount of LP tokens to evaluate.
-     * @return evaluation The evaluation of the given amount of LP tokens in USD.
-     */
-    function getEvaluation(address lpToken, uint256 tokenAmount) public view override returns (uint256 evaluation) {
-        (uint256 priceMantissa, uint8 priceDecimals) = getPrice(lpToken);
-        evaluation = (tokenAmount * priceMantissa) / 10 ** (priceDecimals); // get the evaluation scaled by 10**tokenDecimals
-        uint8 tokenDecimals = IUniswapV2Pair(lpToken).decimals();
-        if (tokenDecimals >= usdDecimals) {
-            evaluation = evaluation / (10 ** (tokenDecimals - usdDecimals)); //get the evaluation in USD.
-        } else {
-            evaluation = evaluation * (10 ** (usdDecimals - tokenDecimals));
-        }
+        priceDecimals = tokenDecimals;
     }
 
     /**
@@ -242,6 +202,6 @@ contract LPPriceProvider is PriceProvider, Initializable, AccessControlUpgradeab
      * @return The number of decimals used for the price provided by this contract.
      */
     function getPriceDecimals() public view override returns (uint8) {
-        return usdDecimals;
+        return tokenDecimals;
     }
 }
