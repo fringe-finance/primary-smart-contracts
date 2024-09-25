@@ -24,7 +24,8 @@ const {
   POLYGONSCAN_API_KEY,
   OPTIMISM_API_KEY,
   ARBISCAN_API_KEY,
-  ZKSYNCSCAN_API_KEY
+  ZKSYNCSCAN_API_KEY,
+  BASESCAN_API_KEY,
 } = process.env;
 const isZksync = Object.keys(process.env).includes('ZKSYNC');
 const isBase = Object.keys(process.env).includes('BASE');
@@ -124,7 +125,7 @@ if (isZksync) {
         gasPrice: 1_500_000_000
       },
       ethereum_goerli: {
-        url:  `https://goerli.infura.io/v3/${INFURA_KEY}`,
+        url: `https://goerli.infura.io/v3/${INFURA_KEY}`,
         timeout: 99999999,
         accounts: [PRIVATE_KEY]
       },
@@ -134,6 +135,10 @@ if (isZksync) {
       },
       base: {
         url: `https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+        accounts: [PRIVATE_KEY]
+      },
+      base_sepolia: {
+        url: `https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_KEY}`,
         accounts: [PRIVATE_KEY]
       }
     },
@@ -154,7 +159,27 @@ if (isZksync) {
         arbitrumGoerli: ARBISCAN_API_KEY,
         optimisticEthereum: OPTIMISM_API_KEY,
         optimisticGoerli: OPTIMISM_API_KEY,
+        baseMainnet: BASESCAN_API_KEY,
+        baseSepolia: BASESCAN_API_KEY
       },
+      customChains: [
+        {
+          network: "baseMainnet",
+          chainId: 8453,
+          urls: {
+            apiURL: "https://api.basescan.org/api",
+            browserURL: "https://basescan.org"
+          }
+        },
+        {
+          network: "baseSepolia",
+          chainId: 84532,
+          urls: {
+            apiURL: "https://api-sepolia.basescan.org/api",
+            browserURL: "https://sepolia.basescan.org"
+          }
+        }
+      ]
     },
     contractSizer: {
       alphaSort: true,

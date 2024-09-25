@@ -15,6 +15,7 @@ const configFile = path.join(__dirname, `../../config/${network}${chain}/config.
 let config = require(configFile);
 const verifyFilePath = path.join(__dirname, `../../config/${network}${chain}/verify.json`);
 const verifyFile = require(verifyFilePath);
+const { EvmPriceServiceConnection } = require('@pythnetwork/pyth-evm-js');
 
 const log = (...args) => {
     if (isTesting) {
@@ -102,6 +103,11 @@ module.exports = {
             exchangeAggregatorParams,
             plpLiquidationParams
         } = configGeneral;
+
+        const {
+            Pyth,
+        } = priceOracle;
+        const tokensUsePyth = Pyth.tokensUsePyth;
 
         // Contracts ABI
         let ERC20 = await hre.ethers.getContractFactory("ERC20");
@@ -1147,7 +1153,28 @@ module.exports = {
                                 await tx.wait(10);
                             }
 
-                            await plp.supply(lendingTokens[i], initialSupplyValue).then(function (instance) {
+                            let priceIds = [];
+                            let updateData = [];
+                            let updateFee = 0;
+                            let expiredPriceFeedData;
+                            if (tokensUsePyth.length > 0) {
+                                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(tokensUsePyth, 30);
+                                if (expiredPriceFeedData.priceIds.length > 0) {
+                                    const connection = new EvmPriceServiceConnection(
+                                        "https://hermes.pyth.network"
+                                    );
+                                    priceIds = expiredPriceFeedData.priceIds;
+                                    updateFee = expiredPriceFeedData.updateFee;
+                                    updateData = await connection.getPriceFeedsUpdateData(expiredPriceFeedData.priceIds);
+                                }
+                            }
+
+                            await plp.supply(lendingTokens[i], initialSupplyValue,
+                                priceIds,
+                                updateData, {
+                                value: updateFee
+                            }
+                            ).then(function (instance) {
                                 log("\nTransaction hash: " + instance.hash);
                                 log("Supply " + initialSupplyValue + " " + lendingTokens[i] + " to " + blending.address);
                             });
