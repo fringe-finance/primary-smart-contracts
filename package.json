@@ -47,6 +47,8 @@
   
     "deploy:v2:goerli": "npx hardhat run --network ethereum_goerli scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:mainnet": "npx hardhat run --network ethereum_mainnet scripts/deployPLP_V2/deployPLP.js",
+    "deploy:v2:base-mainnet": "cross-env LAYER2=true BASE=true npx hardhat run --network base_mainnet scripts/deployPLP_V2/deployPLP.js",
+    "deploy:v2:base-sepolia": "cross-env LAYER2=true BASE=true npx hardhat run --network base_sepolia scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:arbitrum-goerli": "cross-env LAYER2=true npx hardhat run --network arbitrum_goerli scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:arbitrum-mainnet": "cross-env LAYER2=true npx hardhat run --network arbitrum_mainnet scripts/deployPLP_V2/deployPLP.js",
     "deploy:v2:polygon-mumbai": "npx hardhat run --network polygon_mumbai scripts/deployPLP_V2/deployPLP.js",

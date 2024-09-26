@@ -37,6 +37,7 @@ ETHERSCAN_API_KEY=      // Etherscan key to verify the smart contract --> update
 POLYGONSCAN_API_KEY=    // --> Update here (the perpose of the key)
 OPTIMISM_API_KEY=       // --> Update here (the perpose of the key)
 ARBISCAN_API_KEY=       // --> Update here (the perpose of the key)
+BASESCAN_API_KEY=       // --> Update here (the perpose of the key)
 INFURA_KEY=             // --> Update here (the perpose of the key)
 ALCHEMY_KEY=            // --> Update here (the perpose of the key)
 PRIVATE_KEY=            // --> Update here (the perpose of the key)
@@ -608,7 +609,8 @@ Deploying a smart contract for network-specific testing follows the example usin
 | 2   | Polygon  | `npm run deploy:v2:polygon-mainnet` or `yarn deploy:v2:polygon-mainnet`   |
 | 3   | Optimsim | `npm run deploy:v2:optimism-mainnet` or `yarn deploy:v2:optimism-mainnet` |
 | 4   | Arbitrum | `npm run deploy:v2:arbitrum-mainnet` or `yarn deploy:v2:arbitrum-mainnet` |
-| 5   | Zksync   | `npm run deploy:v2:zksync-mainnet` or `yarn deploy:v2:zksync-mainnet`     |
+| 5   | Base   | `npm run deploy:v2:base-mainnet` or `yarn deploy:v2:base-mainnet`     |
+| 6   | Zksync   | `npm run deploy:v2:zksync-mainnet` or `yarn deploy:v2:zksync-mainnet`     |
 
 #### Testnet
 
@@ -618,7 +620,8 @@ Deploying a smart contract for network-specific testing follows the example usin
 | 2   | Polygon Mumbai | `npm run deploy:v2:polygon-mumbai` or `yarn deploy:v2:polygon-mumbai`   |
 | 3   | Optimsim       | `npm run deploy:v2:optimism-goerli` or `yarn deploy:v2:optimism-goerli` |
 | 4   | Arbitrum       | `npm run deploy:v2:arbitrum-goerli` or `yarn deploy:v2:arbitrum-goerli` |
-| 5   | Zksync         | `npm run deploy:v2:zksync-goerli` or `yarn deploy:v2:zksync-goerli`     |
+| 5   | Base           | `npm run deploy:v2:base-sepolia` or `yarn deploy:v2:base-sepolia`         |
+| 6   | Zksync         | `npm run deploy:v2:zksync-goerli` or `yarn deploy:v2:zksync-goerli`     |
 
 #### Fork Testnet
 

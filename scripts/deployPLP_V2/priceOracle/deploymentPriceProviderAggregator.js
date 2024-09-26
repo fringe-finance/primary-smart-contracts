@@ -901,7 +901,7 @@ module.exports = {
                         });
                 }
             }
-            
+
             {
                 const tokenDecimal = await chainlinkPriceProvider.getPriceDecimals();
                 const currentImplementation = await proxyAdmin.getProxyImplementation(chainlinkPriceProvider.address);
@@ -1488,18 +1488,13 @@ module.exports = {
                 projectTokens.concat(lendingTokens).map(token => token.toLowerCase())
             ));
             const listTokenNeedUpdatePrice = [];
-            const listTokenUsePythOracle = [];
 
             for (let i = 0; i < listToken.length; i++) {
 
                 let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
-                let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i]));
 
                 if (currentPrice.timestamp.toString() === "0") {
                     listTokenNeedUpdatePrice.push(listToken[i]);
-                    if (pythPriceProviderAddress && priceProvider.toLowerCase() === pythPriceProviderAddress.toLowerCase()) {
-                        listTokenUsePythOracle.push(listToken[i]);
-                    }
                 }
             }
 
@@ -1507,8 +1502,8 @@ module.exports = {
             let updateData = [];
             let updateFee = 0;
             let expiredPriceFeedData;
-            if (listTokenUsePythOracle.length > 0) {
-                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 15);
+            if (tokensUsePyth.length > 0) {
+                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(tokensUsePyth, 15);
                 if (expiredPriceFeedData.priceIds.length > 0) {
                     const connection = new EvmPriceServiceConnection(
                         "https://hermes.pyth.network"
