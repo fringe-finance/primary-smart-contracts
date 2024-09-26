@@ -1059,7 +1059,7 @@ module.exports = {
             for (var i = 0; i < tokensUseUniswapV2.length; i++) {
                 let uniswapV2Metadata = await uniswapV2PriceProvider.uniswapV2Metadata(tokensUseUniswapV2[i]);
                 if (uniswapV2Metadata.isActive == false || uniswapV2Metadata.pair.toLowerCase() != uniswapPairsV2[i].toLowerCase()) {
-                    await uniswapV2PriceProvider.setTokenAndPair(tokensUseUniswapV2[i], uniswapPairsV2[i], {gasLimit: 80000000}).then(function (instance) {
+                    await uniswapV2PriceProvider.setTokenAndPair(tokensUseUniswapV2[i], uniswapPairsV2[i], { gasLimit: 80000000 }).then(function (instance) {
                         log("\nTransaction hash: " + instance.hash);
                         log("UniswapV2PriceProvider set token " + tokensUseUniswapV2[i] + " and pair " + uniswapPairsV2[i]);
                     });
@@ -1090,7 +1090,7 @@ module.exports = {
                     })
                 }
             }
-            
+
             {
                 const tokenDecimal = await uniswapV3PriceProvider.getPriceDecimals();
                 const currentImplementation = await proxyAdmin.getProxyImplementation(uniswapV3PriceProvider.address);
@@ -1125,7 +1125,7 @@ module.exports = {
                         }
                     }
                     if (flag) {
-                        await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswapV3[i], uniswapPairsV3[i], pricePointTWAPperiodV3[i], {gasLimit: 80000000}).then(function (instance) {
+                        await uniswapV3PriceProvider.setTokenAndPair(tokensUseUniswapV3[i], uniswapPairsV3[i], pricePointTWAPperiodV3[i], { gasLimit: 80000000 }).then(function (instance) {
                             log("UniswapV3PriceProvider set token " + tokensUseUniswapV3[i] + " and pair " + uniswapPairsV3[i] + " and price point TWAP period " + pricePointTWAPperiodV3[i] + " at tx hash " + instance.hash);
                         });
                     }
@@ -1518,18 +1518,11 @@ module.exports = {
                 projectTokens.concat(lendingTokens).map(token => token.toLowerCase())
             ));
             const listTokenNeedUpdatePrice = [];
-            const listTokenUsePythOracle = [];
-
             for (let i = 0; i < listToken.length; i++) {
 
                 let currentPrice = await priceOracleProvider.priceInfo(listToken[i]);
-                let priceProvider = (await priceProviderAggregator.tokenPriceProvider(listToken[i]));
-
                 if (currentPrice.timestamp.toString() === "0") {
                     listTokenNeedUpdatePrice.push(listToken[i]);
-                    if (pythPriceProviderAddress && priceProvider.toLowerCase() === pythPriceProviderAddress.toLowerCase()) {
-                        listTokenUsePythOracle.push(listToken[i]);
-                    }
                 }
             }
 
@@ -1537,9 +1530,9 @@ module.exports = {
             let updateData = [];
             let updateFee = 0;
             let expiredPriceFeedData;
-            if (listTokenUsePythOracle.length > 0) {
+            if (tokensUsePyth.length > 0) {
 
-                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(listTokenUsePythOracle, 15);
+                expiredPriceFeedData = await priceProviderAggregator.getExpiredPriceFeeds(tokensUsePyth, 15);
                 if (expiredPriceFeedData.priceIds.length > 0) {
                     const connection = new EvmPriceServiceConnection(
                         "https://hermes.pyth.network"
