@@ -123,10 +123,9 @@ contract PrimaryLendingPlatformWrappedTokenGatewayV3 is PrimaryLendingPlatformWr
         uint256 updateFee,
         bytes[] memory buyCalldata
     ) external payable nonReentrant returns (address[] memory assets, uint256[] memory assetAmounts) {
-        uint256 actualLendingTokenAmount = msg.value - updateFee;
-        WETH.deposit{value: actualLendingTokenAmount}();
-        WETH.transfer(msg.sender, actualLendingTokenAmount);
-        require(actualLendingTokenAmount == lendingTokenAmount, "WTG: Invalid value");
+        require((msg.value - updateFee) == lendingTokenAmount, "WTG: Invalid value");
+        WETH.deposit{value: lendingTokenAmount}();
+        WETH.transfer(msg.sender, lendingTokenAmount);
         (assets, assetAmounts) = primaryLendingPlatformLiquidation.liquidateFromModerator{value: updateFee}(
             account,
             prjInfo,
