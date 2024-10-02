@@ -23,18 +23,6 @@ contract PriceProviderAggregatorV3 is Initializable, AccessControlUpgradeable {
     mapping(address => address) public tokenPriceProvider; // address of project token => priceProvider address
 
     /**
-     * @dev Emitted when the moderator role is granted to a new account.
-     * @param newModerator The address to which moderator role is granted.
-     */
-    event GrantModeratorRole(address indexed newModerator);
-
-    /**
-     * @dev Emitted when the moderator role is revoked from an account.
-     * @param moderator The address from which moderator role is revoked.
-     */
-    event RevokeModeratorRole(address indexed moderator);
-
-    /**
      * @dev Emitted when the price provider is set to a token.
      * @param token The address of the token whose price provider is set.
      * @param priceProvider The address of the price provider.

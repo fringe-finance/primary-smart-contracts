@@ -786,7 +786,13 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
      * @param positionId The ID of the borrower's position.
      * @return amount of lending tokens actually repaid.
      */
-    function _repay(address repairer, address borrower, address lendingToken, uint256 lendingTokenAmount, bytes32 positionId) internal returns (uint256) {
+    function _repay(
+        address repairer,
+        address borrower,
+        address lendingToken,
+        uint256 lendingTokenAmount,
+        bytes32 positionId
+    ) internal returns (uint256) {
         if (lendingTokenAmount == 0) {
             revert Errors.InvalidLendingAmount();
         }
@@ -801,16 +807,14 @@ abstract contract PrimaryLendingPlatformV3Core is Initializable, AccessControlUp
         uint256 totalOutstanding = outstanding(borrower, lendingToken);
 
         if (
-            lendingTokenAmount > info.bLendingToken.borrowBalanceStored(borrower) ||
-            lendingTokenAmount >= totalOutstanding ||
+            (lendingTokenAmount >= totalOutstanding && lendingTokenAmount >= info.bLendingToken.borrowBalanceStored(borrower)) ||
             lendingTokenAmount == type(uint256).max
         ) {
             amountRepaid = _repayTo(repairer, borrower, info, type(uint256).max);
             isPositionFullyRepaid = _repayFully(lendingToken, borrowPosition_);
         } else {
-            uint256 lendingTokenAmountToRepay = lendingTokenAmount;
-            amountRepaid = _repayTo(repairer, borrower, info, lendingTokenAmountToRepay);
-            isPositionFullyRepaid = _repayPartially(lendingToken, lendingTokenAmountToRepay, borrowPosition_);
+            amountRepaid = _repayTo(repairer, borrower, info, lendingTokenAmount);
+            isPositionFullyRepaid = _repayPartially(lendingToken, lendingTokenAmount, borrowPosition_);
         }
 
         emit RepayBorrow(borrower, lendingToken, amountRepaid, isPositionFullyRepaid, positionId);

@@ -80,12 +80,10 @@ contract PrimaryLendingPlatformWrappedTokenGatewayV3 is PrimaryLendingPlatformWr
         bytes32[] memory priceIds,
         bytes[] calldata updateData,
         bytes[] memory buyCalldata
-    ) external payable nonReentrant {
-        Asset.Info memory WETHinfo = Asset.Info(address(WETH), Asset.Type.ERC20);
-
-        uint256 receivedWETH = primaryLendingPlatformLiquidation.liquidateFromModerator{value: msg.value}(
+    ) external payable nonReentrant returns (address[] memory assets, uint256[] memory assetAmounts) {
+        (assets, assetAmounts) = primaryLendingPlatformLiquidation.liquidateFromModerator{value: msg.value}(
             account,
-            WETHinfo,
+            Asset.Info({addr: address(WETH), tokenType: Asset.Type.ERC20}),
             lendingInfo,
             lendingTokenAmount,
             msg.sender,
@@ -94,6 +92,13 @@ contract PrimaryLendingPlatformWrappedTokenGatewayV3 is PrimaryLendingPlatformWr
             updateData,
             buyCalldata
         );
+
+        uint256 receivedWETH = 0;
+        for (uint256 i = 0; i < assets.length; i++) {
+            if (assets[i] == address(WETH)) {
+                receivedWETH += assetAmounts[i];
+            }
+        }
         _withdrawETHTransferFrom(receivedWETH);
     }
 
@@ -117,16 +122,15 @@ contract PrimaryLendingPlatformWrappedTokenGatewayV3 is PrimaryLendingPlatformWr
         bytes[] calldata updateData,
         uint256 updateFee,
         bytes[] memory buyCalldata
-    ) external payable nonReentrant {
+    ) external payable nonReentrant returns (address[] memory assets, uint256[] memory assetAmounts) {
         uint256 actualLendingTokenAmount = msg.value - updateFee;
-        require(actualLendingTokenAmount == lendingTokenAmount, "WTG: Invalid value");
         WETH.deposit{value: actualLendingTokenAmount}();
         WETH.transfer(msg.sender, actualLendingTokenAmount);
-        Asset.Info memory WETHinfo = Asset.Info(address(WETH), Asset.Type.ERC20);
-        primaryLendingPlatformLiquidation.liquidateFromModerator{value: updateFee}(
+        require(actualLendingTokenAmount == lendingTokenAmount, "WTG: Invalid value");
+        (assets, assetAmounts) = primaryLendingPlatformLiquidation.liquidateFromModerator{value: updateFee}(
             account,
             prjInfo,
-            WETHinfo,
+            Asset.Info({addr: address(WETH), tokenType: Asset.Type.ERC20}),
             lendingTokenAmount,
             msg.sender,
             updatePriceTokens,
@@ -134,6 +138,14 @@ contract PrimaryLendingPlatformWrappedTokenGatewayV3 is PrimaryLendingPlatformWr
             updateData,
             buyCalldata
         );
+
+        uint256 receivedWETH = 0;
+        for (uint256 i = 0; i < assets.length; i++) {
+            if (assets[i] == address(WETH)) {
+                receivedWETH += assetAmounts[i];
+            }
+        }
+        _withdrawETHTransferFrom(receivedWETH);
     }
 
     /**

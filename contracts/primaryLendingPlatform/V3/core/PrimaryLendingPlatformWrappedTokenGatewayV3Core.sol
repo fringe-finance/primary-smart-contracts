@@ -297,17 +297,17 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
 
     /**
      * @notice Repays a loan in Ether for the caller.
-     * @param lendingTokenAmount Amount of lending tokens to repay.
      */
-    function repay(uint256 lendingTokenAmount) external payable nonReentrant {
-        uint256 totalOutStanding = getTotalOutstanding(msg.sender);
-        uint256 paybackAmount = lendingTokenAmount >= totalOutStanding ? totalOutStanding : lendingTokenAmount;
-        require(msg.value >= paybackAmount, "WTG: msg value is less than repayment amount");
-        WETH.deposit{value: paybackAmount}();
-        primaryLendingPlatform.repayFromRelatedContract(address(WETH), paybackAmount, address(this), msg.sender, bytes32(0));
+    function repay() external payable nonReentrant {
+        WETH.deposit{value: msg.value}();
+        uint256 repaidAmount = primaryLendingPlatform.repayFromRelatedContract(address(WETH), msg.value, address(this), msg.sender, bytes32(0));
 
         // refund remaining dust eth
-        if (msg.value > paybackAmount) _safeTransferETH(msg.sender, msg.value - paybackAmount);
+        if (msg.value > repaidAmount) {
+            uint256 remainingAmount = msg.value - repaidAmount;
+            WETH.withdraw(remainingAmount);
+            _safeTransferETH(msg.sender, remainingAmount);
+        }
     }
 
     /**
@@ -318,7 +318,10 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
      */
     function closePositionByShortAsset(bytes32 positionId, uint256 lendingTokenAmount) external payable nonReentrant {
         require(msg.value >= lendingTokenAmount, "WTG: msg value is less than repayment amount");
-        WETH.deposit{value: lendingTokenAmount}();
+        WETH.deposit{value: msg.value}();
+        if (IWETH(WETH).allowance(address(this), address(primaryLendingPlatformLeverage)) < lendingTokenAmount) {
+            IWETH(WETH).approve(address(primaryLendingPlatformLeverage), type(uint256).max);
+        }
         uint256 amountRemaining = primaryLendingPlatformLeverage.closePositionByShortAssetFromRelatedContract(
             address(this),
             positionId,
@@ -326,9 +329,12 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayV3Core is Initializab
             lendingTokenAmount,
             msg.sender
         );
-        if (amountRemaining > 0) {
-            WETH.withdraw(amountRemaining);
-            _safeTransferETH(msg.sender, amountRemaining);
+
+        uint256 amountToRefund = msg.value - lendingTokenAmount + amountRemaining;
+
+        if (amountToRefund > 0) {
+            WETH.withdraw(amountToRefund);
+            _safeTransferETH(msg.sender, amountToRefund);
         }
     }
 

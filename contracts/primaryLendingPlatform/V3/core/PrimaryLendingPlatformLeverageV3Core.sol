@@ -395,8 +395,7 @@ abstract contract PrimaryLendingPlatformLeverageV3Core is Initializable, AccessC
         address borrower
     ) internal returns (uint256 amountRemaining){
         ERC20Upgradeable(lendingToken).safeTransferFrom(user, address(this), lendingTokenAmount);
-        address bLendingToken = primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken;
-        ERC20Upgradeable(lendingToken).approve(bLendingToken, lendingTokenAmount);
+        Asset._safeIncreaseAllowance(primaryLendingPlatform.lendingTokenInfo(lendingToken).bLendingToken, lendingToken, lendingTokenAmount);
         uint256 amountRepaid = primaryLendingPlatform.repayFromRelatedContract(lendingToken, lendingTokenAmount, address(this), borrower, positionId);
         amountRemaining = lendingTokenAmount - amountRepaid;
         if (amountRemaining > 0) {

@@ -143,7 +143,7 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
      * @param token The address of the token to convert.
      * @return The price of the token in USD, represented as a mantissa.
      */
-     function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
+    function _convertToUSD(address priceBase, address token) internal view returns (uint256) {
         address priceProvider = IPriceProviderAggregator(priceBase).tokenPriceProvider(token);
         (uint256 priceMantissa, uint8 priceDecimals) = PriceProvider(priceProvider).getPrice(token);
         uint8 decimals = ERC20Upgradeable(token).decimals();
@@ -162,10 +162,10 @@ contract ERC4626PriceProvider is PriceProvider, Initializable, AccessControlUpgr
     function getPrice(address erc4626Token) public view override returns (uint256 priceMantissa, uint8 priceDecimals) {
         uint8 decimals = IERC4626Upgradeable(erc4626Token).decimals();
         address assetToken = IERC4626Upgradeable(erc4626Token).asset();
-        uint256 assets = IERC4626Upgradeable(erc4626Token).convertToAssets(10**decimals);
+        uint256 assets = IERC4626Upgradeable(erc4626Token).convertToAssets(10 ** decimals);
         ERC4626Metadata memory metadata = erc4626Metadata[erc4626Token];
         uint256 price = _convertToUSD(metadata.base, assetToken);
-        priceMantissa = price.mul(assets).div(2**112);
+        priceMantissa = price.mul(assets).div(2 ** 112);
         priceDecimals = tokenDecimals;
     }
 
