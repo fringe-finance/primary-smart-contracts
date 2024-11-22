@@ -161,16 +161,6 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     }
 
     /**
-     * @dev Returns the total outstanding balance of a user for a specific project token.
-     * @param user The address of the user.
-     * @param projectToken The address of the project token.
-     * @return outstanding The total outstanding balance of the user.
-     */
-    function getTotalOutstanding(address user, address projectToken) public view returns (uint256 outstanding) {
-        outstanding = primaryLendingPlatform.totalOutstanding(user, projectToken, address(WETH));
-    }
-
-    /**
      * @dev Deposits Ether into the PrimaryLendingPlatformWrappedTokenGatewayCore contract and wraps it into WETH.
      */
     function deposit() external payable nonReentrant {
@@ -193,17 +183,19 @@ abstract contract PrimaryLendingPlatformWrappedTokenGatewayCore is Initializable
     /**
      * @dev Repays the specified amount of the project token's Ether outstanding debt using the lending token.
      * @param projectToken The address of the project token.
-     * @param lendingTokenAmount The amount of the lending token to be used for repayment.
      */
-    function repay(address projectToken, uint256 lendingTokenAmount) external payable nonReentrant {
-        uint256 totalOutStanding = getTotalOutstanding(msg.sender, projectToken);
-        uint256 paybackAmount = lendingTokenAmount >= totalOutStanding ? totalOutStanding : lendingTokenAmount;
-        require(msg.value >= paybackAmount, "WTG: Msg value is less than repayment amount");
+    function repay(address projectToken) external payable nonReentrant {
+        require(msg.value > 0, "WTG: Msg value is equal 0");
+        uint256 paybackAmount = msg.value;
         WETH.deposit{value: paybackAmount}();
-        primaryLendingPlatform.repayFromRelatedContract(projectToken, address(WETH), paybackAmount, address(this), msg.sender);
+        uint256 amountRepaid = primaryLendingPlatform.repayFromRelatedContract(projectToken, address(WETH), paybackAmount, address(this), msg.sender);
 
         // refund remaining dust eth
-        if (msg.value > paybackAmount) _safeTransferETH(msg.sender, msg.value - paybackAmount);
+        if (paybackAmount > amountRepaid) {
+            uint256 refund = paybackAmount - amountRepaid;
+            WETH.withdraw(refund);
+            _safeTransferETH(msg.sender, refund);
+        }
     }
 
     /**
