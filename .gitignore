@@ -17,3 +17,4 @@ deployments
 .DS_Store
 deploymentLogs
 scripts/generateByteCode/dist
+**/node_modules/

@@ -348,7 +348,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         bytes[] memory _buyCalldata
     ) internal returns (address[] memory assets, uint256[] memory assetAmounts) {
         _nakedBorrow(_liquidator, _lendingInfo.addr, _lendingTokenAmount, _prjInfo.addr);
-        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(_account, _prjInfo.addr, _lendingInfo.addr, _liquidator, _lendingTokenAmount);
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(
+            _account,
+            _prjInfo.addr,
+            _lendingInfo.addr,
+            _liquidator,
+            _lendingTokenAmount
+        );
         uint256 projectTokenReward = _distributeReward(_account, _prjInfo.addr, projectTokenSendToLiquidator, address(this));
 
         _swapAndRepayNakedBorrow(_prjInfo, _lendingInfo, projectTokenReward, _lendingTokenAmount, _liquidator, _buyCalldata);
@@ -403,7 +409,13 @@ abstract contract PrimaryLendingPlatformLiquidationCore is Initializable, Access
         uint256 _lendingTokenAmount,
         address liquidator
     ) internal returns (uint256) {
-        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(_account, _projectToken, _lendingToken, liquidator, _lendingTokenAmount);
+        uint256 projectTokenSendToLiquidator = _getProjectTokenSendToLiquidator(
+            _account,
+            _projectToken,
+            _lendingToken,
+            liquidator,
+            _lendingTokenAmount
+        );
         uint256 projectTokenLiquidatorReceived = _distributeReward(_account, _projectToken, projectTokenSendToLiquidator, liquidator);
         _transferExcessToken(_lendingToken, liquidator);
 
